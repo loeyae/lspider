@@ -8,6 +8,8 @@
 :date:    2018-1-9 17:32:52
 :version: SVN: $Id: Keywordsdb.py 2119 2018-07-04 03:56:41Z zhangyi $
 """
+from . import Base
+
 {
     'keywords': {
         'kwid': int,        # keywords id
@@ -21,8 +23,6 @@
         'updator': str,     # 最后一次更新的人
     }
 }
-
-from . import Base
 
 class KeywordsDB(Base):
 
