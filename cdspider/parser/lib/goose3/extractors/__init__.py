@@ -121,14 +121,6 @@ class BaseExtractor(object):
             doc = doc.pop(0)
         if doc is None:
             return None
-        if custom_rule.startswith('@xpath:'):
-            custom_rule = custom_rule[7:]
-            ret = self.parser.xpath_re(doc, custom_rule)
-            if not ret:
-                return None
-            if onlyOne:
-                return self.f(ret[0], dtype, target) if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
-            return [self.f(item, dtype, target) for item in ret] if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
         if custom_rule.startswith('@css:'):
             custom_rule = custom_rule[5:]
             ret = self.parser.css_select(doc, custom_rule)
@@ -137,32 +129,33 @@ class BaseExtractor(object):
             if onlyOne:
                 return self.f(ret[0], dtype, target) if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
             return [self.f(item, dtype, target) for item in ret] if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
-        if custom_rule.startswith('@value:'):
+        elif custom_rule.startswith('@value:'):
             ret = custom_rule[7:]
             return ret
-        if custom_rule.startswith('@pq:'):
-            custom_rule = custom_rule[4:]
-            ret = self.parser.css_select(doc, custom_rule)
+        elif custom_rule.startswith('@reg:'):
+            custom_rule = custom_rule[5:]
+            rule, key = rule2pattern(custom_rule)
+            if not rule or not key:
+                return custom_rule
+            matched = None
+            if onlyOne:
+                r = re.search(rule, str(self.article.raw_html), re.S|re.I)
+                if r:
+                    matched = r.group(key)
+                    if matched:
+                        matched = matched.strip()
+            else:
+                matched = re.findall(rule, str(self.article.raw_html), re.S|re.I)
+            return matched
+        else:
+            if custom_rule.startswith('@xpath:'):
+                custom_rule = custom_rule[7:]
+            ret = self.parser.xpath_re(doc, custom_rule)
             if not ret:
                 return None
             if onlyOne:
                 return self.f(ret[0], dtype, target) if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
             return [self.f(item, dtype, target) for item in ret] if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
-        if custom_rule.startswith('@reg:'):
-            custom_rule = custom_rule[5:]
-        rule, key = rule2pattern(custom_rule)
-        if not rule or not key:
-            return custom_rule
-        matched = None
-        if onlyOne:
-            r = re.search(rule, str(self.article.raw_html), re.S|re.I)
-            if r:
-                matched = r.group(key)
-                if matched:
-                    matched = matched.strip()
-        else:
-            matched = re.findall(rule, str(self.article.raw_html), re.S|re.I)
-        return matched
 
     def f(self, doc, dtype, target=None):
         if isinstance(doc, lxml.html.HtmlElement):
