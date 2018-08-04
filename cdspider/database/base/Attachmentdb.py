@@ -8,47 +8,36 @@
 :date:    2018-6-21 18:37:29
 :version: SVN: $Id: Attachmentdb.py 2119 2018-07-04 03:56:41Z zhangyi $
 """
+
 {
     "attachment": {
-        'aid': int,           # attachment id
-        'title': str,         # title
-        'siteid': int,        # site id
-        'url': str,           # url
-        'rate': int,          # int
-        'status': int,        # status
-        'base_request': str,  # 基础请求配置
-        'main_process': str,  # 主流程配置
-        'sub_process': str,   # 子流程配置
-        'identify': str,      # 生成unique id的配置
-        'createtime': int,    # create time
-        'updatetime': int,    # last update time
-        'creator': str,       # creator
-        'updator': str,       # updator
+        'aid': int,           #附加任务I
+        'domain': str,        #一级域名        
+        'subdomain': str,     #二级域名 
+        'status': int,        #状态        
+        'rate': int,          #更新频率
+        'expire': int,        #过期时间    
+        'preparse': str,      #预解析设置          
+        'process': str,       #解析设置
+        'unique': str,        #唯一索引设置
+        'ctime': int,         #创建时间
+        'utime': int,         #最后一次更新时间
+        'creator': int,       #创建人ID         
+        'updator': int,       #最后一次修改人ID
     }
 }
 
-class AttachmentDB(object):
+from . import Base
+
+class AttachmentDB(Base):
     """
     attachment database obejct
     """
-    ATTACHMENT_STATUS_INIT = 0
-    ATTACHMENT_STATUS_ACTIVE = 1
-    ATTACHMENT_STATUS_DISABLE = 2
-    ATTACHMENT_STATUS_DELETED = 3
 
     def insert(self, obj = {}):
         raise NotImplementedError
 
     def update(self, id, obj = {}):
-        raise NotImplementedError
-
-    def enable(self, id, where):
-        raise NotImplementedError
-
-    def enable_by_site(self, sid, where):
-        raise NotImplementedError
-
-    def enable_by_project(self, pid, where):
         raise NotImplementedError
 
     def delete(self, id, where):
