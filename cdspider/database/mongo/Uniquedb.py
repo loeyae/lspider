@@ -16,24 +16,22 @@ class UniqueDB(Mongo, BaseUniqueDB, SplitTableMixin):
 
     __tablename__ = 'unique'
 
-    def __init__(self, host='localhost', port=27017, db = None, user=None,
-            password=None, table=None, **kwargs):
-        super(UniqueDB, self).__init__(host = host, port = port, db = db,
-            user = user, password = password, table = table, **kwargs)
+    def __init__(self, connector, table=None, **kwargs):
+        super(UniqueDB, self).__init__(connector, table = table, **kwargs)
         self._check_collection()
 
-    def insert(self, obj, projectid, taskid, urlid, attachid, kwid, createtime):
+    def insert(self, obj, pid, taskwid, uid, aid, kwid, ctime):
         unid = self.build(obj)
         table = self._table_name(unid)
         try:
-            _id = super(UniqueDB, self).insert({"unid": unid, "projectid": projectid, "taskid": taskid, "urlid": urlid, "attachid": attachid, "kwid": kwid, "createtime": createtime}, table=table)
+            _id = super(UniqueDB, self).insert({"unid": unid, "ctime": ctime}, table=table)
             if _id:
-                return (True, {'unid': unid, 'createtime': createtime})
+                return (True, {'unid': unid, 'ctime': ctime})
             else:
                 return (False, False)
         except DuplicateKeyError:
             result = self.get(where={"unid": unid}, table=table)
-            return (False, {"unid": result['unid'], "createtime": result['createtime']})
+            return (False, {"unid": result['unid'], "ctime": result['ctime']})
         except:
             return (False, False)
 
@@ -50,8 +48,3 @@ class UniqueDB(Mongo, BaseUniqueDB, SplitTableMixin):
                 indexes = collection.index_information()
                 if not 'unid' in indexes:
                     collection.create_index('unid', unique=True, name='unid')
-                    collection.create_index('projectid', name='projectid')
-                    collection.create_index('siteid', name='siteid')
-                    collection.create_index('urlid', name='urlid')
-                    collection.create_index('attachid', name='attachid')
-                    collection.create_index('kwid', name='kwid')
