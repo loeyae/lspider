@@ -36,7 +36,7 @@ class ParseRuleDB(Base):
     def update(self, id, obj = {}):
         raise NotImplementedError
 
-    def delete(self, id):
+    def delete(self, id, where = {}):
         raise NotImplementedError
 
     def get_detail(self, id):
