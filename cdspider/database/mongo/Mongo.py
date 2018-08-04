@@ -9,17 +9,14 @@
 :version: SVN: $Id: Mongo.py 2303 2018-07-06 08:56:57Z zhangyi $
 """
 
-from pymongo import MongoClient
 from cdspider.database import BaseDataBase
 from cdspider.exceptions import *
 
-connection_pool = {}
 
 class Mongo(BaseDataBase):
     """
     Mongo数据库操作类
     """
-    __tablename__ = None
 
     _operator = {
         "and": "$and",
@@ -36,51 +33,11 @@ class Mongo(BaseDataBase):
     }
 
 
-    def __init__(self, host='localhost', port=27017, db = None, user=None,
-                password=None, table=None, **kwargs):
-        if not table:
+    def __init__(self, connector, table = None, **kwargs):
+        super(Mongo, self).__init__(connector, table = table, **kwargs)
+        if table is None:
             table = self.__tablename__
-        super(Mongo, self).__init__(host = host, port = port, db = db,
-            user = user, password = password, table = table, **kwargs)
-
-    def connect(self):
-        """
-        连接数据库
-        """
-        try:
-            k = self.symbol()
-            if not k in connection_pool:
-                self.conn = MongoClient(host = self.host, port = self.port, **self.setting)
-                #登录认证
-                try:
-                    if self.username:
-                        self.conn.admin.authenticate(self.username, self.password)
-                    self.conn.admin.command("ismaster")
-                    isauth = True
-                except:
-                    self.logger.warn("Mongo: %s no admin permission" % self.host)
-                    isauth = False
-                if self.db:
-                    self._db = self.conn[self.db]
-                else:
-                    self._db = self.conn.get_default_database();
-                if not isauth:
-                    if self.username:
-                        self._db.authenticate(self.username, self.password)
-                connection_pool[k] = {"c": self.conn, 'd': self._db}
-            else:
-                self.conn = connection_pool[k]["c"]
-                self._db = connection_pool[k]["d"]
-        except Exception as e:
-            raise CDSpiderDBError(e, host=self.host, prot=self.port, db=self.db)
-
-    def close(self):
-        """
-        关闭数据库连接
-        """
-        if hasattr(self, 'conn'):
-            self.conn.close()
-            del self.conn
+        self._db = self.conn.cursor
 
     def find(self, where, table = None, select = None, sort = None, offset = 0, hits = 10):
         """
