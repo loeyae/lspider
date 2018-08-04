@@ -13,17 +13,17 @@ from . import Base
 {
     "attachment": {
         'aid': int,           # 附加任务I
-        'domain': str,        # 一级域名        
-        'subdomain': str,     # 二级域名 
-        'status': int,        # 状态        
+        'domain': str,        # 一级域名
+        'subdomain': str,     # 二级域名
+        'status': int,        # 状态
         'rate': int,          # 更新频率
-        'expire': int,        # 过期时间    
-        'preparse': str,      # 预解析设置          
+        'expire': int,        # 过期时间
+        'preparse': str,      # 预解析设置
         'process': str,       # 解析设置
         'unique': str,        # 唯一索引设置
         'ctime': int,         # 创建时间
         'utime': int,         # 最后一次更新时间
-        'creator': int,       # 创建人ID         
+        'creator': int,       # 创建人ID
         'updator': int,       # 最后一次修改人ID
     }
 }
@@ -52,12 +52,6 @@ class AttachmentDB(Base):
         raise NotImplementedError
 
     def disable(self, id, where):
-        raise NotImplementedError
-
-    def disable_by_site(self, sid, where):
-        raise NotImplementedError
-
-    def disable_by_project(self, pid, where):
         raise NotImplementedError
 
     def get_detail(self, id):
