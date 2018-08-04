@@ -268,28 +268,18 @@ def load_mailer(mailer, *args, **kwargs):
     )
     return mgr.driver
 
-def load_db(driver_name, name, *args, **kwargs):
+def load_db(driver_name, *args, **kwargs):
     """
     以插件模式加载db
     """
-    try:
-        mgr = stevedore.driver.DriverManager(
-            namespace='cdspider.db.%s' % driver_name,
-            name=name,
-            invoke_args = args,
-            invoke_kwds = kwargs,
-            invoke_on_load=True,
-        )
-        return mgr.driver
-    except stevedore.exception.NoMatches:
-        mgr = stevedore.driver.DriverManager(
-            namespace='cdspider.db.%s' % driver_name,
-            name='base',
-            invoke_args = args,
-            invoke_kwds = kwargs,
-            invoke_on_load=True,
-        )
-        return mgr.driver
+    mgr = stevedore.driver.DriverManager(
+        namespace='cdspider.db',
+        name=driver_name,
+        invoke_args = args,
+        invoke_kwds = kwargs,
+        invoke_on_load=True,
+    )
+    return mgr.driver
 
 def load_handler(name, *args, **kwargs):
     """
