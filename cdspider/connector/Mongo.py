@@ -12,6 +12,8 @@ from pymongo import MongoClient
 from cdspider.exceptions import *
 from . import Base
 
+connection_pool = {}
+
 class Mongo(Base):
     """
     Mongo 连接类
