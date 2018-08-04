@@ -9,6 +9,8 @@
 :version: SVN: $Id: Projectdb.py 1357 2018-06-21 10:41:16Z zhangyi $
 """
 
+from . import Base
+
 {
     'projects': {
         'pid': int,           # 项目id
@@ -23,11 +25,7 @@
     }
 }
 
-class ProjectsDB(object):
-
-    PROJECT_STATUS_INIT = 0
-    PROJECT_STATUS_ACTIVE = 1
-    PROJECT_STATUS_DELETED = 9
+class ProjectsDB(Base):
 
     def get_detail(self, id):
         raise NotImplementedError
