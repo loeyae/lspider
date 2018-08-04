@@ -4,5 +4,4 @@
 #version: SVN: $Id: __init__.py 1289 2018-06-20 02:10:24Z zhangyi $
 
 from .wsgi_xmlrpc import WSGIXMLRPCApplication
-from .goose3 import Goose
 from .url_builder import UrlBuilder
