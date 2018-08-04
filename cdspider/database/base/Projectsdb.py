@@ -10,43 +10,24 @@
 """
 
 {
-    'project': {
+    'projects': {
         'pid': int,           # 项目id
-        'type': int,          # 项目类型
-        'title': str,         # 项目标题
+        'name': str,          # 项目名称
         'status': int,        # 项目状态
-        'script': str,        # 自定义handler
-        'base_request': str,  # 基础请求配置
-        'main_process': str,  # 主流程配置
-        'sub_process': str,   # 子流程配置
-        'custom_columns': str,# 自定义字段
-        'identify': str,      # 生成unique id的配置
-        'comments': str,      # 项目描述
-        'rate': int,          # 更新频率
-        'lastsid': int,       # 最后入队的 site id
-        'createtime': int,    # 创建时间
-        'updatetime': int,    # 最后一次更新时间
-        'creator': str,       # 创建人
-        'updator': str,       # 最后一次更新人
+        'scripts': str,       # 自定义handler
+        'comments': str,      # 项目描述       
+        'ctime': int,         # 创建时间
+        'utime': int,         # 最后一次更新时间
+        'creator': int,       # 创建人id
+        'updator': int,       # 最后一次更新人id
     }
 }
 
-class ProjectDB(object):
-
-    PROJECT_TYPE_GENERAL = 1
-    PROJECT_TYPE_SEARCH = 2
-    PROJECT_TYPE_ATTACHE = 3
-
-    PROJECT_TYPE_MAP = {
-        PROJECT_TYPE_GENERAL: "general",
-        PROJECT_TYPE_SEARCH: "search",
-        PROJECT_TYPE_ATTACHE: "attache",
-    }
+class ProjectsDB(object):
 
     PROJECT_STATUS_INIT = 0
     PROJECT_STATUS_ACTIVE = 1
-    PROJECT_STATUS_DISABLE = 2
-    PROJECT_STATUS_DELETED = 3
+    PROJECT_STATUS_DELETED = 9
 
     def get_detail(self, id):
         raise NotImplementedError
@@ -55,9 +36,6 @@ class ProjectDB(object):
         raise NotImplementedError
 
     def update(self, id, obj = {}):
-        raise NotImplementedError
-
-    def enable(self, id):
         raise NotImplementedError
 
     def active(self, id):
@@ -71,7 +49,9 @@ class ProjectDB(object):
 
     def get_list(self, where = {}, select = None):
         raise NotImplementedError
+    
     def get_count(self, where = {}, select = None):
         raise NotImplementedError
+    
     def get_list_c(self, where = {}, select = None):
         raise NotImplementedError
