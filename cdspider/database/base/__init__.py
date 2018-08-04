@@ -8,7 +8,7 @@ class Base(object):
     STATUS_ACTIVE = 1
     STATUS_DELETED = 9
 
-from .Admindb import AdminDB
+from .Articlesdb import ArticlesDB
 from .AttachDatadb import AttachDataDB
 from .Attachmentdb import AttachmentDB
 from .Commentsdb import CommentsDB
