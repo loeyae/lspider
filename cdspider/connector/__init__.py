@@ -49,3 +49,5 @@ class Base(object):
     @property
     def cursor(self):
         raise NotImplementedError
+
+    from .Mongo import Mongo
