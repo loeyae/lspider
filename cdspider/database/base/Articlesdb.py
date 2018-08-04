@@ -10,48 +10,35 @@
 """
 import time
 from cdspider.libs.utils import base64encode, base64decode
+from . import Base
 
 # result schema
 {
     'result': {
         'rid': str,        # result id
-        'unid': str,       # unique str
-        'crawl_id': str,   # 抓取id, 与siteid一起标识同一站点的同一批次的结果
+        'acid': str,       # unique str
         'url': str,        # 抓取的url
-        'status': int,     # 状态
-        'sitetype': int,   # 站点类型
-        'projectid': int,  # project id
-        'siteid': int,     # site id
-        'urlid': int,      # url id
-        'atid': int,       # attachment id
-        'kwid': int,       # url id
-        'domain': str,     # 站点域名
         'title': str,      # 标题
         'author': str,     # 作者
-        'created': int,    # 发布时间
-        'summary': str,    # 摘要
+        'pubtime': int,    # 发布时间
+        'subtitile': str,  # 二级标题
         'content': str,    # 详情
-        'crawlinfo': str,  # 抓取信息 [{"project":projectid,"task":taskid,"urls":urlid,"keywords":keywordid,"crawltime":crawltime},..]
-        'source': str,     # 抓到的源码
+        'domain': str,     # 站点域名
+        'subdomain': str,  # 站点二级域名
+        'channel': str,    # 站点频道
         'result': str,     # 获取到的其他字段
-        'createtime': int, # 更新时间
-        'updatetime': int, # 更新时间
+        'media_type': str, # 媒体类型
+        'ctime': int,      # 抓取时间
+        'utime': int,      # 更新时间
     }
 }
 
-class ResultDB(object):
-
-    RESULT_STATUS_INIT = 0
-    RESULT_STATUS_PARSED = 1
-    RESULT_STATUS_DELETED = 2
+class ArticlesDB(Base):
 
     def insert(self, obj = {}):
         raise NotImplementedError
 
     def update(self, id, obj = {}):
-        raise NotImplementedError
-
-    def add_crwal_info(self, unid, createtime, crawlinfo):
         raise NotImplementedError
 
     def get_detail(self, id):
@@ -64,9 +51,6 @@ class ResultDB(object):
         raise NotImplementedError
 
     def get_list(self, createtime, where = {}, select = None, sort=[("pid", 1)], **kwargs):
-        raise NotImplementedError
-
-    def aggregate_by_day(self, createtime, where = {}):
         raise NotImplementedError
 
     @staticmethod
