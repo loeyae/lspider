@@ -19,10 +19,8 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
     """
     __tablename__ = 'attachment'
 
-    def __init__(self, host='localhost', port=27017, db = None, user=None,
-            password=None, table=None, **kwargs):
-        super(AttachmentDB, self).__init__(host = host, port = port, db = db,
-            user = user, password = password, table = table, **kwargs)
+    def __init__(self, connector, table=None, **kwargs):
+        super(AttachmentDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
         if not 'aid' in indexes:
@@ -30,54 +28,27 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         if not 'title' in indexes:
             collection.create_index('title', name='title')
         if not 's_s' in indexes:
-            collection.create_index([('siteid', pymongo.ASCENDING),('status', pymongo.ASCENDING)], name='s_s')
+            collection.create_index([('sid', pymongo.ASCENDING),('status', pymongo.ASCENDING)], name='s_s')
         if not 'url' in indexes:
             collection.create_index([('url', pymongo.TEXT)], name='url')
-        if not 'createtime' in indexes:
-            collection.create_index('createtime', name='createtime')
+        if not 'ctime' in indexes:
+            collection.create_index('ctime', name='ctime')
 
     def insert(self, obj = {}):
         obj['aid'] = self._get_increment(self.table)
         obj.setdefault('status', self.ATTACHMENT_STATUS_INIT)
-        obj.setdefault('createtime', int(time.time()))
-        obj.setdefault('updatetime', 0)
+        obj.setdefault('ctime', int(time.time()))
+        obj.setdefault('utime', 0)
         _id = super(AttachmentDB, self).insert(setting=obj)
         return obj['aid']
 
     def update(self, id, obj = {}):
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         return super(AttachmentDB, self).update(setting=obj, where={'aid': int(id)}, multi=False)
-
-    def enable(self, id, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        if not where:
-            where = {'aid': int(id)}
-        else:
-            where.update({'aid': int(id)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
-
-    def enable_by_site(self, sid, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        if not where:
-            where = {"siteid": int(sid)}
-        else:
-            where.update({"siteid": int(sid)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
-
-    def enable_by_project(self, pid, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        if not where:
-            where = {'projectid': int(pid)}
-        else:
-            where.update({'projectid': int(pid)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
 
     def delete(self, id, where = {}):
         obj = {"status": self.ATTACHMENT_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         if not where:
             where = {'aid': int(id)}
         else:
@@ -86,25 +57,25 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
 
     def delete_by_site(self, sid, where = {}):
         obj = {"status": self.ATTACHMENT_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         if not where:
-            where = {"siteid": int(sid)}
+            where = {"sid": int(sid)}
         else:
-            where.update({"siteid": int(sid)})
+            where.update({"sid": int(sid)})
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
 
     def delete_by_project(self, pid, where = {}):
         obj = {"status": self.ATTACHMENT_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         if not where:
-            where = {'projectid': int(pid)}
+            where = {'pid': int(pid)}
         else:
-            where.update({'projectid': int(pid)})
+            where.update({'pid': int(pid)})
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
 
     def active(self, id, where = {}):
         obj = {"status": self.ATTACHMENT_STATUS_ACTIVE}
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         if not where:
             where = {'aid': int(id)}
         else:
@@ -113,30 +84,12 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
 
     def disable(self, id, where = {}):
         obj = {"status": self.ATTACHMENT_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         if not where:
             where = {'aid': int(id)}
         else:
             where.update({'aid': int(id)})
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
-
-    def disable_by_site(self, sid, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
-        if not where:
-            where = {"siteid": int(sid)}
-        else:
-            where.update({"siteid": int(sid)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
-
-    def disable_by_project(self, pid, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
-        if not where:
-            where = {'projectid': int(pid)}
-        else:
-            where.update({'projectid': int(pid)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
 
     def get_detail(self, id):
         return self.get(where={'aid': int(id)})

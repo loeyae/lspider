@@ -5,29 +5,26 @@
 
 """
 :author:  Zhang Yi <loeyae@gmail.com>
-:date:    2018-1-9 21:30:20
-:version: SVN: $Id: Resultdb.py 2338 2018-07-08 05:58:24Z zhangyi $
+:date:    2018-8-4 22:17:41
 """
 import time
 from cdspider.database.base import ArticlesDB as BaseArticlesDB
+from cdspider.database.base import CommentsDB as BaseCommentsDB
 from .Mongo import Mongo, SplitTableMixin
 
-class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
+class CommentsDB(Mongo, BaseCommentsDB, SplitTableMixin):
+    """
+    attach_data data object
+    """
 
-    __tablename__ = 'articles'
 
     def __init__(self, connector, table=None, **kwargs):
-        super(ArticlesDB, self).__init__(connector, table = table, **kwargs)
+        super(CommentsDB, self).__init__(connector, table = table, **kwargs)
         self._check_collection()
 
     def insert(self, obj = {}):
         obj.setdefault("ctime", int(time.time()))
-        table = self._get_collection(obj['ctime'])
-        id = self._get_increment(table)
-        obj['rid'] = BaseArticlesDB.build_id(obj['ctime'], id)
-        obj.setdefault('uid', 0)
-        obj.setdefault('aid', 0)
-        obj.setdefault('kwid', 0)
+        table = self._table_name(obj['rid'])
         super(ArticlesDB, self).insert(setting=obj, table=table)
         return obj['rid']
 
@@ -55,14 +52,14 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
 
     def _get_collection(self, ctime):
         suffix = time.strftime("%Y%m", time.localtime(ctime))
-        name = super(ArticlesDB, self)._collection_name(suffix)
+        name = super(CommentsDB, self)._collection_name(suffix)
         if not name in self._collections:
             self._create_collection(name)
         return name
 
     def _table_name(self, id):
         suffix, _ = BaseArticlesDB.unbuild_id(id)
-        name = super(ArticlesDB, self)._collection_name(suffix)
+        name = super(CommentsDB, self)._collection_name(suffix)
         if not name in self._collections:
             self._create_collection(name)
         return name
@@ -70,7 +67,7 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
     def _check_collection(self):
         self._list_collection()
         suffix = time.strftime("%Y%m")
-        name = super(ArticlesDB, self)._collection_name(suffix)
+        name = super(CommentsDB, self)._collection_name(suffix)
         if not name in self._collections:
             self._create_collection(name)
 
@@ -81,16 +78,8 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
             collection.create_index('rid', unique=True, name='rid')
         if not 'acid' in indexes:
             collection.create_index('acid', unique=True, name='acid')
-        if not 'pid' in indexes:
-            collection.create_index('pid', name='pid')
-        if not 'sid' in indexes:
-            collection.create_index('sid', name='sid')
-        if not 'uid' in indexes:
-            collection.create_index('uid', name='uid')
-        if not 'aid' in indexes:
-            collection.create_index('aid', name='aid')
-        if not 'kwid' in indexes:
-            collection.create_index('kwid', name='kwid')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
         self._collections.add(table)
+
+

@@ -16,10 +16,8 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
 
     __tablename__ = 'keywords'
 
-    def __init__(self, host='localhost', port=27017, db = None, user=None,
-                password=None, table=None, **kwargs):
-        super(KeywordsDB, self).__init__(host = host, port = port, db = db,
-            user = user, password = password, table = table, **kwargs)
+    def __init__(self, connector, table=None, **kwargs):
+        super(KeywordsDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
         if not 'kid' in indexes:
@@ -28,28 +26,20 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
             collection.create_index('word', unique=True, name='word')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
-        if not 'createtime' in indexes:
-            collection.create_index('createtime', name='createtime')
+        if not 'ctime' in indexes:
+            collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
         obj['kid'] = self._get_increment(self.table)
         obj.setdefault('status', self.KEYWORDS_STATUS_INIT)
-        obj.setdefault('createtime', int(time.time()))
-        obj.setdefault('updatetime', 0)
+        obj.setdefault('ctime', int(time.time()))
+        obj.setdefault('utime', 0)
         _id = super(KeywordsDB, self).insert(setting=obj)
         return obj['kid']
 
     def update(self, id, obj):
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         return super(KeywordsDB, self).update(setting=obj, where={"kid": int(id)}, multi=False)
-
-    def enable(self, id, where = {}):
-        if not where:
-            where = {'kid': int(id)}
-        else:
-            where.update({'kid': int(id)})
-        return super(KeywordsDB, self).update(setting={"status": self.KEYWORDS_STATUS_INIT},
-                where=where, multi=False)
 
     def active(self, id, where = {}):
         if not where:
@@ -78,15 +68,6 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
     def get_detail(self, id):
         return self.get(where={"kid": int(id)})
 
-    def get_new_list(self, id, select=None, **kwargs):
-        kwargs.setdefault('sort', [('kid', 1)])
-        return self.find(where={"kid": {"$gt": int(id)}, "status": BaseKeywordsDB.KEYWORDS_STATUS_ACTIVE},
-            select=select, **kwargs)
-
     def get_list(self, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('kid', 1)])
         return self.find(where=where, select=select, **kwargs)
-
-    def get_max_id(self):
-        data = self.get(where={}, sort=[('kid', -1)], select={'kid': True})
-        return data['kid']
