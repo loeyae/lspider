@@ -9,6 +9,8 @@
 :version: SVN: $Id: Attachmentdb.py 2119 2018-07-04 03:56:41Z zhangyi $
 """
 
+from . import Base
+
 {
     "attachment": {
         'aid': int,           # 附加任务I
@@ -26,8 +28,6 @@
         'updator': int,       # 最后一次修改人ID
     }
 }
-
-from . import Base
 
 class AttachmentDB(Base):
     """
