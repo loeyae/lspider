@@ -8,6 +8,8 @@
 :date:    2018-8-4 21:00:32
 """
 
+from pymongo import MongoClient
+from cdspider.exceptions import *
 from . import Base
 
 class Mongo(Base):
