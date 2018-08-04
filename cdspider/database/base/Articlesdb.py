@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:35:54
-:version: SVN: $Id: Resultdb.py 2186 2018-07-04 14:10:49Z zhangyi $
 """
 import time
 from cdspider.libs.utils import base64encode, base64decode

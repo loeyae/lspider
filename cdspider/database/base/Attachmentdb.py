@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-6-21 18:37:29
-:version: SVN: $Id: Attachmentdb.py 2119 2018-07-04 03:56:41Z zhangyi $
 """
 
 from . import Base

@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:32:52
-:version: SVN: $Id: Keywordsdb.py 2119 2018-07-04 03:56:41Z zhangyi $
 """
 from . import Base
 

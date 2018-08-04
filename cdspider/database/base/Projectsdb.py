@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:34:12
-:version: SVN: $Id: Projectdb.py 1357 2018-06-21 10:41:16Z zhangyi $
 """
 from . import Base
 
