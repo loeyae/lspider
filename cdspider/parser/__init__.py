@@ -59,8 +59,3 @@ class BaseParser(object):
 
 from .ListParser import ListParser
 from .ItemParser import ItemParser
-from .JsonParser import JsonParser
-from .PyqueryParser import PyqueryParser
-from .XpathParser import XpathParser
-from .XmlParser import XmlParser
-from .RegularParser import RegularParser

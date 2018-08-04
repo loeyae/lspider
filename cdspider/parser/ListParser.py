@@ -2,12 +2,12 @@
 # -*- coding: UTF-8 -*-
 # date: 2018/1/23
 # author: Mr wang
-from cdspider.libs import Goose
 from cdspider.libs import utils
-from cdspider.libs.goose3.text import StopWordsChinese
-from cdspider.parser import BaseParser
-from .JsonParser import JsonParser
-from .XmlParser import XmlParser
+from . import BaseParser
+from .lib import Goose
+from .lib import JsonParser
+from .lib import XmlParser
+from .lib.goose3.text import StopWordsChinese
 
 class ListParser(BaseParser):
     """

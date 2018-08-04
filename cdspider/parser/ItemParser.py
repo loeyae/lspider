@@ -9,12 +9,12 @@
 :version: SVN: $Id: ItemParser.py 2297 2018-07-06 08:11:14Z zhangyi $
 """
 import re
-from cdspider.libs import Goose
 from cdspider.libs import utils
-from cdspider.libs.goose3.text import StopWordsChinese
-from cdspider.parser import BaseParser
-from .JsonParser import JsonParser
-from .XmlParser import XmlParser
+from . import BaseParser
+from .lib import Goose
+from .lib import JsonParser
+from .lib import XmlParser
+from .lib.goose3.text import StopWordsChinese
 
 class ItemParser(BaseParser):
     """
@@ -74,7 +74,7 @@ class ItemParser(BaseParser):
         if not 'author' in data:
             data['author'] = self.get_author(article.infos['authors'])
         return data
-    
+
     def get_author(self, authors):
         author = ''
         if isinstance(authors, (list, tuple)):
