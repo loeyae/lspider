@@ -36,7 +36,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
 
     def insert(self, obj = {}):
         obj['aid'] = self._get_increment(self.table)
-        obj.setdefault('status', self.ATTACHMENT_STATUS_INIT)
+        obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
         _id = super(AttachmentDB, self).insert(setting=obj)
@@ -47,7 +47,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         return super(AttachmentDB, self).update(setting=obj, where={'aid': int(id)}, multi=False)
 
     def delete(self, id, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_DELETED}
+        obj = {"status": self.STATUS_DELETED}
         obj['utime'] = int(time.time())
         if not where:
             where = {'aid': int(id)}
@@ -56,7 +56,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
 
     def delete_by_site(self, sid, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_DELETED}
+        obj = {"status": self.STATUS_DELETED}
         obj['utime'] = int(time.time())
         if not where:
             where = {"sid": int(sid)}
@@ -65,7 +65,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
 
     def delete_by_project(self, pid, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_DELETED}
+        obj = {"status": self.STATUS_DELETED}
         obj['utime'] = int(time.time())
         if not where:
             where = {'pid': int(pid)}
@@ -74,7 +74,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
 
     def active(self, id, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_ACTIVE}
+        obj = {"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
         if not where:
             where = {'aid': int(id)}
@@ -83,7 +83,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
 
     def disable(self, id, where = {}):
-        obj = {"status": self.ATTACHMENT_STATUS_DISABLE}
+        obj = {"status": self.STATUS_DISABLE}
         obj['utime'] = int(time.time())
         if not where:
             where = {'aid': int(id)}
