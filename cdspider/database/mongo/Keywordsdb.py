@@ -31,7 +31,7 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
 
     def insert(self, obj):
         obj['kid'] = self._get_increment(self.table)
-        obj.setdefault('status', self.KEYWORDS_STATUS_INIT)
+        obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
         _id = super(KeywordsDB, self).insert(setting=obj)
@@ -46,7 +46,7 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
             where = {'kid': int(id)}
         else:
             where.update({'kid': int(id)})
-        return super(KeywordsDB, self).update(setting={"status": self.KEYWORDS_STATUS_ACTIVE},
+        return super(KeywordsDB, self).update(setting={"status": self.STATUS_ACTIVE},
                 where=where, multi=False)
 
     def disable(self, id, where = {}):
@@ -54,7 +54,7 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
             where = {'kid': int(id)}
         else:
             where.update({'kid': int(id)})
-        return super(KeywordsDB, self).update(setting={"status": self.KEYWORDS_STATUS_DISABLE},
+        return super(KeywordsDB, self).update(setting={"status": self.STATUS_DISABLE},
                 where=where, multi=False)
 
     def delete(self, id, where = {}):
@@ -62,7 +62,7 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
             where = {'kid': int(id)}
         else:
             where.update({'kid': int(id)})
-        return super(KeywordsDB, self).update(setting={"status": self.KEYWORDS_STATUS_DELETED},
+        return super(KeywordsDB, self).update(setting={"status": self.STATUS_DELETED},
                 where=where, multi=False)
 
     def get_detail(self, id):
