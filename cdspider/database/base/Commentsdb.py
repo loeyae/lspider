@@ -11,6 +11,7 @@ from . import Base
 
 {
     "comments": {
+        'rid': str,         # result id
         'ctid': str,        # 评论唯一id
         'acid': str,        # 文章ID
         'author': str,      # 评论作者
