@@ -6,8 +6,8 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:41:28
-:version: SVN: $Id: Taskdb.py 2119 2018-07-04 03:56:41Z zhangyi $
 """
+from . import Base
 
 {
     'task': {
@@ -33,30 +33,7 @@
 
 class TaskDB(object):
 
-    TASK_STATUS_INIT = 0
-    TASK_STATUS_ACTIVE = 1
-    TASK_STATUS_DISABLE = 2
-    TASK_STATUS_DELETED = 3
-
     def insert(self, obj={}):
-        raise NotImplementedError
-
-    def enable(self, id, pid, where):
-        raise NotImplementedError
-
-    def enable_by_project(self, pid, where):
-        raise NotImplementedError
-
-    def enable_by_site(self, sid, pid, where):
-        raise NotImplementedError
-
-    def enable_by_urls(self, uid, pid, where):
-        raise NotImplementedError
-
-    def enable_by_attachment(self, aid, pid, where):
-        raise NotImplementedError
-
-    def enable_by_keyword(self, kid, pid, where):
         raise NotImplementedError
 
     def disable(self, id, pid, where):
