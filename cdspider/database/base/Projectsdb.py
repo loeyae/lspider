@@ -9,8 +9,6 @@
 :version: SVN: $Id: Projectdb.py 1357 2018-06-21 10:41:16Z zhangyi $
 """
 
-from . import Base
-
 {
     'projects': {
         'pid': int,           # 项目id
@@ -24,6 +22,8 @@ from . import Base
         'updator': int,       # 最后一次更新人id
     }
 }
+
+from . import Base
 
 class ProjectsDB(Base):
 
