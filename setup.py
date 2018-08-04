@@ -35,8 +35,7 @@ require_packages = [
         'jieba>=0.39.0',
         'beautifulsoup4>=4.6.0',
         'tld>=0.7.9',
-        'kafka-python>=1.4.3',
-        
+        'pykafka>=2.7.0',
     ]
 if sys.platform != 'win32':
     require_packages.append('gssapi>=1.5.0')
