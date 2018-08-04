@@ -10,18 +10,21 @@
 """
 {
     'keywords': {
-        'kid': int,         # keywords id
+        'kwid': int,        # keywords id
         'word': str,        # keyword
         'status': int,      # status
-        'src_txt': str,     # 关键词来源
-        'createtime': int,  # 创建时间
-        'updatetime': int,  # 最后一次更新时间
+        'rate': str,        # 关键词来源
+        'src': str,         # 来源
+        'ctime': int,       # 创建时间
+        'utime': int,       # 最后一次更新时间
         'creator': str,     # 创建人
         'updator': str,     # 最后一次更新的人
     }
 }
 
-class KeywordsDB(object):
+from . import Base
+
+class KeywordsDB(Base):
 
     KEYWORDS_STATUS_INIT = 0
     KEYWORDS_STATUS_ACTIVE = 1
@@ -33,9 +36,6 @@ class KeywordsDB(object):
         raise NotImplementedError
 
     def update(self, id, obj={}):
-        raise NotImplementedError
-
-    def enable(self, id, where = {}):
         raise NotImplementedError
 
     def active(self, id, where = {}):
@@ -50,11 +50,5 @@ class KeywordsDB(object):
     def get_detail(self, id):
         raise NotImplementedError
 
-    def get_new_list(self, id, select=None, **kwargs):
-        raise NotImplementedError
-
     def get_list(self, where = {}, select=None, **kwargs):
-        raise NotImplementedError
-
-    def get_max_id(self):
         raise NotImplementedError
