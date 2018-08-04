@@ -29,6 +29,7 @@ require_packages = [
         'tornado>=3.2,<=4.5.3',
         'flask>=0.12.2',
         'flask_login>=0.4.1',
+        'Pillow>=5.0.0',
         'cssselect>=1.0.1',
         'jieba3k>=0.35.1',
         'jieba>=0.39.0',
