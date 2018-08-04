@@ -20,8 +20,8 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
         super(KeywordsDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'kid' in indexes:
-            collection.create_index('kid', unique=True, name='kid')
+        if not 'kwid' in indexes:
+            collection.create_index('kwid', unique=True, name='kwid')
         if not 'word' in indexes:
             collection.create_index('word', unique=True, name='word')
         if not 'status' in indexes:
@@ -30,44 +30,44 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
-        obj['kid'] = self._get_increment(self.table)
+        obj['kwid'] = self._get_increment(self.table)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
         _id = super(KeywordsDB, self).insert(setting=obj)
-        return obj['kid']
+        return obj['kwid']
 
     def update(self, id, obj):
         obj['utime'] = int(time.time())
-        return super(KeywordsDB, self).update(setting=obj, where={"kid": int(id)}, multi=False)
+        return super(KeywordsDB, self).update(setting=obj, where={"kwid": int(id)}, multi=False)
 
     def active(self, id, where = {}):
         if not where:
-            where = {'kid': int(id)}
+            where = {'kwid': int(id)}
         else:
-            where.update({'kid': int(id)})
+            where.update({'kwid': int(id)})
         return super(KeywordsDB, self).update(setting={"status": self.STATUS_ACTIVE},
                 where=where, multi=False)
 
     def disable(self, id, where = {}):
         if not where:
-            where = {'kid': int(id)}
+            where = {'kwid': int(id)}
         else:
-            where.update({'kid': int(id)})
+            where.update({'kwid': int(id)})
         return super(KeywordsDB, self).update(setting={"status": self.STATUS_DISABLE},
                 where=where, multi=False)
 
     def delete(self, id, where = {}):
         if not where:
-            where = {'kid': int(id)}
+            where = {'kwid': int(id)}
         else:
-            where.update({'kid': int(id)})
+            where.update({'kwid': int(id)})
         return super(KeywordsDB, self).update(setting={"status": self.STATUS_DELETED},
                 where=where, multi=False)
 
     def get_detail(self, id):
-        return self.get(where={"kid": int(id)})
+        return self.get(where={"kwid": int(id)})
 
     def get_list(self, where = {}, select=None, **kwargs):
-        kwargs.setdefault('sort', [('kid', 1)])
+        kwargs.setdefault('sort', [('kwid', 1)])
         return self.find(where=where, select=select, **kwargs)
