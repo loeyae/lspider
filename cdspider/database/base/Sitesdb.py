@@ -27,8 +27,8 @@ from . import Base
         'unique': str,       # 生成unique id的配置
         'ctime': int,        # 创建时间
         'utime': int,        # 最后一次更新时间
-        'creator': str,      # 创建人
-        'updator': str,      # 最后一次更新人
+        'creator': int,      # 创建人
+        'updator': int,      # 最后一次更新人
     }
 }
 
