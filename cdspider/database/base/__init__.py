@@ -3,7 +3,7 @@
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 #version: SVN: $Id: __init__.py 1391 2018-06-22 01:43:19Z zhangyi $
 
-class Base:
+class Base(object):
     
     STATUS_INIT = 0
     STATUS_ACTIVE = 1
