@@ -31,7 +31,7 @@ from . import Base
     }
 }
 
-class TaskDB(object):
+class TaskDB(Base):
 
     def insert(self, obj={}):
         raise NotImplementedError
