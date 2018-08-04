@@ -16,72 +16,10 @@
         "maxsize": 1000000,
         "queue_prefix": "local"
     },
-    "projectdb": {
-        "protocol": "mysql",
+    "database": {
+        "protocol": "mongo",
         "host": "localhost",
-        "port": 3306,
-        "db": "cdspider_sample",
-        "table": "projects",
-        "user": "falsk",
-        "password": "123@qwe"
-    },
-    "taskdb": {
-        "protocol": "mysql",
-        "host": "localhost",
-        "port": 3306,
-        "db": "cdspider_sample",
-        "table": "tasks",
-        "user": "falsk",
-        "password": "123@qwe"
-    },
-    "sitedb": {
-        "protocol": "mysql",
-        "host": "localhost",
-        "port": 3306,
-        "db": "cdspider_sample",
-        "table": "sites",
-        "user": "falsk",
-        "password": "123@qwe"
-    },
-    "urlsdb": {
-        "protocol": "mysql",
-        "host": "localhost",
-        "port": 3306,
-        "db": "cdspider_sample",
-        "table": "urls",
-        "user": "falsk",
-        "password": "123@qwe"
-    },
-    "attachmentdb": {
-        "protocol": "mysql",
-        "host": "localhost",
-        "port": 3306,
-        "db": "cdspider_sample",
-        "table": "attachment",
-        "user": "falsk",
-        "password": "123@qwe"
-    },
-    "keywordsdb": {
-        "protocol": "mysql",
-        "host": "localhost",
-        "port": 3306,
-        "db": "cdspider_sample",
-        "table": "keywords",
-        "user": "falsk",
-        "password": "123@qwe"
-    },
-    "uniquedb": {
-        "protocol": "mysql",
-        "host": "localhost",
-        "port": 3306,
-        "db": "cdspider_sample",
-        "user": "falsk",
-        "password": "123@qwe"
-    },
-    "resultdb": {
-        "protocol": "mysql",
-        "host": "localhost",
-        "port": 3306,
+        "port": 27017,
         "db": "cdspider_sample",
         "user": "falsk",
         "password": "123@qwe"
@@ -102,17 +40,5 @@
                 "mail": "zhangyi07@beyondsoft.com"
             }
         ]
-    },
-    "web": {
-        "need-auth": false,
-        "admindb": {
-            "protocol": "mysql",
-            "host": "localhost",
-            "port": 3306,
-            "db": "cdspider_sample",
-            "table": "admins",
-            "user": "falsk",
-            "password": "123@qwe"
-        }
     }
 }
