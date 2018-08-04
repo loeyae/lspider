@@ -16,113 +16,43 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
 
     __tablename__ = 'task'
 
-    def __init__(self, host='localhost', port=27017, db = None, user=None,
-            password=None, table=None, **kwargs):
-        super(TaskDB, self).__init__(host = host, port = port, db = db,
-            user = user, password = password, table = table, **kwargs)
+    def __init__(self, connector, table=None, **kwargs):
+        super(TaskDB, self).__init__(connector, table = table, **kwargs)
         self._list_collection()
 
     def insert(self, obj):
-        table = self._table_name(obj['projectid'])
+        table = self._table_name(obj['pid'])
         obj['tid'] = self._get_increment(table)
-        obj.setdefault('status', self.TASK_STATUS_INIT)
-        obj.setdefault('createtime', int(time.time()))
-        obj.setdefault('updatetime', 0)
-        obj.setdefault('urlid', 0)
-        obj.setdefault('atid', 0)
+        obj.setdefault('status', self.STATUS_INIT)
+        obj.setdefault('ctime', int(time.time()))
+        obj.setdefault('utime', 0)
+        obj.setdefault('uid', 0)
+        obj.setdefault('aid', 0)
         obj.setdefault('kwid', 0)
         _id = super(TaskDB, self).insert(setting=obj, table=table)
         return obj['tid']
 
     def update(self, id, pid, obj):
         table = self._table_name(pid)
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         return super(TaskDB, self).update(setting=obj, where={"tid": int(id)}, table=table, multi=False)
 
     def update_url_by_site(self, id, pid, url):
         table = self._table_name(pid)
         obj={"url": url}
-        obj['updatetime'] = int(time.time())
-        return super(TaskDB, self).update(setting=obj, where={"siteid": int(id), "atid": 0, "urlid": 0}, table=table, multi=False)
+        obj['utime'] = int(time.time())
+        return super(TaskDB, self).update(setting=obj, where={"sid": int(id), "aid": 0, "uid": 0}, table=table, multi=False)
 
     def update_url_by_urls(self, id, pid, url):
         table = self._table_name(pid)
         obj={"url": url}
-        obj['updatetime'] = int(time.time())
-        return super(TaskDB, self).update(setting=obj, where={"urlid": int(id), "atid": 0}, table=table, multi=False)
-
-    def enable(self, id, pid, where = {}):
-        table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        obj['plantime'] = 0
-        obj['save'] = None
-        if not where:
-            where = {'tid':int(id)}
-        else:
-            where.update({'tid':int(id)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=False)
-
-    def enable_by_project(self, pid, where = {}):
-        table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        obj['plantime'] = 0
-        obj['save'] = None
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
-
-    def enable_by_site(self, sid, pid, where = {}):
-        table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        obj['plantime'] = 0
-        obj['save'] = None
-        if not where:
-            where = {"siteid": int(sid)}
-        else:
-            where.update({"siteid": int(sid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
-
-    def enable_by_urls(self, uid, pid, where = {}):
-        table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        obj['plantime'] = 0
-        obj['save'] = None
-        if not where:
-            where = {"urlid": int(uid)}
-        else:
-            where.update({"urlid": int(uid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
-
-    def enable_by_attachment(self, aid, pid, where = {}):
-        table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        obj['plantime'] = 0
-        obj['save'] = None
-        if not where:
-            where = {"atid": int(aid)}
-        else:
-            where.update({"atid": int(aid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
-
-    def enable_by_keyword(self, kid, pid, where = {}):
-        table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        obj['plantime'] = 0
-        obj['save'] = None
-        if not where:
-            where = {"kwid": int(kid)}
-        else:
-            where.update({"kwid": int(kid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        obj['utime'] = int(time.time())
+        return super(TaskDB, self).update(setting=obj, where={"uid": int(id), "aid": 0}, table=table, multi=False)
 
     def disable(self, id, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
             where = {'tid':int(id)}
@@ -132,59 +62,59 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
 
     def disable_by_project(self, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable_by_site(self, sid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"siteid": int(sid)}
+            where = {"sid": int(sid)}
         else:
-            where.update({"siteid": int(sid)})
+            where.update({"sid": int(sid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable_by_urls(self, uid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"urlid": int(uid)}
+            where = {"uid": int(uid)}
         else:
-            where.update({"urlid": int(uid)})
+            where.update({"uid": int(uid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable_by_attachment(self, aid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"atid": int(aid)}
+            where = {"aid": int(aid)}
         else:
-            where.update({"atid": int(aid)})
+            where.update({"aid": int(aid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
-    def disable_by_keyword(self, kid, pid, where = {}):
+    def disable_by_keyword(self, kwid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"kwid": int(kid)}
+            where = {"kwid": int(kwid)}
         else:
-            where.update({"kwid": int(kid)})
+            where.update({"kwid": int(kwid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active(self, id, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_ACTIVE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
         if not where:
             where = {'tid':int(id)}
         else:
@@ -193,51 +123,51 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
 
     def active_by_site(self, sid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_ACTIVE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
         if not where:
-            where = {"siteid": int(sid)}
+            where = {"sid": int(sid)}
         else:
-            where.update({"siteid": int(sid)})
+            where.update({"sid": int(sid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active_by_urls(self, uid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_ACTIVE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
         obj['plantime'] = int(time.time())
         if not where:
-            where = {"urlid": int(uid)}
+            where = {"uid": int(uid)}
         else:
-            where.update({"urlid": int(uid)})
+            where.update({"uid": int(uid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active_by_attachment(self, aid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_ACTIVE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
         obj['plantime'] = int(time.time())
         if not where:
-            where = {"atid": int(aid)}
+            where = {"aid": int(aid)}
         else:
-            where.update({"atid": int(aid)})
+            where.update({"aid": int(aid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
-    def active_by_keyword(self, kid, pid, where = {}):
+    def active_by_keyword(self, kwid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_ACTIVE}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
         obj['plantime'] = int(time.time())
         if not where:
-            where = {"kwid": int(kid)}
+            where = {"kwid": int(kwid)}
         else:
-            where.update({"kwid": int(kid)})
+            where.update({"kwid": int(kwid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete(self, id, pid, obj, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
             where = {'tid':int(id)}
@@ -247,53 +177,53 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
 
     def delete_by_project(self, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete_by_site(self, sid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"siteid": int(sid)}
+            where = {"sid": int(sid)}
         else:
-            where.update({"siteid": int(sid)})
+            where.update({"sid": int(sid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete_by_urls(self, uid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"urlid": int(uid)}
+            where = {"uid": int(uid)}
         else:
-            where.update({"urlid": int(uid)})
+            where.update({"uid": int(uid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete_by_attachment(self, uid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"atid": int(aid)}
+            where = {"aid": int(aid)}
         else:
-            where.update({"atid": int(aid)})
+            where.update({"aid": int(aid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
-    def delete_by_keyword(self, kid, pid, where = {}):
+    def delete_by_keyword(self, kwid, pid, where = {}):
         table = self._table_name(pid)
-        obj={"status": self.TASK_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"kwid": int(kid)}
+            where = {"kwid": int(kwid)}
         else:
-            where.update({"kwid": int(kid)})
+            where.update({"kwid": int(kwid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def get_detail(self, id, pid, crawlinfo=False):
@@ -313,16 +243,9 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         kwargs.setdefault('sort', [('tid', 1)])
         return self.find(where=where, table=table, select=select, **kwargs)
 
-    def get_init_list(self, pid, where = {}, select=None, **kwargs):
-        table = self._table_name(pid)
-        where['status'] = self.TASK_STATUS_ACTIVE
-        where['plantime'] = 0
-        kwargs.setdefault('sort', [('tid', 1)])
-        return self.find(where=where, table=table, select=select, **kwargs)
-
     def get_plan_list(self, pid, plantime, where = {}, select=None, **kwargs):
         table = self._table_name(pid)
-        where['status'] = TaskDB.TASK_STATUS_ACTIVE
+        where['status'] = TaskDB.STATUS_ACTIVE
         where['plantime'] = {"$lte": plantime}
         kwargs.setdefault('sort', [('tid', 1)])
         return self.find(where=where, table=table, select=select, **kwargs)
@@ -338,12 +261,20 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         indexes = collection.index_information()
         if not 'tid' in indexes:
             collection.create_index('tid', unique=True, name='tid')
-        if not 's_u_a_k' in indexes:
-            collection.create_index([('siteid', 1), ('urlid', 1), ('atid', 1), ('kwid', 1)], unique=True, name='s_u_k')
+        if not 'pid' in indexes:
+            collection.create_index('pid', name='pid')
+        if not 'sid' in indexes:
+            collection.create_index('sid', name='sid')
+        if not 'uid' in indexes:
+            collection.create_index('uid', name='uid')
+        if not 'kwid' in indexes:
+            collection.create_index('kwid', name='kwid')
+        if not 'aid' in indexes:
+            collection.create_index('aid', name='aid')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
         if not 'plantime' in indexes:
             collection.create_index('plantime', name='plantime')
-        if not 'createtime' in indexes:
-            collection.create_index('createtime', name='createtime')
+        if not 'ctime' in indexes:
+            collection.create_index('ctime', name='ctime')
         self._collections.add(table)
