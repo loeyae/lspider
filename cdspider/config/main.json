@@ -1,0 +1,118 @@
+{
+    "debug": true,
+    "proxy": {
+        "proxy_url": "http://114.112.86.46:8082/get_ips/own/30",
+        "user": "hongmai",
+        "password": "soften.cn",
+        "type": "socks",
+        "proxy_rate": "every"
+    },
+    "message_queue": {
+        "protocol": "kafka",
+        "host": "47.93.88.247",
+        "port": 5672,
+        "user": "pyworm",
+        "password": "pyworm@123",
+        "maxsize": 1000000,
+        "queue_prefix": "local"
+    },
+    "projectdb": {
+        "protocol": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "db": "cdspider_sample",
+        "table": "projects",
+        "user": "falsk",
+        "password": "123@qwe"
+    },
+    "taskdb": {
+        "protocol": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "db": "cdspider_sample",
+        "table": "tasks",
+        "user": "falsk",
+        "password": "123@qwe"
+    },
+    "sitedb": {
+        "protocol": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "db": "cdspider_sample",
+        "table": "sites",
+        "user": "falsk",
+        "password": "123@qwe"
+    },
+    "urlsdb": {
+        "protocol": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "db": "cdspider_sample",
+        "table": "urls",
+        "user": "falsk",
+        "password": "123@qwe"
+    },
+    "attachmentdb": {
+        "protocol": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "db": "cdspider_sample",
+        "table": "attachment",
+        "user": "falsk",
+        "password": "123@qwe"
+    },
+    "keywordsdb": {
+        "protocol": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "db": "cdspider_sample",
+        "table": "keywords",
+        "user": "falsk",
+        "password": "123@qwe"
+    },
+    "uniquedb": {
+        "protocol": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "db": "cdspider_sample",
+        "user": "falsk",
+        "password": "123@qwe"
+    },
+    "resultdb": {
+        "protocol": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "db": "cdspider_sample",
+        "user": "falsk",
+        "password": "123@qwe"
+    },
+    "exc_work": {
+        "mailer": "smtp",
+        "sender": {
+            "host": "ismtp.beyondsoft.com",
+            "port": 25,
+            "user": "bdopener",
+            "pass": "bdopener20170510",
+            "from": "bdopener@beyondsoft.com",
+            "from_name": "bdopener service"
+        },
+        "receiver": [
+            {
+                "name": "Zhang Yi",
+                "mail": "zhangyi07@beyondsoft.com"
+            }
+        ]
+    },
+    "web": {
+        "need-auth": false,
+        "admindb": {
+            "protocol": "mysql",
+            "host": "localhost",
+            "port": 3306,
+            "db": "cdspider_sample",
+            "table": "admins",
+            "user": "falsk",
+            "password": "123@qwe"
+        }
+    }
+}
