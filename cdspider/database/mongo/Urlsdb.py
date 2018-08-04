@@ -17,65 +17,38 @@ class UrlsDB(Mongo, BaseUrlsDB):
 
     __tablename__ = 'urls'
 
-    def __init__(self, host='localhost', port=27017, db = None, user=None,
-            password=None, table=None, **kwargs):
-        super(UrlsDB, self).__init__(host = host, port = port, db = db,
-            user = user, password = password, table = table, **kwargs)
+    def __init__(self, connector, table=None, **kwargs):
+        super(UrlsDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
         if not 'uid' in indexes:
             collection.create_index('uid', unique=True, name='uid')
-        if not 'title' in indexes:
-            collection.create_index('title', name='title')
-        if not 's_s' in indexes:
-            collection.create_index([('siteid', pymongo.ASCENDING),('status', pymongo.ASCENDING)], name='s_s')
+        if not 'name' in indexes:
+            collection.create_index('name', name='name')
+        if not 'pid' in indexes:
+            collection.create_index('pid', name='pid')
+        if not 'sid' in indexes:
+            collection.create_index('sid', name='sid')
         if not 'url' in indexes:
             collection.create_index([('url', pymongo.TEXT)], name='url')
-        if not 'createtime' in indexes:
-            collection.create_index('createtime', name='createtime')
+        if not 'ctime' in indexes:
+            collection.create_index('ctime', name='ctime')
 
     def insert(self, obj = {}):
         obj['uid'] = self._get_increment(self.table)
-        obj.setdefault('status', self.URLS_STATUS_INIT)
-        obj.setdefault('createtime', int(time.time()))
-        obj.setdefault('updatetime', 0)
+        obj.setdefault('status', self.STATUS_INIT)
+        obj.setdefault('ctime', int(time.time()))
+        obj.setdefault('utime', 0)
         _id = super(UrlsDB, self).insert(setting=obj)
         return obj['uid']
 
     def update(self, id, obj = {}):
-        obj['updatetime'] = int(time.time())
+        obj['utime'] = int(time.time())
         return super(UrlsDB, self).update(setting=obj, where={'uid': int(id)}, multi=False)
 
-    def enable(self, id, where = {}):
-        obj = {"status": self.URLS_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        if not where:
-            where = {'uid': int(id)}
-        else:
-            where.update({'uid': int(id)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
-
-    def enable_by_site(self, sid, where = {}):
-        obj = {"status": self.URLS_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        if not where:
-            where = {"siteid": int(sid)}
-        else:
-            where.update({"siteid": int(sid)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
-
-    def enable_by_project(self, pid, where = {}):
-        obj = {"status": self.URLS_STATUS_INIT}
-        obj['updatetime'] = int(time.time())
-        if not where:
-            where = {'projectid': int(pid)}
-        else:
-            where.update({'projectid': int(pid)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
-
     def delete(self, id, where = {}):
-        obj = {"status": self.URLS_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj = {"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         if not where:
             where = {'uid': int(id)}
         else:
@@ -83,26 +56,26 @@ class UrlsDB(Mongo, BaseUrlsDB):
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
     def delete_by_site(self, sid, where = {}):
-        obj = {"status": self.URLS_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj = {"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         if not where:
-            where = {"siteid": int(sid)}
+            where = {"sid": int(sid)}
         else:
-            where.update({"siteid": int(sid)})
+            where.update({"sid": int(sid)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
 
     def delete_by_project(self, pid, where = {}):
-        obj = {"status": self.URLS_STATUS_DELETED}
-        obj['updatetime'] = int(time.time())
+        obj = {"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
         if not where:
-            where = {'projectid': int(pid)}
+            where = {'pid': int(pid)}
         else:
-            where.update({'projectid': int(pid)})
+            where.update({'pid': int(pid)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
 
     def active(self, id, where = {}):
-        obj = {"status": self.URLS_STATUS_ACTIVE}
-        obj['updatetime'] = int(time.time())
+        obj = {"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
         if not where:
             where = {'uid': int(id)}
         else:
@@ -110,8 +83,8 @@ class UrlsDB(Mongo, BaseUrlsDB):
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
     def disable(self, id, where = {}):
-        obj = {"status": self.URLS_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj = {"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         if not where:
             where = {'uid': int(id)}
         else:
@@ -119,21 +92,21 @@ class UrlsDB(Mongo, BaseUrlsDB):
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
     def disable_by_site(self, sid, where = {}):
-        obj = {"status": self.URLS_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj = {"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         if not where:
-            where = {"siteid": int(sid)}
+            where = {"sid": int(sid)}
         else:
-            where.update({"siteid": int(sid)})
+            where.update({"sid": int(sid)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
 
     def disable_by_project(self, pid, where = {}):
-        obj = {"status": self.URLS_STATUS_DISABLE}
-        obj['updatetime'] = int(time.time())
+        obj = {"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
         if not where:
-            where = {'projectid': int(pid)}
+            where = {'pid': int(pid)}
         else:
-            where.update({'projectid': int(pid)})
+            where.update({'pid': int(pid)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
 
     def get_detail(self, id):
@@ -142,11 +115,3 @@ class UrlsDB(Mongo, BaseUrlsDB):
     def get_list(self, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uid', 1)])
         return self.find(where=where, select=select, **kwargs)
-
-    def get_new_list(self, id, siteid, select=None, **kwargs):
-        kwargs.setdefault('sort', [('uid', 1)])
-        return self.find(where={'uid': {'$gt': int(id)}, 'siteid': siteid}, select=select, **kwargs)
-
-    def get_max_id(self, siteid):
-        data = self.get(where={"siteid": siteid}, sort=[('uid', -1)], select={'uid': True})
-        return data['uid']
