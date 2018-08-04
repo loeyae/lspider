@@ -8,6 +8,8 @@
 :date:    2018-1-9 17:43:17
 """
 
+from . import Base
+
 {
     "urls": {
         'uid': int,           # url id
@@ -26,12 +28,7 @@
     }
 }
 
-class UrlsDB(object):
-
-    URLS_STATUS_INIT = 0
-    URLS_STATUS_ACTIVE = 1
-    URLS_STATUS_DISABLE = 2
-    URLS_STATUS_DELETED = 3
+class UrlsDB(Base):
 
     def insert(self, obj = {}):
         raise NotImplementedError
