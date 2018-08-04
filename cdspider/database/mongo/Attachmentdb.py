@@ -83,7 +83,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
 
     def disable(self, id, where = {}):
-        obj = {"status": self.STATUS_DISABLE}
+        obj = {"status": self.STATUS_INIT}
         obj['utime'] = int(time.time())
         if not where:
             where = {'aid': int(id)}

@@ -46,7 +46,7 @@ class ProjectsDB(Mongo, BaseProjectsDB):
                 where={"pid": int(id)}, multi=False)
 
     def disable(self, id):
-        return super(ProjectsDB, self).update(setting={"status": self.STATUS_DISABLE},
+        return super(ProjectsDB, self).update(setting={"status": self.STATUS_INIT},
                 where={"pid": int(id)}, multi=False)
 
     def delete(self, id):

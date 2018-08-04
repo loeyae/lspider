@@ -54,7 +54,7 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
             where = {'kwid': int(id)}
         else:
             where.update({'kwid': int(id)})
-        return super(KeywordsDB, self).update(setting={"status": self.STATUS_DISABLE},
+        return super(KeywordsDB, self).update(setting={"status": self.STATUS_INIT},
                 where=where, multi=False)
 
     def delete(self, id, where = {}):

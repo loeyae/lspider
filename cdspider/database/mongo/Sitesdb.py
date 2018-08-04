@@ -43,7 +43,7 @@ class SitesDB(Mongo, BaseSitesDB):
             where = {'sid': int(id)}
         else:
             where.update({'sid': int(id)})
-        return super(SitesDB, self).update(setting={"status": self.STATUS_DISABLE, 'utime': int(time.time())},
+        return super(SitesDB, self).update(setting={"status": self.STATUS_INIT, 'utime': int(time.time())},
                 where=where, multi=False)
 
     def disable_by_project(self, pid, where = {}):
@@ -51,7 +51,7 @@ class SitesDB(Mongo, BaseSitesDB):
             where = {'pid': int(pid)}
         else:
             where.update({'pid': int(pid)})
-        return super(SitesDB, self).update(setting={"status": self.STATUS_DISABLE, 'utime': int(time.time())},
+        return super(SitesDB, self).update(setting={"status": self.STATUS_INIT, 'utime': int(time.time())},
                 where=where, multi=True)
 
     def active(self, id, where = {}):
