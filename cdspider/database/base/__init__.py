@@ -3,6 +3,12 @@
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 #version: SVN: $Id: __init__.py 1391 2018-06-22 01:43:19Z zhangyi $
 
+class Base:
+    
+    STATUS_INIT = 0
+    STATUS_ACTIVE = 1
+    STATUS_DELETED = 9
+
 from .Admindb import AdminDB
 from .Projectdb import ProjectDB
 from .Sitedb import SiteDB
