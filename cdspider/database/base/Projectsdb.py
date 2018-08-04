@@ -8,6 +8,7 @@
 :date:    2018-1-9 17:34:12
 :version: SVN: $Id: Projectdb.py 1357 2018-06-21 10:41:16Z zhangyi $
 """
+from . import Base
 
 {
     'projects': {
@@ -22,8 +23,6 @@
         'updator': int,       # 最后一次更新人id
     }
 }
-
-from . import Base
 
 class ProjectsDB(Base):
 
