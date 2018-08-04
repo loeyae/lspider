@@ -12,6 +12,7 @@ from .Articlesdb import ArticlesDB
 from .AttachDatadb import AttachDataDB
 from .Attachmentdb import AttachmentDB
 from .Commentsdb import CommentsDB
+from .CrawlLogdb import CrawlLogDB
 from .Keywordsdb import KeywordsDB
 from .ParseRuledb import ParseRuleDB
 from .Projectsdb import ProjectsDB
