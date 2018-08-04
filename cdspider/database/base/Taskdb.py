@@ -12,22 +12,22 @@ from . import Base
 {
     'task': {
         'tid': int,        # task id
-        'projectid': int,  # project id
-        'siteid': int,     # site id
+        'pid': int,        # project id
+        'sid': int,        # site id
         'kwid': int,       # keyword id, if exists, default: 0
-        'urlid': int,      # url id, if exists, default: 0
-        'atid': int,       # attachment id, if exists, default: 0
+        'uid': int,        # url id, if exists, default: 0
+        'aid': int,        # attachment id, if exists, default: 0
         'url': str,        # base url
         'rate': int,       # 抓取频率
-        'script': str,     # 自定义handler脚本
         'status': int,     # status, default: 0
+        'expire': int,     # 过期时间, default: 0
         'save': str,       # 保留的参数
+        'crawlinfo': str,  # 最近10次抓取记录
         'queuetime': int,  # 最近一次入队时间
         'crawltime': int,  # 最近一次抓取时间
-        'crawlinfo': str,  # 最近10次抓取记录
         'plantime': int,   # 计划执行时间
-        'createtime': int, # 创建时间
-        'updatetime': int, # 修改时间
+        'ctime': int,      # 创建时间
+        'utime': int,      # 最后一次修改时间
     }
 }
 
