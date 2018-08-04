@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>README</title>
+<style type="text/css">/*...*/</style>
+</head>
+<body>
+<blockquote><h1>Color-Data数据采集框架</h1><h2><a href="#版本要求" name="版本要求">版本要求</a></h2>
+  <ul>
+    <li>python&gt;=3.5</li>
+  </ul><h2><a href="#安装方法" name="安装方法">安装方法</a></h2>
+  <ul>
+    <li>python setup.py sdist</li>
+    <li>pip install dist/cdspider-0.1.tar.gz</li>
+  </ul><h2><a href="#卸载方法" name="卸载方法">卸载方法</a></h2>
+  <ul>
+    <li>pip uninstall cdspider</li>
+  </ul><h2><a href="#运行方法" name="运行方法">运行方法</a></h2>
+  <ul>
+    <li>cdspider [command]</li>
+    <li>cdspider &ndash;help 获取command</li>
+  </ul><h2><a href="#apache-wsgi部署" name="apache-wsgi部署">apache wsgi部署</a></h2>
+  <ul>
+    <li>&lt;VirtualHost *:80&gt;
+</li>
+    <li>DocumentRoot &ldquo;{rootdir}&rdquo;</li>
+    <li>ServerName {ServerName}</li>
+    <li>ServerAlias {ServerName}<br/>*</li>
+    <li>WSGIScriptAlias / &ldquo;{rootdir}/wsgi.py&rdquo;<br/>*</li>
+    <li>&lt;Directory &ldquo;{rootdir}&rdquo;&gt;</li>
+    <li>Options Indexes FollowSymLinks MultiViews</li>
+    <li>AllowOverride all</li>
+    <li></li>
+    <li>Require local</li>
+    <li></li>
+    <li>&lt;IfDefine !APACHE24&gt;</li>
+    <li>Order Deny,Allow</li>
+    <li>Deny from all</li>
+    <li>Allow from localhost ::1 127.0.0.1</li>
+    <li></li>
+    <li>WSGIScriptReloading On</li>
+    <li></li>
+    <li></li>
+  </ul>
+</blockquote>
+</body>
+</html>
