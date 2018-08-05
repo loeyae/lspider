@@ -25,6 +25,12 @@ from multiprocessing import Process
 import stevedore
 import datetime
 
+def build_url_by_rule(rule, params):
+    url = rule.get('base')
+    if rule.get('mode', 'get') == 'format':
+        return url.format(**params)
+    return build_query(url, params)
+
 def parse_domain(url):
     try:
         presult = parse.urlparse(url)
