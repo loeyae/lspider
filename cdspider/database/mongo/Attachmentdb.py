@@ -55,24 +55,6 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
             where.update({'aid': int(id)})
         return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
 
-    def delete_by_site(self, sid, where = {}):
-        obj = {"status": self.STATUS_DELETED}
-        obj['utime'] = int(time.time())
-        if not where:
-            where = {"sid": int(sid)}
-        else:
-            where.update({"sid": int(sid)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
-
-    def delete_by_project(self, pid, where = {}):
-        obj = {"status": self.STATUS_DELETED}
-        obj['utime'] = int(time.time())
-        if not where:
-            where = {'pid': int(pid)}
-        else:
-            where.update({'pid': int(pid)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
-
     def active(self, id, where = {}):
         obj = {"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
@@ -96,4 +78,18 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
 
     def get_list(self, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('aid', 1)])
+        return self.find(where=where, select=select, **kwargs)
+
+    def get_list_by_domain(self, domain, where = {}, select=None, **kwargs):
+        kwargs.setdefault('sort', [('aid', 1)])
+        if not where:
+            where = {}
+        where['domain'] = domain
+        return self.find(where=where, select=select, **kwargs)
+
+    def get_list_by_subdomain(self, subdomain, where = {}, select=None, **kwargs):
+        kwargs.setdefault('sort', [('aid', 1)])
+        if not where:
+            where = {}
+        where['subdomain'] = subdomain
         return self.find(where=where, select=select, **kwargs)
