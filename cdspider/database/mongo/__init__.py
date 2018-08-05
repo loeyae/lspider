@@ -3,7 +3,7 @@
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 #version: SVN: $Id: __init__.py 1388 2018-06-22 01:39:47Z zhangyi $
 
-from .Mongo import Mongo
+from .Mongo import Mongo as Base
 from .Articlesdb import ArticlesDB
 from .AttachDatadb import AttachDataDB
 from .Attachmentdb import AttachmentDB
