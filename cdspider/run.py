@@ -53,7 +53,7 @@ def cli(ctx, **kwargs):
         kwargs['db'] = load_cls(ctx, None, 'cdspider.database.{protocol}.Base'.format(protocol = db_setting.get('protocol')))
         for d in app_config.get("database", {}):
             db = 'cdspider.database.{protocol}.{db}'.format(protocol = db_setting.get('protocol'), db= d)
-            kwargs[d] = load_cls(ctx, None, db)(connector)
+            kwargs[d.lower()] = load_cls(ctx, None, db)(connector)
 
     queue_setting = kwargs.get("message_queue")
     if queue_setting:
@@ -104,11 +104,11 @@ def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
         scheduler.run_once()
     else:
         scheduler.run()
-        
+
 @cli.command()
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def newTask_schedle(ctx, no_loop,  get_object=False):     
+def newTask_schedle(ctx, no_loop,  get_object=False):
     """
     newTask_schedle: 根据queue:newTask2scheduler往taskdb 里存入新的任务数据
     """
@@ -121,7 +121,7 @@ def newTask_schedle(ctx, no_loop,  get_object=False):
     attachmentdb = g.get('attachmentdb', None)
     keywordsdb = g.get('keywordsdb', None)
     rate_map = g.get('rate_map')
-    
+
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
@@ -137,7 +137,7 @@ def newTask_schedle(ctx, no_loop,  get_object=False):
 @cli.command()
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def status_schedle(ctx,no_loop,  get_object=False):     
+def status_schedle(ctx,no_loop,  get_object=False):
     """
     newTask_schedle: 根据queue:status2scheduler往taskdb 里更新数据状态
     """
@@ -150,7 +150,7 @@ def status_schedle(ctx,no_loop,  get_object=False):
     attachmentdb = g.get('attachmentdb', None)
     keywordsdb = g.get('keywordsdb', None)
     rate_map = g.get('rate_map')
-    
+
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
