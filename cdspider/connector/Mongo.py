@@ -32,14 +32,16 @@ class Mongo(Base):
             k = self.symbol()
             if not k in connection_pool:
                 self.conn = MongoClient(host = self.host, port = self.port, **self.setting)
-                #登录认证
                 if self.db:
                     self._db = self.conn[self.db]
                 else:
                     self._db = self.conn.get_default_database();
                 #登录认证
                 if self.username:
-                    self._db.authenticate(self.username, self.password)
+                    try:
+                        self.conn.admin.authenticate(self.username, self.password)
+                    except:
+                        self._db.authenticate(self.username, self.password)
                 connection_pool[k] = {"c": self.conn, 'd': self._db}
             else:
                 self.conn = connection_pool[k]["c"]
