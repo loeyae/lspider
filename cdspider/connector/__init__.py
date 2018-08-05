@@ -5,6 +5,8 @@ import abc
 import six
 import logging
 
+from cdspider.libs.utils import md5
+
 @six.add_metaclass(abc.ABCMeta)
 class Base(object):
     """
@@ -50,4 +52,4 @@ class Base(object):
     def cursor(self):
         raise NotImplementedError
 
-    from .Mongo import Mongo
+from .Mongo import Mongo
