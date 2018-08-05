@@ -226,10 +226,9 @@ class Spider():
             self.logger.debug("Attachment: %s" % attachment)
             return None
         task['project'] = project
-        task['site'] = {}
+        task['site'] = {"sid": 0}
         task['attachment'] = attachment
-        task['project']['scripts'] = attachment['scripts']
-        task['site']['script'] = None
+        task['site']['scripts'] = attachment['scripts']
         if not 'save' in task or not task['save']:
             task['save'] = {}
         tasl['save']['mode'] = BaseHandler.MODE_ATT
