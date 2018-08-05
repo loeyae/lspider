@@ -48,13 +48,16 @@ def cli(ctx, **kwargs):
     app_config = utils.load_config(os.path.join(cpath, "config", "app.json"))
 
     db_setting = kwargs.get('database')
+    db_object = {}
     if db_setting:
         connector = connect_db(ctx, None, db_setting)
-        kwargs['db'] = load_cls(ctx, None, 'cdspider.database.{protocol}.Base'.format(protocol = db_setting.get('protocol')))
+        db_object['base'] = load_cls(ctx, None, 'cdspider.database.{protocol}.Base'.format(protocol = db_setting.get('protocol')))
         for d in app_config.get("database", {}):
             db = 'cdspider.database.{protocol}.{db}'.format(protocol = db_setting.get('protocol'), db= d)
-            kwargs[d.lower()] = load_cls(ctx, None, db)(connector)
+            db_object[d.lower()] = load_cls(ctx, None, db)(connector)
+    kwargs['db'] = db_object
 
+    queue_object = {}
     queue_setting = kwargs.get("message_queue")
     if queue_setting:
         queue_setting.setdefault('maxsize', kwargs.get('queue_maxsize'))
@@ -63,9 +66,11 @@ def cli(ctx, **kwargs):
             _maxsize = queue_setting['maxsize']
             if q == 'spider2scheduler' or q == 'excinfo_queue':
                 queue_setting['maxsize'] = 0
-            kwargs[q] = connect_message_queue(ctx, q, queue_setting)
+            queue_object[q] = connect_message_queue(ctx, q, queue_setting)
             if _maxsize != queue_setting['maxsize']:
                 queue_setting['maxsize'] = _maxsize
+
+    kwargs['queue'] = queue_object
 
     ctx.obj = {}
     ctx.obj.update(kwargs)
@@ -84,19 +89,12 @@ def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     Schedule: 根据taskdb往queue:scheduler2spider 里塞任务
     """
     g=ctx.obj
-    inqueue=g.get('scheduler2spider')
-    projetctsdb = g.get('projetctsdb')
-    taskdb=g.get('taskdb')
-    sitesdb = g.get('sitesdb')
-    urlsdb = g.get('urlsdb')
-    attachmentdb = g.get('attachmentdb', None)
-    keywordsdb = g.get('keywordsdb', None)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    scheduler = Scheduler(inqueue=inqueue, projetctsdb=projetctsdb, taskdb=taskdb, sitesdb=sitesdb, urlsdb=urlsdb, keywordsdb=keywordsdb, attachmentdb=attachmentdb,rate_map=rate_map, log_level=log_level)
+    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -113,19 +111,12 @@ def newTask_schedle(ctx, no_loop,  get_object=False):
     newTask_schedle: 根据queue:newTask2scheduler往taskdb 里存入新的任务数据
     """
     g=ctx.obj
-    outqueue=g.get('newtask_queue')
-    projetctsdb = g.get('projetctsdb')
-    taskdb=g.get('taskdb')
-    sitesdb = g.get('sitesdb')
-    urlsdb = g.get('urlsdb')
-    attachmentdb = g.get('attachmentdb', None)
-    keywordsdb = g.get('keywordsdb', None)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    newTask_schedle = newTask_schedle(outqueue=outqueue, projetctsdb=projetctsdb, taskdb=taskdb, sitesdb=sitesdb, urlsdb=urlsdb, keywordsdb=keywordsdb, attachmentdb=attachmentdb,rate_map=rate_map, log_level=log_level)
+    newTask_schedle = newTask_schedle(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
     g['instances'].append(newTask_schedle)
     if g.get('testing_mode') or get_object:
         return newTask_schedle
@@ -142,19 +133,12 @@ def status_schedle(ctx,no_loop,  get_object=False):
     newTask_schedle: 根据queue:status2scheduler往taskdb 里更新数据状态
     """
     g=ctx.obj
-    outqueue=g.get('status_queue')
-    projetctsdb = g.get('projetctsdb')
-    taskdb=g.get('taskdb')
-    sitesdb = g.get('sitesdb')
-    urlsdb = g.get('urlsdb')
-    attachmentdb = g.get('attachmentdb', None)
-    keywordsdb = g.get('keywordsdb', None)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    status_schedle = status_schedle(outqueue=outqueue, projetctsdb=projetctsdb, taskdb=taskdb, sitesdb=sitesdb, urlsdb=urlsdb, keywordsdb=keywordsdb, attachmentdb=attachmentdb,rate_map=rate_map, log_level=log_level)
+    status_schedle = status_schedle(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
     g['instances'].append(status_schedle)
     if g.get('testing_mode') or get_object:
         return status_schedle
@@ -177,30 +161,11 @@ def fetch(ctx, fetch_cls, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=
     """
     g = ctx.obj
     Spider = load_cls(ctx, None, fetch_cls)
-    if not no_input:
-        inqueue = g.get("scheduler2spider")
-        outqueue = g.get("spider2result")
-        status_queue = g.get("status_queue")
-        requeue = g.get("spider2scheduler")
-        excqueue = g.get("excinfo_queue")
-        articlesdb = g.get('articlesdb')
-        taskdb = g.get('taskdb')
-    else:
-        inqueue = None
-        outqueue = None
-        status_queue = None
-        requeue = None
-        excqueue = None
-        articlesdb = None
-        taskdb = None
-    projetctsdb = g.get('projetctsdb')
-    sitetypedb = g.get('sitetypedb', None)
-    sitesdb = g.get('sitesdb')
-    customdb = g.get('db', None)
-    uniquedb = g.get('uniquedb')
-    urlsdb = g.get('urlsdb', None)
-    attachmentdb = g.get('attachmentdb', None)
-    keywordsdb = g.get('keywordsdb', None)
+    db = g.get('db')
+    queue = g.get('queue'),
+    if no_input:
+        queue = {}
+        db['taskdb'] = None
     handler = None
     proxy = g.get('proxy', None)
     log_level = logging.WARN
@@ -210,10 +175,7 @@ def fetch(ctx, fetch_cls, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=
     if g.get("debug", False):
         log_level = logging.DEBUG
 
-    spider = Spider(inqueue=inqueue, outqueue=outqueue, status_queue=status_queue, requeue=requeue,
-            excqueue=excqueue, projetctsdb=projetctsdb, sitetypedb=sitetypedb, taskdb=taskdb, sitesdb=sitesdb,
-            articlesdb=articlesdb, customdb=customdb, uniquedb=uniquedb, urlsdb=urlsdb, keywordsdb=keywordsdb,
-            attachmentdb=attachmentdb, handler=handler, proxy=proxy, log_level=log_level, attach_storage = attach_storage)
+    spider = Spider(db = db, queue = queue, proxy=proxy, log_level=log_level, attach_storage = attach_storage)
     g['instances'].append(spider)
     if g.get('testing_mode') or get_object:
         return spider
@@ -234,25 +196,11 @@ def result_work(ctx, worker_cls, no_loop, get_object=False):
     """
     g = ctx.obj
     Worker = load_cls(ctx, None, worker_cls)
-    inqueue = g.get('spider2result')
-    outqueue = g.get('spider2scheduler')
-    excqueue = g.get('excinfo_queue')
-    articlesdb = g.get('articlesdb')
-    projetctsdb = g.get('projetctsdb')
-    sitetypedb = g.get('sitetypedb')
-    sitesdb = g.get('sitesdb')
-    customdb = g.get('db', None)
-    uniquedb = g.get('uniquedb', None)
-    urlsdb = g.get('urlsdb', None)
-    attachmentdb = g.get('attachmentdb', None)
-    keywordsdb = g.get('keywordsdb', None)
     proxy = g.get('proxy', None)
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    worker = Worker(inqueue=inqueue, outqueue=outqueue, excqueue=excqueue, projetctsdb=projetctsdb,
-            sitesdb=sitesdb, uniquedb=uniquedb, urlsdb=urlsdb, keywordsdb=keywordsdb, customdb=customdb,
-            attachmentdb=attachmentdb, articlesdb=articlesdb, sitetypedb=sitetypedb, proxy=proxy, log_level=log_level)
+    worker = Worker(db = db, queue = queue, proxy=proxy, log_level=log_level)
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
         return worker
@@ -271,25 +219,11 @@ def search_work(ctx, worker_cls, no_loop, get_object=False):
     """
     g = ctx.obj
     Worker = load_cls(ctx, None, worker_cls)
-    inqueue = g.get('search_work')
-    outqueue = g.get('newtask_queue')
-    excqueue = g.get('excinfo_queue')
-    articlesdb = g.get('articlesdb')
-    projetctsdb = g.get('projetctsdb')
-    sitetypedb = g.get('sitetypedb')
-    sitesdb = g.get('sitesdb')
-    customdb = g.get('db', None)
-    uniquedb = g.get('uniquedb', None)
-    urlsdb = g.get('urlsdb', None)
-    attachmentdb = g.get('attachmentdb', None)
-    keywordsdb = g.get('keywordsdb', None)
     proxy = g.get('proxy', None)
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    worker = Worker(inqueue=inqueue, outqueue=outqueue, excqueue=excqueue, projetctsdb=projetctsdb,
-            sitesdb=sitesdb, uniquedb=uniquedb, urlsdb=urlsdb, keywordsdb=keywordsdb, customdb=customdb,
-            attachmentdb=attachmentdb, articlesdb=articlesdb, sitetypedb=sitetypedb, proxy=proxy, log_level=log_level)
+    worker = Worker(db = db, queue = queue, proxy=proxy, log_level=log_level)
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
         return worker
@@ -313,27 +247,13 @@ def exc_work(ctx, worker_cls, mailer, sender, receiver, no_loop, get_object=Fals
     """
     g = ctx.obj
     Worker = load_cls(ctx, None, worker_cls)
-    inqueue = g.get('excinfo_queue')
-    outqueue = g.get('spider2scheduler')
-    excqueue = None
-    articlesdb = g.get('articlesdb')
-    projetctsdb = g.get('projetctsdb')
-    sitetypedb = g.get('sitetypedb')
-    sitesdb = g.get('sitesdb')
-    customdb = g.get('db', None)
-    uniquedb = g.get('uniquedb', None)
-    urlsdb = g.get('urlsdb', None)
-    attachmentdb = g.get('attachmentdb', None)
-    keywordsdb = g.get('keywordsdb', None)
     proxy = g.get('proxy', None)
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
     if mailer:
         mailer = utils.load_mailer(mailer, sender=sender, receiver=receiver)
-    worker = Worker(inqueue=inqueue, outqueue=outqueue, excqueue=excqueue, projetctsdb=projetctsdb,
-            sitesdb=sitesdb, uniquedb=uniquedb, urlsdb=urlsdb, keywordsdb=keywordsdb, customdb=customdb,
-            attachmentdb=attachmentdb, articlesdb=articlesdb, sitetypedb=sitetypedb, proxy=proxy, mailer=mailer,
+    worker = Worker(db = db, queue = queue, proxy=proxy, mailer=mailer,
             log_level=log_level)
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
