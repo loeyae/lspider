@@ -16,7 +16,7 @@ class AttachDataDB(Mongo, BaseAttachDataDB, SplitTableMixin):
     """
     attach_data data object
     """
-
+    __tablename__ = 'attach_data'
 
     def __init__(self, connector, table=None, **kwargs):
         super(AttachDataDB, self).__init__(connector, table = table, **kwargs)

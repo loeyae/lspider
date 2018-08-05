@@ -17,6 +17,7 @@ class CommentsDB(Mongo, BaseCommentsDB, SplitTableMixin):
     attach_data data object
     """
 
+    __tablename__ = 'comments'
 
     def __init__(self, connector, table=None, **kwargs):
         super(CommentsDB, self).__init__(connector, table = table, **kwargs)
