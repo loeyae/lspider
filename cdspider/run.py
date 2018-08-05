@@ -82,6 +82,7 @@ def cli(ctx, **kwargs):
     return ctx
 
 @cli.command()
+@click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
@@ -89,63 +90,68 @@ def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     Schedule: 根据taskdb往queue:scheduler2spider 里塞任务
     """
     g=ctx.obj
+    Scheduler = load_cls(ctx, None, scheduler_cls)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
-        return scheduler
+        return Scheduler
     if no_loop:
-        scheduler.run_once()
+        Scheduler.run_once()
     else:
-        scheduler.run()
+        Scheduler.run()
 
 @cli.command()
+@click.option('--newTask_schedule_cls', default='cdspider.scheduler.newTask_schedule', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def newTask_schedle(ctx, no_loop,  get_object=False):
+def newTask_schedule(ctx,newTask_schedule_cls, no_loop,  get_object=False):
     """
     newTask_schedle: 根据queue:newTask2scheduler往taskdb 里存入新的任务数据
     """
     g=ctx.obj
+    newTask_schedule = load_cls(ctx, None, newTask_schedule_cls)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    newTask_schedle = newTask_schedle(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
-    g['instances'].append(newTask_schedle)
+    newTask_schedule = newTask_schedule(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+    g['instances'].append(newTask_schedule)
     if g.get('testing_mode') or get_object:
-        return newTask_schedle
+        return newTask_schedule
     if no_loop:
-        newTask_schedle.run_once()
+        newTask_schedule.run_once()
     else:
-        newTask_schedle.run()
+        newTask_schedule.run()
 
 @cli.command()
+@click.option('--status_schedule_cls', default='cdspider.scheduler.status_schedule', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def status_schedle(ctx,no_loop,  get_object=False):
+def status_schedule(ctx,status_schedule_cls,no_loop,  get_object=False):
     """
     newTask_schedle: 根据queue:status2scheduler往taskdb 里更新数据状态
     """
     g=ctx.obj
+    status_schedule = load_cls(ctx, None, status_schedule_cls)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    status_schedle = status_schedle(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
-    g['instances'].append(status_schedle)
+    status_schedule = status_schedule(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+    g['instances'].append(status_schedule)
     if g.get('testing_mode') or get_object:
         return status_schedle
     if no_loop:
-        status_schedle.run_once()
+        status_schedule.run_once()
     else:
-        status_schedle.run()
+        status_schedule.run()
 
 
 @cli.command()
