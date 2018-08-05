@@ -145,12 +145,7 @@ def connect_db(ctx, param, value):
     protocol = value.get('protocol', 'sqlite')
     host = value.get('host', 'localhost')
     port = value.get('port', 0)
-    if isinstance(param, click.core.Option):
-        name = value.get('name', param.name)
-    else:
-        name = param
-    db = value.get('db', name)
-    table = value.get('table')
+    db = value.get('db')
     user = value.get('user')
     password = value.get('password')
     log_level = logging.WARN
@@ -162,9 +157,9 @@ def connect_db(ctx, param, value):
     if protocol == 'hive':
         config = ctx.params.get('config').get('redis')
         kwargs['redis'] = Redis(**config)
-    dbo =  utils.load_db(protocol, name = name, host = host, port = port, db = db, user = user,
-        password = password, table = table, logger=logger, log_level = log_level, **kwargs)
-    return dbo
+    connector =  utils.load_db(protocol, host = host, port = port, db = db, user = user,
+        password = password, logger=logger, log_level = log_level, **kwargs)
+    return connector
 
 def connect_rpc(ctx, param, value):
     if not value:
@@ -205,7 +200,7 @@ class ModulerLoader(object):
         return compile(self.get_source(), '<%s>' % self.name, 'exec')
 
     def get_source(self):
-        script = self.moduler['script']
+        script = self.moduler['scripts']
         if isinstance(script, six.text_type):
             return script.encode('utf8')
         return script
@@ -216,15 +211,24 @@ class ProjectLoader(ModulerLoader):
     """
     def __init__(self, project, mod=None):
         super(ProjectLoader, self).__init__(project, mod)
-        self.name = 'cdspider.handler.custom.%s' % project['name']
+        self.name = 'cdspider.handler.custom.%s' % project['class_name']
 
 class SiteLoader(ModulerLoader):
     """
     任务
     """
     def __init__(self, task, mod=None):
-        task['name'] = task['project']['name']
+        task['name'] = task['project']['class_name']
         super(SiteLoader, self).__init__(task, mod)
+        self.name = 'cdspider.handler.custom.%s' % task['name']
+
+class UrlLoader(ModulerLoader):
+    """
+    URL
+    """
+    def __init__(self, url, mod=None):
+        task['name'] = url['site']['class_name']
+        super(UrlLoader, self).__init__(task, mod)
         self.name = 'cdspider.handler.custom.%s' % task['name']
 
 def load_handler(task, spider, **kwargs):
@@ -238,11 +242,19 @@ def load_handler(task, spider, **kwargs):
     mod = None
     project = task.get("project", None)
     site = task.get("site", None)
-    if project and "script" in project and project['script']:
+    url = task.get("url", None)
+    if 'pid' in project and project['pid']:
+        project.setdefault('class_name', 'Project%s' % project['pid'])
+    if project and "scripts" in project and project['scripts']:
         mod = ProjectLoader(project).load_module()
-    if site and "script" in site and site['script']:
-        site['project'] = {"name": project['name']}
+    if 'sid' in site and site['sid']:
+        site.setdefault('class_name', 'Site%s' % site['sid'])
+    if site and "scripts" in site and site['scripts']:
+        site['project'] = {"class_name": project['class_name']}
         mod = SiteLoader(site, mod).load_module()
+    if url and "scripts" in url and url['scripts']:
+        url['site'] = {"class_name": site['class_name']}
+        mod = UrlLoader(url, mod).load_module()
     if mod:
         _class_list = []
         for each in list(six.itervalues(mod.__dict__)):
