@@ -4,10 +4,8 @@
 import abc
 import six
 import re
-from tld import get_tld
-from urllib.parse import urlparse
 import logging
-from cdspider.libs.utils import patch_result
+from cdspider.libs.utils import parse_domain, patch_result
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseParser(object):
@@ -32,16 +30,11 @@ class BaseParser(object):
         self.domain = kwargs.pop('domain', None)
         self.subdomain = kwargs.pop('subdomain', None)
         if url:
-            try:
-                presult = urlparse(url)
-                domain = get_tld(url)
-                hostname = presult.hostname
-                end = hostname.find(domain)-1
-                subdomain = hostname[0:end] or ''
-                self.domain = domain
+            subdomain, domain = parse_domain(url)
+            if subdomain:
                 self.subdomain = subdomain
-            except:
-                pass
+            if domain:
+                self.domain = domain
         log_level = kwargs.pop('log_level', logging.WARN)
         self._settings = kwargs or {}
         self.logger.setLevel(log_level)
