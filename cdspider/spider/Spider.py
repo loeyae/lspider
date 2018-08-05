@@ -33,8 +33,6 @@ class Spider():
         self._running = False
         self.inqueue = queue.get('schedule2spider')
         self.outqueue = queue.get('schedule2spider')
-        self.excqueue = queue.get('excinfo_queue')
-        self.requeue = queue.get('newtask_queue')
         self.status_queue = queue.get('status_queue')
         self.projectdb = db.get('projectsdb')
         self.sitedb = db.get('sitesdb')
@@ -42,7 +40,6 @@ class Spider():
         self.attachmentdb = db.get('attachmentdb')
         self.keywordsdb = db.get('keywordsdb')
         self.taskdb = db.get('taskdb')
-        self.articlesdb = db.get('articlesdb')
         self.db = db
         self.queue = queue
         self.proxy = proxy
@@ -80,7 +77,6 @@ class Spider():
             save.setdefault('referer', task['url'])
             save.setdefault('continue_exceptions', handler.continue_exceptions)
             save.setdefault('proxy', self.proxy)
-            proxies = self.proxy
             referer = save.get('flush_referer', False)
             refresh_base = save.get('rebase', False)
             last_source_unid = None
@@ -110,7 +106,9 @@ class Spider():
                         return_data.append((result, broken_exc, last_source, final_url, save))
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
                     else:
-                        handler.on_result(task, result, broken_exc, last_source, mode)
+                        handler.on_result(result, broken_exc, last_source, final_url)
+                        if mode == self.MODE_ITEM and handler.current_page == 1:
+                            handler.on_attach(last_source, final_url)
                         if broken_exc:
                             raise broken_exc
                     if not 'incr_data' in save:
@@ -124,13 +122,13 @@ class Spider():
                         item['first'] = True
             if not return_result:
                 task['last_source'] = last_source
-                handler.on_error(task, e, mode)
+                handler.on_error(e)
             else:
                 return_data.append((None, traceback.format_exc(), None, None, None))
             self.logger.error(traceback.format_exc())
         finally:
             if not return_result:
-                handler.finish(task, mode)
+                handler.finish()
             self.logger.info("Spider fetch end, task: %s" % task)
             if return_result:
                 return return_data
