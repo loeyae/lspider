@@ -15,7 +15,6 @@ import redis
 
 from cdspider.exceptions import *
 from cdspider.libs import utils
-from cdspider.database.base import ProjectDB
 
 BROKEN_EXCEPTIONS = {
     'base': CDSpiderCrawlerBroken,
@@ -273,8 +272,7 @@ def load_handler(task, spider, **kwargs):
                         _class = each
             logging.info("selected handler: %s" % _class)
             return _class(task = task, spider = spider,  **kwargs)
-    logging.info("HandlerLoader no handler selected, load cdspider.handler.%s" % ProjectDB.PROJECT_TYPE_MAP[project['type']])
-    return utils.load_handler(ProjectDB.PROJECT_TYPE_MAP[project['type']], task = task, spider = spider,  **kwargs)
+    raise CDSpiderHandlerError("HandlerLoader no handler selected")
 
 def load_cls(ctx, param, value):
     if isinstance(value, six.string_types):
