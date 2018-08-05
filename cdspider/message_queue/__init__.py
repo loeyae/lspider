@@ -101,3 +101,4 @@ class BaseQueue(object):
 
 from .MessageQueue import PikaQueue, AmqpQueue
 from .RedisQueue import RedisQueue
+from .KafkaQueue import  KafkaQueue
