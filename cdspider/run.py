@@ -26,26 +26,8 @@ cpath = os.path.dirname(__file__)
 @click.option('--logging-config', default=os.path.join(cpath, "config", "logging.conf"),
               help="日志配置文件", show_default=True)
 @click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
-@click.option('--projectdb', callback=connect_db, help='project数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: project}')
-@click.option('--taskdb', callback=connect_db, help='task数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: task}')
-@click.option('--sitedb', callback=connect_db, help='site数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: site}')
-@click.option('--sitetypedb', callback=connect_db, help='site type数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: sitetype}')
-@click.option('--urlsdb', callback=connect_db, help='url数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: url}')
-@click.option('--attachmentdb', callback=connect_db, help='attachment数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: attachment}')
-@click.option('--keywordsdb', callback=connect_db, help='keywordds数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: keywordds}')
-@click.option('--uniquedb', callback=connect_db, help='unique数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: unique}')
-@click.option('--resultdb', callback=connect_db, help='result数据库设置,'
-              ' default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: result}')
-@click.option('--custom-db', help='自定义数据库设置, default: '
-              'custom1: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: custom}')
+@click.option('--database', help='数据库设置, default: '
+              '{protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: cdspider}')
 @click.option('--proxy', default=None, help='代理设置', show_default=True)
 @click.option('--queue-maxsize', default=1000, help='queue最大阈值', show_default=True)
 @click.option('--queue-prefix', default=None, help='queue的前缀', show_default=True)
@@ -63,12 +45,15 @@ def cli(ctx, **kwargs):
     if kwargs['debug']:
         kwargs['logger'].setLevel(logging.DEBUG)
 
-    if kwargs.get("custom_db"):
-        kwargs['custom_db'] = {}
-        for n,v in kwargs.get("custom_db").items():
-            kwargs['custom_db'][n] = connect_db(ctx, n, v)
-
     app_config = utils.load_config(os.path.join(cpath, "config", "app.json"))
+
+    db_setting = kwargs.get('database')
+    if db_setting:
+        connector = connect_db(ctx, None, db_setting)
+        kwargs['db'] = load_cls(ctx, None, 'cdspider.{protocol}.Base'.format(protocol = db_setting.get('protocol')))
+        for d in app_config.get("database", {}):
+            db = 'cdspider.{protocol}.{db}'.format(protocol = db_setting.get('protocol'), db= d)
+            kwargs[d] = load_cls(ctx, None, db)(connector)
 
     queue_setting = kwargs.get("message_queue")
     if queue_setting:
