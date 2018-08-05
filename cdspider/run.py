@@ -50,9 +50,9 @@ def cli(ctx, **kwargs):
     db_setting = kwargs.get('database')
     if db_setting:
         connector = connect_db(ctx, None, db_setting)
-        kwargs['db'] = load_cls(ctx, None, 'cdspider.{protocol}.Base'.format(protocol = db_setting.get('protocol')))
+        kwargs['db'] = load_cls(ctx, None, 'cdspider.database.{protocol}.Base'.format(protocol = db_setting.get('protocol')))
         for d in app_config.get("database", {}):
-            db = 'cdspider.{protocol}.{db}'.format(protocol = db_setting.get('protocol'), db= d)
+            db = 'cdspider.database.{protocol}.{db}'.format(protocol = db_setting.get('protocol'), db= d)
             kwargs[d] = load_cls(ctx, None, db)(connector)
 
     queue_setting = kwargs.get("message_queue")
