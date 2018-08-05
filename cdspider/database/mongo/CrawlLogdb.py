@@ -20,7 +20,7 @@ class CrawlLogDB(Mongo, BaseCrawlLogDB):
     __tablename__ = 'crawl_log'
 
     def __init__(self, connector, table=None, **kwargs):
-        super(ParseRuleDB, self).__init__(connector, table = table, **kwargs)
+        super(CrawlLogDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
         if not 'id' in indexes:
@@ -35,17 +35,17 @@ class CrawlLogDB(Mongo, BaseCrawlLogDB):
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
-        _id = super(KeywordsDB, self).insert(setting=obj)
+        _id = super(CrawlLogDB, self).insert(setting=obj)
         return obj['id']
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(KeywordsDB, self).update(setting=obj, where={"prid": int(id)}, multi=False)
+        return super(CrawlLogDB, self).update(setting=obj, where={"prid": int(id)}, multi=False)
 
     def delete(self, id, where = {}):
         if not where:
             where = {'id': int(id)}
         else:
             where.update({'id': int(id)})
-        return super(KeywordsDB, self).update(setting={"status": self.STATUS_DELETED},
+        return super(CrawlLogDB, self).update(setting={"status": self.STATUS_DELETED},
                 where=where, multi=False)

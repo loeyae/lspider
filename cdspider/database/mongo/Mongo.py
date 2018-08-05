@@ -34,9 +34,9 @@ class Mongo(BaseDataBase):
 
 
     def __init__(self, connector, table = None, **kwargs):
-        super(Mongo, self).__init__(connector, table = table, **kwargs)
         if table is None:
             table = self.__tablename__
+        super(Mongo, self).__init__(connector, table = table, **kwargs)
         self._db = self.conn.cursor
 
     def find(self, where, table = None, select = None, sort = None, offset = 0, hits = 10):
