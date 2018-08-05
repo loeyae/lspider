@@ -13,6 +13,7 @@ import json
 import hashlib
 import datetime
 from urllib import parse
+from tld import get_tld
 from types import *
 import subprocess
 import random
@@ -23,6 +24,17 @@ from threading import Thread
 from multiprocessing import Process
 import stevedore
 import datetime
+
+def parse_domain(url):
+    try:
+        presult = parse.urlparse(url)
+        domain = get_tld(url)
+        hostname = presult.hostname
+        end = hostname.find(domain)-1
+        subdomain = hostname[0:end] or ''
+        return subdomain, domain
+    except:
+        return None, None
 
 def remove_punctuation(content):
     if not isinstance(content, str):
