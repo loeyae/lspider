@@ -1,7 +1,6 @@
 #-*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-#version: SVN: $Id: __init__.py 2342 2018-07-09 18:33:43Z zhangyi $
 import abc
 import six
 import re
@@ -53,9 +52,6 @@ class BaseParser(object):
         解析类
         """
         pass
-
-    def patch_result(self, data, rule, callback=None):
-        return patch_result(data, rule, callback)
 
 from .ListParser import ListParser
 from .ItemParser import ItemParser
