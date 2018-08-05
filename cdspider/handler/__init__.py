@@ -154,8 +154,8 @@ class BaseHandler(object):
             if self.page == 2 and self.mode == self.MODE_ITEM:
                 for i in save['incr_data']:
                     if not 'base_page' in  save['incr_data'][i] or int(save['incr_data'][i]['value']) == int(save['incr_data'][i]['base_page']):
-                    save['incr_data'][i]['isfirst'] = False
-                    save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) + int(save['incr_data'][i].get('step', 1))
+                        save['incr_data'][i]['isfirst'] = False
+                        save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) + int(save['incr_data'][i].get('step', 1))
             builder = UrlBuilder(self.logger, self.log_level)
             params = builder.build(request, last_source, self.crawler, save)
             if self.crawler isinstance SeleniumCrawler and params['method'].upper() == 'GET':
@@ -229,7 +229,7 @@ class BaseHandler(object):
         return parse
 
     def on_attach(self, source, url):
-        pass
+
 
     def on_repetition(self):
         raise CDSpiderCrawlerNoNextPage()
@@ -284,7 +284,7 @@ class BaseHandler(object):
                 del crawlinfo_sorted[0]
             self.db['taskdb'].update(self.task.get('tid'), self.task.get('pid'), {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": self.task.get("save")})
             #TODO 自动调节抓取频率
-            
+
 from .NewTaskTrait import NewTaskTrait
 from .ResultTrait import ResultTrait
 from .SearchHandler import SearchHandler
