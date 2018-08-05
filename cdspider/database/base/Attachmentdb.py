@@ -42,12 +42,6 @@ class AttachmentDB(Base):
     def delete(self, id, where):
         raise NotImplementedError
 
-    def delete_by_site(self, sid, where):
-        raise NotImplementedError
-
-    def delete_by_project(self, pid, where):
-        raise NotImplementedError
-
     def active(self, id, where):
         raise NotImplementedError
 
@@ -58,4 +52,10 @@ class AttachmentDB(Base):
         raise NotImplementedError
 
     def get_list(self, where = {}, select=None, **kwargs):
+        raise NotImplementedError
+
+    def get_list_by_domain(self, domain, where = {}, select=None, **kwargs):
+        raise NotImplementedError
+
+    def get_list_by_subdomain(self, subdomain, where = {}, select=None, **kwargs):
         raise NotImplementedError
