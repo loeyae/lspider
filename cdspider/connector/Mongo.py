@@ -20,9 +20,9 @@ class Mongo(Base):
     """
 
     def __init__(self, host='localhost', port=27017, db = None, user=None,
-                password=None, table=None, **kwargs):
+                password=None, **kwargs):
         super(Mongo, self).__init__(host = host, port = port, db = db,
-            user = user, password = password, table = table, **kwargs)
+            user = user, password = password, **kwargs)
 
     def connect(self):
         """
