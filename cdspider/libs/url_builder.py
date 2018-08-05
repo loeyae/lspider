@@ -280,7 +280,7 @@ class UrlBuilder():
                 if not 'max' in item or not item['max']:
                     item['max'] = 0
                 step = int(item.get('step', 1))
-                if not item.get('first', True):
+                if not item.get('isfirst', True):
                     item['value'] = int(item['value']) + step
                 if "max" in item and int(item["max"]) > 0:
                     page = (int(item['value']) - int(item['base_page']) * abs(step)) / step + 1
@@ -293,11 +293,11 @@ class UrlBuilder():
                 if 'suffix' in item and item['suffix']:
                     value += item['suffix']
                 save['incr_data'][i]['value'] = item['value']
-                if not item.get('first', True):
+                if not item.get('isfirst', True):
                     self._append_kwargs_data(kwargs, item['type'], item['name'], value)
-                elif item.get('first_attach', False):
+                elif item.get('first', False):
                     self._append_kwargs_data(kwargs, item['type'], item['name'], item['base_page'])
-                save['incr_data'][i]['first'] = False
+                save['incr_data'][i]['isfirst'] = False
 
     def _append_kwargs_data(self, kwargs, type, name, value):
         """
