@@ -77,45 +77,92 @@ def cli(ctx, **kwargs):
     return ctx
 
 @cli.command()
-@click.option('--scheduler-cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='scheduler name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.option('--xmlrpc/--no-xmlrpc', default=False)
-@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host")
-@click.option('--xmlrpc-port', default=23333, help="xmlrpc bind port")
 @click.pass_context
-def schedule(ctx, scheduler_cls, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=False):
+def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
-    Schedule: 根据project的设置生成任务
+    Schedule: 根据taskdb往queue:scheduler2spider 里塞任务
     """
-    g = ctx.obj
-    Scheduler = load_cls(ctx, None, scheduler_cls)
-    newtask_queue = g.get('newtask_queue')
-    inqueue = g.get('spider2scheduler')
-    outqueue = g.get('scheduler2spider')
-    status_queue = g.get('status_queue')
-    search_work = g.get('search_work')
+    g=ctx.obj
+    inqueue=g.get('scheduler2spider')
     projectdb = g.get('projectdb')
-    taskdb = g.get('taskdb')
+    taskdb=g.get('taskdb')
     sitedb = g.get('sitedb')
-    urlsdb = g.get('urlsdb', None)
+    urlsdb = g.get('urlsdb')
     attachmentdb = g.get('attachmentdb', None)
     keywordsdb = g.get('keywordsdb', None)
-    customdb = g.get('customdb', None)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    scheduler = Scheduler(newtask_queue=newtask_queue, inqueue=inqueue, outqueue=outqueue, status_queue=status_queue, search_work=search_work, projectdb=projectdb, taskdb=taskdb, sitedb=sitedb, urlsdb=urlsdb, keywordsdb=keywordsdb, attachmentdb=attachmentdb, customdb=customdb, rate_map=rate_map, log_level=log_level)
+    scheduler = Scheduler(inqueue=inqueue, projectdb=projectdb, taskdb=taskdb, sitedb=sitedb, urlsdb=urlsdb, keywordsdb=keywordsdb, attachmentdb=attachmentdb,rate_map=rate_map, log_level=log_level)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
     if no_loop:
         scheduler.run_once()
     else:
-        if xmlrpc:
-            utils.run_in_thread(scheduler.xmlrpc_run, port=xmlrpc_port, bind=xmlrpc_host)
         scheduler.run()
+        
+@cli.command()
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def newTask_schedle(ctx, no_loop,  get_object=False):     
+    """
+    newTask_schedle: 根据queue:newTask2scheduler往taskdb 里存入新的任务数据
+    """
+    g=ctx.obj
+    outqueue=g.get('newtask_queue')
+    projectdb = g.get('projectdb')
+    taskdb=g.get('taskdb')
+    sitedb = g.get('sitedb')
+    urlsdb = g.get('urlsdb')
+    attachmentdb = g.get('attachmentdb', None)
+    keywordsdb = g.get('keywordsdb', None)
+    rate_map = g.get('rate_map')
+    
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    newTask_schedle = newTask_schedle(outqueue=outqueue, projectdb=projectdb, taskdb=taskdb, sitedb=sitedb, urlsdb=urlsdb, keywordsdb=keywordsdb, attachmentdb=attachmentdb,rate_map=rate_map, log_level=log_level)
+    g['instances'].append(newTask_schedle)
+    if g.get('testing_mode') or get_object:
+        return newTask_schedle
+    if no_loop:
+        newTask_schedle.run_once()
+    else:
+        newTask_schedle.run()
+
+@cli.command()
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def status_schedle(ctx,no_loop,  get_object=False):     
+    """
+    newTask_schedle: 根据queue:status2scheduler往taskdb 里更新数据状态
+    """
+    g=ctx.obj
+    outqueue=g.get('status_queue')
+    projectdb = g.get('projectdb')
+    taskdb=g.get('taskdb')
+    sitedb = g.get('sitedb')
+    urlsdb = g.get('urlsdb')
+    attachmentdb = g.get('attachmentdb', None)
+    keywordsdb = g.get('keywordsdb', None)
+    rate_map = g.get('rate_map')
+    
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    status_schedle = status_schedle(outqueue=outqueue, projectdb=projectdb, taskdb=taskdb, sitedb=sitedb, urlsdb=urlsdb, keywordsdb=keywordsdb, attachmentdb=attachmentdb,rate_map=rate_map, log_level=log_level)
+    g['instances'].append(status_schedle)
+    if g.get('testing_mode') or get_object:
+        return status_schedle
+    if no_loop:
+        status_schedle.run_once()
+    else:
+        status_schedle.run()
+
 
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
