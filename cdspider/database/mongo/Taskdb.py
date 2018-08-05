@@ -36,6 +36,13 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         table = self._table_name(pid)
         obj['utime'] = int(time.time())
         return super(TaskDB, self).update(setting=obj, where={"tid": int(id)}, table=table, multi=False)
+    
+    def update_many(self , pid, obj, where=None):
+        if where=={} or where==None:
+            return
+        table = self._table_name(pid)
+        obj['utime'] = int(time.time())
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def update_url_by_site(self, id, pid, url):
         table = self._table_name(pid)
