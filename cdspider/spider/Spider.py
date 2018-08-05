@@ -101,14 +101,14 @@ class Spider():
                     save['request_url'] = final_url
                     self.logger.info("Spider crawl end, result: %s" % str((last_source, broken_exc, final_url)))
                     self.logger.info('Spider parse start')
-                    result = handler.parse(last_source, final_url)
+                    result = handler.parse(last_source, save.get("parent_url", final_url))
                     if return_result:
                         return_data.append((result, broken_exc, last_source, final_url, save))
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
                     else:
                         handler.on_result(result, broken_exc, last_source, final_url)
                         if mode == self.MODE_ITEM and handler.current_page == 1:
-                            handler.on_attach(last_source, final_url)
+                            handler.on_attach(last_source, save.get("parent_url", final_url))
                         if broken_exc:
                             raise broken_exc
                     if not 'incr_data' in save:
