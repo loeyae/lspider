@@ -127,10 +127,11 @@ class KafkaQueue(CDBaseQueue):
 
     @catch_error
     def get_nowait(self, ack=False):
-        consumer = self.connect.get_simple_consumer(b'cdspider')
-        sum=self.connect.latest_available_offsets()[0][0][0]
+        consumer = self.connect.get_simple_consumer(b'cdspider',auto_commit_enable=True,auto_commit_interval_ms=1,consumer_id=b'test')
+#         sum=self.connect.latest_available_offsets()[0][0][0]
         c=consumer.consume()
-        self.qsize=sum-c.offset
+        print(c.offset)
+#         self.qsize=sum-c.offset
         msg=c.value.decode('utf-8')
         msg=json.loads(msg)
         if msg is None:
@@ -141,14 +142,8 @@ class KafkaQueue(CDBaseQueue):
     def put_nowait(self, obj):
         """
         直接发送
+        （obj>>json格式）
         """
-        if self.lazy_limit and self.qsize_diff < self.qsize_diff_limit:
-            pass
-        elif self.full():
-            raise BaseQueue.Full
-        else:
-            self.qsize_diff = 0
-        self.qsize_diff += 1
         producer = self.connect.get_producer()
         obj=json.dumps(obj)
         obj=obj.encode(encoding='utf_8')
@@ -162,17 +157,18 @@ class KafkaQueue(CDBaseQueue):
         """
         queue的条数
         """
-        if self.qsize:
-            consumer = self.connect.get_simple_consumer(b'cdspider')
-            sum=self.connect.latest_available_offsets()[0][0][0]
-            if sum==0:
-                self.qsize=0
-                return self.qsize 
-            c=consumer.consume()
-            self.qsize=sum-c.offset
-            producer = self.connect.get_producer()
-            producer.produce(c.value)
-            producer.stop()
+#         if self.qsize:
+#             consumer = self.connect.get_simple_consumer(b'cdspider')
+#             sum=self.connect.latest_available_offsets()[0][0][0]
+#             if sum==0:
+#                 self.qsize=0
+#                 return self.qsize 
+#             c=consumer.consume()
+#             self.qsize=sum-c.offset
+#             producer = self.connect.get_producer()
+#             producer.produce(c.value)
+#             producer.stop()
+        self.qsize=100
         return self.qsize
 
 
@@ -180,7 +176,7 @@ class KafkaQueue(CDBaseQueue):
         pass
     
 if __name__=='__main__':
-    k=KafkaQueue('test1_queue',host='114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667')
-#     for i in range(5):
-#         k.put_nowait({'test':i})
-    print(k.get_nowait())
+    k=KafkaQueue('test2_queue',host='114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667')
+    for i in range(5):
+        k.put_nowait({'test':i})
+#     print(k.get_nowait())
