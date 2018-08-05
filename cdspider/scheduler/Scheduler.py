@@ -87,60 +87,68 @@ class Scheduler(object):
 
     def _build_task(self, task):
         self.logger.info("Schedule build_task task: %s starting..." % str(task))
-        if 'siteid' in task and 'kwid' in task:
-            keyword = self.keywordsdb.get_detail(task['kwid'])
-            site = self.sitedb.get_detail(task['siteid'])
-            lastkwid = site.get('lastkwid', 0)
-            project = self.projectdb.get_detail(site['projectid'])
-            project['name'] = "Project%s" % project['pid']
-            task['project'] = project
-            task['site'] = site
-            task['keyword'] = keyword
-        elif 'urlsid' in task:
-            urls = self.urlsdb.get_detail(task['urlsid'])
-            site = self.sitedb.get_detail(urls['siteid'])
-            project = self.projectdb.get_detail(site['projectid'])
-            project['name'] = "Project%s" % project['pid']
-            task['project'] = project
-            task['site'] = site
-            task['urls'] = urls
+        if 'sid' in task:
+            site=self.db['SitesDB'].get_detail(task['sid'])
+            project=self.db['ProjectsDB'].get_detail(site['pid'])
+            task['site']=site
+            task['project']=project
+        elif 'kid' in task:
+            keyword=self.db['KeywordsDB'].get_detail(task['kid'])
+            project=self.db['ProjectsDB'].get_detail(keyword['pid'])
+            task['keyword']=keyword
+            task['project']=project
+        elif 'uid' in task:
+            url=self.db['UrlsDB'].get_detail(task['uid'])
+            site=self.db['SitesDB'].get_detail(url['sid'])
+            project=self.db['ProjectsDB'].get_detail(site['pid'])
+            task['url']=url
+            task['site']=site
+            task['project']=project
+        elif 'aid' in task:
+            attachment=self.db['AttachmentDB'].get_detail(task['aid'])
+            project=self.db['ProjectsDB'].get_detail(attachment['pid'])
+            task['attachment']=attachment
+            task['project']=project
+            task['site'] = {"sid": 0}
+            task['site']['scripts'] = attachment['scripts']
         else:
-            return self.logger.debug("Schedule build_task failed")
-        handler = load_handler(task=task, spider=None,
-            projectdb=self.projectdb, sitedb=self.sitedb, keywordsdb=self.keywordsdb,
-            urlsdb=self.urlsdb, attachmentdb=self.attachmentdb, taskdb=self.taskdb,
-            log_level=self.log_level)
-        handler.build_newtask()
+            return self.logger.debug("Schedule NewTask failed")
+        handler=load_handler(task, spider=None)
+        handler.newtask()
         self.logger.debug("Schedule build_task success")
 
     def _check_tasks(self):
         self.logger.info("Schedule check_tasks starting...")
         for projectid in self.projects:
             while True:
-                newtask_list = self.taskdb.get_init_list(projectid)
+                newtask_list = self.db['TaskDB'].get_list(projectid,where={'status':TaskDB.STATUS_ACTIVE},sort=[('plantime', 1)])
                 i = 0
                 for task in newtask_list:
                     self.logger.debug("Schedule check_tasks task@%s: %s " % (projectid, str(task)))
-                    self.plan_task(task, True)
+                    obj={}
+                    if task['aid']==0:
+                        obj['mode']='list'
+                    else:
+                        obj['mode']='att'
+                    obj['pid']=task['pid']
+                    obj['tid']=task['tid']
+                    self.queue['scheduler2spider'].put_nowait(obj)
+                    self.plan_task(task)
                     i += 1
                 if i == 0:
                     self.logger.debug("Schedule check_tasks no newtask@%s" % projectid)
                     break
         self.logger.info("Schedule check_tasks end")
 
-    def plan_task(self, task, init = False, replan = False):
+    def plan_task(self, task):
         currenttime = int(time.time())
         if task['rate'] != 0 or init:
             self.send_task(task)
             obj = {
                 'queuetime': currenttime,
-                'plantime': currenttime if init or replan else currenttime + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0])
+                'plantime': currenttime+task['rate']
             }
-        if init:
-            obj['status'] = TaskDB.TASK_STATUS_ACTIVE
-        elif task['rate'] == 0:
-            obj['status'] = TaskDB.TASK_STATUS_DELETE
-        self.taskdb.update(task['tid'], task['projectid'], obj=obj)
+        self.db['TaskDB'].update(task['tid'], task['projectid'], obj=obj)
 
     def send_task(self, task):
         if self.outqueue:
@@ -283,12 +291,8 @@ class Scheduler(object):
         scheduler 执行操作
         """
         self.logger.info("Scheduler once starting...")
-        self._check_newtask()
-        self._check_retask()
-        self._check_status()
         self._check_projects()
         self._check_tasks()
-        self._check_cronjob()
         self.logger.info("Scheduler once end")
 
     def run(self):
@@ -354,3 +358,105 @@ class Scheduler(object):
         self.xmlrpc_server.listen(port=port, address=bind)
         self.logger.info('schedule.xmlrpc listening on %s:%s', bind, port)
         self.xmlrpc_ioloop.start()
+        
+        
+    def status_run(self):
+        """
+        newTask_schedule 进程
+        """
+        self.logger.info("newTask_schedule starting...")
+
+        while not self._quit:
+            try:
+                time.sleep(self.LOOP_INTERVAL)
+                self.status_run_once()
+                self._exceptions = 0
+            except KeyboardInterrupt:
+                break
+            except:
+                self.logger.error(traceback.format_exc())
+                self._exceptions += 1
+                if self._exceptions > self.EXCEPTION_LIMIT:
+                    break
+    
+    def status_run_once(self):
+        self.logger.info("status_schedule once starting...")
+        q_data=self.queue['status_queue'].get_nowait()
+        try:
+            q_data=json.loads(q_data)
+        except:
+            self.logger.error("status_schedule get queue data is not json")
+            return
+        if 'sid' in q_data:
+            pid=self.db['SitesDB'].get_detail(q_data['sid'])['pid']
+            self._status_udpate_mongo(q_data, 'SitesDB','sid',pid)
+        elif 'uid' in q_data:
+            sid=self.db['UrlsDB'].get_detail(q_data['uid'])['sid']
+            pid=self.db['SitesDB'].get_detail(q_data['sid'])['pid']
+            self._status_udpate_mongo(q_data, 'UrlsDB','uid',pid)
+        elif 'wid' in q_data:
+            pid=self.db['KeywordsDB'].get_detail(q_data['wid'])['pid']
+            self._status_udpate_mongo(q_data, 'KeywordsDB','wid',pid)
+        elif 'pid' in q_data:
+            self._status_udpate_mongo(q_data, 'ProjectsDB','pid',pid)
+        else:
+            return self.logger.debug("Schedule status_task failed")
+        self.logger.info("status_schedule once end")
+        
+    def _status_udpate_mongo(self,data,db,id_type,pid):
+        obj={}
+        if 'rate' in data:
+            rate=data['data']
+            try:
+                obj['rate']=int(rate)
+                obj['plantime']=int(time.time)+obj['rate']
+            except:
+                pass
+            
+        if 'status' in data:
+            status=data['status']
+            try:
+                obj['status']=int(status)
+                if obj['status']==1:
+                    obj['plantime']=int(time.time)
+            except:
+                pass
+                
+        if 'rate' in obj:
+            for item in self.db['TaskDB'].get_list(pid,where={id_type:data[id_type]}):
+                if item['rate']>obj['rate']:
+                    self.db['TaskDB'].update(item['tid'],pid,obj=obj)
+        else:
+            self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data['id_type']})
+            
+        return self.logger.debug("Schedule update success")
+    
+    def newTask_run(self):
+        """
+        newTask_schedule 进程
+        """
+        self.logger.info("newTask_schedule starting...")
+
+        while not self._quit:
+            try:
+                time.sleep(self.LOOP_INTERVAL)
+                self.newTask_run_once()
+                self._exceptions = 0
+            except KeyboardInterrupt:
+                break
+            except:
+                self.logger.error(traceback.format_exc())
+                self._exceptions += 1
+                if self._exceptions > self.EXCEPTION_LIMIT:
+                    break
+    
+    def newTask_run_once(self):
+        self.logger.info("newTask_schedule once starting...")
+        q_data=self.queue['newtask_queue'].get_nowait()
+        try:
+            q_data=json.loads(q_data)
+        except:
+            self.logger.error("newTask_schedule get queue data is not json")
+            return
+        self._build_task(task)
+        self.logger.info("newTask_schedule once end")
