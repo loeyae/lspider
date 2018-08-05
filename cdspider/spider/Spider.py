@@ -291,6 +291,7 @@ class Spider():
         if not 'save' in task or not task['save']:
             task['save'] = {}
         task['save']['mode'] = message['mode'];
+        task['save']['parent_url'] = message['parent_url'];
         return task
 
     def get_task(self, message, task=None, no_check_status = False):
