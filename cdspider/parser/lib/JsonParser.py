@@ -123,9 +123,9 @@ class JsonParser(BaseParser):
             return rst
         else:
             ruleset = rule['item']['url'] if 'url' in rule['item'] else list(rule['item'].values())[0]
-            if 'filter' in ruleset and ruleset['filter'].startswith('@pq:'):
+            if 'filter' in ruleset and ruleset['filter'].startswith('@css:'):
                 for k, v in rule['item'].items():
-                    v['filter'] = v['filter'][4:]
+                    v['filter'] = v['filter'][5:]
                 parser = PyqueryParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
                 parsed = parser.parse()
                 return parsed.get('json', []) if parsed else None

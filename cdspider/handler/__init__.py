@@ -29,54 +29,69 @@ class BaseHandler(object):
     MODE_LIST = MODE_DEFAULT
     MODE_ITEM = 'item'
     MODE_ATT = 'att'
+    MODE_CHANNEL = 'channel'
     CRAWL_INFO_LIMIT_COUNT = 10
     CONTINUE_EXCEPTIONS = ()
+
+    DEFAULT_PROCESS = {
+        "request": {
+            "crawler": "requests",
+            "method": "GET",
+            "proxy": "auto",
+        }
+    }
 
     def __init__(self, *args, **kwargs):
         """
         init
         """
         self.logger = kwargs.pop('logger', logging.getLogger('handler'))
-        log_level = kwargs.pop('log_level', logging.WARN)
-        self.logger.setLevel(log_level)
+        self.log_level = kwargs.pop('log_level', logging.WARN)
+        self.logger.setLevel(self.log_level)
         self.task = kwargs.pop('task')
-        self.spider = kwargs.pop('spider')
-        self.outqueue = kwargs.pop("outqueue", None)
-        self.requeue = kwargs.pop("requeue", None)
-        self.status_queue = kwargs.pop("status_queue", None)
-        self.excqueue = kwargs.pop("excqueue", None)
-        self.uniquedb = kwargs.pop("uniquedb", None)
-        self.projectdb = kwargs.pop("projectdb", None)
-        self.taskdb = kwargs.pop("taskdb", None)
-        self.sitedb = kwargs.pop("sitedb", None)
-        self.sitetypedb = kwargs.pop('sitetypedb', None)
-        self.urlsdb = kwargs.pop("urlsdb", None)
-        self.attachmentdb = kwargs.pop("attachmentdb", None)
-        self.keywordsdb = kwargs.pop("keywordsdb", None)
-        self.resultdb = kwargs.pop("resultdb", None)
-        self.customdb = kwargs.pop('customdb', None)
-        self.crawl_info  = {"crawl_count": {"count": 0, "new_count": 0, "req_error": 0, "parsed_count": 0, "repet_count": 0},"broken": None, "crawl_start": int(time.time())}
+        self.db = kwargs.pop('db')
+        self.queue = kwargs.pop('queue')
+        self.outqueue = self.queue.get("schedule2spider", None)
+        self.requeue = self.queue.get("newtask_queue", None)
+        self.status_queue = self.queue.get("status_queue", None)
+        self.excqueue = self.queue.get("excqueue", None)
+        self.uniquedb = self.db.get("uniquedb", None)
+        self.projectdb = self.db.get("projectsdb", None)
+        self.taskdb = self.db.get("taskdb", None)
+        self.sitedb = self.db.get("sitesdb", None)
+        self.urlsdb = self.db.get("urlsdb", None)
+        self.attachmentdb = self.db.get("attachmentdb", None)
+        self.keywordsdb = self.db.get("keywordsdb", None)
+        self.articlesdb = self.db.get("articlesdb", None)
+        self.attachdatadb = self.db.get("attachdatadb", None)
+        self.commentsdb = self.db.get("commentsdb", None)
+        self.parseruledb = kwargs.pop('parseruledb', None)
         self.crawl_id = self.task.get('save', {}).get('crawl_id', int(time.time()))
+        self.task.save.setdefault('crawl_id', self.crawl_id)
+        self.crawl_info  = {
+            "crawl_start": self.crawl_id,
+            "crawl_end": None,
+            "crawl_count": {
+                "count": 0,
+                "new_count": 0,
+                "parsed_count": 0,
+                "req_error": 0,
+                "repeat_count": 0,
+            },
+            "broken": None,
+            "traceback": None
+        }
         self._settings = kwargs or {}
 
-    def get_crawler(self, task, mode):
-        if 'process' in task and task['process']:
-            return task.get('process', {}).get('crawler', 'requests')
-        if mode == self.MODE_LIST:
-            return task.get("site").get("main_process", {}).get("crawler", task.get("project").get("main_process", {}).get("crawler", "requests"))
-        elif mode == self.MODE_ATT:
-            return task.get('attachment').get("main_process", {}).get("crawler", "requests")
-        return task.get("site").get("sub_process", {}).get("crawler", task.get("project").get("sub_process", {}).get("crawler", "requests"))
+    def get_crawler(self, rule):
+        crawler = crawler.get('crawler', 'requests')
+        return utils.load_crawler(crawler, headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
 
-    def get_base_request(self, task, mode):
+    def prepare(self, save):
         """
-        获取定义的基础请求
+        预处理
         """
-        if 'base_request' in task and task['base_request']:
-            return task['base_request']
-        if mode == self.MODE_ATT:
-            return task.get("attachment").get("base_request")
-        return task.get("site").get("base_request", task.get("project").get("base_request", None))
+        pass
 
     @property
     def continue_exceptions(self):
@@ -154,8 +169,8 @@ class BaseHandler(object):
             if isinstance(exc, RETRY_EXCEPTIONS) or not isinstance(exc, CDSpiderError):
                 task['queue'].put_nowait(task['queue_message'])
                 return
-        if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in task and self.resultdb:
-            self.resultdb.update(task['rid'], {"status": self.resultdb.RESULT_STATUS_DELETED})
+        if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in task and self.articlesdb:
+            self.articlesdb.update(task['rid'], {"status": self.articlesdb.RESULT_STATUS_DELETED})
             return
         if not isinstance(exc, IGNORE_EXCEPTIONS) and self.excqueue:
             message = {
@@ -381,13 +396,13 @@ class ResultTrait(object):
                     self.crawl_info['crawl_count']['new_count'] += 1
                     result = self._build_result_info(final_url=item['url'], result=item, crawlinfo=crawlinfo, nocreated=True, **unid)
                     result['parentid'] = parentid
-                    result_id = self.resultdb.insert(result)
+                    result_id = self.articlesdb.insert(result)
                     if result_id:
                         self.outqueue.put_nowait({"id": result_id, 'task': 1})
                     else:
                         raise CDSpiderDBError("Result insert failed")
                 elif unid:
-                    self.resultdb.add_crwal_info(unid['unid'], unid['createtime'], crawlinfo=crawlinfo)
+                    self.articlesdb.add_crwal_info(unid['unid'], unid['createtime'], crawlinfo=crawlinfo)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repet_count'] += 1
                 self.on_repetition()
@@ -417,11 +432,11 @@ class ResultTrait(object):
                         item['url'] = urljoin(final_url, item['url'])
                     result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=item, crawlinfo=crawlinfo, **unid)
                     result['parentid'] = parentid
-                    result_id = self.resultdb.insert(result)
+                    result_id = self.articlesdb.insert(result)
                     if not result_id:
                         raise CDSpiderDBError("Result insert failed")
                 elif unid:
-                    self.resultdb.add_crwal_info(unid['unid'], unid['createtime'], crawlinfo=crawlinfo)
+                    self.articlesdb.add_crwal_info(unid['unid'], unid['createtime'], crawlinfo=crawlinfo)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repet_count'] += 1
                 self.on_repetition()
@@ -459,18 +474,18 @@ class ResultTrait(object):
                 crawlinfo = self._build_crawl_info(final_url, createtime)
                 result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ResultDB.RESULT_STATUS_PARSED, update=update, **unid)
                 if rid:
-                    self.resultdb.update(rid, result)
+                    self.articlesdb.update(rid, result)
                     result_id = rid
                 else:
                     result['parentid'] = parentid
-                    result_id = self.resultdb.insert(result)
+                    result_id = self.articlesdb.insert(result)
             else:
-                result = self.resultdb.get_detail_by_unid(**unid)
+                result = self.articlesdb.get_detail_by_unid(**unid)
                 result_id = result['rid']
                 content = result['content']
                 if 'content' in data and data['content']:
                     content = '%s\r\n\r\n%s' % (content, data['content'])
-                self.resultdb.update(result_id, {"content": content})
+                self.articlesdb.update(result_id, {"content": content})
             if result_id:
                 self.outqueue.put_nowait({"id": result_id})
             else:
@@ -478,7 +493,7 @@ class ResultTrait(object):
             return result_id
         elif unid:
             crawlinfo = self._build_crawl_info(final_url, createtime)
-            return self.resultdb.add_crwal_info(unid['unid'], unid['createtime'], crawlinfo=crawlinfo)
+            return self.articlesdb.add_crwal_info(unid['unid'], unid['createtime'], crawlinfo=crawlinfo)
 
     def item_to_attachment(self, rtid, final_url, attachment, data):
         message = {
@@ -521,18 +536,18 @@ class ResultTrait(object):
                 data = utils.dictjoin(data, item)
                 result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ResultDB.RESULT_STATUS_PARSED, update=update, **unid)
                 if rid:
-                    self.resultdb.update(rid, result)
+                    self.articlesdb.update(rid, result)
                     result_id = rid
                 else:
                     result['parentid'] = parentid
-                    result_id = self.resultdb.insert(result)
+                    result_id = self.articlesdb.insert(result)
             else:
-                result = self.resultdb.get_detail_by_unid(**unid)
+                result = self.articlesdb.get_detail_by_unid(**unid)
                 result_id = result['rid']
                 content = result['content']
                 if 'content' in data and data['content']:
                     content = '%s\r\n\r\n%s' % (content, data['content'])
-                self.resultdb.update(result_id, {"content": content})
+                self.articlesdb.update(result_id, {"content": content})
             if not result_id:
                 raise CDSpiderDBError("Result insert failed")
             return result_id
