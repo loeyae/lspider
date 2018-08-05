@@ -148,7 +148,7 @@ class BaseHandler(object):
                 self.crawler = self.get_crawler(request)
             request['url'] = self.task.get('url')
             if self.page > 1 or self.mode != self.MODE_ITEM:
-                save['incr_data'] = self._get_paging(request['url'])
+                save['incr_data'] = self._get_paging(save.get("parent_url", request['url']))
 
             #列表页抓取时，第一页不添加分页参数,因此在第二页时，先将自增字段自增
             if self.page == 2 and self.mode == self.MODE_ITEM:
@@ -158,7 +158,7 @@ class BaseHandler(object):
                         save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) + int(save['incr_data'][i].get('step', 1))
             builder = UrlBuilder(self.logger, self.log_level)
             params = builder.build(request, last_source, self.crawler, save)
-            if self.crawler isinstance SeleniumCrawler and params['method'].upper() == 'GET':
+            if isinstance(self.crawler, SeleniumCrawler) and params['method'].upper() == 'GET':
                 params['method'] = 'open'
             if proxy == self.PROXY_TYPE_NEVER and save['proxy']:
                 params['proxy'] = copy.deepcopy(save['proxy'])
@@ -181,9 +181,9 @@ class BaseHandler(object):
             parserule = None
             if subdomain:
                 parserule = self.db['parseruledb'].get_detail_by_subdomain('%s.%s' % (subdomain, domain))
-            if not parserule:
+            if not list(parserule):
                 parserule = self.db['parseruledb'].get_detail_by_domain(domain)
-            self.process = parserule:
+            self.process = list(parserule)
         elif self.mode == self.MODE_ATT:
             self.process = self.task.get('attachment', {}).get('process', self.DEFAULT_PROCESS)
 
@@ -229,9 +229,25 @@ class BaseHandler(object):
         return parse
 
     def on_attach(self, source, url):
-
+        """
+        获取附加任务链接，并push newtask
+        """
+        subdomain, domain = utisl.parse_domain(url)
+        attach_list = self.db['attachmentdb'].get_list_by_subdomain('%s.%s' % (subdomain, domain))
+        if not list(attach_list):
+            attach_list = self.db['attachmentdb'].get_list_by_domain(domain)
+        for each in attach_list:
+            parse = each.get('preparse', {}).get('parse', None)
+            if parse:
+                parsed = self.parse(source, parse)
+                urlrule = each.get('preparse', {}).get('url', None)
+                attachurl = utils.build_url_by_rule(urlrule, parsed)
+                self.queue['newtask_queue'].put_nowait({'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid')})
 
     def on_repetition(self):
+        """
+        重复处理
+        """
         raise CDSpiderCrawlerNoNextPage()
 
     def on_error(self, exc):
