@@ -106,7 +106,7 @@ def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
         Scheduler.run()
 
 @cli.command()
-@click.option('--newTask_schedule_cls', default='cdspider.scheduler.newTask_schedule', callback=load_cls, help='schedule name')
+@click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def newTask_schedule(ctx,newTask_schedule_cls, no_loop,  get_object=False):
@@ -114,23 +114,23 @@ def newTask_schedule(ctx,newTask_schedule_cls, no_loop,  get_object=False):
     newTask_schedle: 根据queue:newTask2scheduler往taskdb 里存入新的任务数据
     """
     g=ctx.obj
-    newTask_schedule = load_cls(ctx, None, newTask_schedule_cls)
+    Scheduler = load_cls(ctx, None, scheduler_cls)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    newTask_schedule = newTask_schedule(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
     g['instances'].append(newTask_schedule)
     if g.get('testing_mode') or get_object:
-        return newTask_schedule
+        return Scheduler
     if no_loop:
-        newTask_schedule.run_once()
+        Scheduler.newTask_run_once()
     else:
-        newTask_schedule.run()
+        Scheduler.newTask_run()
 
 @cli.command()
-@click.option('--status_schedule_cls', default='cdspider.scheduler.status_schedule', callback=load_cls, help='schedule name')
+@click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def status_schedule(ctx,status_schedule_cls,no_loop,  get_object=False):
@@ -138,20 +138,20 @@ def status_schedule(ctx,status_schedule_cls,no_loop,  get_object=False):
     newTask_schedle: 根据queue:status2scheduler往taskdb 里更新数据状态
     """
     g=ctx.obj
-    status_schedule = load_cls(ctx, None, status_schedule_cls)
+    Scheduler = load_cls(ctx, None, scheduler_cls)
     rate_map = g.get('rate_map')
 
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    status_schedule = status_schedule(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
     g['instances'].append(status_schedule)
     if g.get('testing_mode') or get_object:
-        return status_schedle
+        return Scheduler
     if no_loop:
-        status_schedule.run_once()
+        Scheduler.status_run_once()
     else:
-        status_schedule.run()
+        Scheduler.status_run()
 
 
 @cli.command()
