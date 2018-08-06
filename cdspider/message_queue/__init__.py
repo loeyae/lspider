@@ -18,6 +18,7 @@ class BaseQueue(object):
         init
         """
         self.queuename = kwargs.pop('name')
+        self.exchange= kwargs.pop('exchange')
         self.username = kwargs.pop('user', None)
         self.password = kwargs.pop('password', None)
         self.host = kwargs.pop('host', 'localhost')

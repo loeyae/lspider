@@ -64,12 +64,12 @@ class PikaQueue(CDBaseQueue):
     Full = BaseQueue.Full
     max_timeout = 0.3
 
-    def __init__(self, name, user="guest", password="guest", host="localhost", port=5672, path='%2F',
+    def __init__(self, name, user="guest",exchange='', password="guest", host="localhost", port=5672, path='%2F',
                  maxsize=0, lazy_limit=True, log_level = logging.WARN):
         """
         init
         """
-        super(PikaQueue, self).__init__(name=name, user=user, password=password, host=host, port=port, path=path,
+        super(PikaQueue, self).__init__(name=name, exchange='',user=user, password=password, host=host, port=port, path=path,
                  maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
         self.lock = threading.RLock()
         if self.lazy_limit and self.maxsize:
@@ -195,12 +195,12 @@ class PikaQueue(CDBaseQueue):
 
 class AmqpQueue(PikaQueue):
 
-    def __init__(self, name, user="guest", password="guest", host="localhost", port=5672, path='%2F',
+    def __init__(self, name, user="guest",exchange='', password="guest", host="localhost", port=5672, path='%2F',
                  maxsize=0, lazy_limit=True, log_level=logging.WARN):
         """
         init
         """
-        super(AmqpQueue, self).__init__(name=name, user=user, password=password, host=host, port=port, path=path,
+        super(AmqpQueue, self).__init__(name=name, exchange='',user=user, password=password, host=host, port=port, path=path,
                  maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
 
     def connect(self):
@@ -243,7 +243,7 @@ class AmqpQueue(PikaQueue):
         with self.lock:
             self.qsize_diff += 1
             msg = amqp.Message(umsgpack.packb(obj))
-            return self.channel.basic_publish(msg, exchange="", routing_key=self.queuename)
+            return self.channel.basic_publish(msg, exchange=self.exchange, routing_key=self.queuename)
 
     @catch_error
     def get_nowait(self, ack=False):
