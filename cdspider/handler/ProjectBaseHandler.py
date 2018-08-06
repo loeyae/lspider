@@ -7,16 +7,12 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-8-5 21:42:18
 """
-import time
-import traceback
-import tldextract
-from cdspider.database.base import *
-from cdspider.handler import BaseHandler, NewTaskTrait
+from cdspider.handler import BaseHandler
 from cdspider.exceptions import *
 
 class ProjectBaseHandler(BaseHandler, ResultTrait):
 
-    def on_result(self, task, data, broken_exc, page_source, final_url):
+    def on_result(self, data, broken_exc, page_source, final_url):
         """
         on result
         """
@@ -25,17 +21,19 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
             if broken_exc:
                 raise broken_exc
             raise CDSpiderParserNoContent("No parsed content",
-                base_url=self.task.get('save', {}).get("base_url"), current_url=self.task.get('save', {}).get("request_url"))
+                base_url=self.task.get('save', {}).get("base_url"), current_url=final_url)
         if mode == self.MODE_CHANNEL:
-            self.list_to_result(final_url, {k: item}, typeinfo, self.task, page_source)
+            typeinfo = self._domain_info(final_url)
+            self.channel_to_list(final_url, data, typeinfo, page_source)
         elif mode == self.MODE_LIST:
-            self.list_to_work(data, self.task)
+            typeinfo = self._domain_info(final_url)
+            self.list_to_item(final_url, data, typeinfo, page_source)
         elif mode == self.MODE_ITEM:
-            final_url = self.task.get('save').get("request_url")
+            typeinfo = self._domain_info(self.task.get('save', {}).get('parent_url', final_url))
             unique = False if not 'unid' in self.task else self.task['unid']
-            self.item_to_result(final_url, data, page_source, unique)
+            self.item_to_result(final_url, data, typeinfo, page_source, unique)
         elif mode == self.MODE_ATT:
-            final_url = self.task.get('save').get("request_url")
-            self.list_to_attach(final_url, {k: item}, typeinfo, task, page_source)
+            typeinfo = self._domain_info(self.task.get('save', {}).get('parent_url', final_url))
+            self.attach_to_result(final_url, data, typeinfo, task, page_source)
 
 
