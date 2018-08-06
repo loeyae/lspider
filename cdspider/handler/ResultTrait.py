@@ -138,7 +138,6 @@ class ResultTrait(object):
                 self.logger.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     crawlinfo =  self._build_crawl_info(final_url)
-                    typeinfo = self._domain_info(final_url)
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                     result_id = self.db['ArticlesDB'].insert(result)
                     self.queue['result2kafka'].put_nowait({"rid": result_id})
