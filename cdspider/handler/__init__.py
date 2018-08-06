@@ -81,7 +81,7 @@ class BaseHandler(object):
         return "%s.%s" % (subdomain, domain), domain
 
     def _typeinfo(self, url):
-        subdomain, domain = self._domain_info
+        subdomain, domain = self._domain_info(url)
         return {"domain": domain, "subdomain": subdomain}
 
     @property
@@ -294,7 +294,8 @@ class BaseHandler(object):
     def on_continue(self, crawler, save):
         if 'incr_data' in save:
             for i in range(len(save['incr_data'])):
-                save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
+                if int(save['incr_data'][i]['value']) > int(save['incr_data'][i]['base_page']):
+                    save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
 
     def finish(self):
         if self.db['TaskDB'] and self.task.get('tid', None):
