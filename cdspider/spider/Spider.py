@@ -134,7 +134,7 @@ class Spider():
         finally:
             if not return_result:
                 handler.finish()
-            self.logger.info("Spider fetch end, task: %s" % task)
+            self.logger.info("Spider fetch end" )
             if return_result:
                 return return_data
 
