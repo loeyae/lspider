@@ -118,7 +118,7 @@ class ResultTrait(object):
                     self.queue['newtask_queue'].put_nowait({"uid": uid})
                     self.crawl_info['crawl_count']['new_count'] += 1
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
-                self.crawl_info['crawl_count']['repet_count'] += 1
+                self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
 
     def list_to_item(self, final_url, data, typeinfo, page_source = None, unid = None):
@@ -149,7 +149,7 @@ class ResultTrait(object):
 #                elif unid:
 #                    self.db['ArticlesDB'].add_crwal_info(unid['unid'], unid['ctime'], crawlinfo=crawlinfo)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
-                self.crawl_info['crawl_count']['repet_count'] += 1
+                self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
 
     def item_to_result(self, final_url, data, typeinfo, page_source=None, unid=None):
@@ -253,5 +253,5 @@ class ResultTrait(object):
                     if result_id:
                         self.crawl_info['crawl_count']['new_count'] += 1
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
-                self.crawl_info['crawl_count']['repet_count'] += 1
+                self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
