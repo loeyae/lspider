@@ -7,7 +7,7 @@ import six
 import time
 import logging
 import traceback
-import copyurljoin
+import copy
 from cdspider.crawler import SeleniumCrawler
 from cdspider.database.base import *
 from cdspider.libs import utils
