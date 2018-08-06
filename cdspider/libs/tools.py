@@ -171,7 +171,7 @@ class ModulerLoader(object):
 
     def __init__(self, moduler, mod=None):
         self.moduler = moduler
-        self.name = moduler['name']
+        self.name = moduler['class_name']
         self.mod = mod
 
     def load_module(self):
