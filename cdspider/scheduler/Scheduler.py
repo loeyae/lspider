@@ -221,7 +221,7 @@ class Scheduler(object):
             pid=self.db['KeywordsDB'].get_detail(q_data['wid'])['pid']
             StatusSchedule.schedule(q_data, 'KeywordsDB','wid',pid)
         elif 'pid' in q_data:
-           StatusSchedule.schedule(q_data, 'ProjectsDB','pid',pid)
+           StatusSchedule.schedule(q_data, 'ProjectsDB','pid',q_data['pid'])
         elif 'aid' in q_data:
             pid=self.db['AttachmentDB'].get_detail(q_data['aid'])['pid']
             StatusSchedule.schedule(q_data, 'AttachmentDB','aid',pid)

@@ -13,95 +13,94 @@ class StatusSchedule(object):
     """
     put you comment
     """
-    def __init__(self, status_queue, ProjectsDB, TaskDB, SitesDB, UrlsDB, AttachmentDB, KeywordsDB, customdb):
-        self.status_queue = status_queue
-        self.ProjectsDB = ProjectsDB
-        self.TaskDB = TaskDB
-        self.SitesDB = SitesDB
-        self.UrlsDB = UrlsDB
-        self.AttachmentDB = AttachmentDB
-        self.KeywordsDB = KeywordsDB
-        self.customdb = customdb
+    def __init__(self, db,queue,rate):
+        self.db=db
+        self.queue=queue
+        self.rate=rate
 
-    def schedule(self, message):
-        if 'keywordid' in message:
-            self.schedule_keyword(**message)
-        elif 'projectid' in message:
-            self.schedule_project(**message)
-        elif 'siteid' in message:
-            self.schedule_site(**message)
-        elif 'urlsid' in message:
-            self.schedule_urls(**message)
-        elif 'attachid' in message:
-            self.schedule_attachment(**message)
+    def schedule(self, data,db_name,id_type,pid):
+        obj={}
+        if 'rate' in data:
+            rate=data['data']
+            try:
+                obj['rate']=int(rate)
+            except:
+                pass
+             
+        if 'status' in data:
+            status=data['status']
+            try:
+                obj['status']=int(status)
+            except:
+                pass
+        if 'kwid'==id_type:
+            self.schedule_keyword(data,obj,db_name,id_type,pid)
+        elif 'pid'==id_type:
+            self.schedule_project(data,obj,db_name,id_type,pid)
+        elif 'sid'==id_type:
+            self.schedule_site(data,obj,db_name,id_type,pid)
+        elif 'uid'==id_type:
+            self.schedule_urls(data,obj,db_name,id_type,pid)
+        elif 'aid'==id_type:
+            self.schedule_attachment(data,obj,db_name,id_type,pid)
 
-    def schedule_keyword(self, keywordid, status):
-        project_list = self.ProjectsDB.get_list(where={'type': ProjectDB.PROJECT_TYPE_SEARCH})
-        if status == KeywordsDB.KEYWORDS_STATUS_INIT:
-            for item in project_list:
-                self.TaskDB.enable_by_keyword(keywordid, item['pid'], where = {'status': KeywordsDB.KEYWORDS_STATUS_ACTIVE})
-        elif status == KeywordsDB.KEYWORDS_STATUS_DELETED:
-            for item in project_list:
-                self.TaskDB.delete_by_keyword(keywordid, item['pid'])
-        elif status == KeywordsDB.KEYWORDS_STATUS_DISABLE:
-            for item in project_list:
-                self.TaskDB.disable_by_keyword(keywordid, item['pid'], where = {"status": [TaskDB.TASK_STATUS_INIT, TaskDB.TASK_STATUS_ACTIVE]})
-        elif status == KeywordsDB.KEYWORDS_STATUS_ACTIVE:
-            for item in project_list:
-                self.TaskDB.active_by_keyword(keywordid, item['pid'], where = {"status": [TaskDB.TASK_STATUS_INIT, TaskDB.TASK_STATUS_DISABLE]})
+    def schedule_keyword(self,data, obj,db_name,id_type,pid):
+        if 'status' in obj:
+            self.db['KeywordsDB'].update(data[id_type],obj)
+            self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+        else:
+            where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
+            self.db['TaskDB'].update_many(pid,obj=obj,where=where)
+            self.db['KeywordsDB'].update(data[id_type],{'rate':obj['rate']})
 
-    def schedule_project(self, projectid, status):
-        if status == ProjectDB.PROJECT_STATUS_INIT:
-            self.UrlsDB.enable_by_project(projectid, where = {"status": UrlsDB.URLS_STATUS_ACTIVE})
-            self.AttachmentDB.enable_by_project(projectid, where = {"status": AttachmentDB.ATTACHMENT_STATUS_ACTIVE})
-            self.SitesDB.enable_by_project(projectid, where = {"status": SiteDB.SITE_STATUS_ACTIVE})
-            self.TaskDB.enable_by_project(projectid, where = {"status": TaskDB.TASK_STATUS_ACTIVE})
-        elif status == ProjectDB.PROJECT_STATUS_DELETED:
-            self.UrlsDB.delete_by_project(projectid)
-            self.AttachmentDB.delete_by_project(projectid)
-            self.SitesDB.delete_by_project(projectid)
-            self.TaskDB.delete_by_project(projectid)
-        elif status == ProjectDB.PROJECT_STATUS_DISABLE:
-            self.UrlsDB.disable_by_project(projectid, where = {"status": [UrlsDB.URLS_STATUS_INIT, UrlsDB.URLS_STATUS_ACTIVE]})
-            self.AttachmentDB.disable_by_project(projectid, where = {"status": [AttachmentDB.ATTACHMENT_STATUS_INIT, AttachmentDB.ATTACHMENT_STATUS_ACTIVE]})
-            self.SitesDB.disable_by_project(projectid, where = {"status": [SiteDB.SITE_STATUS_INIT, SiteDB.SITE_STATUS_ACTIVE]})
-            self.TaskDB.disable_by_project(projectid, where = {"status": [TaskDB.TASK_STATUS_INIT, TaskDB.TASK_STATUS_ACTIVE]})
+    def schedule_project(self, obj,db_name,id_type,pid):
+        if 'status' in obj:
+            if obj['status']==Base.STATUS_DELETED or obj['status']==Base.STATUS_INIT:
+                self.db['ProjectsDB'].update(data[id_type],obj)
+                self.db['KeywordsDB'].update_many(obj,where={id_type:data[id_type]})
+                self.db['SitesDB'].update_many(obj,where={id_type:data[id_type]})
+                self.db['AttachmentDB'].update_many(obj,where={id_type:data[id_type]})
+                self.db['UrlsDB'].update_many(obj,where={id_type:data[id_type]})
+                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type]})
+            elif obj['status']==Base.STATUS_ACTIVE:
+                self.db['ProjectsDB'].update(data[id_type],obj)
+            
 
-    def schedule_site(self, siteid, status):
-        site = self.SitesDB.get_detail(siteid)
-        if status == SiteDB.SITE_STATUS_INIT:
-            self.UrlsDB.enable_by_site(siteid, where = {"status": UrlsDB.URLS_STATUS_ACTIVE})
-            self.AttachmentDB.enable_by_site(siteid, where = {"status": AttachmentDB.ATTACHMENT_STATUS_ACTIVE})
-            self.TaskDB.enable_by_site(siteid, site['projectid'], where = {"status": TaskDB.TASK_STATUS_ACTIVE})
-        elif status == SiteDB.SITE_STATUS_DELETED:
-            self.UrlsDB.delete_by_site(siteid)
-            self.AttachmentDB.delete_by_site(siteid)
-            self.TaskDB.delete_by_site(siteid, site['projectid'])
-        elif status == SiteDB.SITE_STATUS_DISABLE:
-            self.UrlsDB.disable_by_site(siteid, where = {"status": [UrlsDB.URLS_STATUS_INIT, UrlsDB.URLS_STATUS_ACTIVE]})
-            self.AttachmentDB.disable_by_site(siteid, where = {"status": [AttachmentDB.ATTACHMENT_STATUS_INIT, AttachmentDB.ATTACHMENT_STATUS_ACTIVE]})
-            self.TaskDB.disable_by_site(siteid, site['projectid'], where = {"status": [TaskDB.TASK_STATUS_INIT, TaskDB.TASK_STATUS_ACTIVE]})
-        elif status == SiteDB.SITE_STATUS_ACTIVE:
-            self.TaskDB.active_by_site(siteid, site['projectid'], where = {"status": TaskDB.TASK_STATUS_DISABLE})
+    def schedule_site(self, data,obj,db_name,id_type,pid):
+        if 'status' in obj:
+            self.db['SitesDB'].update(data[id_type],obj)
+            if obj['status']==Base.STATUS_DELETED or obj['status']==Base.STATUS_INIT:
+                self.db['UrlsDB'].update_many(obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+        else:
+            self.db['SitesDB'].update(data[id_type],{'rate':obj['rate']})
+            u_rate={}
+            for item in self.db['UrlsDB'].get_list(where={'sid':data[id_type]}):
+                u_rate[item['uid']]=item['rate']
+            for k,v in u_rate.items():
+                if v>obj['rate']:
+                    obj['rate']=v
+                where={id_type:data[id_type],'uid':int(k),'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
+                self.db['TaskDB'].update_many(pid,obj={'rate':obj['rate']},where=where)
 
-    def schedule_urls(self, urlsid, status):
-        urls = self.UrlsDB.get_detail(urlsid)
-        if status == UrlsDB.URLS_STATUS_INIT:
-            self.TaskDB.enable_by_urls(urlsid, urls['projectid'], where = {"status": TaskDB.TASK_STATUS_ACTIVE})
-        elif status == UrlsDB.URLS_STATUS_DELETED:
-            self.TaskDB.delete_by_urls(urlsid, urls['projectid'])
-        elif status == UrlsDB.URLS_STATUS_DISABLE:
-            self.TaskDB.disable_by_urls(urlsid, urls['projectid'], where = {"status": [TaskDB.TASK_STATUS_INIT, TaskDB.TASK_STATUS_ACTIVE]})
-        elif status == UrlsDB.URLS_STATUS_ACTIVE:
-            self.TaskDB.active_by_urls(urlsid, urls['projectid'], where = {"status": [TaskDB.TASK_STATUS_INIT, TaskDB.TASK_STATUS_DISABLE]})
+    def schedule_urls(self,data,obj,db_name,id_type,pid):
+        if 'status' in obj:
+                self.db['UrlsDB'].update(data[id_type],obj)
+                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+        else:
+            where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
+            self.db['UrlsDB'].update(data[id_type],{'rate':obj['rate']})
+            sid=self.db['UrlsDB'].get_detail(data[id_type])['sid']
+            s_rate=self.db['SitesDB'].get_detail(sid)
+            if s_rate>obj['rate']:
+                obj['rate']=s_rate
+            self.db['TaskDB'].update_many(pid,obj={'rate':obj['rate']},where=where)
 
-    def schedule_attachment(self, attachid, status):
-        attachment = self.AttachmentDB.get_detail(attachid)
-        if status == AttachmentDB.ATTACHMENT_STATUS_INIT:
-            self.TaskDB.enable_by_attachment(attachid, attachment['projectid'], where = {"status": TaskDB.TASK_STATUS_ACTIVE})
-        elif status == AttachmentDB.ATTACHMENT_STATUS_DELETED:
-            self.TaskDB.delete_by_attachment(attachid, attachment['projectid'])
-        elif status == AttachmentDB.ATTACHMENT_STATUS_DISABLE:
-            self.TaskDB.disable_by_attachment(attachid, attachment['projectid'], where = {"status": [TaskDB.TASK_STATUS_INIT, TaskDB.TASK_STATUS_ACTIVE]})
-        elif status == AttachmentDB.ATTACHMENT_STATUS_ACTIVE:
-            self.TaskDB.active_by_attachment(attachid, attachment['projectid'], where = {"status": [TaskDB.TASK_STATUS_INIT, TaskDB.TASK_STATUS_DISABLE]})
+    def schedule_attachment(self, obj,db_name,id_type,pid):
+        if 'status' in obj:
+            self.db['AttachmentDB'].update(data[id_type],obj)
+            self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+        else:
+            where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
+            self.db['TaskDB'].update_many(pid,obj=obj,where=where)
+            self.db['AttachmentDB'].update(data[id_type],{'rate':obj['rate']})
