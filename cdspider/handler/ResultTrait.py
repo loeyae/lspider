@@ -56,6 +56,12 @@ class ResultTrait(object):
         r['result'] = result or None
         return r
 
+    def url_prepare(self, url):
+        """
+        url预处理
+        """
+        return url
+
     def build_url_by_rule(self, data, base_url = None):
         if not base_url:
             base_url = self.task.get('url')
@@ -69,7 +75,7 @@ class ResultTrait(object):
             if item['url'].startswith('javascript'):
                 continue
             if urlrule:
-                parsed = {urlrule['name']: item['url']}
+                parsed = {urlrule['name']: self.url_prepare(item['url'])}
                 item['url'] = utils.build_url_by_rule(urlrule, parsed)
             else:
                 item['url'] = urljoin(base_url, item['url'])
@@ -250,8 +256,3 @@ class ResultTrait(object):
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repet_count'] += 1
                 self.on_repetition()
-
-
-
-
-
