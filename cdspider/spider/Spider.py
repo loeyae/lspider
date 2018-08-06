@@ -89,6 +89,9 @@ class Spider():
                 while True:
                     self.logger.info('Spider crawl start')
                     last_source, broken_exc, final_url = handler.crawl(save)
+                    if isinstance(broken_exc, CONTINUE_EXCEPTIONS):
+                        handler.on_continue()
+                        continue
                     unid = utils.md5(last_source)
                     if last_source_unid == unid or last_url == final_url:
                         raise CDSpiderCrawlerNoNextPage()
