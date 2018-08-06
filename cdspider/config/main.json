@@ -8,8 +8,8 @@
         "proxy_rate": "every"
     },
     "message_queue": {
-        "protocol": "kafka",
-        "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
+        "protocol": "amqp",
+        "host": "47.93.88.247",
         "port": 5672,
         "user": "pyworm",
         "password": "pyworm@123",
