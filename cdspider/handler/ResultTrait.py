@@ -11,7 +11,7 @@ import time
 from urllib.parse import urljoin
 from cdspider.database.base import *
 from cdspider.libs import utils
-from cdspider.libs.time_parser import Parser as TimeParser
+from cdspider.parser.lib.time_parser import Parser as TimeParser
 
 class ResultTrait(object):
 
