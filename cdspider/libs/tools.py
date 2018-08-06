@@ -228,7 +228,7 @@ class UrlLoader(ModulerLoader):
         super(UrlLoader, self).__init__(task, mod)
         self.name = 'cdspider.handler.custom.%s' % task['name']
 
-def load_handler(task, spider, **kwargs):
+def load_handler(task, **kwargs):
     """
     动态加载handler
     如果task中有定义，则使用task中的handler。如果project也有定义，task中定义的handler需继承自project中定义的handler
@@ -269,7 +269,7 @@ def load_handler(task, spider, **kwargs):
                     if issubclass(each, _class):
                         _class = each
             logging.info("selected handler: %s" % _class)
-            return _class(task = task, spider = spider,  **kwargs)
+            return _class(task = task, **kwargs)
     raise CDSpiderHandlerError("HandlerLoader no handler selected")
 
 def load_cls(ctx, param, value):
