@@ -23,7 +23,7 @@ limitations under the License.
 
 import html
 import traceback
-from cdspider.libs.goose3.text import innerTrim
+from cdspider.parser.lib.goose3.text import innerTrim
 
 
 class OutputFormatter(object):

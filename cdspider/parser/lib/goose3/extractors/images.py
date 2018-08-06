@@ -25,10 +25,10 @@ import os
 import traceback
 from urllib.parse import urlparse, urljoin
 
-from cdspider.libs.goose3.extractors import BaseExtractor
-from cdspider.libs.goose3.image import Image
-from cdspider.libs.goose3.utils import FileHelper
-from cdspider.libs.goose3.utils.images import ImageUtils
+from cdspider.parser.lib.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.image import Image
+from cdspider.parser.lib.goose3.utils import FileHelper
+from cdspider.parser.lib.goose3.utils.images import ImageUtils
 
 KNOWN_IMG_DOM_NAMES = [
     "yn-story-related-media",

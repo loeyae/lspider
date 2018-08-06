@@ -25,7 +25,7 @@ import re
 import traceback
 from urllib.parse import urlparse, urljoin
 
-from cdspider.libs.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.extractors import BaseExtractor
 
 
 RE_LANG = r'^[A-Za-z]{2}$'

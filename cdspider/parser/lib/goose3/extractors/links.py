@@ -21,7 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import traceback
-from cdspider.libs.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.extractors import BaseExtractor
 
 
 class LinksExtractor(BaseExtractor):

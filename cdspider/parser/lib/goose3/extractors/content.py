@@ -23,7 +23,7 @@ limitations under the License.
 import traceback
 from copy import deepcopy
 
-from cdspider.libs.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.libs import utils
 
 KNOWN_CONTENT_TAGS = [

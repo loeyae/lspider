@@ -25,9 +25,9 @@ import copy
 import tempfile
 import logging
 
-from cdspider.libs.goose3.text import StopWords
-from cdspider.libs.goose3.parsers import Parser, ParserSoup
-from cdspider.libs.goose3.version import __version__
+from cdspider.parser.lib.goose3.text import StopWords
+from cdspider.parser.lib.goose3.parsers import Parser, ParserSoup
+from cdspider.parser.lib.goose3.version import __version__
 
 AVAILABLE_PARSERS = {
     'lxml': Parser,

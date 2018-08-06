@@ -9,7 +9,7 @@
 :version: SVN: $Id: RegularParser.py 2097 2018-07-03 14:28:05Z zhangyi $
 """
 import re
-from cdspider.parser import BaseParser
+from . import BaseParser
 from cdspider.libs.utils import table2kvlist, rule2pattern, decode
 
 class RegularParser(BaseParser):

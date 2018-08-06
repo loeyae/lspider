@@ -24,8 +24,8 @@ import os
 import re
 import string
 
-from cdspider.libs.goose3.utils import FileHelper
-from cdspider.libs.goose3.utils.encoding import (smart_unicode, smart_str, DjangoUnicodeDecodeError)
+from cdspider.parser.lib.goose3.utils import FileHelper
+from cdspider.parser.lib.goose3.utils.encoding import (smart_unicode, smart_str, DjangoUnicodeDecodeError)
 
 
 SPACE_SYMBOLS = re.compile(r'[\s\xa0\t]')

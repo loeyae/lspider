@@ -10,7 +10,7 @@
 """
 import re
 import traceback
-from cdspider.libs.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.libs import utils
 
 

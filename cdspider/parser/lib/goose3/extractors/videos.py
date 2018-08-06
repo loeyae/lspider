@@ -21,8 +21,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import traceback
-from cdspider.libs.goose3.extractors import BaseExtractor
-from cdspider.libs.goose3.video import Video
+from cdspider.parser.lib.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.video import Video
 
 VIDEOS_TAGS = ['iframe', 'embed', 'object', 'video']
 VIDEO_PROVIDERS = ['youtube', 'vimeo', 'dailymotion', 'kewego']

@@ -25,7 +25,7 @@ from copy import deepcopy
 import lxml.html
 from lxml import etree
 
-from cdspider.libs.goose3.text import innerTrim, encodeValue, get_encodings_from_content, smart_str
+from cdspider.parser.lib.goose3.text import innerTrim, encodeValue, get_encodings_from_content, smart_str
 
 
 class Parser(object):

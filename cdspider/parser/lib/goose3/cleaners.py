@@ -22,7 +22,7 @@ limitations under the License.
 """
 from __future__ import unicode_literals
 
-from cdspider.libs.goose3.utils import ReplaceSequence
+from cdspider.parser.lib.goose3.utils import ReplaceSequence
 
 
 class DocumentCleaner(object):

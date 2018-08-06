@@ -27,8 +27,8 @@ import base64
 
 from PIL import Image
 
-from cdspider.libs.goose3.utils.encoding import smart_str
-from cdspider.libs.goose3.image import (ImageDetails, LocallyStoredImage)
+from cdspider.parser.lib.goose3.utils.encoding import smart_str
+from cdspider.parser.lib.goose3.image import (ImageDetails, LocallyStoredImage)
 
 LOG = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@
 """
 import six
 from pyquery import PyQuery
-from cdspider.parser import BaseParser
+from . import BaseParser
 from cdspider.libs.utils import pcre2re
 from cdspider.libs.utils import callback_result
 from cdspider.libs.utils import decode

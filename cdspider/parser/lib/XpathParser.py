@@ -9,8 +9,8 @@
 :version: SVN: $Id: XpathParser.py 2078 2018-07-03 11:24:15Z zhangyi $
 """
 import lxml
-from cdspider.libs.goose3.parsers import Parser
-from cdspider.parser import BaseParser
+from .goose3.parsers import Parser
+from . import BaseParser
 from cdspider.libs.utils import table2kvlist, decode
 
 class XpathParser(BaseParser):

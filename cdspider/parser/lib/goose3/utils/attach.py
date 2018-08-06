@@ -11,7 +11,7 @@
 import hashlib
 import os
 
-from cdspider.libs.goose3.utils.encoding import smart_str
+from cdspider.parser.lib.goose3.utils.encoding import smart_str
 
 class AttachUtils():
     """

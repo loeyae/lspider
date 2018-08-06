@@ -23,27 +23,27 @@ limitations under the License.
 import os
 import glob
 from copy import deepcopy
-from cdspider.libs.goose3.article import Article
-from cdspider.libs.goose3.catalogue import Catalogue
-from cdspider.libs.goose3.utils import URLHelper, RawHelper
-from cdspider.libs.goose3.extractors.content import StandardContentExtractor
-from cdspider.libs.goose3.extractors.videos import VideoExtractor
-from cdspider.libs.goose3.extractors.title import TitleExtractor
-from cdspider.libs.goose3.extractors.images import ImageExtractor
-from cdspider.libs.goose3.extractors.links import LinksExtractor
-from cdspider.libs.goose3.extractors.tweets import TweetsExtractor
-from cdspider.libs.goose3.extractors.authors import AuthorsExtractor
-from cdspider.libs.goose3.extractors.attach import AttachExtractor
-from cdspider.libs.goose3.extractors.tags import TagsExtractor
-from cdspider.libs.goose3.extractors.opengraph import OpenGraphExtractor
-from cdspider.libs.goose3.extractors.publishdate import PublishDateExtractor
-from cdspider.libs.goose3.extractors.metas import MetasExtractor
-from cdspider.libs.goose3.extractors.custom import CustomExtractor
-from cdspider.libs.goose3.extractors.catalogue  import CatalogueExtractor
-from cdspider.libs.goose3.cleaners import StandardDocumentCleaner
-from cdspider.libs.goose3.outputformatters import StandardOutputFormatter
+from cdspider.parser.lib.goose3.article import Article
+from cdspider.parser.lib.goose3.catalogue import Catalogue
+from cdspider.parser.lib.goose3.utils import URLHelper, RawHelper
+from cdspider.parser.lib.goose3.extractors.content import StandardContentExtractor
+from cdspider.parser.lib.goose3.extractors.videos import VideoExtractor
+from cdspider.parser.lib.goose3.extractors.title import TitleExtractor
+from cdspider.parser.lib.goose3.extractors.images import ImageExtractor
+from cdspider.parser.lib.goose3.extractors.links import LinksExtractor
+from cdspider.parser.lib.goose3.extractors.tweets import TweetsExtractor
+from cdspider.parser.lib.goose3.extractors.authors import AuthorsExtractor
+from cdspider.parser.lib.goose3.extractors.attach import AttachExtractor
+from cdspider.parser.lib.goose3.extractors.tags import TagsExtractor
+from cdspider.parser.lib.goose3.extractors.opengraph import OpenGraphExtractor
+from cdspider.parser.lib.goose3.extractors.publishdate import PublishDateExtractor
+from cdspider.parser.lib.goose3.extractors.metas import MetasExtractor
+from cdspider.parser.lib.goose3.extractors.custom import CustomExtractor
+from cdspider.parser.lib.goose3.extractors.catalogue  import CatalogueExtractor
+from cdspider.parser.lib.goose3.cleaners import StandardDocumentCleaner
+from cdspider.parser.lib.goose3.outputformatters import StandardOutputFormatter
 
-from cdspider.libs.goose3.network import NetworkFetcher
+from cdspider.parser.lib.goose3.network import NetworkFetcher
 
 
 class CrawlCandidate(object):

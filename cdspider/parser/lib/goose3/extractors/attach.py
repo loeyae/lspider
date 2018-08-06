@@ -10,8 +10,8 @@
 """
 import traceback
 from urllib.parse import urljoin
-from cdspider.libs.goose3.extractors import BaseExtractor
-from cdspider.libs.goose3.utils.attach import AttachUtils
+from cdspider.parser.lib.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.utils.attach import AttachUtils
 
 
 class AttachExtractor(BaseExtractor):

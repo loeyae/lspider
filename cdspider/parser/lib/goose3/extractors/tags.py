@@ -21,7 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import traceback
-from cdspider.libs.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.extractors import BaseExtractor
 
 A_REL_TAG_SELECTOR = "a[rel=tag]"
 A_HREF_TAG_SELECTOR = "a[href*='/tag/'], a[href*='/tags/'], a[href*='/topic/'], a[href*='?keyword=']"

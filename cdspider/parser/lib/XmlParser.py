@@ -9,7 +9,7 @@
 :version: SVN: $Id: XmlParser.py 2079 2018-07-03 11:24:33Z zhangyi $
 """
 import lxml.etree
-from cdspider.parser import BaseParser
+from . import BaseParser
 from cdspider.libs.utils import callback_result, decode
 
 class XmlParser(BaseParser):

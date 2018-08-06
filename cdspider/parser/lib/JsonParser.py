@@ -13,7 +13,7 @@ import re
 import json
 import copy
 import traceback
-from cdspider.parser import BaseParser
+from . import BaseParser
 from .PyqueryParser import PyqueryParser
 from .RegularParser import RegularParser
 from .XpathParser import XpathParser

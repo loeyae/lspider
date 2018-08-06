@@ -27,7 +27,7 @@ import os
 import codecs
 from urllib.parse import urlparse
 
-from cdspider.libs.goose3 import version as base
+from cdspider.parser.lib.goose3 import version as base
 
 
 class BuildURL(object):

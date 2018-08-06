@@ -24,12 +24,12 @@ import os
 import weakref
 from tempfile import mkstemp
 
-from cdspider.libs.goose3.configuration import Configuration
-from cdspider.libs.goose3.article import Article  # to make it available for documentation!
-from cdspider.libs.goose3.image import Image  # to make it available for documentation!
-from cdspider.libs.goose3.video import Video  # to make it available for documentation!
-from cdspider.libs.goose3.crawler import (CrawlCandidate, Crawler, CatalogueCrawler)
-from cdspider.libs.goose3.network import NetworkFetcher
+from cdspider.parser.lib.goose3.configuration import Configuration
+from cdspider.parser.lib.goose3.article import Article  # to make it available for documentation!
+from cdspider.parser.lib.goose3.image import Image  # to make it available for documentation!
+from cdspider.parser.lib.goose3.video import Video  # to make it available for documentation!
+from cdspider.parser.lib.goose3.crawler import (CrawlCandidate, Crawler, CatalogueCrawler)
+from cdspider.parser.lib.goose3.network import NetworkFetcher
 
 
 class Goose(object):
