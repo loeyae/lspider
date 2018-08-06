@@ -20,7 +20,8 @@
         "spider2result",
         "spider2scheduler",
         "excinfo_queue",
-        "search_work"
+        "search_work",
+        "result2kafka"
     ],
     "media_type": {
         "1": "新闻",
