@@ -7,7 +7,7 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-8-5 21:42:18
 """
-from cdspider.handler import BaseHandler
+from cdspider.handler import BaseHandler, ResultTrait
 from cdspider.exceptions import *
 
 class ProjectBaseHandler(BaseHandler, ResultTrait):
@@ -36,5 +36,3 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
             typeinfo = self._domain_info(self.task.get('save', {}).get('parent_url', final_url))
             unique = False if not 'unid' in self.task else self.task['unid']
             self.attach_to_result(final_url, data, typeinfo, page_source, unique)
-
-
