@@ -42,6 +42,9 @@ class ArticlesDB(Base):
     def update(self, id, obj = {}):
         raise NotImplementedError
 
+    def update_many(self,obj, where=None):
+        raise NotImplementedError
+
     def get_detail(self, id):
         raise NotImplementedError
 
