@@ -85,7 +85,7 @@ class BaseHandler(object):
         return self.page
 
     def get_crawler(self, rule):
-        crawler = crawler.get('crawler', 'requests')
+        crawler = rule.get('crawler', 'requests')
         return utils.load_crawler(crawler, headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
 
     def prepare(self, save):
@@ -139,7 +139,7 @@ class BaseHandler(object):
         """
         pass
 
-    def craw(self, save):
+    def crawl(self, save):
         broken_exc = None
         final_url = self.task.get('url')
         last_source = None
