@@ -77,7 +77,7 @@ class BaseHandler(object):
         self.last_result_id = None
 
     def _domain_info(self, url):
-        subdomain, domain = utisl.parse_domain(url)
+        subdomain, domain = utils.parse_domain(url)
         return "%s.%s" % (subdomain, domain), domain
 
     @property
