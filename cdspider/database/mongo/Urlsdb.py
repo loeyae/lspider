@@ -45,6 +45,12 @@ class UrlsDB(Mongo, BaseUrlsDB):
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
         return super(UrlsDB, self).update(setting=obj, where={'uid': int(id)}, multi=False)
+    
+    def update_many(self, obj = {},where=None):
+        if where=={} or where==None:
+            return
+        obj['utime'] = int(time.time())
+        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
 
     def delete(self, id, where = {}):
         obj = {"status": self.STATUS_DELETED}

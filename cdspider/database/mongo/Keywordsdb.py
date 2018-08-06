@@ -40,6 +40,12 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
     def update(self, id, obj):
         obj['utime'] = int(time.time())
         return super(KeywordsDB, self).update(setting=obj, where={"kwid": int(id)}, multi=False)
+    
+    def update_many(self,obj, where=None):
+        if where==None or where=={}:
+            return
+        obj['utime'] = int(time.time())
+        return super(KeywordsDB, self).update(setting=obj, where=where, multi=False)
 
     def active(self, id, where = {}):
         if not where:
