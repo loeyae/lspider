@@ -13,10 +13,10 @@ from .AttachDatadb import AttachDataDB
 from .Attachmentdb import AttachmentDB
 from .Commentsdb import CommentsDB
 from .CrawlLogdb import CrawlLogDB
-from .KeywordsDB import KeywordsDB
+from .Keywordsdb import KeywordsDB
 from .ParseRuledb import ParseRuleDB
-from .ProjectsDB import ProjectsDB
-from .SitesDB import SitesDB
+from .Projectsdb import ProjectsDB
+from .Sitesdb import SitesDB
 from .Taskdb import TaskDB
 from .Uniquedb import UniqueDB
 from .Urlsdb import UrlsDB
