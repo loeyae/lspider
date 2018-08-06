@@ -78,7 +78,11 @@ class BaseHandler(object):
 
     def _domain_info(self, url):
         subdomain, domain = utils.parse_domain(url)
-        return ["%s.%s" % (subdomain, domain), domain]
+        return "%s.%s" % (subdomain, domain), domain
+
+    def _typeinfo(self, url):
+        subdomain, domain = self._domain_info
+        return {"domain": domain, "subdomain": subdomain}
 
     @property
     def current_page(self):
