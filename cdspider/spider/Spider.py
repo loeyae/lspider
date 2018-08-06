@@ -102,6 +102,10 @@ class Spider():
                     save['request_url'] = final_url
                     self.logger.info("Spider crawl end, result: %s" % str((last_source, broken_exc, final_url)))
                     self.logger.info('Spider parse start')
+                    if not last_source:
+                        if broken_exc:
+                            raise broken_exc
+                        raise CDSpiderCrawlerError('Spider crawl failed')
                     result = handler.parse(last_source, save.get("parent_url", final_url))
                     if return_result:
                         return_data.append((result, broken_exc, last_source, final_url, save))
