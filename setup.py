@@ -2,7 +2,6 @@
 #-*- coding: UTF-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-#version: SVN: $Id: setup.py 2269 2018-07-06 07:03:11Z zhangyi $
 
 __author__="Zhang Yi <loeyae@gmail.com>"
 __date__ ="$2018-1-9 18:06:30$"
