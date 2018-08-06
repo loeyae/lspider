@@ -108,7 +108,7 @@ def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
 @click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def newTask_schedule(ctx,newTask_schedule_cls, no_loop,  get_object=False):
+def newtask_schedule(ctx,scheduler_cls, no_loop,  get_object=False):
     """
     newTask_schedle: 根据queue:newTask2scheduler往TaskDB 里存入新的任务数据
     """
@@ -120,7 +120,7 @@ def newTask_schedule(ctx,newTask_schedule_cls, no_loop,  get_object=False):
     if g.get("debug", False):
         log_level = logging.DEBUG
     Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
-    g['instances'].append(newTask_schedule)
+    g['instances'].append(Scheduler)
     if g.get('testing_mode') or get_object:
         return Scheduler
     if no_loop:
@@ -151,6 +151,30 @@ def status_schedule(ctx,status_schedule_cls,no_loop,  get_object=False):
         Scheduler.status_run_once()
     else:
         Scheduler.status_run()
+        
+# @cli.command()
+# @click.option('--insert_kafka_worker_cls', default='cdspider.worker.insert_kafka_worker', callback=load_cls, help='worker name')
+# @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+# @click.pass_context
+# def insert_kafka_worker(ctx,insert_kafka_worker_cls,no_loop,  get_object=False):
+#     """
+#     newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
+#     """
+#     g=ctx.obj
+#     Scheduler = load_cls(ctx, None, insert_kafka_worker_cls)
+#     rate_map = g.get('rate_map')
+# 
+#     log_level = logging.WARN
+#     if g.get("debug", False):
+#         log_level = logging.DEBUG
+#     Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+#     g['instances'].append(status_schedule)
+#     if g.get('testing_mode') or get_object:
+#         return Scheduler
+#     if no_loop:
+#         Scheduler.status_run_once()
+#     else:
+#         Scheduler.status_run()
 
 
 @cli.command()
