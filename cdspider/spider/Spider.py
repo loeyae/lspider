@@ -67,11 +67,11 @@ class Spider():
         if not "save" in task or not task['save']:
             task['save'] = {}
         save = task['save']
-        mode = save.get('mode', handler.MODE_DEFAULT)
+        mode = save.get('mode', BaseHandler.MODE_DEFAULT)
+        handler = self.get_handler(task)
         if return_result:
             return_data = []
         try:
-            handler = self.get_handler(task)
             self.logger.info("Spider loaded handler: %s" % handler)
             save.setdefault('base_url', task['url'])
             save.setdefault('referer', task['url'])
