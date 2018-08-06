@@ -23,16 +23,16 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
             raise CDSpiderParserNoContent("No parsed content",
                 base_url=self.task.get('save', {}).get("base_url"), current_url=final_url)
         if self.mode == self.MODE_CHANNEL:
-            typeinfo = self._domain_info(final_url)
+            typeinfo = self._typeinfo(final_url)
             self.channel_to_list(final_url, data, typeinfo, page_source)
         elif self.mode == self.MODE_LIST:
-            typeinfo = self._domain_info(final_url)
+            typeinfo = self._typeinfo(final_url)
             self.list_to_item(final_url, data, typeinfo, page_source)
         elif self.mode == self.MODE_ITEM:
-            typeinfo = self._domain_info(self.task.get('save', {}).get('parent_url', final_url))
+            typeinfo = self._typeinfo(self.task.get('save', {}).get('parent_url', final_url))
             unique = False if not 'unid' in self.task else self.task['unid']
             self.item_to_result(final_url, data, typeinfo, page_source, unique)
         elif self.mode == self.MODE_ATT:
-            typeinfo = self._domain_info(self.task.get('save', {}).get('parent_url', final_url))
+            typeinfo = self._typeinfo(self.task.get('save', {}).get('parent_url', final_url))
             unique = False if not 'unid' in self.task else self.task['unid']
             self.attach_to_result(final_url, data, typeinfo, page_source, unique)
