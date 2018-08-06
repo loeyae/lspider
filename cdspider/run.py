@@ -54,7 +54,7 @@ def cli(ctx, **kwargs):
         db_object['base'] = load_cls(ctx, None, 'cdspider.database.{protocol}.Base'.format(protocol = db_setting.get('protocol')))
         for d in app_config.get("database", {}):
             db = 'cdspider.database.{protocol}.{db}'.format(protocol = db_setting.get('protocol'), db= d)
-            db_object[d.lower()] = load_cls(ctx, None, db)(connector)
+            db_object[d] = load_cls(ctx, None, db)(connector)
     kwargs['db'] = db_object
 
     queue_object = {}
