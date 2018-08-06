@@ -20,7 +20,7 @@ class UniqueDB(Mongo, BaseUniqueDB, SplitTableMixin):
         super(UniqueDB, self).__init__(connector, table = table, **kwargs)
         self._check_collection()
 
-    def insert(self, obj, pid, taskwid, uid, aid, kwid, ctime):
+    def insert(self, obj, ctime):
         unid = self.build(obj)
         table = self._table_name(unid)
         try:
