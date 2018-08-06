@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:56:34
-:version: SVN: $Id: MessageQueue.py 2153 2018-07-04 08:25:29Z zhangyi $
 """
 
 import time

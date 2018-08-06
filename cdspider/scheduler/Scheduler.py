@@ -24,21 +24,9 @@ class Scheduler(object):
     EXCEPTION_LIMIT = 3
     DEFAULT_RATE = [7200, "每2小时一次"]
 
-    def __init__(self, newtask_queue, inqueue, outqueue, status_queue, search_work,
-            projectdb, taskdb, sitedb, urlsdb, keywordsdb, customdb, attachmentdb,
-            rate_map, log_level = logging.WARN):
-        self.newtask_queue = newtask_queue
-        self.inqueue = inqueue
-        self.outqueue = outqueue
-        self.status_queue = status_queue
-        self.searchwork_queue = search_work
-        self.projectdb = projectdb
-        self.taskdb = taskdb
-        self.sitedb = sitedb
-        self.urlsdb = urlsdb
-        self.attachmentdb = attachmentdb
-        self.keywordsdb = keywordsdb
-        self.customdb = customdb
+    def __init__(self, db, queue, rate_map, log_level = logging.WARN):
+        self.db = db
+        self.queue = queue
         self.rate_map = rate_map
         self.logger = logging.getLogger("scheduler")
         self.log_level = log_level
@@ -52,7 +40,7 @@ class Scheduler(object):
         self.projects = set()
         projectid = 0
         while True:
-            projects = self.projectdb.get_list(where=[('pid', "$gt", projectid), ("status", ProjectDB.PROJECT_STATUS_ACTIVE)])
+            projects = self.db['ProjectsDB'].get_list(where=[('pid', "$gt", projectid), ("status", ProjectDB.PROJECT_STATUS_ACTIVE)])
             i = 0
             for project in projects:
                 self.logger.debug("Schedule check_projects project: %s " % str(project))
@@ -67,7 +55,7 @@ class Scheduler(object):
 
     def _build_attachment_task(self, task):
         self.logger.debug("Schedule build_attachment_task task: %s starting..." % str(task))
-        attachment = self.attachmentdb.get_detail(task['atid'])
+        attachment = self.AttachmentDB.get_detail(task['atid'])
         if attachment:
             project = {
                 'type': ProjectDB.PROJECT_TYPE_ATTACHE,          # 项目类型
@@ -78,8 +66,8 @@ class Scheduler(object):
             task['project'] = project
             task['attachment'] = attachment
             handler = load_handler(task=task, spider=None,
-                    projectdb=self.projectdb, sitedb=self.sitedb, keywordsdb=self.keywordsdb,
-                    urlsdb=self.urlsdb, attachmentdb=self.attachmentdb, taskdb=self.taskdb,
+                    ProjectsDB=self.ProjectsDB, SitesDB=self.SitesDB, KeywordsDB=self.KeywordsDB,
+                    UrlsDB=self.UrlsDB, AttachmentDB=self.AttachmentDB, TaskDB=self.TaskDB,
                     log_level=self.log_level)
             handler.build_newtask()
             self.logger.debug("Schedule build_attachment_task success")
@@ -159,7 +147,7 @@ class Scheduler(object):
         currenttime = int(time.time())
         for projectid in self.projects:
             while True:
-                task_list = self.taskdb.get_plan_list(projectid, currenttime)
+                task_list = self.TaskDB.get_plan_list(projectid, currenttime)
                 i = 0
                 for task in task_list:
                     self.logger.info("Schedule check_cronjob task@%s: %s" % (projectid, str(task)))
@@ -177,7 +165,7 @@ class Scheduler(object):
                 try:
                     message = self.status_queue.get_nowait()
                     self.logger.debug("Schedule check_status: %s" % str(message))
-                    StatusSchedule(status_queue = self.status_queue, projectdb = self.projectdb, taskdb = self.taskdb, sitedb = self.sitedb, urlsdb = self.urlsdb, attachmentdb = self.attachmentdb, keywordsdb = self.keywordsdb, customdb = self.customdb).schedule(message)
+                    StatusSchedule(status_queue = self.status_queue, ProjectsDB = self.ProjectsDB, TaskDB = self.TaskDB, SitesDB = self.SitesDB, UrlsDB = self.UrlsDB, AttachmentDB = self.AttachmentDB, KeywordsDB = self.KeywordsDB, customdb = self.customdb).schedule(message)
                 except Queue.Empty:
                     break
         self.logger.info("Schedule check_status end")
@@ -213,12 +201,12 @@ class Scheduler(object):
         try:
             if not 'urlsid' in task or not task['urlsid']:
                 return {"status": 500, "message": "无效的URLS ID"}
-                urls = self.urlsdb.get_detail(task['urlsid'])
+                urls = self.UrlsDB.get_detail(task['urlsid'])
                 if not urls:
                     return {"status": 500, "message": "无效的URLS"}
             if not 'siteid' in task or not task['siteid']:
                 return {"status": 500, "message": "无效的站点ID"}
-                site = self.sitedb.get_detail(task['siteid'])
+                site = self.SitesDB.get_detail(task['siteid'])
                 if not site:
                     return {"status": 500, "message": "无效的站点"}
             self.newtask_queue.put_nowait(task)
@@ -231,31 +219,31 @@ class Scheduler(object):
             if 'keywordid' in task:
                 if not task['keywordid']:
                     return {"status": 500, "message": "无效的关键词ID"}
-                keyword  = self.keywordsdb.get_detail(task['keywordid'])
+                keyword  = self.KeywordsDB.get_detail(task['keywordid'])
                 if not keyword:
                     return {"status": 500, "message": "无效的关键词"}
             elif 'projectid' in task:
                 if not task['projectid']:
                     return {"status": 500, "message": "无效的项目"}
-                project = self.projectdb.get_detail(task['projectid'])
+                project = self.ProjectsDB.get_detail(task['projectid'])
                 if not project:
                     return {"status": 500, "message": "无效的站点"}
             elif 'siteid' in task:
                 if not task['siteid']:
                     return {"status": 500, "message": "无效的站点ID"}
-                site = self.sitedb.get_detail(task['siteid'])
+                site = self.SitesDB.get_detail(task['siteid'])
                 if not site:
                     return {"status": 500, "message": "无效的站点"}
             elif 'urlsid' in task:
                 if not task['urlsid']:
                     return {"status": 500, "message": "无效的URLS ID"}
-                urls = self.urlsdb.get_detail(task['urlsid'])
+                urls = self.UrlsDB.get_detail(task['urlsid'])
                 if not urls:
                     return {"status": 500, "message": "无效的URLS"}
             elif 'attachid' in task:
                 if not task['attachid']:
                     return {"status": 500, "message": "无效的附加任务ID"}
-                attachment = self.attachmentdb.get_detail(task['attachid'])
+                attachment = self.AttachmentDB.get_detail(task['attachid'])
                 if not attachment:
                     return {"status": 500, "message": "无效的附加任务"}
             else:
@@ -270,13 +258,13 @@ class Scheduler(object):
             if 'kwid' in task:
                 if not task['kwid']:
                     return {"status": 500, "message": "无效的关键词ID"}
-                keyword  = self.keywordsdb.get_detail(task['kwid'])
+                keyword  = self.KeywordsDB.get_detail(task['kwid'])
                 if not keyword:
                     return {"status": 500, "message": "无效的关键词"}
             elif 'siteid' in task:
                 if not task['siteid']:
                     return {"status": 500, "message": "无效的站点ID"}
-                site = self.sitedb.get_detail(task['siteid'])
+                site = self.SitesDB.get_detail(task['siteid'])
                 if not site:
                     return {"status": 500, "message": "无效的站点"}
             else:
@@ -358,8 +346,8 @@ class Scheduler(object):
         self.xmlrpc_server.listen(port=port, address=bind)
         self.logger.info('schedule.xmlrpc listening on %s:%s', bind, port)
         self.xmlrpc_ioloop.start()
-        
-        
+
+
     def status_run(self):
         """
         newTask_schedule 进程
@@ -378,7 +366,7 @@ class Scheduler(object):
                 self._exceptions += 1
                 if self._exceptions > self.EXCEPTION_LIMIT:
                     break
-    
+
     def status_run_once(self):
         self.logger.info("status_schedule once starting...")
         q_data=self.queue['status_queue'].get_nowait()
@@ -402,7 +390,7 @@ class Scheduler(object):
         else:
             return self.logger.debug("Schedule status_task failed")
         self.logger.info("status_schedule once end")
-        
+
     def _status_udpate_mongo(self,data,db,id_type,pid):
         obj={}
         if 'rate' in data:
@@ -412,7 +400,7 @@ class Scheduler(object):
                 obj['plantime']=int(time.time)+obj['rate']
             except:
                 pass
-            
+
         if 'status' in data:
             status=data['status']
             try:
@@ -421,16 +409,16 @@ class Scheduler(object):
                     obj['plantime']=int(time.time)
             except:
                 pass
-                
+
         if 'rate' in obj:
             for item in self.db['TaskDB'].get_list(pid,where={id_type:data[id_type]}):
                 if item['rate']>obj['rate']:
                     self.db['TaskDB'].update(item['tid'],pid,obj=obj)
         else:
             self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data['id_type']})
-            
+
         return self.logger.debug("Schedule update success")
-    
+
     def newTask_run(self):
         """
         newTask_schedule 进程
@@ -449,7 +437,7 @@ class Scheduler(object):
                 self._exceptions += 1
                 if self._exceptions > self.EXCEPTION_LIMIT:
                     break
-    
+
     def newTask_run_once(self):
         self.logger.info("newTask_schedule once starting...")
         q_data=self.queue['newtask_queue'].get_nowait()

@@ -27,7 +27,7 @@ class NewTaskTrait(object):
             'crawlinfo': None,                     # 最近十次抓取信息
             'plantime': 0,                         # 下一次入队时间
         }
-        return self.db['taskdb'].insert(task)
+        return self.db['TaskDB'].insert(task)
 
     def build_newtask_by_attachment(self):
         project = self.task.get("project")
@@ -38,7 +38,7 @@ class NewTaskTrait(object):
             raise CDSpiderHandlerError('No Attachment')
         self.logger.debug("%s build_newtask_by_attachment attachment: %s" % (self.__class__.__name__, attachment))
         status = 1 if attachment['status'] == AttachmentDB.STATUS_ACTIVE else 0
-        count = self.db['taskdb'].get_count(project['pid'], {"aid": attachment['aid']}) or 0
+        count = self.db['TaskDB'].get_count(project['pid'], {"aid": attachment['aid']}) or 0
         self._new_task(project['pid'], 0, self.task['url'], attachment['rate'], count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time) + int(attachment['expire']) * self.EXPIRE_STEP)
 
     def build_newtask_by_keywords(self):

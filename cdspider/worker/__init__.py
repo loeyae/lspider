@@ -1,7 +1,6 @@
 #-*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-#version: SVN: $Id: __init__.py 2178 2018-07-04 12:44:44Z zhangyi $
 
 import time
 import logging
@@ -12,19 +11,9 @@ class BaseWorker():
 
     LOOP_INTERVAL = 0.1
 
-    def __init__(self, inqueue, outqueue, excqueue, projectdb, uniquedb, sitedb, urlsdb, attachmentdb, keywordsdb, customdb, resultdb, sitetypedb, proxy, mailer = None, log_level=logging.WARN):
-        self.inqueue=inqueue
-        self.outqueue=outqueue
-        self.excqueue=excqueue
-        self.projectdb=projectdb
-        self.sitedb=sitedb
-        self.uniquedb=uniquedb
-        self.urlsdb=urlsdb
-        self.attachmentdb=attachmentdb
-        self.keywordsdb=keywordsdb
-        self.customdb=customdb
-        self.resultdb=resultdb
-        self.sitetypedb=sitetypedb
+    def __init__(self, db, queue, proxy, mailer = None, log_level=logging.WARN):
+        self.db = db
+        self.queue=queue
         self.mailer=mailer
         self.proxy=proxy
         self.log_level=log_level

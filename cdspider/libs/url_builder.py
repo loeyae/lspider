@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-6-20 9:54:45
-:version: SVN: $Id: url_builder.py 2234 2018-07-06 01:26:36Z zhangyi $
 """
 import six
 import time

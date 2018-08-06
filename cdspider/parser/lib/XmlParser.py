@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-25 9:55:21
-:version: SVN: $Id: XmlParser.py 2079 2018-07-03 11:24:33Z zhangyi $
 """
 import lxml.etree
 from . import BaseParser

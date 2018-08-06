@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-25 10:54:35
-:version: SVN: $Id: SmtpSender.py 2175 2018-07-04 12:42:41Z zhangyi $
 """
 import os
 import traceback

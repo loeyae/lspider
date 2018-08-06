@@ -34,12 +34,12 @@ class Spider():
         self.inqueue = queue.get('schedule2spider')
         self.outqueue = queue.get('schedule2spider')
         self.status_queue = queue.get('status_queue')
-        self.projectdb = db.get('projectsdb')
-        self.sitedb = db.get('sitesdb')
-        self.urlsdb = db.get('urlsdb')
-        self.attachmentdb = db.get('attachmentdb')
-        self.keywordsdb = db.get('keywordsdb')
-        self.taskdb = db.get('taskdb')
+        self.ProjectsDB = db.get('ProjectsDB')
+        self.SitesDB = db.get('SitesDB')
+        self.UrlsDB = db.get('UrlsDB')
+        self.AttachmentDB = db.get('AttachmentDB')
+        self.KeywordsDB = db.get('KeywordsDB')
+        self.TaskDB = db.get('TaskDB')
         self.db = db
         self.queue = queue
         self.proxy = proxy
@@ -216,7 +216,7 @@ class Spider():
         if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
             self.logger.debug("Task: %s not active" % task)
             return None
-        attachment = self.attachmentdb.get_detail(int(message['aid']))
+        attachment = self.AttachmentDB.get_detail(int(message['aid']))
         if not attachment:
             self.status_queue.put_nowait({"aid": task['aid'], 'status': AttachmentDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Attachment: %s not found" % task['aid'])
@@ -230,6 +230,7 @@ class Spider():
         if not 'save' in task or not task['save']:
             task['save'] = {}
         tasl['save']['mode'] = BaseHandler.MODE_ATT
+        tasl['save']['base_url'] = task['url']
         return task
 
     def _get_task_from_project(self, message, task, project, no_check_status = False):
@@ -242,7 +243,7 @@ class Spider():
             task['save'] = {}
         task['save']['mode'] = message['mode'];
         task['project'] = project
-        site = self.sitedb.get_detail(int(task['sid']))
+        site = self.SitesDB.get_detail(int(task['sid']))
         if not site:
             self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
@@ -255,7 +256,7 @@ class Spider():
             site['sub_process'] = {}
         task['site'] = site
         if 'uid' in task and task['uid']:
-            urls = self.urlsdb.get_detail(int(task['uid']))
+            urls = self.UrlsDB.get_detail(int(task['uid']))
             if not urls:
                 self.status_queue.put_nowait({"aid": task['aid'], 'status': UrlsDB.STATUS_DELETED})
                 raise CDSpiderDBDataNotFound("Url: %s not found" % task['uid'])
@@ -266,18 +267,17 @@ class Spider():
                 urls['main_process'] = {}
             if not 'sub_process' in urls or not urls['sub_process']:
                 urls['sub_process'] = {}
-            task['save'].setdefault('base_url', urls['url'])
-            task['save'].setdefault('referer', urls['url'])
             task['urls'] = urls
         if 'kwid' in task and task['kwid']:
-            keywords = self.keywordsdb.get_detail(int(task['kwid']))
+            keywords = self.KeywordsDB.get_detail(int(task['kwid']))
             if not keywords:
                 self.status_queue.put_nowait({"kwid": task['kwid'], 'status': KeywordsDB.STATUS_DELETED})
                 raise CDSpiderDBDataNotFound("Keyword: %s not found" % task['kwid'])
             if not no_check_status and keywords.get('status', KeywordsDB.STATUS_INIT) != KeywordsDB.STATUS_ACTIVE:
                 self.logger.debug("Keywords: %s" % keywords)
                 return None
-            task['save']['hard_data'] = {"keyword": keywords['word']}
+        task['save'].setdefault('base_url', task['url'])
+        task['save'].setdefault('referer', task['url'])
         return task
 
     def _get_task_from_item(self, message, task, project, no_check_status = False):
@@ -290,8 +290,12 @@ class Spider():
             })
         if not 'save' in task or not task['save']:
             task['save'] = {}
+        task['rid'] = message['rid']
+        task['unid'] = message['unid']
         task['save']['mode'] = message['mode'];
         task['save']['parent_url'] = message['parent_url'];
+        task['save']['base_url'] = message['url']
+        task['item'] = message['save']
         return task
 
     def get_task(self, message, task=None, no_check_status = False):
@@ -302,8 +306,8 @@ class Spider():
         pid = message.get('pid')
         taskid = message.get('tid')
         if task is None and taskid:
-            task = self.taskdb.get_detail(taskid, pid, True)
-        project = self.projectdb.get_detail(int(task['pid']))
+            task = self.TaskDB.get_detail(taskid, pid, True)
+        project = self.ProjectsDB.get_detail(int(task['pid']))
         if not project:
             self.status_queue.put_nowait({"pid": pid, 'status': ProjectsDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Project: %s not found" % pid)

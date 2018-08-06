@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:27:08
-:version: SVN: $Id: result_worker.py 2180 2018-07-04 12:49:54Z zhangyi $
 """
 import time
 from cdspider.database.base import TaskDB
@@ -61,20 +60,20 @@ class ResultWorker(BaseWorker):
             status_queue = None
             requeue = self.outqueue
             excqueue=self.excqueue
-            projectdb=self.projectdb
+            ProjectsDB=self.ProjectsDB
             sitetypedb = self.sitetypedb
-            taskdb = None
-            sitedb=self.sitedb
-            uniquedb=self.uniquedb
-            urlsdb=self.urlsdb
-            attachmentdb=self.attachmentdb
-            keywordsdb=self.keywordsdb
+            TaskDB = None
+            SitesDB=self.SitesDB
+            UniqueDB=self.UniqueDB
+            UrlsDB=self.UrlsDB
+            AttachmentDB=self.AttachmentDB
+            KeywordsDB=self.KeywordsDB
             customdb=self.customdb
             resultdb=self.resultdb
             spider = Spider(inqueue=inqueue, outqueue=outqueue, status_queue=status_queue, requeue=requeue,
-            excqueue=excqueue, projectdb=projectdb, sitetypedb=sitetypedb, taskdb=taskdb, sitedb=sitedb,
-            resultdb=resultdb, customdb=customdb, uniquedb=uniquedb, urlsdb=urlsdb, keywordsdb=keywordsdb,
-            attachmentdb=attachmentdb, handler=None, proxy=self.proxy, log_level=self.log_level)
+            excqueue=excqueue, ProjectsDB=ProjectsDB, sitetypedb=sitetypedb, TaskDB=TaskDB, SitesDB=SitesDB,
+            resultdb=resultdb, customdb=customdb, UniqueDB=UniqueDB, UrlsDB=UrlsDB, KeywordsDB=KeywordsDB,
+            AttachmentDB=AttachmentDB, handler=None, proxy=self.proxy, log_level=self.log_level)
             task = spider.get_task({'pid': result.get('projectid')}, task)
             spider.fetch(task)
         else:

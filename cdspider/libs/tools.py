@@ -1,8 +1,6 @@
 #-*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-#version: SVN: $Id: tools.py 988 2018-06-07 09:37:25Z zhangyi $
-
 import sys
 import imp
 import inspect

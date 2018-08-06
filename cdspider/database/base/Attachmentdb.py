@@ -32,6 +32,8 @@ class AttachmentDB(Base):
     """
     attachment database obejct
     """
+    TYPE_IMPACT = 1
+    TYPE_COMMENTS = 2
 
     def insert(self, obj = {}):
         raise NotImplementedError

@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-25 18:52:45
-:version: SVN: $Id: wsgi_xmlrpc.py 1287 2018-06-20 01:54:49Z zhangyi $
 """
 from six.moves.xmlrpc_server import SimpleXMLRPCDispatcher
 import logging

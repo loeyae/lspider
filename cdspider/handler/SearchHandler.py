@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:51:00
-:version: SVN: $Id: SearchHandler.py 1996 2018-07-02 11:10:29Z zhangyi $
 """
 import time
 import traceback
@@ -22,7 +21,6 @@ class SearchHandler(BaseHandler, NewTaskTrait):
 
     def __init__(self, *args, **kwargs):
         super(SearchHandler, self).__init__(*args, **kwargs)
-        self.siteinfo=self.sitedb.get_detail(6)
 
     def newtask(self):
         """

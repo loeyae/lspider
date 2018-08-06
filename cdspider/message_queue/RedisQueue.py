@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-29 11:23:19
-:version: SVN: $Id: RedisQueue.py 1381 2018-06-21 12:43:03Z zhangyi $
 """
 import time
 import logging

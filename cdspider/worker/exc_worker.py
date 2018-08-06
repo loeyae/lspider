@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-14 21:06:24
-:version: SVN: $Id: exc_worker.py 1395 2018-06-22 02:41:32Z zhangyi $
 """
 import traceback
 from cdspider.mailer import BaseSender

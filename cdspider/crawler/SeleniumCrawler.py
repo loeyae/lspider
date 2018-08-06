@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-19 9:13:51
-:version: SVN: $Id: SeleniumCrawler.py 2346 2018-07-09 19:30:45Z zhangyi $
 """
 import os
 import six

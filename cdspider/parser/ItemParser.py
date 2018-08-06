@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-5-17 14:27:33
-:version: SVN: $Id: ItemParser.py 2297 2018-07-06 08:11:14Z zhangyi $
 """
 import re
 from cdspider.libs import utils
@@ -57,7 +56,7 @@ class ItemParser(BaseParser):
                 data[i] = article.infos['cleaned_text']
                 data["raw_content"] = '\r\n'.join(article.top_node_html) if isinstance(article.top_node_html, (list, tuple)) else article.top_node_html
                 data["raw_content"] = re.sub('[\u3000\xa0]', '', str(data["raw_content"]))
-            elif i == 'created':
+            elif i == 'pubtime':
                 data[i] = article.infos['publish_date']
             elif i == 'author':
                 data[i] = self.get_author(article.infos['authors'])
@@ -69,8 +68,8 @@ class ItemParser(BaseParser):
             data['content'] = article.infos['cleaned_text']
             data["raw_content"] = '\r\n'.join(article.top_node_html) if isinstance(article.top_node_html, (list, tuple)) else article.top_node_html
             data["raw_content"] = re.sub('[\u3000\xa0]', '', str(data["raw_content"]))
-        if not 'created' in data:
-            data['created'] = article.infos['publish_date']
+        if not 'pubtime' in data:
+            data['pubtime'] = article.infos['publish_date']
         if not 'author' in data:
             data['author'] = self.get_author(article.infos['authors'])
         return data

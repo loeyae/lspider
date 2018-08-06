@@ -2,7 +2,6 @@
 #-*- coding: UTF-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-#version: SVN: $Id: run.py 2299 2018-07-06 08:30:54Z zhangyi $
 
 __author__="Zhang Yi <loeyae@gmail.com>"
 __date__ ="$2018-1-9 18:04:41$"
@@ -87,7 +86,7 @@ def cli(ctx, **kwargs):
 @click.pass_context
 def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
-    Schedule: 根据taskdb往queue:scheduler2spider 里塞任务
+    Schedule: 根据TaskDB往queue:scheduler2spider 里塞任务
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -111,7 +110,7 @@ def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
 @click.pass_context
 def newTask_schedule(ctx,newTask_schedule_cls, no_loop,  get_object=False):
     """
-    newTask_schedle: 根据queue:newTask2scheduler往taskdb 里存入新的任务数据
+    newTask_schedle: 根据queue:newTask2scheduler往TaskDB 里存入新的任务数据
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -135,7 +134,7 @@ def newTask_schedule(ctx,newTask_schedule_cls, no_loop,  get_object=False):
 @click.pass_context
 def status_schedule(ctx,status_schedule_cls,no_loop,  get_object=False):
     """
-    newTask_schedle: 根据queue:status2scheduler往taskdb 里更新数据状态
+    newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -171,7 +170,7 @@ def fetch(ctx, fetch_cls, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=
     queue = g.get('queue'),
     if no_input:
         queue = {}
-        db['taskdb'] = None
+        db['TaskDB'] = None
     handler = None
     proxy = g.get('proxy', None)
     log_level = logging.WARN
@@ -278,7 +277,7 @@ def rebuild_result(ctx, created, no_loop):
     import time
     g = ctx.obj
     outqueue = g.get('spider2result')
-    articlesdb = g.get('articlesdb')
+    ArticlesDB = g.get('ArticlesDB')
     createtime = 0
     lastcreatetime = createtime
     if not created:
@@ -289,13 +288,13 @@ def rebuild_result(ctx, created, no_loop):
         else:
             lastcreatetime = createtime
         g['logger'].debug("current createtime: %s" % createtime)
-        data = articlesdb.get_list(created, where = [("status", articlesdb.RESULT_STATUS_INIT), ("createtime", "$gte", createtime)], select={"rid": 1, "url": 1, "createtime": 1}, hits=100)
+        data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.RESULT_STATUS_INIT), ("createtime", "$gte", createtime)], select={"rid": 1, "url": 1, "createtime": 1}, hits=100)
         data = list(data)
         g['logger'].debug("got result: %s" % str(data))
         i = 0
         for item in data:
             if item['url'].startswith('javascript'):
-                articlesdb.update(item['rid'], {"status": articlesdb.RESULT_STATUS_DELETED})
+                ArticlesDB.update(item['rid'], {"status": ArticlesDB.RESULT_STATUS_DELETED})
                 continue
             outqueue.put_nowait({"id": item['rid'], "task": 1})
             if item['createtime'] > createtime:

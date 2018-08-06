@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-5-29 10:44:27
-:version: SVN: $Id: RegularParser.py 2097 2018-07-03 14:28:05Z zhangyi $
 """
 import re
 from . import BaseParser

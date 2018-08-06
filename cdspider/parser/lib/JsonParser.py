@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-24 21:39:45
-:version: SVN: $Id: JsonParser.py 2096 2018-07-03 14:03:03Z zhangyi $
 """
 import six
 import re

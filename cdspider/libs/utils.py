@@ -1,7 +1,6 @@
 #-*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-#version: SVN: $Id: utils.py 2233 2018-07-06 01:26:22Z zhangyi $
 import sys
 import os
 import re
@@ -28,7 +27,14 @@ import datetime
 def build_url_by_rule(rule, params):
     url = rule.get('base')
     if rule.get('mode', 'get') == 'format':
-        return url.format(**params)
+        keylist = re.findall('\{(\w+)\}', rul)
+        format_params = {}
+        for key in keylist:
+            if key in params:
+                format_params[key] = params[key]
+            else:
+                format_params[key] = '{%s}' % key
+        return url.format(**format_params)
     return build_query(url, params)
 
 def parse_domain(url):

@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-6-12 16:14:02
-:version: SVN: $Id: XpathParser.py 2078 2018-07-03 11:24:15Z zhangyi $
 """
 import lxml
 from .goose3.parsers import Parser

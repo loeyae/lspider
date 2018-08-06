@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-16 11:13:07
-:version: SVN: $Id: AttachHandler.py 1997 2018-07-02 11:11:00Z zhangyi $
 """
 import time
 import traceback

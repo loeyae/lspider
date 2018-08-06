@@ -6,7 +6,7 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 19:49:34
-:version: SVN: $Id: Keywordsdb.py 2114 2018-07-04 03:56:01Z zhangyi $
+:version: SVN: $Id: KeywordsDB.py 2114 2018-07-04 03:56:01Z zhangyi $
 """
 import time
 from cdspider.database.base import KeywordsDB as BaseKeywordsDB

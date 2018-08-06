@@ -34,6 +34,7 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
             self.item_to_result(final_url, data, typeinfo, page_source, unique)
         elif mode == self.MODE_ATT:
             typeinfo = self._domain_info(self.task.get('save', {}).get('parent_url', final_url))
-            self.attach_to_result(final_url, data, typeinfo, task, page_source)
+            unique = False if not 'unid' in self.task else self.task['unid']
+            self.attach_to_result(final_url, data, typeinfo, page_source, unique)
 
 

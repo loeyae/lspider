@@ -1,22 +1,19 @@
 #-*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-#version: SVN: $Id: __init__.py 2428 2018-07-31 01:28:52Z zhangyi $
 import abc
 import re
 import six
 import time
 import logging
 import traceback
-import copy
-from urllib.parse import urljoin
+import copyurljoin
 from cdspider.crawler import SeleniumCrawler
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.exceptions import *
 from cdspider.libs.tools import *
 from cdspider.libs.url_builder import UrlBuilder
-from cdspider.libs.time_parser import Parser as TimeParser
 
 IGNORE_EXCEPTIONS = (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerNoExists, CDSpiderCrawlerNoSource)
 RETRY_EXCEPTIONS = (CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout)
@@ -77,6 +74,11 @@ class BaseHandler(object):
         self.process = None
         self.mode = self.task.get('save').get('mode', self.MODE_DEFAULT)
         self.page = 1
+        self.last_result_id = None
+
+    def _domain_info(self, url):
+        subdomain, domain = utisl.parse_domain(url)
+        return "%s.%s" % (subdomain, domain), domain
 
     @property
     def current_page(self):
@@ -177,12 +179,12 @@ class BaseHandler(object):
         elif self.mode == self.MODE_LIST:
             self.process = self.task.get('urls', {}).get('sub_process', self.task.get('site', {}).get('sub_process', self.DEFAULT_PROCESS))
         elif self.mode == self.MODE_ITEM:
-            subdomain, domain = utisl.parse_domain(url)
+            subdomain, domain = self._domain_info(url)
             parserule = None
             if subdomain:
-                parserule = self.db['parseruledb'].get_detail_by_subdomain('%s.%s' % (subdomain, domain))
+                parserule = self.db['ParseRuleDB'].get_detail_by_subdomain(subdomain)
             if not list(parserule):
-                parserule = self.db['parseruledb'].get_detail_by_domain(domain)
+                parserule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
             self.process = list(parserule)
         elif self.mode == self.MODE_ATT:
             self.process = self.task.get('attachment', {}).get('process', self.DEFAULT_PROCESS)
@@ -232,17 +234,17 @@ class BaseHandler(object):
         """
         获取附加任务链接，并push newtask
         """
-        subdomain, domain = utisl.parse_domain(url)
-        attach_list = self.db['attachmentdb'].get_list_by_subdomain('%s.%s' % (subdomain, domain))
+        subdomain, domain = self._domain_info(url)
+        attach_list = self.db['AttachmentDB'].get_list_by_subdomain(subdomain)
         if not list(attach_list):
-            attach_list = self.db['attachmentdb'].get_list_by_domain(domain)
+            attach_list = self.db['AttachmentDB'].get_list_by_domain(domain)
         for each in attach_list:
             parse = each.get('preparse', {}).get('parse', None)
             if parse:
                 parsed = self.parse(source, parse)
                 urlrule = each.get('preparse', {}).get('url', None)
                 attachurl = utils.build_url_by_rule(urlrule, parsed)
-                self.queue['newtask_queue'].put_nowait({'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid')})
+                self.queue['newtask_queue'].put_nowait({'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid'), 'rid': self.last_result_id})
 
     def on_repetition(self):
         """
@@ -259,10 +261,10 @@ class BaseHandler(object):
             if isinstance(exc, RETRY_EXCEPTIONS) or not isinstance(exc, CDSpiderError):
                 self.task['queue'].put_nowait(self.task['queue_message'])
                 return
-        if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in self.task and self.db['articlesdb']:
-            self.db['articlesdb'].update(self.task['rid'], {"status": self.db['articlesdb'].STATUS_DELETED})
+        if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in self.task and self.db['ArticlesDB']:
+            self.db['ArticlesDB'].update(self.task['rid'], {"status": self.db['ArticlesDB'].STATUS_DELETED})
             return
-        if not isinstance(exc, IGNORE_EXCEPTIONS) and self.queue['excqueue']:
+        if not isinstance(exc, IGNORE_EXCEPTIONS) and self.queue['excinfo_queue']:
             message = {
                 'mode':  self.mode,
                 'base_url': self.task.get("save", {}).get("base_url", None),
@@ -270,13 +272,13 @@ class BaseHandler(object):
                 'project': self.task.get("pid", None),
                 'site': self.task.get("sid", None),
                 'urls': self.task.get("uid", None),
-                'site': self.task.get("kwid", None),
+                'keyword': self.task.get("kwid", None),
                 'crawltime': self.crawl_id,
                 'err_message': str(exc),
                 'tracback': traceback.format_exc(),
                 'last_source': self.task.get('last_source', None),
             }
-            self.queue['excqueue'].put_nowait(message)
+            self.queue['excinfo_queue'].put_nowait(message)
 
     @abc.abstractmethod
     def on_result(self, data, broken_exc, page_source, final_url):
@@ -291,14 +293,14 @@ class BaseHandler(object):
                 save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
 
     def finish(self):
-        if self.db['taskdb'] and self.task.get('tid', None):
+        if self.db['TaskDB'] and self.task.get('tid', None):
             crawlinfo = self.task.get('crawlinfo', {}) or {}
             self.crawl_info['crawl_end'] = int(time.time())
             crawlinfo[str(self.crawl_id)] = self.crawl_info
             crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
             if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
                 del crawlinfo_sorted[0]
-            self.db['taskdb'].update(self.task.get('tid'), self.task.get('pid'), {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": self.task.get("save")})
+            self.db['TaskDB'].update(self.task.get('tid'), self.task.get('pid'), {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": self.task.get("save")})
             #TODO 自动调节抓取频率
 
 from .NewTaskTrait import NewTaskTrait

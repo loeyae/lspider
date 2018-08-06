@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:39:24
-:version: SVN: $Id: RequestsCrawler.py 2345 2018-07-09 18:40:34Z zhangyi $
 """
 import requests
 import time

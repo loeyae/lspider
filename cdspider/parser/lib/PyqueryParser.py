@@ -6,7 +6,6 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:58:01
-:version: SVN: $Id: PyqueryParser.py 2081 2018-07-03 11:24:50Z zhangyi $
 """
 import six
 from pyquery import PyQuery
