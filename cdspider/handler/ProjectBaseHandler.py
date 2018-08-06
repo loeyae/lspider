@@ -16,23 +16,23 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
         """
         on result
         """
-        self.logger.debug("%s on_result: %s @ %s %s" % (self.__class__.__name__, str(data), mode, str(broken_exc)))
+        self.logger.debug("%s on_result: %s @ %s %s" % (self.__class__.__name__, str(data), self.mode, str(broken_exc)))
         if not data:
             if broken_exc:
                 raise broken_exc
             raise CDSpiderParserNoContent("No parsed content",
                 base_url=self.task.get('save', {}).get("base_url"), current_url=final_url)
-        if mode == self.MODE_CHANNEL:
+        if self.mode == self.MODE_CHANNEL:
             typeinfo = self._domain_info(final_url)
             self.channel_to_list(final_url, data, typeinfo, page_source)
-        elif mode == self.MODE_LIST:
+        elif self.mode == self.MODE_LIST:
             typeinfo = self._domain_info(final_url)
             self.list_to_item(final_url, data, typeinfo, page_source)
-        elif mode == self.MODE_ITEM:
+        elif self.mode == self.MODE_ITEM:
             typeinfo = self._domain_info(self.task.get('save', {}).get('parent_url', final_url))
             unique = False if not 'unid' in self.task else self.task['unid']
             self.item_to_result(final_url, data, typeinfo, page_source, unique)
-        elif mode == self.MODE_ATT:
+        elif self.mode == self.MODE_ATT:
             typeinfo = self._domain_info(self.task.get('save', {}).get('parent_url', final_url))
             unique = False if not 'unid' in self.task else self.task['unid']
             self.attach_to_result(final_url, data, typeinfo, page_source, unique)
