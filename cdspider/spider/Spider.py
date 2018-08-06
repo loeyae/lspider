@@ -81,6 +81,7 @@ class Spider():
             refresh_base = save.get('rebase', False)
             last_source_unid = None
             last_url = None
+            self.logger.info("Spider process start")
             try:
                 self.logger.info("Spider fetch prepare start")
                 handler.prepare(save)
@@ -114,7 +115,7 @@ class Spider():
                     if not 'incr_data' in save:
                         break
             finally:
-                self.logger.info("Spider process end, rule: %s" % process)
+                self.logger.info("Spider process end")
         except Exception as e:
             if 'incr_data' in save and isinstance(save['incr_data'], list) and save['incr_data']:
                 for item in save['incr_data']:
