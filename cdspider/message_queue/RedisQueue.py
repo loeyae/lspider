@@ -15,7 +15,9 @@ import umsgpack
 import redis
 from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
+
 connection_pool = {}
+
 def catch_error(func):
     """
     Catch errors of redis then reconnect
@@ -38,6 +40,9 @@ def catch_error(func):
             return func(self, *args, **kwargs)
         except connect_exceptions as e:
             logger.error('Redis error: %r, reconnect.', e)
+            k = self.symbol()
+            if k in connection_pool:
+                del connection_pool[k]
             self.connect()
             return func(self, *args, **kwargs)
     return wrap
@@ -64,8 +69,8 @@ class RedisQueue(CDBaseQueue):
 
         k = self.symbol()
         if not k in connection_pool:
-            connection_pool = redis.ConnectionPool(host=self.host, port=self.port, db=self.path, password=self.password)
-            self.connect = redis.Redis(connection_pool=connection_pool)
+            connectionPool = redis.ConnectionPool(host=self.host, port=self.port, db=self.path, password=self.password)
+            self.connect = redis.Redis(connection_pool=connectionPool)
             connection_pool[k] = self.connect
         else:
             self.connect = connection_pool[k]
