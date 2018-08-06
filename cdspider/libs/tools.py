@@ -171,7 +171,7 @@ class ModulerLoader(object):
 
     def __init__(self, moduler, mod=None):
         self.moduler = moduler
-        self.name = moduler['class_name']
+        self.name = moduler['name']
         self.mod = mod
 
     def load_module(self):
@@ -208,24 +208,15 @@ class ProjectLoader(ModulerLoader):
     """
     def __init__(self, project, mod=None):
         super(ProjectLoader, self).__init__(project, mod)
-        self.name = 'cdspider.handler.custom.%s' % project['class_name']
+        self.name = 'cdspider.handler.custom.%s' % project['name']
 
-class SiteLoader(ModulerLoader):
+class TaskLoader(ModulerLoader):
     """
     任务
     """
     def __init__(self, task, mod=None):
-        task['name'] = task['project']['class_name']
-        super(SiteLoader, self).__init__(task, mod)
-        self.name = 'cdspider.handler.custom.%s' % task['name']
-
-class UrlLoader(ModulerLoader):
-    """
-    URL
-    """
-    def __init__(self, url, mod=None):
-        task['name'] = url['site']['class_name']
-        super(UrlLoader, self).__init__(task, mod)
+        task['name'] = task['project']['name']
+        super(TaskLoader, self).__init__(task, mod)
         self.name = 'cdspider.handler.custom.%s' % task['name']
 
 def load_handler(task, **kwargs):
@@ -241,17 +232,15 @@ def load_handler(task, **kwargs):
     site = task.get("site", None)
     url = task.get("url", None)
     if 'pid' in project and project['pid']:
-        project.setdefault('class_name', 'Project%s' % project['pid'])
+        project['name'] = 'Project%s' % project['pid']
     if project and "scripts" in project and project['scripts']:
         mod = ProjectLoader(project).load_module()
-    if 'sid' in site and site['sid']:
-        site.setdefault('class_name', 'Site%s' % site['sid'])
     if site and "scripts" in site and site['scripts']:
-        site['project'] = {"class_name": project['class_name']}
-        mod = SiteLoader(site, mod).load_module()
+        site['project'] = {"name": project['name']}
+        mod = TaskLoader(site, mod).load_module()
     if url and "scripts" in url and url['scripts']:
-        url['site'] = {"class_name": site['class_name']}
-        mod = UrlLoader(url, mod).load_module()
+        url['project'] = {"name": project['name']}
+        mod = TaskLoader(url, mod).load_module()
     if mod:
         _class_list = []
         for each in list(six.itervalues(mod.__dict__)):
