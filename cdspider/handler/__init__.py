@@ -242,7 +242,9 @@ class BaseHandler(object):
             rule = self._get_parse(url)
         if not mode:
             mode = self.mode
-        if mode == self.MODE_ITEM:
+        if mode == self.MODE_ATT:
+            parser_name = 'custom'
+        elif mode == self.MODE_ITEM:
             parser_name = 'item'
         else:
             parser_name = 'list'
