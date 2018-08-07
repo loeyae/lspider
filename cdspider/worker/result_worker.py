@@ -13,7 +13,7 @@ from cdspider.worker import BaseWorker
 from cdspider.parser import ItemParser
 from cdspider.spider import Spider
 from cdspider.libs import utils
-from cdspider.libs.time_parser import Parser as TimeParser
+from cdspider.parser.lib.time_parser import Parser as TimeParser
 
 class ResultWorker(BaseWorker):
     """
