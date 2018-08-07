@@ -122,7 +122,7 @@ class ResultTrait(object):
             'unid': unid,
             'parent_url': parent_url,
         }
-        self.queue['schedule2spider'].put_nowait(message)
+        self.queue['scheduler2spider'].put_nowait(message)
 
     def channel_to_list(self, final_url, data, typeinfo, page_source, unique = True):
         """
