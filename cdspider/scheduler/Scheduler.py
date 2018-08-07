@@ -68,7 +68,7 @@ class Scheduler(object):
             url=self.db['UrlsDB'].get_detail(task['uid'])
             site=self.db['SitesDB'].get_detail(url['sid'])
             project=self.db['ProjectsDB'].get_detail(site['pid'])
-            task['url']=url
+            task['urls']=url
             task['site']=site
             task['project']=project
         elif 'aid' in task:
@@ -80,7 +80,7 @@ class Scheduler(object):
             task['site']['scripts'] = attachment['scripts']
         else:
             return self.logger.debug("Schedule NewTask failed")
-        handler=load_handler(task, spider=None)
+        handler=load_handler(task, db=self.db,queue=self.queue)
         handler.newtask()
         self.logger.debug("Schedule build_task success")
 
