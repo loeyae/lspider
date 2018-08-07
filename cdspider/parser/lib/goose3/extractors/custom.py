@@ -29,17 +29,20 @@ class CustomExtractor(BaseExtractor):
     KNOWN_CUSTOM_PATTERN_BY_DOMAIN = {
     }
 
-    def extract(self, key):
+    def extract(self, key, custom_rule = None, onlyOne = None):
         try:
-            onlyOne = bool(int(self.custom_rule.get(key, {}).get('onlyOne', 1)))
-            custom_rule = self.custom_rule.get(key, {}).get('filter') if self.custom_rule else None
-            if custom_rule:
-                matched = self.custom_match(custom_rule, dtype=self.custom_rule.get(key, {}).get('type', 'text'), target=self.custom_rule.get(key, {}).get('target', 'value'), onlyOne=onlyOne)
+            if custom_rule is None:
+                custom_rule = self.custom_rule.get(key, {})
+            if onlyOne is None:
+                onlyOne = bool(int(custom_rule.get('onlyOne', 1)))
+            rule = custom_rule.get('filter', None)
+            if rule:
+                matched = self.custom_match(rule, dtype=custom_rule.get('type', 'text'), target=custom_rule.get('target', 'value'), onlyOne=onlyOne)
                 if matched:
                     return matched
-            self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN.update(self.custom_rule.get(key, {}).get('pattern4domain', {}))
-            self.KNOWN_CUSTOM_TAGS_BY_DOMAIN.update(self.custom_rule.get(key, {}).get('tags4domain', {}))
-            self.KNOWN_CUSTOM_TAGS.extend(self.custom_rule.get(key, {}).get('tags', []))
+            self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN.update(custom_rule.get('pattern4domain', {}))
+            self.KNOWN_CUSTOM_TAGS_BY_DOMAIN.update(custom_rule.get('tags4domain', {}))
+            self.KNOWN_CUSTOM_TAGS.extend(custom_rule.get('tags', []))
 
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
