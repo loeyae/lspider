@@ -414,3 +414,98 @@ class CatalogueCrawler(object):
         self.catalogue.data = self.extractor.extract()
 
         return self.catalogue
+
+class CustomCrawler(object):
+    def __init__(self, config, fetcher=None):
+        # config
+        self.config = config
+        # parser
+        self.parser = self.config.get_parser()
+
+        # catalogue
+        self.catalogue = Catalogue()
+
+        # html fetcher
+        if isinstance(fetcher, NetworkFetcher):
+            self.fetcher = fetcher
+        else:
+            self.fetcher = NetworkFetcher(self.config)
+
+        # TODO: use the log prefix
+        self.log_prefix = "urlcrawler: "
+
+        # metas extractor
+        self.metas_extractor = self.get_metas_extractor()
+
+        self.extractor = self.get_extractor()
+
+    def crawl(self, crawl_candidate):
+
+        # parser candidate
+        parse_candidate = self.get_parse_candidate(crawl_candidate)
+
+        # raw html
+        raw_html = self.get_html(crawl_candidate, parse_candidate)
+
+        if raw_html is None:
+            return self.catalogue
+
+        return self.process(raw_html, parse_candidate.url, parse_candidate.link_hash, parse_candidate.encoding)
+
+    def get_document(self, raw_html, encoding=None):
+        doc = self.parser.fromstring(raw_html, encoding)
+        return doc
+
+    def get_html(self, crawl_candidate, parsing_candidate):
+        # we got a raw_tml
+        # no need to fetch remote content
+        if crawl_candidate.raw_html:
+            return crawl_candidate.raw_html
+
+        # fetch HTML
+        html = self.fetcher.fetch(parsing_candidate.url)
+        return html
+
+    @staticmethod
+    def get_parse_candidate(crawl_candidate):
+        if crawl_candidate.raw_html:
+            return RawHelper.get_parsing_candidate(crawl_candidate.url, crawl_candidate.raw_html, crawl_candidate.encoding)
+        return URLHelper.get_parsing_candidate(crawl_candidate.url)
+
+    def get_extractor(self):
+        return CustomExtractor(self.config, self.catalogue)
+
+    def process(self, raw_html, final_url, link_hash, encoding=None):
+
+        # create document
+        doc = self.get_document(raw_html, encoding)
+
+        # catalogue
+        self.catalogue._final_url = final_url or self.config.final_url
+        self.catalogue._link_hash = link_hash
+        self.catalogue._raw_html = raw_html
+        self.catalogue._doc = doc
+        self.catalogue._raw_doc = deepcopy(doc)
+
+        custom_rule = self.config.custom_rule
+        if custom_rule:
+            if 'item' in custom_rule and custom_rule['item']:
+                if 'filter' in custom_rule and custom_rule['filter']:
+                    doc = self.extractor.custom_match_elements(custom_rule['filter'], doc=doc)
+                onlyOne = custom_rule.get('onlyOne', 1)
+                self.catalogue._doc = doc
+                for key, rule in custom_rule['item'].items():
+                    parsed = self.extractor.extract(key, rule, onlyOne)
+                    parsed = utils.patch_result(parsed, rule)
+                    parsed = utils.extract_result(parsed, rule)
+                    data[key] = parsed
+
+                self.catalogue.data = utils.table2kvlist(data)
+            else:
+                for key, rule in custom_rule.items():
+                    parsed = self.extractor.extract(key, rule)
+                    parsed = utils.patch_result(parsed, rule)
+                    parsed = utils.extract_result(parsed, rule)
+                    data[key] = parsed
+                self.catalogue.data = data
+        return self.catalogue
