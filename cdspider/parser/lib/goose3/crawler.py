@@ -23,6 +23,7 @@ limitations under the License.
 import os
 import glob
 from copy import deepcopy
+from cdspider.libs import utils
 from cdspider.parser.lib.goose3.article import Article
 from cdspider.parser.lib.goose3.catalogue import Catalogue
 from cdspider.parser.lib.goose3.utils import URLHelper, RawHelper
