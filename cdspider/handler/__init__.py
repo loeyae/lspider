@@ -153,7 +153,7 @@ class BaseHandler(object):
             if self.page == 1:
                 self.crawler = self.get_crawler(request)
             request['url'] = self.task.get('url')
-            if self.page == 1 AND self.mode != self.MODE_ITEM:
+            if self.page == 1 and self.mode != self.MODE_ITEM:
                 request['incr_data'] = self._get_paging(save.get("parent_url", request['url']))
 
             #列表页抓取时，第一页不添加分页参数,因此在第二页时，先将自增字段自增
