@@ -11,6 +11,9 @@ class BaseWorker():
 
     LOOP_INTERVAL = 0.1
 
+    inqueue_key = None
+    excqueue_key = None
+
     def __init__(self, db, queue, proxy, mailer = None, log_level=logging.WARN):
         self.db = db
         self.queue=queue
@@ -20,6 +23,12 @@ class BaseWorker():
         self.logger=logging.getLogger("worker")
         self.logger.setLevel(log_level)
         self._quit=False
+        self.inqueue = None
+        self.excqueue = None
+        if self.inqueue_key:
+            self.inqueue = self.queue[self.inqueue_key]
+        if self.excqueue_key:
+            self.excqueue = self.queue[self.excqueue_key]
 
     def on_result(self, message):
         raise NotImplementedError
