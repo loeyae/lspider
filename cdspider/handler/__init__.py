@@ -258,7 +258,7 @@ class BaseHandler(object):
         parse = self.process.get('parse', {})
         if self.mode == self.MODE_ATT:
             if not 'item' in  parse:
-                parse = {"filter": "", "item": dict(key: item for key, item in parse.items() if 'filter' in item and item['filter'])}
+                parse = {"filter": "", "item": dict((key, item) for key, item in parse.items() if 'filter' in item and item['filter'])}
         return parse
 
     def on_attach(self, source, url):
