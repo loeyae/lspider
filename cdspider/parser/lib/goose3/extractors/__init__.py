@@ -76,10 +76,7 @@ class BaseExtractor(object):
             doc = doc.pop(0)
         if doc is None:
             return None
-        if custom_rule.startswith('@xpath:'):
-            custom_rule = custom_rule[7:]
-            ret = self.parser.xpath_re(doc, custom_rule)
-        elif custom_rule.startswith('@css:'):
+        if custom_rule.startswith('@css:'):
             custom_rule = custom_rule[5:]
             custom_rule_arr = custom_rule.split(":eq")
             rule = custom_rule_arr.pop(0)
@@ -100,7 +97,7 @@ class BaseExtractor(object):
             custom_rule = custom_rule[4:]
             ret = self.parser.css_select(doc, custom_rule)
 
-        else:
+        elif:
             if custom_rule.startswith('@reg:'):
                 custom_rule = custom_rule[5:]
             custom_rule, key = rule2pattern(custom_rule)
@@ -108,6 +105,11 @@ class BaseExtractor(object):
                 return ret
             matched = re.findall(custom_rule, self.article.raw_html, re.S|re.I)
             ret = [self.parser.fromstring(item if item.startswith('<') else "<div>%s</div>" % item) for item in matched if item]
+        else:
+            if custom_rule.startswith('@xpath:'):
+                custom_rule = custom_rule[7:]
+            ret = self.parser.xpath_re(doc, custom_rule)
+        
         if not ret:
             return None
         if onlyOne:
