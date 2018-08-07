@@ -151,7 +151,7 @@ def status_schedule(ctx,scheduler_cls,no_loop,  get_object=False):
         Scheduler.status_run_once()
     else:
         Scheduler.status_run()
-        
+
 # @cli.command()
 # @click.option('--insert_kafka_worker_cls', default='cdspider.worker.insert_kafka_worker', callback=load_cls, help='worker name')
 # @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
@@ -163,7 +163,7 @@ def status_schedule(ctx,scheduler_cls,no_loop,  get_object=False):
 #     g=ctx.obj
 #     Scheduler = load_cls(ctx, None, insert_kafka_worker_cls)
 #     rate_map = g.get('rate_map')
-# 
+#
 #     log_level = logging.WARN
 #     if g.get("debug", False):
 #         log_level = logging.DEBUG
@@ -195,7 +195,6 @@ def fetch(ctx, fetch_cls, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=
     if no_input:
         queue = {}
         db['TaskDB'] = None
-    handler = None
     proxy = g.get('proxy', None)
     log_level = logging.WARN
     attach_storage = g.get('app_config', {}).get('attach_storage', None)
