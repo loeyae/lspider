@@ -8,6 +8,8 @@
 :date:    2018-8-5 23:25:38
 """
 
+from cdspider.exceptions import *
+
 class NewTaskTrait(object):
 
     def _new_task(self, pid, sid, url, rate, uid=0, aid=0, kwid=0, status=0, save=None, expire = 0):
