@@ -166,7 +166,6 @@ class ResultTrait(object):
                     crawlinfo =  self._build_crawl_info(final_url)
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                     result_id = self.db['ArticlesDB'].insert(result)
-                    self.queue['result2kafka'].put_nowait({"rid": result_id})
                     self.last_result_id = result_id
                     if not result_id:
                         raise CDSpiderDBError("Result insert failed")
