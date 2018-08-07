@@ -202,7 +202,29 @@ class BaseHandler(object):
 
         if not self.process:
             self._init_process();
-        return self.process.get('request', {})
+        request = self.process.get('request', {})
+        if 'cookie' in request and request['cookie']:
+            cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
+            if len(cookie_list) > 1:
+                for item in cookie_list:
+                    request['cookies_list'].append(utils.query2dict(item))
+            else:
+                request['cookies'] = utils.query2dict(cookie_list[0])
+            del request['cookie']
+        if 'header' in request and request['header']:
+            header_list = re.split('(?:(?:\r\n)|\r|\n)', request['header'])
+            if len(header_list) > 1:
+                for item in header_list:
+                    request['headers_list'].append(utils.query2dict(item))
+            else:
+                request['headers'] = utils.query2dict(header_list[0])
+            request['headers'] = utils.query2dict(request['header'])
+            del request['header']
+        if 'data' in request and request['data']:
+            request['data'] = utils.query2dict(request['data'])
+        else:
+            request['data'] = {}
+        return request
 
     def _get_paging(self, url = None):
         if not self.process:
