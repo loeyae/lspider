@@ -194,14 +194,15 @@ class ResultTrait(object):
         incr_data = self.task.get('save', {}).get('incr_data', None)
         parentid = self.task.get('save', {}).get('parentid', '0')
         rid = self.task.get('rid', None)
+        self.last_result_id = rid
         update = True if rid else False
         if incr_data:
             for item in incr_data:
-                if not 'isfirst' in item or not item['isfirst']:
+                if 'isfirst' in item and not item['isfirst']:
                     isfirst = False
                     break
         if not unid:
-            inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(final_url, data), self.task.get("pid"), self.task.get("sid"), self.task.get("uid"), self.task.get("aid"), self.task.get("kwid"), ctime)
+            inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(final_url, data), ctime)
             self.logger.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
         if inserted:
             if isfirst:
@@ -244,6 +245,7 @@ class ResultTrait(object):
     def attach_to_result(self, final_url, data, typeinfo, page_source, unid=None):
         attachment = self.task.get('attachment')
         rid = self.task.get('rid', None)
+        self.last_result_id = rid
         if attachment.get('type', AttachmentDB.TYPE_IMPACT) == AttachmentDB.TYPE_IMPACT:
             '''
             阅读数、点赞数....数据存储
@@ -272,7 +274,7 @@ class ResultTrait(object):
                     ctime = self.crawl_id
                 inserted = True
                 if not unid:
-                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(final_url, data), self.task.get("pid"), self.task.get("sid"), self.task.get("uid"), self.task.get("aid"), self.task.get("kwid"), ctime)
+                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(final_url, data), ctime)
                     self.logger.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     result_id = self.db['CommentsDB'].insert(result)
