@@ -153,15 +153,16 @@ class BaseHandler(object):
             if self.page == 1:
                 self.crawler = self.get_crawler(request)
             request['url'] = self.task.get('url')
-            if self.page > 1 or self.mode != self.MODE_ITEM:
-                save['incr_data'] = self._get_paging(save.get("parent_url", request['url']))
+            if self.page == 1 AND self.mode != self.MODE_ITEM:
+                request['incr_data'] = self._get_paging(save.get("parent_url", request['url']))
 
             #列表页抓取时，第一页不添加分页参数,因此在第二页时，先将自增字段自增
             if self.page == 2 and self.mode == self.MODE_ITEM:
-                for i in save['incr_data']:
-                    if not 'base_page' in  save['incr_data'][i] or int(save['incr_data'][i]['value']) == int(save['incr_data'][i]['base_page']):
-                        save['incr_data'][i]['isfirst'] = False
-                        save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) + int(save['incr_data'][i].get('step', 1))
+                request['incr_data'] = self._get_paging(save.get("parent_url", request['url']))
+                for i in request['incr_data']:
+                    if not 'base_page' in  request['incr_data'][i] or int(request['incr_data'][i]['value']) == int(request['incr_data'][i]['base_page']):
+                        request['incr_data'][i]['isfirst'] = False
+                        request['incr_data'][i]['value'] = int(request['incr_data'][i]['value']) + int(request['incr_data'][i].get('step', 1))
             builder = UrlBuilder(self.logger, self.log_level)
             params = builder.build(request, last_source, self.crawler, save)
             if isinstance(self.crawler, SeleniumCrawler) and params['method'].upper() == 'GET':
