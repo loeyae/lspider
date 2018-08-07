@@ -96,14 +96,14 @@ def schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
-        return Scheduler
+        return scheduler
     if no_loop:
-        Scheduler.run_once()
+        scheduler.run_once()
     else:
-        Scheduler.run()
+        scheduler.run()
 
 @cli.command()
 @click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
