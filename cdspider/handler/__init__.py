@@ -289,8 +289,7 @@ class BaseHandler(object):
         """
         self.logger.info("result2kafka  starting...")
         res={}
-        pid=self.task['pid']
-        on_sync=self.db['ProjectsDB'].get_detail(pid)['on_sync']
+        on_sync=self.task['project']['on_sync']
         if on_sync!=None and on_sync!='':
             res['on_sync']=on_sync
         res['rid']=self.last_result_id
