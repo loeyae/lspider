@@ -65,7 +65,6 @@ class ResultTrait(object):
                 'pubtime': pubtime,                                                # 发布时间
                 'content': result.pop('content', None),                            # 详情
                 'channel': result.pop('channel', None),                            # 频道信息
-                'source': kwargs.get('source', None),                              # 抓到的源码
                 'crawlinfo': kwargs.get('crawlinfo')
                 }
             r['result'] = result or None
