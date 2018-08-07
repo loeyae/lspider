@@ -96,9 +96,7 @@ class TitleExtractor(BaseExtractor):
         # rebuild the title
         title = " ".join(title_words).strip()
 
-        title_words = re.split("(\||-|»|:|_)", title)
-
-        return title_words[0]
+        return title
 
     def get_title(self):
         """
