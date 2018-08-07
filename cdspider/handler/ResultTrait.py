@@ -99,8 +99,9 @@ class ResultTrait(object):
                 raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(task)))
             if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
+            item['url'] = self.url_prepare(item['url'])
             if urlrule:
-                parsed = {urlrule['name']: self.url_prepare(item['url'])}
+                parsed = {urlrule['name']: item['url']}
                 item['url'] = utils.build_url_by_rule(urlrule, parsed)
             else:
                 item['url'] = urljoin(base_url, item['url'])
