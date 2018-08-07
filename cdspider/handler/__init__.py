@@ -258,7 +258,7 @@ class BaseHandler(object):
         parse = self.process.get('parse', {})
         if self.mode == self.MODE_ATT:
             if not 'item' in  parse:
-                parse = {"filter": "", "item": parse}
+                parse = {"filter": "", "item": dict((key, item) for key, item in parse.items() if 'filter' in item and item['filter'])}
         return parse
 
     def on_attach(self, source, url):
@@ -266,15 +266,19 @@ class BaseHandler(object):
         获取附加任务链接，并push newtask
         """
         self.logger.debug("%s attach start: %s @ %s" % (self.__class__.__name__, str(url), self.mode))
+        pid = self.task.get('pid')
         subdomain, domain = self._domain_info(url)
-        attach_list = self.db['AttachmentDB'].get_list_by_subdomain(subdomain)
+        attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain)
         attach_list = list(attach_list)
         if not attach_list:
-            attach_list = self.db['AttachmentDB'].get_list_by_domain(domain)
+            attach_list = self.db['AttachmentDB'].get_list_by_domain(pid,domain)
             attach_list = list(attach_list)
         self.logger.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
-            parse = each.get('preparse', {}).get('parse', None)
+            pparse = each.get('preparse', {}).get('parse', None)
+            parse = {}
+            for item in pparse.values():
+                parse[item.pop('key')] = item
             if parse:
                 parsed = self.parse(source, parse)
                 urlrule = each.get('preparse', {}).get('url', None)
@@ -289,14 +293,14 @@ class BaseHandler(object):
         """
         self.logger.info("result2kafka  starting...")
         res={}
-        on_sync=self.task['project']['on_sync']
+        on_sync=self.task.get('project', {}).get('on_sync', None)
         if on_sync!=None and on_sync!='':
             res['on_sync']=on_sync
         res['rid']=self.last_result_id
         self.queue['result2kafka'].put_nowait(res)
         self.logger.info("result2kafka  end data: %s" % str(res))
-        
-            
+
+
     def on_repetition(self):
         """
         重复处理

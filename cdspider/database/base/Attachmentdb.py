@@ -56,8 +56,8 @@ class AttachmentDB(Base):
     def get_list(self, where = {}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_list_by_domain(self, domain, where = {}, select=None, **kwargs):
+    def get_list_by_domain(self, pid, domain, where = {}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_list_by_subdomain(self, subdomain, where = {}, select=None, **kwargs):
+    def get_list_by_subdomain(self, pid, subdomain, where = {}, select=None, **kwargs):
         raise NotImplementedError
