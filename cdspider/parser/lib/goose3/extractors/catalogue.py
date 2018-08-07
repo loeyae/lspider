@@ -78,9 +78,10 @@ class CatalogueExtractor(BaseExtractor):
                 if urls:
                     data = {'url': urls}
                     for k, rule in custom_rule.items():
-                        val = self.custom_match(rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'), target=rule.get('target', None))
-                        if val:
-                            data[k] = utils.patch_result(val, rule)
+                        if rule and 'filter' in rule and rule['filter']:
+                            val = self.custom_match(rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'), target=rule.get('target', None))
+                            if val:
+                                data[k] = utils.patch_result(val, rule)
                     return utils.table2kvlist(data)
                 return []
 
