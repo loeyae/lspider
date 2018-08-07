@@ -132,7 +132,7 @@ class BaseHandler(object):
                         u = ret.group(0)
             if 'query' in identify and identify['query']:
                 u = utils.build_filter_query(url, identify['query'])
-            if 'data' in identify:
+            if 'data' in identify and identify['data']:
                 udict = dict.fromkeys(identify['data'])
                 query = utils.dictunion(data, udict)
                 return utils.build_query(u, query)
