@@ -132,7 +132,11 @@ class RedisQueue(CDBaseQueue):
         body = self.connect.lpop(self.queuename)
         if body is None:
             raise BaseQueue.Empty
-        return umsgpack.unpackb(body)
+        try:
+            s=umsgpack.unpackb(body)
+        except:
+            s=json.loads(body.decode())
+        return s
 
     @catch_error
     def put_nowait(self, obj):

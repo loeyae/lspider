@@ -282,10 +282,5 @@ class Scheduler(object):
     def newTask_run_once(self):
         self.logger.info("newTask_schedule once starting...")
         q_data=self.queue['newtask_queue'].get_nowait()
-        try:
-            q_data=json.loads(q_data)
-        except:
-            self.logger.error("newTask_schedule get queue data is not json")
-            return
-        self._build_task(task)
+        self._build_task(q_data)
         self.logger.info("newTask_schedule once end")

@@ -9,6 +9,7 @@
 """
 
 import time
+import json
 import socket
 import select
 import logging
@@ -180,7 +181,11 @@ class PikaQueue(CDBaseQueue):
                 raise BaseQueue.Empty
             if ack:
                 self.channel.basic_ack(method_frame.delivery_tag)
-        return umsgpack.unpackb(body)
+        try:
+            s=umsgpack.unpackb(body)
+        except:
+            s=json.loads(body.decode())
+        return s
 
     @catch_error
     def delete(self):
@@ -253,4 +258,8 @@ class AmqpQueue(PikaQueue):
                 raise BaseQueue.Empty
             if ack:
                 self.channel.basic_ack(message.delivery_tag)
-        return umsgpack.unpackb(message.body)
+        try:
+            s=umsgpack.unpackb(message.body)
+        except:
+            s=json.loads(message.body.decode())
+        return s
