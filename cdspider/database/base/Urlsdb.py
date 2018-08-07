@@ -72,8 +72,5 @@ class UrlsDB(Base):
     def get_list(self, where = {}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_new_list(self, id, site, select=None, **kwargs):
-        raise NotImplementedError
-
-    def get_max_id(self, siteid):
+    def get_new_list(self, id, sid, select=None, **kwargs):
         raise NotImplementedError

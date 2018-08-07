@@ -58,5 +58,8 @@ class SitesDB(Base):
     def get_detail(self, id):
         raise NotImplementedError
 
+    def get_new_list(self, id, pid, where = {}, select=None, **kwargs):
+        raise NotImplementedError
+
     def get_list(self, where = {}, select=None, **kwargs):
         raise NotImplementedError

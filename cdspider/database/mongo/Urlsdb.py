@@ -45,7 +45,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
         return super(UrlsDB, self).update(setting=obj, where={'uid': int(id)}, multi=False)
-    
+
     def update_many(self, obj = {},where=None):
         if where=={} or where==None:
             return
@@ -121,3 +121,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
     def get_list(self, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uid', 1)])
         return self.find(where=where, select=select, **kwargs)
+
+    def get_new_list(self, id, sid, select=None, **kwargs):
+        kwargs.setdefault('sort', [('uid', 1)])
+        return self.find(where={'uid': {'$gt': int(id)}, 'sid': sid}, select=select, **kwargs)
