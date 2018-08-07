@@ -25,9 +25,6 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
         table = self._get_collection(obj['ctime'])
         id = self._get_increment(table)
         obj['rid'] = BaseArticlesDB.build_id(obj['ctime'], id)
-        obj.setdefault('uid', 0)
-        obj.setdefault('aid', 0)
-        obj.setdefault('kwid', 0)
         super(ArticlesDB, self).insert(setting=obj, table=table)
         return obj['rid']
 
