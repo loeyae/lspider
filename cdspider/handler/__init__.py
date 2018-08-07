@@ -232,7 +232,11 @@ class BaseHandler(object):
     def _get_paging(self, url = None):
         if not self.process:
             self._init_process(url);
-        return self.process.get('paging', None)
+        paging = self.process.get('paging', None)
+        if paging:
+            if paging['name']:
+                return paging
+        return None
 
     def parse(self, source, url, rule = None, mode = None):
         """
