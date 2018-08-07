@@ -65,11 +65,11 @@ class CatalogueExtractor(BaseExtractor):
                 return utils.table2kvlist(data)
             if 'filter' in urls_pattern and urls_pattern['filter']:
                 if not urls_pattern['filter'].startswith('@'):
-                    if ("patch" in urls_pattern and urls_pattern["patch"]) or ('prefix' in urls_pattern and urls_pattern['prefix']) or ('suffix' in urls_pattern and urls_pattern['suffix']):
+                    rule, key = utils.rule2pattern(urls_pattern['filter'])
+                    if not key:
                         urls = self.custom_match(urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'), target=urls_pattern.get('target', 'href'), doc=doc)
                         urls = utils.patch_result(urls, urls_pattern)
                     else:
-                        rule, key = utils.rule2pattern(urls_pattern['filter'])
                         urls = self.get_message_by_tag({'tag': 'a', 'attr': 'href', 'value': rule, 'content': 'href'}, doc=doc)
                         urls = utils.patch_result(urls, urls_pattern)
                 else:
@@ -82,6 +82,7 @@ class CatalogueExtractor(BaseExtractor):
                         if val:
                             data[k] = utils.patch_result(val, rule)
                     return utils.table2kvlist(data)
+                return None
 
         known_context_patterns = []
         fulldomain = "%s.%s" % (self.subdomain, self.domain)
