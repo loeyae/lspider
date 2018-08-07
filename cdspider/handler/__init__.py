@@ -266,6 +266,7 @@ class BaseHandler(object):
         获取附加任务链接，并push newtask
         """
         self.logger.debug("%s attach start: %s @ %s" % (self.__class__.__name__, str(url), self.mode))
+        pid = self.task.get('pid')
         subdomain, domain = self._domain_info(url)
         attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain)
         attach_list = list(attach_list)
