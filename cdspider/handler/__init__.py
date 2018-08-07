@@ -282,6 +282,7 @@ class BaseHandler(object):
                 parse[item.pop('key')] = item
             if parse:
                 parsed = self.parse(source, url, parse)
+                self.logger.debug("%s attach parsed: %s" % (self.__class__.__name__, parsed))
                 urlrule = each.get('preparse', {}).get('url', None)
                 attachurl = utils.build_url_by_rule(urlrule, parsed)
                 self.logger.debug("%s attach create task: %s" % (self.__class__.__name__, attachurl))
