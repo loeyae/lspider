@@ -234,13 +234,15 @@ class BaseHandler(object):
             self._init_process(url);
         return self.process.get('paging', None)
 
-    def parse(self, source, url, rule = None):
+    def parse(self, source, url, rule = None, mode = None):
         """
         页面解析
         """
         if not rule:
             rule = self._get_parse(url)
-        if self.mode == self.MODE_ITEM:
+        if not mode:
+            mode = self.mode
+        if mode == self.MODE_ITEM:
             parser_name = 'item'
         else:
             parser_name = 'list'
@@ -281,7 +283,7 @@ class BaseHandler(object):
             for item in pparse.values():
                 parse[item.pop('key')] = item
             if parse:
-                parsed = self.parse(source, url, parse)
+                parsed = self.parse(source, url, parse, self.MODE_ATT)
                 self.logger.debug("%s attach parsed: %s" % (self.__class__.__name__, parsed))
                 urlrule = each.get('preparse', {}).get('url', None)
                 attachurl = utils.build_url_by_rule(urlrule, parsed)
