@@ -77,6 +77,7 @@ setup(
         'cdspider.parser': [
             'list=cdspider.parser:ListParser',
             'item=cdspider.parser:ItemParser',
+            'custom=cdspider.parser:CustomParser',
         ],
         'cdspider.queue': [
             'amqp=cdspider.message_queue:AmqpQueue',
@@ -97,3 +98,4 @@ setup(
         ]
     }
 )
+
