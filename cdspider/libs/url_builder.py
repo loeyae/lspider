@@ -226,7 +226,7 @@ class UrlBuilder():
         """
         随机参数设置
         """
-        if 'random' in kwargs:
+        if 'random' in kwargs and kwargs['random']:
             self.logger.debug("UrlBuilder parse random data rule: %s" % str(kwargs['random']))
             for item in kwargs['random']:
                 assert 'name' in item and item['name'], "invalid setting name of random data"
@@ -255,7 +255,7 @@ class UrlBuilder():
         """
         自增参数设置
         """
-        if 'incr_data' in kwargs:
+        if 'incr_data' in kwargs and kwargs['incr_data']:
             self.logger.debug("UrlBuilder parse incr data rule: %s" % str(kwargs['incr_data']))
             incr_data = kwargs['incr_data'].copy()
             if not isinstance(incr_data, list):
