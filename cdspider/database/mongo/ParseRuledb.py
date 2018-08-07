@@ -56,15 +56,13 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
     def get_detail(self, id):
         return self.get(where={"prid": int(id)})
 
-    def get_rules_by_domain(self, domain, **kwargs):
-        kwargs.setdefault('sort', [('prid', 1)])
+    def get_detail_by_domain(self, domain):
         where = {'domain': domain}
-        return self.find(where=where, **kwargs)
+        return self.get(where=where)
 
-    def get_rules_by_subdomain(self, subdomain, **kwargs):
-        kwargs.setdefault('sort', [('prid', 1)])
+    def get_detail_by_subdomain(self, subdomain):
         where = {'subdomain': subdomain}
-        return self.find(where=where, **kwargs)
+        return self.get(where=where)
 
     def get_list(self, where = {}, select = None):
         return self.find(where=where, select=select)
