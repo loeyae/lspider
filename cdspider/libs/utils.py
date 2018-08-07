@@ -177,7 +177,7 @@ def patch_result(data, rule, callback=None):
         return "%s%s%s" %(prefix, rst, suffix) if not isinstance(rst, (list, dict)) and rst else rst
 
 def preg(data, rule):
-    pattern, key = rule2pattern(extract)
+    pattern, key = rule2pattern(rule)
     r = re.search(pattern, str(data), re.S|re.I)
     if r:
         matched = r.group(key)
