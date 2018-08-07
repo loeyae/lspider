@@ -31,8 +31,8 @@ class Spider():
     def __init__(self, db, queue, attach_storage = None, handler=None, proxy=None, log_level=logging.WARN):
         self._quit = False
         self._running = False
-        self.inqueue = queue.get('schedule2spider')
-        self.outqueue = queue.get('schedule2spider')
+        self.inqueue = queue.get('scheduler2spider')
+        self.outqueue = queue.get('scheduler2spider')
         self.status_queue = queue.get('status_queue')
         self.ProjectsDB = db.get('ProjectsDB')
         self.SitesDB = db.get('SitesDB')
