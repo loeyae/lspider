@@ -191,7 +191,7 @@ def fetch(ctx, fetch_cls, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=
     g = ctx.obj
     Spider = load_cls(ctx, None, fetch_cls)
     db = g.get('db')
-    queue = g.get('queue'),
+    queue = g.get('queue')
     if no_input:
         queue = {}
         db['TaskDB'] = None
