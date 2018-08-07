@@ -82,7 +82,7 @@ class CatalogueExtractor(BaseExtractor):
                         if val:
                             data[k] = utils.patch_result(val, rule)
                     return utils.table2kvlist(data)
-                return None
+                return []
 
         known_context_patterns = []
         fulldomain = "%s.%s" % (self.subdomain, self.domain)
