@@ -79,5 +79,5 @@ class NewTaskTrait(object):
         srate = site.get('rate', 0)
         urate = urls.get('rate', 0)
         rate = urate if urate > srate else (srate if srate > prate else prate)
-        status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE else 0
+        status = 1 if project['status'] == self.db['ProjectsDB'].STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE else 0
         self._new_task(project['pid'], site['sid'], urls['url'], rate, urls['uid'], 0, 0, status)
