@@ -16,7 +16,7 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
     parse_rule data object
     """
 
-    __tablename__ = 'parse_rule'
+    __tablename__ = 'parse_rules'
 
     def __init__(self, connector, table=None, **kwargs):
         super(ParseRuleDB, self).__init__(connector, table = table, **kwargs)
