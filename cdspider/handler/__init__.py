@@ -293,7 +293,7 @@ class BaseHandler(object):
             if isinstance(exc, RETRY_EXCEPTIONS) or not isinstance(exc, CDSpiderError):
                 self.task['queue'].put_nowait(self.task['queue_message'])
                 return
-        if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in self.task and self.db['ArticlesDB']:
+        if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in self.task and self.task['rid'] and self.db['ArticlesDB']:
             self.db['ArticlesDB'].update(self.task['rid'], {"status": self.db['ArticlesDB'].STATUS_DELETED})
             return
         if not isinstance(exc, IGNORE_EXCEPTIONS) and self.queue['excinfo_queue']:
