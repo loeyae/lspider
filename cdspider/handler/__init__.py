@@ -284,6 +284,7 @@ class BaseHandler(object):
                 parsed = self.parse(source, url, parse)
                 urlrule = each.get('preparse', {}).get('url', None)
                 attachurl = utils.build_url_by_rule(urlrule, parsed)
+                self.logger.debug("%s attach create task: %s" % (self.__class__.__name__, attachurl))
                 self.queue['newtask_queue'].put_nowait({'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid'), 'rid': self.last_result_id})
 
         self.logger.debug("%s attach end" % (self.__class__.__name__))
