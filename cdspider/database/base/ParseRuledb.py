@@ -42,10 +42,10 @@ class ParseRuleDB(Base):
     def get_detail(self, id):
         raise NotImplementedError
 
-    def get_detail_by_domain(self, domain):
+    def get_rules_by_domain(self, domain, **kwargs):
         raise NotImplementedError
 
-    def get_detail_by_subdomain(self, subdomain):
+    def get_rules_by_subdomain(self, subdomain, **kwargs):
         raise NotImplementedError
 
     def get_list(self, where = {}, select = None):
