@@ -110,6 +110,7 @@ class Spider():
                             raise broken_exc
                         raise CDSpiderCrawlerError('Spider crawl failed')
                     result = handler.parse(last_source, save.get("parent_url", final_url))
+                    self.logger.info('Spider parse end, result: %s' % str(result))
                     if return_result:
                         return_data.append((result, broken_exc, last_source, final_url, save))
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
