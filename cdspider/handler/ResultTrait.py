@@ -15,6 +15,13 @@ from cdspider.parser.lib.time_parser import Parser as TimeParser
 
 class ResultTrait(object):
 
+    def result_prepare(self, data):
+        """
+        入库数据预处理
+        """
+        return data
+
+
     def _build_crawl_info(self, final_url):
         return {
                 "tid": self.task.get("tid"),
@@ -43,11 +50,12 @@ class ResultTrait(object):
                 'title': result.pop('title'),                                      # 标题
                 'author': result.pop('author'),                                    # 作者
                 'pubtime': pubtime,                                                # 发布时间
-                'content': result.pop('content', None) if "content" in result else str(result),  # 详情
+                'content': result.pop('content', None),                            # 详情
                 'channel': result.pop('channel', None),                            # 频道信息
                 'source': kwargs.get('source', None),                              # 抓到的源码
                 'crawlinfo': kwargs.get('crawlinfo')
             }
+        r = self.result_prepare(r)
         if not update:
             r.update({
                 'unid': kwargs['acid'],                                            # unique str
