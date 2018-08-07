@@ -188,9 +188,9 @@ class BaseHandler(object):
             parserule = None
             if subdomain:
                 parserule = self.db['ParseRuleDB'].get_detail_by_subdomain(subdomain)
-            if not list(parserule):
+            if not parserule:
                 parserule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
-            self.process = list(parserule)
+            self.process = parserule
         elif self.mode == self.MODE_ATT:
             self.process = self.task.get('attachment', {}).get('process', None) or self.DEFAULT_PROCESS
 
