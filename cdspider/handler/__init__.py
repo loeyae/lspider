@@ -179,9 +179,9 @@ class BaseHandler(object):
 
     def _init_process(self, url = None):
         if self.mode == self.MODE_CHANNEL:
-            self.process = self.task.get('urls', {}).get('main_process', self.task.get('site', {}).get('main_process', self.DEFAULT_PROCESS))
+            self.process = self.task.get('urls', {}).get('main_process', None) or self.task.get('site', {}).get('main_process', None) or self.DEFAULT_PROCESS
         elif self.mode == self.MODE_LIST:
-            self.process = self.task.get('urls', {}).get('sub_process', self.task.get('site', {}).get('sub_process', self.DEFAULT_PROCESS))
+            self.process = self.task.get('urls', {}).get('sub_process', None) or self.task.get('site', {}).get('sub_process', None) or self.DEFAULT_PROCESS
         elif self.mode == self.MODE_ITEM:
             subdomain, domain = self._domain_info(url)
             parserule = None
@@ -191,7 +191,7 @@ class BaseHandler(object):
                 parserule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
             self.process = list(parserule)
         elif self.mode == self.MODE_ATT:
-            self.process = self.task.get('attachment', {}).get('process', self.DEFAULT_PROCESS)
+            self.process = self.task.get('attachment', {}).get('process', None) or self.DEFAULT_PROCESS
 
     def _get_request(self):
         """
