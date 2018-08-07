@@ -12,7 +12,7 @@ class CustomParser(BaseParser):
     """
 
     def __init__(self, *args, **kwargs):
-       super(ListParser, self).__init__(*args, **kwargs)
+       super(CustomParser, self).__init__(*args, **kwargs)
 
 
     def parse(self, source = None, ruleset = None):
