@@ -53,7 +53,7 @@ class StatusSchedule(object):
             self.db['TaskDB'].update_many(pid,obj=obj,where=where)
             self.db['KeywordsDB'].update(data[id_type],{'rate':obj['rate']})
 
-    def schedule_project(self, obj,db_name,id_type,pid):
+    def schedule_project(self, data,obj,db_name,id_type,pid):
         if 'status' in obj:
             if obj['status']==Base.STATUS_DELETED or obj['status']==Base.STATUS_INIT:
                 self.db['ProjectsDB'].update(data[id_type],obj)

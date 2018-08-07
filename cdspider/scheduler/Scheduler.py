@@ -70,7 +70,7 @@ class Scheduler(object):
         elif 'uid' in task and task['uid']:
             url=self.db['UrlsDB'].get_detail(task['uid'])
             site=self.db['SitesDB'].get_detail(url['sid'])
-            if site['type']=='search':
+            if site['type']=='2':
                 self.queue['search_work'].put_nowait({'uid':task['uid']})
                 return
             project=self.db['ProjectsDB'].get_detail(site['pid'])
@@ -223,8 +223,8 @@ class Scheduler(object):
             pid=self.db['SitesDB'].get_detail(sid)['pid']
             statusSchedule.schedule(q_data, 'UrlsDB','uid',pid)
         elif 'kwid' in q_data:
-            pid=self.db['KeywordsDB'].get_detail(q_data['wid'])['pid']
-            statusSchedule.schedule(q_data, 'KeywordsDB','wid',pid)
+            pid=self.db['KeywordsDB'].get_detail(q_data['kwid'])['pid']
+            statusSchedule.schedule(q_data, 'KeywordsDB','kwid',pid)
         elif 'pid' in q_data:
            statusSchedule.schedule(q_data, 'ProjectsDB','pid',q_data['pid'])
         elif 'aid' in q_data:

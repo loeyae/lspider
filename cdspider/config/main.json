@@ -9,21 +9,28 @@
     },
     "message_queue": {
         "protocol": "amqp",
-        "host": "47.93.88.247",
+        "host": "47.93.128.20",
         "port": 5672,
-        "user": "pyworm",
-        "password": "pyworm@123",
+        "user": "guest",
+        "password": "guest",
+        "exchange": "cdspider",
         "maxsize": 1000000,
-        "queue_prefix": "local"
+        "queue_prefix": ""
     },
     "database": {
         "protocol": "mongo",
-        "host": "localhost",
+        "host": "114.112.86.141",
         "port": 27017,
-        "db": "cdspider_sample",
-        "user": "falsk",
-        "password": "123@qwe"
+        "db": "mytest",
+        "user": "abcdef",
+        "password": "123321"
     },
+    "kafka": {
+    "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
+    "topic": "test",
+    "user": "guest",
+    "password": "guest"
+	},
     "exc_work": {
         "mailer": "smtp",
         "sender": {
