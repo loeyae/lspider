@@ -279,6 +279,12 @@ class BaseHandler(object):
 
         self.logger.debug("%s attach end" % (self.__class__.__name__))
 
+    def on_sync(self):
+        """
+        同步大数据平台
+        """
+        pass
+
     def on_repetition(self):
         """
         重复处理
