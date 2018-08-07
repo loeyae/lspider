@@ -226,7 +226,7 @@ def load_handler(task, **kwargs):
     如果project中有定义，则使用project中的handler
     否则，根据项目类型，使用默认的handler
     """
-    from cdspider.handler import BaseHandler
+    from cdspider.handler import *
     mod = None
     project = task.get("project", None)
     site = task.get("site", None)
