@@ -94,7 +94,7 @@ class Scheduler(object):
         self.logger.info("Schedule check_tasks starting...")
         for projectid in self.projects:
             while True:
-                newtask_list = self.db['TaskDB'].get_list(projectid,where={'status':TaskDB.STATUS_ACTIVE},sort=[('plantime', 1)])
+                newtask_list = self.db['TaskDB'].get_list(projectid,where={'status':TaskDB.STATUS_ACTIVE,'plantime':{'$lte':int(time.time())}},sort=[('plantime', 1)])
                 i = 0
                 for task in newtask_list:
                     self.logger.debug("Schedule check_tasks task@%s: %s " % (projectid, str(task)))
@@ -106,6 +106,7 @@ class Scheduler(object):
                     obj['pid']=task['pid']
                     obj['tid']=task['tid']
                     self.queue['scheduler2spider'].put_nowait(obj)
+                    print()
                     self.plan_task(task)
                     i += 1
                 if i == 0:
@@ -116,16 +117,16 @@ class Scheduler(object):
     def plan_task(self, task):
         currenttime = int(time.time())
         if task['rate'] != 0 or init:
-            self.send_task(task)
+#             self.send_task(task)
             obj = {
                 'queuetime': currenttime,
-                'plantime': currenttime+task['rate']
+                'plantime': currenttime+self.rate_map[str(task['rate'])][0]
             }
-        self.db['TaskDB'].update(task['tid'], task['projectid'], obj=obj)
+        self.db['TaskDB'].update(task['tid'], task['pid'], obj=obj)
 
     def send_task(self, task):
-        if self.outqueue:
-            self.outqueue.put_nowait({"id": task['tid'], 'pid': task['projectid']})
+        if self.queue['scheduler2spider']:
+            self.queue['scheduler2spider'].put_nowait({"id": task['tid'], 'pid': task['projectid']})
 
 
 
@@ -211,6 +212,8 @@ class Scheduler(object):
         self.logger.info("status_schedule once starting...")
         try:
             q_data=self.queue['status_queue'].get_nowait()
+            for k,v in q_data.items():
+                q_data[k]=int(v)
         except queue.Empty:
             time.sleep(0.5)
             return
@@ -257,6 +260,8 @@ class Scheduler(object):
         try:
             self.logger.info("newTask_schedule once starting...")
             q_data=self.queue['newtask_queue'].get_nowait()
+            for k,v in q_data.items():
+                q_data[k]=int(v)
             self._build_task(q_data)
             self.logger.info("newTask_schedule once end")
         except queue.Empty:
