@@ -267,10 +267,10 @@ class BaseHandler(object):
         """
         self.logger.debug("%s attach start: %s @ %s" % (self.__class__.__name__, str(url), self.mode))
         subdomain, domain = self._domain_info(url)
-        attach_list = self.db['AttachmentDB'].get_list_by_subdomain(subdomain)
+        attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain)
         attach_list = list(attach_list)
         if not attach_list:
-            attach_list = self.db['AttachmentDB'].get_list_by_domain(domain)
+            attach_list = self.db['AttachmentDB'].get_list_by_domain(pid,domain)
             attach_list = list(attach_list)
         self.logger.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
@@ -295,8 +295,8 @@ class BaseHandler(object):
         res['rid']=self.last_result_id
         self.queue['result2kafka'].put_nowait(res)
         self.logger.info("result2kafka  end data: %s" % str(res))
-        
-            
+
+
     def on_repetition(self):
         """
         重复处理
