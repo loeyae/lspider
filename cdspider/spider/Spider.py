@@ -89,7 +89,7 @@ class Spider():
                     self.logger.info('Spider crawl start')
                     last_source, broken_exc, final_url = handler.crawl(save)
                     if isinstance(broken_exc, CONTINUE_EXCEPTIONS):
-                        handler.on_continue()
+                        handler.on_continue(broken_exc, save)
                         continue
                     unid = utils.md5(last_source)
                     if last_source_unid == unid or last_url == final_url:
