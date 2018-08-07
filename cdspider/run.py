@@ -132,7 +132,7 @@ def newtask_schedule(ctx,scheduler_cls, no_loop,  get_object=False):
 @click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def status_schedule(ctx,status_schedule_cls,no_loop,  get_object=False):
+def status_schedule(ctx,scheduler_cls,no_loop,  get_object=False):
     """
     newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
     """

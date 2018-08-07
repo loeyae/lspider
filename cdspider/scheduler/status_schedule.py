@@ -21,7 +21,7 @@ class StatusSchedule(object):
     def schedule(self, data,db_name,id_type,pid):
         obj={}
         if 'rate' in data:
-            rate=data['data']
+            rate=data['rate']
             try:
                 obj['rate']=int(rate)
             except:
