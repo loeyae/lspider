@@ -97,7 +97,7 @@ class ResultTrait(object):
         for item in data:
             if not 'url' in item or not item['url']:
                 raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(task)))
-            if item['url'].startswith('javascript'):
+            if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
             if urlrule:
                 parsed = {urlrule['name']: self.url_prepare(item['url'])}
