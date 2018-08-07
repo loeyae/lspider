@@ -204,28 +204,23 @@ class Scheduler(object):
     
     def status_run_once(self):
         self.logger.info("status_schedule once starting...")
-        StatusSchedule=StatusSchedule(db,queue,self.rate_map)
+        statusSchedule=StatusSchedule(self.db,self.queue,self.rate_map)
         q_data=self.queue['status_queue'].get_nowait()
-        try:
-            q_data=json.loads(q_data)
-        except:
-            self.logger.error("status_schedule get queue data is not json")
-            return
         if 'sid' in q_data:
             pid=self.db['SitesDB'].get_detail(q_data['sid'])['pid']
-            StatusSchedule.schedule(q_data, 'SitesDB','sid',pid)
+            statusSchedule.schedule(q_data, 'SitesDB','sid',pid)
         elif 'uid' in q_data:
             sid=self.db['UrlsDB'].get_detail(q_data['uid'])['sid']
             pid=self.db['SitesDB'].get_detail(q_data['sid'])['pid']
-            StatusSchedule.schedule(q_data, 'UrlsDB','uid',pid)
+            statusSchedule.schedule(q_data, 'UrlsDB','uid',pid)
         elif 'kwid' in q_data:
             pid=self.db['KeywordsDB'].get_detail(q_data['wid'])['pid']
-            StatusSchedule.schedule(q_data, 'KeywordsDB','wid',pid)
+            statusSchedule.schedule(q_data, 'KeywordsDB','wid',pid)
         elif 'pid' in q_data:
-           StatusSchedule.schedule(q_data, 'ProjectsDB','pid',q_data['pid'])
+           statusSchedule.schedule(q_data, 'ProjectsDB','pid',q_data['pid'])
         elif 'aid' in q_data:
             pid=self.db['AttachmentDB'].get_detail(q_data['aid'])['pid']
-            StatusSchedule.schedule(q_data, 'AttachmentDB','aid',pid)
+            statusSchedule.schedule(q_data, 'AttachmentDB','aid',pid)
         else:
             return self.logger.debug("Schedule status_task failed")
         self.logger.info("status_schedule once end")
