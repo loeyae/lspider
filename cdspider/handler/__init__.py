@@ -303,8 +303,8 @@ class BaseHandler(object):
         if 'queue' in self.task and self.task['queue'] and 'queue_message' in self.task and self.task['queue_message']:
             if isinstance(exc, RETRY_EXCEPTIONS) or not isinstance(exc, CDSpiderError):
                 self.task['queue_message'] = self.task['save']['retry']
-                self.task['queue_message']['retry'] += 1
                 if self.task['queue_message']['retry'] < self.MAX_RETRY:
+                    self.task['queue_message']['retry'] += 1
                     self.task['queue'].put_nowait(self.task['queue_message'])
                 return
         if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in self.task and self.task['rid'] and self.db['ArticlesDB']:
@@ -333,11 +333,15 @@ class BaseHandler(object):
         """
         pass
 
-    def on_continue(self, crawler, save):
+    def on_continue(self, broken_exc, save):
         if 'incr_data' in save:
             for i in range(len(save['incr_data'])):
                 if int(save['incr_data'][i]['value']) > int(save['incr_data'][i]['base_page']):
                     save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
+        if self.task['save']['retry'] < self.MAX_RETRY:
+            self.task['save']['retry'] += 1
+        else:
+            raise broken_exc
 
     def finish(self):
         if self.db['TaskDB'] and self.task.get('tid', None):
