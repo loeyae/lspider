@@ -434,9 +434,6 @@ class CustomCrawler(object):
         # TODO: use the log prefix
         self.log_prefix = "urlcrawler: "
 
-        # metas extractor
-        self.metas_extractor = self.get_metas_extractor()
-
         self.extractor = self.get_extractor()
 
     def crawl(self, crawl_candidate):
