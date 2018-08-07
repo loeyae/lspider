@@ -40,7 +40,7 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
     def update(self, id, obj):
         obj['utime'] = int(time.time())
         return super(KeywordsDB, self).update(setting=obj, where={"kwid": int(id)}, multi=False)
-    
+
     def update_many(self,obj, where=None):
         if where==None or where=={}:
             return
@@ -73,6 +73,11 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
 
     def get_detail(self, id):
         return self.get(where={"kwid": int(id)})
+
+    def get_new_list(self, id, select=None, **kwargs):
+        kwargs.setdefault('sort', [('kid', 1)])
+        return self.find(where={"kid": {"$gt": int(id)}, "status": self.STATUS_ACTIVE},
+            select=select, **kwargs)
 
     def get_list(self, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('kwid', 1)])
