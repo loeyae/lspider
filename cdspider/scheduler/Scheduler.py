@@ -56,12 +56,7 @@ class Scheduler(object):
 
     def _build_task(self, task):
         self.logger.info("Schedule build_task task: %s starting..." % str(task))
-        if 'sid' in task:
-            site=self.db['SitesDB'].get_detail(task['sid'])
-            project=self.db['ProjectsDB'].get_detail(site['pid'])
-            task['site']=site
-            task['project']=project
-        elif 'kwid' in task and 'uid' in task:
+        if 'kwid' in task and task['kwid'] and 'uid' in task and task['uid']:
             url=self.db['UrlsDB'].get_detail(task['uid'])
             site=self.db['SitesDB'].get_detail(url['sid'])
             project=self.db['ProjectsDB'].get_detail(site['pid'])
@@ -70,10 +65,9 @@ class Scheduler(object):
             task['site']=site
             task['project']=project
             task['keyword'] = keyword
-        elif 'kwid' in task:
+        elif 'kwid' in task and task['kwid']:
             self.queue['search_work'].put_nowait({'kwid':task['kwid']})
-        elif 'uid' in task:
-
+        elif 'uid' in task and task['uid']:
             url=self.db['UrlsDB'].get_detail(task['uid'])
             site=self.db['SitesDB'].get_detail(url['sid'])
             if site['type']=='search':
@@ -83,7 +77,7 @@ class Scheduler(object):
             task['urls']=url
             task['site']=site
             task['project']=project
-        elif 'aid' in task:
+        elif 'aid' in task and task['aid']:
             attachment=self.db['AttachmentDB'].get_detail(task['aid'])
             project=self.db['ProjectsDB'].get_detail(attachment['pid'])
             task['attachment']=attachment
