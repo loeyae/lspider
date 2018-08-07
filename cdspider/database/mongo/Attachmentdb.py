@@ -17,7 +17,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
     """
     AttachmentDB
     """
-    __tablename__ = 'attachment'
+    __tablename__ = 'attachments'
 
     def __init__(self, connector, table=None, **kwargs):
         super(AttachmentDB, self).__init__(connector, table = table, **kwargs)
@@ -45,7 +45,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
         return super(AttachmentDB, self).update(setting=obj, where={'aid': int(id)}, multi=False)
-    
+
     def update_many(self, obj = {},where=None):
         if where=={} or where==None:
             return
