@@ -61,10 +61,19 @@ class Scheduler(object):
             project=self.db['ProjectsDB'].get_detail(site['pid'])
             task['site']=site
             task['project']=project
+        elif 'kwid' in task and 'uid' in task:
+            url=self.db['UrlsDB'].get_detail(task['uid'])
+            site=self.db['SitesDB'].get_detail(url['sid'])
+            project=self.db['ProjectsDB'].get_detail(site['pid'])
+            keyword = self.db['KeywordsDB'].get_detail(task['kwid'])
+            task['urls']=url
+            task['site']=site
+            task['project']=project
+            task['keyword'] = keyword
         elif 'kwid' in task:
             self.queue['search_work'].put_nowait({'kwid':task['kwid']})
         elif 'uid' in task:
-            
+
             url=self.db['UrlsDB'].get_detail(task['uid'])
             site=self.db['SitesDB'].get_detail(url['sid'])
             if site['type']=='search':
@@ -183,8 +192,8 @@ class Scheduler(object):
         self.xmlrpc_server.listen(port=port, address=bind)
         self.logger.info('schedule.xmlrpc listening on %s:%s', bind, port)
         self.xmlrpc_ioloop.start()
-        
-        
+
+
     def status_run(self):
         """
         newTask_schedule 进程
@@ -203,7 +212,7 @@ class Scheduler(object):
                 self._exceptions += 1
                 if self._exceptions > self.EXCEPTION_LIMIT:
                     break
-    
+
     def status_run_once(self):
         self.logger.info("status_schedule once starting...")
         try:
@@ -230,7 +239,7 @@ class Scheduler(object):
         else:
             return self.logger.debug("Schedule status_task failed")
         self.logger.info("status_schedule once end")
-    
+
     def newTask_run(self):
         """
         newTask_schedule 进程
@@ -249,7 +258,7 @@ class Scheduler(object):
                 self._exceptions += 1
                 if self._exceptions > self.EXCEPTION_LIMIT:
                     break
-    
+
     def newTask_run_once(self):
         try:
             self.logger.info("newTask_schedule once starting...")
