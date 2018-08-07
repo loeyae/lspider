@@ -12,6 +12,7 @@ import logging
 import traceback
 import copy
 import tornado.ioloop
+from tld import get_tld
 from six.moves import queue
 
 from cdspider.handler import BaseHandler
@@ -116,7 +117,11 @@ class Spider():
                     else:
                         handler.on_result(result, broken_exc, last_source, final_url)
                         if mode == BaseHandler.MODE_ITEM and handler.current_page == 1:
-                            handler.on_attach(last_source, save.get("parent_url", final_url))
+                            _url = final_url
+                            parent_url = save.get("parent_url", None)
+                            if parent_url and get_tld(parent_url) == get_tld(final_url):
+                                _url = parent_url
+                            handler.on_attach(last_source, _url)
                         if broken_exc:
                             raise broken_exc
                     if not 'incr_data' in save:
