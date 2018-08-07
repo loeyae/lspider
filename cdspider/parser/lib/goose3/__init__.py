@@ -28,7 +28,7 @@ from cdspider.parser.lib.goose3.configuration import Configuration
 from cdspider.parser.lib.goose3.article import Article  # to make it available for documentation!
 from cdspider.parser.lib.goose3.image import Image  # to make it available for documentation!
 from cdspider.parser.lib.goose3.video import Video  # to make it available for documentation!
-from cdspider.parser.lib.goose3.crawler import (CrawlCandidate, Crawler, CatalogueCrawler)
+from cdspider.parser.lib.goose3.crawler import (CrawlCandidate, Crawler, CatalogueCrawler, CustomCrawler)
 from cdspider.parser.lib.goose3.network import NetworkFetcher
 
 
@@ -116,6 +116,10 @@ class Goose(object):
         crawl_candidate = CrawlCandidate(self.config, url, raw_html, encoding)
         return self.__fetch(crawl_candidate)
 
+    def parse(self, url=None, raw_html=None, encoding=None):
+        crawl_candidate = CrawlCandidate(self.config, url, raw_html, encoding)
+        return self.__parse(crawl_candidate)
+
     def shutdown_network(self):
         ''' Close the network connection
 
@@ -147,6 +151,24 @@ class Goose(object):
         def crawler_wrapper(parser, parsers_lst, crawl_candidate):
             try:
                 crawler = CatalogueCrawler(self.config, self.fetcher)
+                article = crawler.crawl(crawl_candidate)
+            except (UnicodeDecodeError, ValueError) as ex:
+                if parsers_lst:
+                    parser = parsers_lst.pop(0)  # remove it also!
+                    return crawler_wrapper(parser, parsers_lst, crawl_candidate)
+                else:
+                    raise ex
+            return article
+
+        ''' use the wrapper '''
+        parsers = list(self.config.available_parsers)
+        parsers.remove(self.config.parser_class)
+        return crawler_wrapper(self.config.parser_class, parsers, crawl_candidate)
+
+    def __parse(self, crawl_candidate):
+        def crawler_wrapper(parser, parsers_lst, crawl_candidate):
+            try:
+                crawler = CustomCrawler(self.config, self.fetcher)
                 article = crawler.crawl(crawl_candidate)
             except (UnicodeDecodeError, ValueError) as ex:
                 if parsers_lst:
