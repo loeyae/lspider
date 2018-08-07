@@ -49,9 +49,9 @@ class ResultTrait(object):
             pubtime = TimeParser.timeformat(str(pubtime))
         if self.mode == self.MODE_ITEM:
             if update:
-                result = self.db['ArticlesDB'].get_detail_by_unid(kwargs['unid'], kwargs['ctime'])
+                src = self.db['ArticlesDB'].get_detail_by_unid(kwargs['unid'], kwargs['ctime'])
                 #TODO 更新列表页抓取任务的crawlinfo
-                pubtime = result.get('pubtime', None)
+                pubtime = src.get('pubtime', None)
             if not pubtime and not nocreated:
                 pubtime = self.crawl_id
             r = {
