@@ -86,16 +86,18 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         kwargs.setdefault('sort', [('aid', 1)])
         return self.find(where=where, select=select, **kwargs)
 
-    def get_list_by_domain(self, domain, where = {}, select=None, **kwargs):
+    def get_list_by_domain(self, pid, domain, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('aid', 1)])
         if not where:
             where = {}
+        where['pid'] = pid
         where['domain'] = domain
         return self.find(where=where, select=select, **kwargs)
 
-    def get_list_by_subdomain(self, subdomain, where = {}, select=None, **kwargs):
+    def get_list_by_subdomain(self, pid, subdomain, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('aid', 1)])
         if not where:
             where = {}
+        where['pid'] = pid
         where['subdomain'] = subdomain
         return self.find(where=where, select=select, **kwargs)
