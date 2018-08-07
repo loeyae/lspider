@@ -159,22 +159,44 @@ def get_current_month_days():
     return day
 
 def patch_result(data, rule, callback=None):
-        prefix = rule.get('prefix', '')
-        suffix = rule.get('suffix', '')
-        patch = rule.get('patch', None)
-        if isinstance(data, list):
-            if patch:
-                return [re.sub('\[\w+\]', str(d), patch) if not isinstance(d, (list, dict)) and d else d for d in data]
-            return ["%s%s%s" %(prefix, callback_result(callback, d), suffix) if not isinstance(d, (list, dict)) and d else d for d in data]
-        elif isinstance(data, dict):
-            if patch:
-                return dict((k, re.sub('\[\w+\]', str(d), patch)) if not isinstance(d, (list, dict)) and d else d for k,d in data.items())
-            return dict((k, "%s%s%s" %(prefix, callback_result(callback, d), suffix)) if not isinstance(d, (list, dict)) else d and d for k,d in data.items())
-        else:
-            rst = callback_result(callback, data)
-            if patch:
-                return re.sub('\[\w+\]', str(rst), patch) if not isinstance(rst, (list, dict)) and rst else rst
-            return "%s%s%s" %(prefix, rst, suffix) if not isinstance(rst, (list, dict)) and rst else rst
+    prefix = rule.get('prefix', '')
+    suffix = rule.get('suffix', '')
+    patch = rule.get('patch', None)
+    if isinstance(data, list):
+        if patch:
+            return [re.sub('\[\w+\]', str(callback_result(callback, d)), patch) if not isinstance(d, (list, dict)) and d else d for d in data]
+        return ["%s%s%s" %(prefix, callback_result(callback, d), suffix) if not isinstance(d, (list, dict)) and d else d for d in data]
+    elif isinstance(data, dict):
+        if patch:
+            return dict((k, re.sub('\[\w+\]', str(callback_result(callback, d)), patch)) if not isinstance(d, (list, dict)) and d else d for k,d in data.items())
+        return dict((k, "%s%s%s" %(prefix, callback_result(callback, d), suffix)) if not isinstance(d, (list, dict)) else d and d for k,d in data.items())
+    else:
+        rst = callback_result(callback, data)
+        if patch:
+            return re.sub('\[\w+\]', str(rst), patch) if not isinstance(rst, (list, dict)) and rst else rst
+        return "%s%s%s" %(prefix, rst, suffix) if not isinstance(rst, (list, dict)) and rst else rst
+
+def preg(data, rule):
+    pattern, key = rule2pattern(extract
+    r = re.search(pattern, str(data), re.S|re.I)
+    if r:
+        matched = r.group(key)
+        if matched:
+            matched = matched.strip()
+        return matched
+    return None
+
+def extract_result(data, rule, callback=None):
+
+    extract = rule.get('extract', None)
+    if not extract:
+        return data
+    if isinstance(data, list):
+        return [preg(callback_result(callback, d), extract) if not isinstance(d, (list, dict)) and d else d for d in data]
+    elif isinstance(data, dict):
+        return dict((k, preg(callback_result(callback, d), extract)) if not isinstance(d, (list, dict)) and d else d for k,d in data.items())
+    else:
+        return preg(callback_result(callback, data), extract)
 
 def load_config(f):
     """
