@@ -178,11 +178,8 @@ def insert_kafka_worker(ctx,insert_kafka_worker_cls,no_loop,  get_object=False):
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.option('--xmlrpc/--no-xmlrpc', default=False)
-@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host")
-@click.option('--xmlrpc-port', default=24444, help="xmlrpc bind port")
 @click.pass_context
-def fetch(ctx, fetch_cls, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=False, no_input=False):
+def fetch(ctx, fetch_cls, no_loop, get_object=False, no_input=False):
     """
     Fetch: 监听任务并执行抓取
     """
@@ -208,9 +205,32 @@ def fetch(ctx, fetch_cls, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=
     if no_loop:
         spider.run_once()
     else:
-        if xmlrpc:
-            utils.run_in_thread(spider.xmlrpc_run, port=xmlrpc_port, bind=xmlrpc_host)
         spider.run()
+
+@cli.command()
+@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
+@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host")
+@click.option('--xmlrpc-port', default=24444, help="xmlrpc bind port")
+@click.pass_context
+def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
+    """
+    spider rpc
+    """
+    g = ctx.obj
+    Spider = load_cls(ctx, None, fetch_cls)
+    db = g.get('db')
+    queue = g.get('queue')
+    proxy = g.get('proxy', None)
+    log_level = logging.WARN
+    attach_storage = g.get('app_config', {}).get('attach_storage', None)
+    if attach_storage:
+        attach_storage = os.path.realpath(os.path.join(cpath, attach_storage))
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+
+    spider = Spider(db = db, queue = queue, proxy=proxy, log_level=log_level, attach_storage = attach_storage)
+    g['instances'].append(spider)
+    spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
 @cli.command()
 @click.option('--worker-cls', default='cdspider.worker.ResultWorker', callback=load_cls, help='worker name')
