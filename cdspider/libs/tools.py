@@ -260,7 +260,8 @@ def load_handler(task, **kwargs):
                     if issubclass(each, _class):
                         _class = each
             logging.info("selected handler: %s" % _class)
-            return _class(task = task, **kwargs)
+            if _class:
+                return _class(task = task, **kwargs)
     raise CDSpiderHandlerError("HandlerLoader no handler selected")
 
 def load_cls(ctx, param, value):
