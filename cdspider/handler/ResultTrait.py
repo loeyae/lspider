@@ -100,6 +100,8 @@ class ResultTrait(object):
         if not self.process:
             self._init_process()
         urlrule = self.process.get('url', {})
+        if not urlrule:
+            return data
         formated = []
         for item in data:
             if not 'url' in item or not item['url']:
