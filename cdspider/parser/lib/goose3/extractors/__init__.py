@@ -97,9 +97,8 @@ class BaseExtractor(object):
             custom_rule = custom_rule[4:]
             ret = self.parser.css_select(doc, custom_rule)
 
-        elif:
-            if custom_rule.startswith('@reg:'):
-                custom_rule = custom_rule[5:]
+        elif custom_rule.startswith('@reg:'):
+            custom_rule = custom_rule[5:]
             custom_rule, key = rule2pattern(custom_rule)
             if not custom_rule or not key:
                 return ret
@@ -109,7 +108,7 @@ class BaseExtractor(object):
             if custom_rule.startswith('@xpath:'):
                 custom_rule = custom_rule[7:]
             ret = self.parser.xpath_re(doc, custom_rule)
-        
+
         if not ret:
             return None
         if onlyOne:
