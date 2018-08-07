@@ -52,6 +52,7 @@ class Scheduler(object):
                 break
         self.logger.info("Schedule check_projects end")
 
+
     def _build_task(self, task):
         self.logger.info("Schedule build_task task: %s starting..." % str(task))
         if 'sid' in task:

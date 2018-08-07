@@ -53,8 +53,8 @@ class BaseHandler(object):
         self.logger.setLevel(self.log_level)
         self.task = kwargs.pop('task')
         self.attach_storage = kwargs.pop('attach_storage', None)
-        self.db = kwargs.pop('db')
-        self.queue = kwargs.pop('queue')
+        self.db = kwargs.pop('db',None)
+        self.queue = kwargs.pop('queue',None)
         self.crawl_id = self.task.get('save', {}).get('crawl_id', int(time.time()))
         self.crawl_info  = {
             "crawl_start": self.crawl_id,
@@ -72,7 +72,7 @@ class BaseHandler(object):
         self._settings = kwargs or {}
         self.crawler = None
         self.process = None
-        self.mode = self.task.get('save').get('mode', self.MODE_DEFAULT)
+        self.mode = self.task.get('save',{}).get('mode', self.MODE_DEFAULT)
         self.page = 1
         self.last_result_id = None
 
