@@ -487,6 +487,7 @@ class CustomCrawler(object):
 
         custom_rule = self.config.custom_rule
         if custom_rule:
+            data = {}
             if 'item' in custom_rule and custom_rule['item']:
                 if 'filter' in custom_rule and custom_rule['filter']:
                     doc = self.extractor.custom_match_elements(custom_rule['filter'], doc=doc)
