@@ -91,7 +91,7 @@ class StatusSchedule(object):
             where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
             self.db['UrlsDB'].update(data[id_type],{'rate':obj['rate']})
             sid=self.db['UrlsDB'].get_detail(data[id_type])['sid']
-            s_rate=self.db['SitesDB'].get_detail(sid)
+            s_rate=self.db['SitesDB'].get_detail(sid)['rate']
             if s_rate>obj['rate']:
                 obj['rate']=s_rate
             self.db['TaskDB'].update_many(pid,obj={'rate':obj['rate']},where=where)
