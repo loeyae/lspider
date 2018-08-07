@@ -21,6 +21,13 @@ class ResultTrait(object):
         """
         return data
 
+    def parse_media_type(self, ulr):
+        """
+        解析媒体类型
+        """
+        if 'media_type' in self.process and self.process['media_type']:
+            return self.process['media_type']
+        return 1
 
     def _build_crawl_info(self, final_url):
         return {
@@ -52,6 +59,7 @@ class ResultTrait(object):
                 'url': kwargs['final_url'],
                 'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
                 'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
+                'media_type': self.parse_media_type(kwargs['final_url']),          # 媒体类型
                 'title': result.pop('title'),                                      # 标题
                 'author': result.pop('author', None),                              # 作者
                 'pubtime': pubtime,                                                # 发布时间
