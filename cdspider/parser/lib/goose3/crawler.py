@@ -505,6 +505,6 @@ class CustomCrawler(object):
                     parsed = self.extractor.extract(key, rule)
                     parsed = utils.patch_result(parsed, rule)
                     parsed = utils.extract_result(parsed, rule)
-                    data[key] = parsed
-                self.catalogue.data = data
+                    data[key] = [parsed] if not isinstance(parsed, list) else parsed
+                self.catalogue.data = utils.table2kvlist(data)
         return self.catalogue
