@@ -70,7 +70,7 @@ class PikaQueue(CDBaseQueue):
         """
         init
         """
-        super(PikaQueue, self).__init__(name=name, exchange='',user=user, password=password, host=host, port=port, path=path,
+        super(PikaQueue, self).__init__(name=name, exchange=exchange, user=user, password=password, host=host, port=port, path=path,
                  maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
         self.lock = threading.RLock()
         if self.lazy_limit and self.maxsize:
@@ -205,7 +205,7 @@ class AmqpQueue(PikaQueue):
         """
         init
         """
-        super(AmqpQueue, self).__init__(name=name, exchange='',user=user, password=password, host=host, port=port, path=path,
+        super(AmqpQueue, self).__init__(name=name, exchange=exchange,user=user, password=password, host=host, port=port, path=path,
                  maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
 
     def connect(self):
