@@ -234,11 +234,12 @@ class BaseHandler(object):
             self._init_process(url);
         return self.process.get('paging', None)
 
-    def parse(self, source, url):
+    def parse(self, source, url, rule = None):
         """
         页面解析
         """
-        rule = self._get_parse(url)
+        if not rule:
+            rule = self._get_parse(url)
         if self.mode == self.MODE_ITEM:
             parser_name = 'item'
         else:
@@ -271,7 +272,7 @@ class BaseHandler(object):
         attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain)
         attach_list = list(attach_list)
         if not attach_list:
-            attach_list = self.db['AttachmentDB'].get_list_by_domain(pid,domain)
+            attach_list = self.db['AttachmentDB'].get_list_by_domain(pid, domain)
             attach_list = list(attach_list)
         self.logger.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
@@ -280,7 +281,7 @@ class BaseHandler(object):
             for item in pparse.values():
                 parse[item.pop('key')] = item
             if parse:
-                parsed = self.parse(source, parse)
+                parsed = self.parse(source, url, parse)
                 urlrule = each.get('preparse', {}).get('url', None)
                 attachurl = utils.build_url_by_rule(urlrule, parsed)
                 self.queue['newtask_queue'].put_nowait({'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid'), 'rid': self.last_result_id})
