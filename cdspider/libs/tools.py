@@ -245,7 +245,7 @@ def load_handler(task, **kwargs):
         _class_list = []
         for each in list(six.itervalues(mod.__dict__)):
             if inspect.isclass(each) and each is not BaseHandler \
-                            and each is not ProjectBaseHanler and each is not AttachHandler \
+                            and each is not ProjectBaseHandler and each is not AttachHandler \
                             and each is not GeneralHandler and each is not SearchHandler \
                             and issubclass(each, BaseHandler):
                 _class_list.append(each)
