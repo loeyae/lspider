@@ -116,7 +116,7 @@ class Spider():
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
                     else:
                         handler.on_result(result, broken_exc, last_source, final_url)
-                        if mode == self.MODE_ITEM and handler.current_page == 1:
+                        if mode == BaseHandler.MODE_ITEM and handler.current_page == 1:
                             handler.on_attach(last_source, save.get("parent_url", final_url))
                         if broken_exc:
                             raise broken_exc
