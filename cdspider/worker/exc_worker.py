@@ -13,6 +13,8 @@ from cdspider.worker import BaseWorker
 
 class ExcWorker(BaseWorker):
 
+    inqueue_key = 'excinfo_queue'
+
     def on_result(self, message):
         if self.mailer and isinstance(self.mailer, BaseSender):
             try:
