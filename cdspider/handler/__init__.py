@@ -218,8 +218,10 @@ class BaseHandler(object):
             parser_name = 'item'
         else:
             parser_name = 'list'
+        self.logger.debug("%s parse start: %s @ %s" % (self.__class__.__name__, str(rule), self.mode))
         parser = utils.load_parser(parser_name, source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         parsed = parser.parse()
+        self.logger.debug("%s parse end" % (self.__class__.__name__))
         return parsed
 
     def _get_parse(self, url = None):
@@ -238,10 +240,12 @@ class BaseHandler(object):
         """
         获取附加任务链接，并push newtask
         """
+        self.logger.debug("%s attach start: %s @ %s" % (self.__class__.__name__, str(url), self.mode))
         subdomain, domain = self._domain_info(url)
         attach_list = self.db['AttachmentDB'].get_list_by_subdomain(subdomain)
         if not list(attach_list):
             attach_list = self.db['AttachmentDB'].get_list_by_domain(domain)
+        self.logger.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
             parse = each.get('preparse', {}).get('parse', None)
             if parse:
@@ -249,6 +253,8 @@ class BaseHandler(object):
                 urlrule = each.get('preparse', {}).get('url', None)
                 attachurl = utils.build_url_by_rule(urlrule, parsed)
                 self.queue['newtask_queue'].put_nowait({'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid'), 'rid': self.last_result_id})
+
+        self.logger.debug("%s attach end" % (self.__class__.__name__))
 
     def on_repetition(self):
         """

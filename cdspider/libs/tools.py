@@ -226,7 +226,7 @@ def load_handler(task, **kwargs):
     如果project中有定义，则使用project中的handler
     否则，根据项目类型，使用默认的handler
     """
-    from cdspider.handler import BaseHandler
+    from cdspider.handler import BaseHandler, AttachHandler, GeneralHandler, ProjectBaseHandler, SearchHandler
     mod = None
     project = task.get("project", None)
     site = task.get("site", None)
@@ -245,6 +245,8 @@ def load_handler(task, **kwargs):
         _class_list = []
         for each in list(six.itervalues(mod.__dict__)):
             if inspect.isclass(each) and each is not BaseHandler \
+                            and each is not ProjectHandler  and each is not ProjectBaseHanler \
+                            and each is not AttachHandler and each is not GeneralHandler and each is not SearchHandler \
                             and issubclass(each, BaseHandler):
                 _class_list.append(each)
         l = len(_class_list)
@@ -258,7 +260,8 @@ def load_handler(task, **kwargs):
                     if issubclass(each, _class):
                         _class = each
             logging.info("selected handler: %s" % _class)
-            return _class(task = task, **kwargs)
+            if _class:
+                return _class(task = task, **kwargs)
     raise CDSpiderHandlerError("HandlerLoader no handler selected")
 
 def load_cls(ctx, param, value):

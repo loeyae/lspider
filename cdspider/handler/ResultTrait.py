@@ -40,25 +40,42 @@ class ResultTrait(object):
         pubtime = result.pop('pubtime', 0)
         if pubtime:
             pubtime = TimeParser.timeformat(str(pubtime))
-        if not pubtime and not nocreated:
-            pubtime = self.crawl_id
-        r = {
+        if self.mode == self.MODE_ITEM:
+            if update:
+                result = self.db['ArticlesDB'].get_detail_by_unid(kwargs['unid'], kwargs['ctime'])
+                #TODO 更新列表页抓取任务的crawlinfo
+                pubtime = result.get('pubtime', None)
+            if not pubtime and not nocreated:
+                pubtime = self.crawl_id
+            r = {
                 'status': kwargs.get('status', ArticlesDB.STATUS_INIT),            # 状态
                 'url': kwargs['final_url'],
                 'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
                 'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
                 'title': result.pop('title'),                                      # 标题
-                'author': result.pop('author'),                                    # 作者
+                'author': result.pop('author', None),                              # 作者
                 'pubtime': pubtime,                                                # 发布时间
                 'content': result.pop('content', None),                            # 详情
                 'channel': result.pop('channel', None),                            # 频道信息
                 'source': kwargs.get('source', None),                              # 抓到的源码
                 'crawlinfo': kwargs.get('crawlinfo')
+                }
+            r = self.result_prepare(r)
+        else:
+            r = {
+                "status": kwargs.get('status', ArticlesDB.STATUS_INIT),
+                'url': kwargs['final_url'],
+                'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
+                'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
+                'title': result.pop('title', None),                                # 标题
+                'author': result.pop('author', None),                              # 作者
+                'pubtime': result.pop('pubtime', None),                            # 发布时间
+                'channel': result.pop('channel', None),                            # 频道信息
+                'crawlinfo': kwargs.get('crawlinfo')
             }
-        r = self.result_prepare(r)
         if not update:
             r.update({
-                'unid': kwargs['acid'],                                            # unique str
+                'unid': kwargs['unid'],                                            # unique str
                 'ctime': kwargs.get('ctime', int(time.time())),
             })
         r['result'] = result or None
