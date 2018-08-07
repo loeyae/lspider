@@ -60,6 +60,7 @@ class ResultTrait(object):
                 'source': kwargs.get('source', None),                              # 抓到的源码
                 'crawlinfo': kwargs.get('crawlinfo')
                 }
+            r = self.result_prepare(r)
         else:
             r = {
                 "status": kwargs.get('status', ArticlesDB.STATUS_INIT),
@@ -72,7 +73,6 @@ class ResultTrait(object):
                 'channel': result.pop('channel', None),                            # 频道信息
                 'crawlinfo': kwargs.get('crawlinfo')
             }
-        r = self.result_prepare(r)
         if not update:
             r.update({
                 'unid': kwargs['unid'],                                            # unique str
