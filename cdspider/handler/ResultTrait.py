@@ -75,7 +75,7 @@ class ResultTrait(object):
             }
         if not update:
             r.update({
-                'unid': kwargs['unid'],                                            # unique str
+                'acid': kwargs['unid'],                                            # unique str
                 'ctime': kwargs.get('ctime', int(time.time())),
             })
         r['result'] = result or None
