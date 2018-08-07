@@ -122,6 +122,7 @@ class Spider():
                     if not 'incr_data' in save:
                         break
             finally:
+                handler.on_sync()
                 self.logger.info("Spider process end")
         except Exception as e:
             if 'incr_data' in save and isinstance(save['incr_data'], list) and save['incr_data']:
