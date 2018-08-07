@@ -297,7 +297,7 @@ class TaskHandler(ProjectHandler):
     def newtask(self):
         pass
 """
-        itemscript.format(projectname = "Project%s" % message['pid'])
+        itemscript = itemscript.format(projectname = "Project%s" % message['pid'])
         if not task:
             task = {}
         task.update({
