@@ -176,7 +176,7 @@ class UrlBuilder():
         固定值
         """
         data = save.get("hard_code", None)
-        if not data and 'hard_code' in kwargs:
+        if not data and 'hard_code' in kwargs and kwargs['hard_code']:
             self.logger.debug("UrlBuilder parse hard code rule: %s" % str(kwargs['hard_code']))
             data = []
             for item in kwargs['hard_code']:
@@ -202,7 +202,7 @@ class UrlBuilder():
         cookie值获取
         """
         data = save.get("cookie_data", None)
-        if not data and 'cookie' in kwargs:
+        if not data and 'cookie' in kwargs and kwargs['cookie']:
             self.logger.debug("UrlBuilder parse cookie data rule: %s" % str(kwargs['cookie']))
             data = []
             for item in kwargs['cookie']:
