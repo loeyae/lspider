@@ -48,3 +48,4 @@ class BaseParser(object):
 
 from .ListParser import ListParser
 from .ItemParser import ItemParser
+from .CustomParser import CustomParser
