@@ -206,7 +206,7 @@ class ResultTrait(object):
         if inserted:
             if isfirst:
                 self.crawl_info['crawl_count']['new_count'] += 1
-                crawlinfo = self._build_crawl_info(final_url, ctime)
+                crawlinfo = self._build_crawl_info(final_url)
                 item = self.task.get('item', {})
                 data = utils.dictjoin(data, item)
                 result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ArticlesDB.STATUS_PARSED, update=update, **unid)
