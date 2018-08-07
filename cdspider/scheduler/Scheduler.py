@@ -211,7 +211,7 @@ class Scheduler(object):
             statusSchedule.schedule(q_data, 'SitesDB','sid',pid)
         elif 'uid' in q_data:
             sid=self.db['UrlsDB'].get_detail(q_data['uid'])['sid']
-            pid=self.db['SitesDB'].get_detail(q_data['sid'])['pid']
+            pid=self.db['SitesDB'].get_detail(sid)['pid']
             statusSchedule.schedule(q_data, 'UrlsDB','uid',pid)
         elif 'kwid' in q_data:
             pid=self.db['KeywordsDB'].get_detail(q_data['wid'])['pid']
