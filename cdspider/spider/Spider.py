@@ -289,12 +289,25 @@ class Spider():
         return task
 
     def _get_task_from_item(self, message, task, project, no_check_status = False):
+        itemscript = """
+from cdspider.handler.custom.{projectname} import ProjectHandler
+
+class TaskHandler(ProjectHandler):
+
+    def newtask(self):
+        pass
+"""
+        itemscript.format(projectname = "Project%s" % message['pid'])
         if not task:
             task = {}
         task.update({
                 'pid': message['pid'],
                 'project': project,
                 'url': message['url'],
+                'site': {
+                    'sid': 0,
+                    'scripts': itemscript,
+                }
             })
         if not 'save' in task or not task['save']:
             task['save'] = {}
