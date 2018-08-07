@@ -14,6 +14,7 @@ from six.moves import queue as Queue
 from cdspider.libs.tools import *
 from cdspider.database.base import *
 from .status_schedule import StatusSchedule
+from six.moves import queue
 
 class Scheduler(object):
     """
@@ -228,37 +229,6 @@ class Scheduler(object):
         else:
             return self.logger.debug("Schedule status_task failed")
         self.logger.info("status_schedule once end")
-        
-#     def _status_udpate_mongo(self,data,db_name,id_type,pid):
-#         obj={}
-#         if 'rate' in data:
-#             rate=data['data']
-#             try:
-#                 obj['rate']=int(rate)
-#                 obj['plantime']=int(time.time)+obj['rate']
-#             except:
-#                 pass
-#             
-#         if 'status' in data:
-#             status=data['status']
-#             try:
-#                 obj['status']=int(status)
-#                 if obj['status']==1:
-#                     obj['plantime']=int(time.time)
-#             except:
-#                 pass
-#                 
-#         for item in self.db['TaskDB'].get_list(pid,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}):
-#             if item['status']==Base.STATUS_INIT:
-#                 self.db['TaskDB'].update(item['tid'],pid,obj=obj)
-#                 self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data['id_type']})
-#             elif item['status']==Base.STATUS_ACTIVE:
-#                 if item['rate']>obj['rate']:
-#                     self.db['TaskDB'].update(item['tid'],pid,obj=obj)
-#             else:
-#                 self.logger.error("Schedule status value is error")
-#             
-#         return self.logger.debug("Schedule update success")
     
     def newTask_run(self):
         """
