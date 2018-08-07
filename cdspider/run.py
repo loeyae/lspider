@@ -70,7 +70,6 @@ def cli(ctx, **kwargs):
                 queue_setting['maxsize'] = _maxsize
 
     kwargs['queue'] = queue_object
-    kwargs['kafka_config']=kwargs.get('kafka')
 
     ctx.obj = {}
     ctx.obj.update(kwargs)
@@ -162,19 +161,18 @@ def insert_kafka_worker(ctx,insert_kafka_worker_cls,no_loop,  get_object=False):
     newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
     """
     g=ctx.obj
-    Scheduler = load_cls(ctx, None, insert_kafka_worker_cls)
-
+    Worker = load_cls(ctx, None, insert_kafka_worker_cls)
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'),conf=g.get('kafka_config') ,log_level=log_level)
-    g['instances'].append(scheduler)
+    worker = Worker(g.get('db'),g.get('queue'),g['config']['kafka'] ,log_level)
+    g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
-        return scheduler
+        return worker
     if no_loop:
-        scheduler.status_run_once()
+        worker.run_once()
     else:
-        scheduler.status_run()
+        worker.run()
 
 
 @cli.command()

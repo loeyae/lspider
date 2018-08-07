@@ -10,8 +10,9 @@ from cdspider.worker import BaseWorker
 from cdspider.message_queue import KafkaQueue
 import time
 import logging
+from six.moves import queue
 
-class InsertKafkaWorker(object):
+class insert_kafka_worker(object):
     def __init__(self,db,queue,conf,log_level):
         self.db=db
         self.queue=queue

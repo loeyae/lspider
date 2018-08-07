@@ -62,13 +62,14 @@ class Scheduler(object):
             task['site']=site
             task['project']=project
         elif 'kwid' in task:
-            keyword=self.db['KeywordsDB'].get_detail(task['kwid'])
-            project=self.db['ProjectsDB'].get_detail(keyword['pid'])
-            task['keyword']=keyword
-            task['project']=project
+            self.queue['search_work'].put_nowait({'kwid':task['kwid']})
         elif 'uid' in task:
+            
             url=self.db['UrlsDB'].get_detail(task['uid'])
             site=self.db['SitesDB'].get_detail(url['sid'])
+            if site['type']=='search':
+                self.queue['search_work'].put_nowait({'uid':task['uid']})
+                return
             project=self.db['ProjectsDB'].get_detail(site['pid'])
             task['urls']=url
             task['site']=site

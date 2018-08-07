@@ -14,7 +14,7 @@ from cdspider.worker import BaseWorker
 class SearchWorker(BaseWorker):
 
     def on_result(self, message):
-        if 'siteid' in message:
+        if 'uid' in message:
             lastkwid = 0
             maxkwid = self.KeywordsDB.get_max_id()
             while True:
