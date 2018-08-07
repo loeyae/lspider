@@ -60,6 +60,7 @@ class ResultTrait(object):
                 'source': kwargs.get('source', None),                              # 抓到的源码
                 'crawlinfo': kwargs.get('crawlinfo')
                 }
+            r['result'] = result or None
             r = self.result_prepare(r)
         else:
             r = {
@@ -78,7 +79,6 @@ class ResultTrait(object):
                 'acid': kwargs['unid'],                                            # unique str
                 'ctime': kwargs.get('ctime', int(time.time())),
             })
-        r['result'] = result or None
         return r
 
     def url_prepare(self, url):
