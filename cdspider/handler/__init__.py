@@ -266,8 +266,10 @@ class BaseHandler(object):
         self.logger.debug("%s attach start: %s @ %s" % (self.__class__.__name__, str(url), self.mode))
         subdomain, domain = self._domain_info(url)
         attach_list = self.db['AttachmentDB'].get_list_by_subdomain(subdomain)
-        if not list(attach_list):
+        attach_list = list(attach_list)
+        if not attach_list:
             attach_list = self.db['AttachmentDB'].get_list_by_domain(domain)
+            attach_list = list(attach_list)
         self.logger.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
             parse = each.get('preparse', {}).get('parse', None)
