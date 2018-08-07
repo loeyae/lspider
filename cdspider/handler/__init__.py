@@ -44,6 +44,8 @@ class BaseHandler(object):
         }
     }
 
+    MAX_RETRY = 3
+
     def __init__(self, *args, **kwargs):
         """
         init
@@ -300,7 +302,11 @@ class BaseHandler(object):
         self.crawl_info['broken'] = str(exc)
         if 'queue' in self.task and self.task['queue'] and 'queue_message' in self.task and self.task['queue_message']:
             if isinstance(exc, RETRY_EXCEPTIONS) or not isinstance(exc, CDSpiderError):
-                self.task['queue'].put_nowait(self.task['queue_message'])
+                self.task['queue_message'].setdefault('retry', 0)
+                self.task['queue_message']['retry'] += 1
+                self.task['save']['retry'] = self.task['queue_message']['retry']
+                if self.task['queue_message']['retry'] < self.MAX_RETRY:
+                    self.task['queue'].put_nowait(self.task['queue_message'])
                 return
         if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in self.task and self.task['rid'] and self.db['ArticlesDB']:
             self.db['ArticlesDB'].update(self.task['rid'], {"status": self.db['ArticlesDB'].STATUS_DELETED})
