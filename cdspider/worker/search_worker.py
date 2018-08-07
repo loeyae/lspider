@@ -13,46 +13,49 @@ from cdspider.worker import BaseWorker
 
 class SearchWorker(BaseWorker):
 
+    inqueue_key = 'search_work'
+
     def on_result(self, message):
         if 'uid' in message:
             lastkwid = 0
-            maxkwid = self.KeywordsDB.get_max_id()
+            urls = self.db['UrlsDB'].get_detail(message['uid'])
             while True:
-                keywords = self.KeywordsDB.get_new_list(lastkwid)
+                keywords = self.db['KeywordsDB'].get_new_list(lastkwid, where = {'pid': urls['pid']})
                 for keyword in keywords:
                     self.logger.debug("%s build_search_work_by_site keyword: %s" % (self.__class__.__name__, keyword))
-                    self.outqueue.put_nowait({'kwid': keyword['kid'], 'siteid': message['siteid']})
-                    if keyword['kid'] > lastkwid:
-                        lastkwid = keyword['kid']
+                    self.queue['newtask_queue'].put_nowait({'kwid': keyword['kwid'], 'uid': message['uid']})
+                    if keyword['kwid'] > lastkwid:
+                        lastkwid = keyword['kwid']
                 if lastkwid >= maxkwid:
                     self.logger.debug("%s build_search_work_by_site end lastkwid: %s" % (self.__class__.__name__, lastkwid))
                     break
         elif 'kwid' in message:
-            projectid = 0
+            keyword = self.db['KeywordsDB'].get_detail(message['kwid'])
+            lastsid = 0
             while True:
-                projects = self.ProjectsDB.get_list(where=[("status", ProjectDB.PROJECT_STATUS_ACTIVE), ("pid", "$gt", projectid)])
+                sites = self.db['SitesDB'].get_new_list(lastsid, keyword['pid'])
                 i = 0
-                for project in projects:
+                for site in sites:
                     self.logger.debug("%s build_search_work_by_kwid project: %s " % (self.__class__.__name__, str(project)))
-                    self.build_search_work_by_site(project, kwid)
-                    if project['pid'] > projectid:
-                        projectid = project['pid']
+                    self.build_search_work_by_site(site, kwid)
+                    if site['sid'] > lastsid:
+                        lastsid = site['sid']
                     i += 1
                 if i == 0:
-                    self.logger.debug("%s build_search_work_by_kwid end lastpid: %s" % (self.__class__.__name__, projectid))
+                    self.logger.debug("%s build_search_work_by_kwid end lastsid: %s" % (self.__class__.__name__, lastsid))
                     break
 
-    def build_search_work_by_site(self, project, kwid):
-        siteid = 0
+    def build_search_work_by_site(self, site, kwid):
+        lastuid = 0
         while True:
-            sites = self.SitesDB.get_list([("projectid", project['pid']),("sid", "$gt", siteid)], hits = 10)
+            urls = self.db['UrlsDB'].get_new_list(lastuid, site['sid'])
             i = 0
-            for site in sites:
-                self.logger.debug("%s build_search_work_by_kwid site: %s" % (self.__class__.__name__, site['sid']))
-                self.outqueue.put_nowait({'kwid': kwid, 'siteid': site['sid']})
-                if site['sid'] > siteid:
-                    siteid = site['sid']
+            for url in urls:
+                self.logger.debug("%s build_search_work_by_kwid urls: %s" % (self.__class__.__name__, url['uid']))
+                self.queue['newtask_queue'].put_nowait({'kwid': kwid, 'uid': url['uid']})
+                if url['uid'] > lastuid:
+                    lastuid = url['uid']
                 i += 1
             if i == 0:
-                self.logger.debug("%s build_search_work_by_kwid lastsite: %s" % (self.__class__.__name__, siteid))
+                self.logger.debug("%s build_search_work_by_kwid lastuid: %s" % (self.__class__.__name__, lastuid))
                 break
