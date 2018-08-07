@@ -50,19 +50,23 @@ class NewTaskTrait(object):
         site = self.task.get("site")
         if not site:
             raise CDSpiderHandlerError('No site')
+        urls = self.task.get("urls")
+        if not urls:
+            raise CDSpiderHandlerError('No urls')
         keyword = self.task.get("keyword")
         if not keyword:
             raise CDSpiderHandlerError('No keyword')
-        count = self.task.get_count(project['pid'], {"sid": site['sid'], "kwid": keyword['kwid']})
+        count = self.task.get_count(project['pid'], {"uid": url['uid'], "kwid": keyword['kwid']})
         if count:
             return
         self.logger.debug("%s build_newtask_by_urls urls: %s" % (self.__class__.__name__, urls))
         srate = site.get('rate', 0)
         urate = urls.get('rate', 0)
         krate = keyword.get('rate', 0)
-        rate = krate if krate > urate else (urate if srate > srate else srate)
-        status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and keyword['status'] == KeywordsDB.STATUS_ACTIVE else 0
-        self._new_task(project['pid'], site['sid'], site['url'], rate, 0, 0, keyword['kid'], status)
+        rate = urate if urate > srate else srate
+        rate =  krate if krate > rate else rate
+        status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE and keyword['status'] == KeywordsDB.STATUS_ACTIVE else 0
+        self._new_task(project['pid'], site['sid'], url['url'], rate, urls['uid'], 0, keyword['kid'], status)
 
     def build_newtask_by_urls(self):
         project = self.task.get("project")
