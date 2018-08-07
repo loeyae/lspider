@@ -21,7 +21,7 @@ from cdspider.libs import UrlBuilder
 from cdspider.libs.tools import *
 from cdspider.database.base import *
 
-CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse)
+CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse)
 
 class Spider():
     """
@@ -318,6 +318,10 @@ class TaskHandler(ProjectHandler):
         task['save']['parent_url'] = message['parent_url'];
         task['save']['base_url'] = message['url']
         task['item'] = message['save']
+        task['queue'] = self.queue['scheduler2spider']
+        message = copy.deepcopy(message)
+        task['queue_message'] = message
+        task['save']['retry'] = message.get('retry', 0)
         return task
 
     def get_task(self, message, task=None, no_check_status = False):
@@ -345,6 +349,7 @@ class TaskHandler(ProjectHandler):
         if "incr_data" in task['save'] and task['save']['incr_data']:
             for i in range(len(task['save']['incr_data'])):
                 task['save']['incr_data'][i]['value'] = task['save']['incr_data'][i].get('base_page', 1)
+        task['save'].setdefault('retry', 0)
         return task
 
 
