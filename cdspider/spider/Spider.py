@@ -315,7 +315,7 @@ class Spider():
         taskid = message.get('tid')
         if task is None and taskid:
             task = self.TaskDB.get_detail(taskid, pid, True)
-        project = self.ProjectsDB.get_detail(int(task['pid']))
+        project = self.ProjectsDB.get_detail(pid)
         if not project:
             self.status_queue.put_nowait({"pid": pid, 'status': ProjectsDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Project: %s not found" % pid)
