@@ -274,7 +274,10 @@ class BaseHandler(object):
             attach_list = list(attach_list)
         self.logger.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
-            parse = each.get('preparse', {}).get('parse', None)
+            pparse = each.get('preparse', {}).get('parse', None)
+            parse = {}
+            for item in pparse.values():
+                parse[item.pop('key')] = item
             if parse:
                 parsed = self.parse(source, parse)
                 urlrule = each.get('preparse', {}).get('url', None)
