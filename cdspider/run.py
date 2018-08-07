@@ -70,6 +70,7 @@ def cli(ctx, **kwargs):
                 queue_setting['maxsize'] = _maxsize
 
     kwargs['queue'] = queue_object
+    kwargs['kafka_config']=kwargs.get('kafka')
 
     ctx.obj = {}
     ctx.obj.update(kwargs)
@@ -152,29 +153,28 @@ def status_schedule(ctx,scheduler_cls,no_loop,  get_object=False):
     else:
         Scheduler.status_run()
 
-# @cli.command()
-# @click.option('--insert_kafka_worker_cls', default='cdspider.worker.insert_kafka_worker', callback=load_cls, help='worker name')
-# @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-# @click.pass_context
-# def insert_kafka_worker(ctx,insert_kafka_worker_cls,no_loop,  get_object=False):
-#     """
-#     newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
-#     """
-#     g=ctx.obj
-#     Scheduler = load_cls(ctx, None, insert_kafka_worker_cls)
-#     rate_map = g.get('rate_map')
-#
-#     log_level = logging.WARN
-#     if g.get("debug", False):
-#         log_level = logging.DEBUG
-#     Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
-#     g['instances'].append(status_schedule)
-#     if g.get('testing_mode') or get_object:
-#         return Scheduler
-#     if no_loop:
-#         Scheduler.status_run_once()
-#     else:
-#         Scheduler.status_run()
+@cli.command()
+@click.option('--insert_kafka_worker_cls', default='cdspider.worker.insert_kafka_worker', callback=load_cls, help='worker name')
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def insert_kafka_worker(ctx,insert_kafka_worker_cls,no_loop,  get_object=False):
+    """
+    newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
+    """
+    g=ctx.obj
+    Scheduler = load_cls(ctx, None, insert_kafka_worker_cls)
+
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'),conf=g.get('kafka_config') ,log_level=log_level)
+    g['instances'].append(scheduler)
+    if g.get('testing_mode') or get_object:
+        return scheduler
+    if no_loop:
+        scheduler.status_run_once()
+    else:
+        scheduler.status_run()
 
 
 @cli.command()

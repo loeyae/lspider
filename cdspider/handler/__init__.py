@@ -287,8 +287,17 @@ class BaseHandler(object):
         """
         同步大数据平台
         """
-        pass
-
+        self.logger.info("result2kafka  starting...")
+        res={}
+        pid=self.task['pid']
+        on_sync=self.db['ProjectsDB'].get_detail(pid)['on_sync']
+        if on_sync!=None and on_sync!='':
+            res['on_sync']=on_sync
+        res['rid']=self.last_result_id
+        self.queue['result2kafka'].put_nowait(res)
+        self.logger.info("result2kafka  end data: %s" % str(res))
+        
+            
     def on_repetition(self):
         """
         重复处理

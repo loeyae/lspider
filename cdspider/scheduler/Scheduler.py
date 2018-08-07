@@ -204,8 +204,12 @@ class Scheduler(object):
     
     def status_run_once(self):
         self.logger.info("status_schedule once starting...")
+        try:
+            q_data=self.queue['status_queue'].get_nowait()
+        except queue.Empty:
+            time.sleep(0.5)
+            return
         statusSchedule=StatusSchedule(self.db,self.queue,self.rate_map)
-        q_data=self.queue['status_queue'].get_nowait()
         if 'sid' in q_data:
             pid=self.db['SitesDB'].get_detail(q_data['sid'])['pid']
             statusSchedule.schedule(q_data, 'SitesDB','sid',pid)
@@ -276,7 +280,11 @@ class Scheduler(object):
                     break
     
     def newTask_run_once(self):
-        self.logger.info("newTask_schedule once starting...")
-        q_data=self.queue['newtask_queue'].get_nowait()
-        self._build_task(q_data)
-        self.logger.info("newTask_schedule once end")
+        try:
+            self.logger.info("newTask_schedule once starting...")
+            q_data=self.queue['newtask_queue'].get_nowait()
+            self._build_task(q_data)
+            self.logger.info("newTask_schedule once end")
+        except queue.Empty:
+            time.sleep(0.5)
+            return

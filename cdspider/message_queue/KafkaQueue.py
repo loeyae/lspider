@@ -127,7 +127,7 @@ class KafkaQueue(CDBaseQueue):
 
     @catch_error
     def get_nowait(self, ack=False):
-        consumer = self.connect.get_simple_consumer(b'cdspider',auto_commit_enable=True,auto_commit_interval_ms=1,consumer_id=b'test')
+        consumer = self.connect.get_simple_consumer(b'cdspider',auto_commit_enable=True,auto_commit_interval_ms=1)
 #         sum=self.connect.latest_available_offsets()[0][0][0]
         c=consumer.consume()
         print(c.offset)
@@ -144,12 +144,13 @@ class KafkaQueue(CDBaseQueue):
         直接发送
         （obj>>json格式）
         """
-        producer = self.connect.get_producer()
+        self.logger.info('send kafka starting ....')
+        producer = self.connect.get_producer(linger_ms=1)
         obj=json.dumps(obj)
         obj=obj.encode(encoding='utf_8')
         producer.produce(obj)
         producer.stop()
-        return (self.queuename, umsgpack.packb(obj))
+        self.logger.info('send kafka end data: %s' % obj)
 
 
     @catch_error
