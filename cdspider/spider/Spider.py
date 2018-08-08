@@ -11,6 +11,7 @@
 import logging
 import traceback
 import copy
+import json
 import tornado.ioloop
 from tld import get_tld
 from six.moves import queue
@@ -412,26 +413,42 @@ class TaskHandler(ProjectHandler):
         application.register_function(self.quit, '_quit')
 
         def hello():
-            result = Binary(umsgpack.packb("xmlrpc is running"))
-            return result
+            result = {"message": "xmlrpc is running"}
+            return json.dumps(result)
         application.register_function(hello, 'hello')
 
         def fetch(task):
-            ret = self.fetch(task, True)
-            if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
-                result, broken_exc, last_source, final_url, save = ret[0]
-            else:
-                self.logger.error(ret)
-            last_source = utils.decode(last_source)
-            result = (result, broken_exc, last_source, final_url, save)
-            result = Binary(umsgpack.packb(result))
-            return result
+            r_obj=__redirection__()
+            sys.stdout=r_obj
+            parsed = broken_exc = last_source = final_url = save = None
+            try:
+                ret = self.fetch(task, True)
+                if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
+                    parsed, broken_exc, last_source, final_url, save = ret[0]
+                else:
+                    self.logger.error(ret)
+                if last_source:
+                    last_source = utils.decode(last_source)
+            except :
+                broken_exc = traceback.format_exc()
+            output = sys.stdout.read()
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
+
+            return json.dunmps(result)
         application.register_function(fetch, 'fetch')
 
         def get_task(data):
-            message, task = data
-            task = self.get_task(message, task, no_check_status = True)
-            return Binary(umsgpack.packb(task))
+            r_obj=__redirection__()
+            sys.stdout=r_obj
+            message = task = broken_exc = None
+            try:
+                message, task = data
+                task = self.get_task(message, task, no_check_status = True)
+            except :
+                broken_exc = traceback.format_exc()
+            output = sys.stdout.read()
+            result = {"task": task, "broken_exc": broken_exc, "stdout": output}
+            return json.dumps(result)
         application.register_function(get_task, 'task')
 
         import tornado.wsgi
