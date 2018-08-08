@@ -348,6 +348,16 @@ def rebuild_result(ctx, created, no_loop):
         time.sleep(0.5)
 
 @cli.command()
+@click.option('-n', '--name', help='tool名')
+@click.option('-a', '--arg', multiple=True, help='tool参数')
+@click.pass_context
+def tool(ctx, name, arg):
+    cls_name = 'cdspider.tool.%s.%s' % (name, name)
+    cls = utils.load_cls(ctx, None, cls_name)
+    c = cls()
+    c.process(*arg)
+
+@cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
 @click.option('--result-work-num', default=1, help='result worker实例个数')
 @click.option('--exc-work-num', default=1, help='exc worker实例个数')
