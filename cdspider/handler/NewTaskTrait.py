@@ -14,8 +14,9 @@ from cdspider.database.base import *
 
 class NewTaskTrait(object):
 
-    def _new_task(self, pid, sid, url, rate, uid=0, aid=0, kwid=0, status=0, save=None, expire = 0):
+    def _new_task(self, pid, sid, url, rate, uid=0, aid=0, kwid=0, status=0, save=None, expire = 0,rid=0):
         task = {
+            'rid': rid,
             'pid': pid,                            # project id
             'sid': sid,                            # site id
             'kwid': kwid,                          # keyword id, if exists, default: 0
@@ -43,7 +44,7 @@ class NewTaskTrait(object):
         self.logger.debug("%s build_newtask_by_attachment attachment: %s" % (self.__class__.__name__, attachment))
         status = 1 if attachment['status'] == AttachmentDB.STATUS_ACTIVE else 0
         count = self.db['TaskDB'].get_count(project['pid'], {"aid": attachment['aid']}) or 0
-        self._new_task(project['pid'], 0, self.task['url'], attachment['rate'], count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time()) + int(attachment['expire']) * self.EXPIRE_STEP)
+        self._new_task(project['pid'], 0, self.task['url'], attachment['rate'], count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time()) + int(attachment['expire']) * self.EXPIRE_STEP,self.task['rid'])
 
     def build_newtask_by_keywords(self):
         project = self.task.get("project")

@@ -25,13 +25,13 @@ class AttachDataDB(Mongo, BaseAttachDataDB, SplitTableMixin):
     def insert(self, obj = {}):
         obj.setdefault("ctime", int(time.time()))
         table = self._table_name(obj['rid'])
-        super(ArticlesDB, self).insert(setting=obj, table=table)
+        super(AttachDataDB, self).insert(setting=obj, table=table)
         return obj['rid']
 
     def update(self, id, obj = {}):
         table = self._table_name(id)
         obj['utime'] = int(time.time())
-        return super(ArticlesDB, self).update(setting=obj, where={"rid": id}, table=table)
+        return super(AttachDataDB, self).update(setting=obj, where={"rid": id}, table=table)
 
     def get_detail(self, id):
         table = self._table_name(id)
