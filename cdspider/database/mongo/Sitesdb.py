@@ -95,6 +95,10 @@ class SitesDB(Mongo, BaseSitesDB):
         kwargs.setdefault('sort', [('sid', 1)])
         return self.find(where=where, select=select, **kwargs)
 
-    def get_new_list(self, id, pid, select=None, **kwargs):
+    def get_new_list(self, id, pid, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('sid', 1)])
-        return self.find(where={'sid': {'$gt': int(id)}, 'pid': pid}, select=select, **kwargs)
+        if not where:
+            where == {}
+        where['sid'] = {'$gt': int(id)}
+        where['pid'] = pid
+        return self.find(where=where, select=select, **kwargs)
