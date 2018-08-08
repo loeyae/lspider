@@ -252,7 +252,7 @@ class ResultTrait(object):
         attachment = self.task.get('attachment')
         rid = self.task.get('rid', None)
         self.last_result_id = rid
-        article = self.db['AritclesDB'].get_detail(rid)
+        article = self.db['ArticlesDB'].get_detail(rid)
         if attachment.get('type', AttachmentDB.TYPE_IMPACT) == AttachmentDB.TYPE_IMPACT:
             '''
             阅读数、点赞数....数据存储
