@@ -8,6 +8,7 @@
 :date:    2018-1-9 18:01:26
 :version: SVN: $Id: Spider.py 2266 2018-07-06 06:50:15Z zhangyi $
 """
+import sys
 import logging
 import traceback
 import copy
@@ -232,7 +233,7 @@ class Spider():
         if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
             self.logger.debug("Task: %s not active" % task)
             return None
-        attachment = self.AttachmentDB.get_detail(int(message['aid']))
+        attachment = self.AttachmentDB.get_detail(int(task['aid']))
         if not attachment:
             self.status_queue.put_nowait({"aid": task['aid'], 'status': AttachmentDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Attachment: %s not found" % task['aid'])
