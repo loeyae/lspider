@@ -7,9 +7,11 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:51:00
 """
+import re
 import time
 import traceback
 import tldextract
+import urllib.request
 from cdspider.database.base import *
 from cdspider.handler import BaseHandler, NewTaskTrait
 from cdspider.exceptions import *
