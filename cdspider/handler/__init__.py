@@ -87,6 +87,48 @@ class BaseHandler(object):
         subdomain, domain = self._domain_info(url)
         return {"domain": domain, "subdomain": subdomain}
 
+
+    def result_prepare(self, data):
+        """
+        入库数据预处理
+        """
+        return data
+
+    def parse_media_type(self, ulr):
+        """
+        解析媒体类型
+        """
+        if 'media_type' in self.process and self.process['media_type']:
+            return self.process['media_type']
+        return 1
+    
+    def url_prepare(self, url):
+        """
+        url预处理
+        """
+        return url
+
+    def build_url_by_rule(self, data, base_url = None):
+        if not base_url:
+            base_url = self.task.get('url')
+        if not self.process:
+            self._init_process()
+        urlrule = self.process.get('url', {})
+        formated = []
+        for item in data:
+            if not 'url' in item or not item['url']:
+                raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(task)))
+            if item['url'].startswith('javascript') or item['url'] == '/':
+                continue
+            item['url'] = self.url_prepare(item['url'])
+            if urlrule and 'name' in urlrule and urlrule['name']:
+                parsed = {urlrule['name']: item['url']}
+                item['url'] = utils.build_url_by_rule(urlrule, parsed)
+            else:
+                item['url'] = urljoin(base_url, item['url'])
+            formated.append(item)
+        return formated
+
     @property
     def current_page(self):
         return self.page
