@@ -293,6 +293,7 @@ class Spider():
             if not no_check_status and keywords.get('status', KeywordsDB.STATUS_INIT) != KeywordsDB.STATUS_ACTIVE:
                 self.logger.debug("Keywords: %s" % keywords)
                 return None
+            task['save']['hard_code'].append({'name': 'keyword', 'type': 'format', 'value': keywords['word']})
         task['save'].setdefault('base_url', task['url'])
         task['save'].setdefault('referer', task['url'])
         return task
