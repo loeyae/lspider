@@ -8,6 +8,7 @@ import time
 import logging
 import traceback
 import copy
+from urllib.parse import urljoin
 from cdspider.crawler import SeleniumCrawler
 from cdspider.database.base import *
 from cdspider.libs import utils
@@ -101,7 +102,7 @@ class BaseHandler(object):
         if 'media_type' in self.process and self.process['media_type']:
             return self.process['media_type']
         return 1
-    
+
     def url_prepare(self, url):
         """
         url预处理
