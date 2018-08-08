@@ -423,6 +423,7 @@ class TaskHandler(ProjectHandler):
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:
+                task = json.loads(task)
                 ret = self.fetch(task, True)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
                     parsed, broken_exc, last_source, final_url, save = ret[0]
@@ -443,7 +444,7 @@ class TaskHandler(ProjectHandler):
             sys.stdout = r_obj
             message = task = broken_exc = None
             try:
-                message, task = data
+                message, task = json.loads(data)
                 task = self.get_task(message, task, no_check_status = True)
             except :
                 broken_exc = traceback.format_exc()
