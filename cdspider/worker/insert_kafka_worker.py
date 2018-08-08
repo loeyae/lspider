@@ -23,7 +23,7 @@ class insert_kafka_worker(object):
         self.connection()
     
     def connection(self):
-        self.kafka=KafkaQueue(self.conf['topic'],host=self.conf['host'])
+        self.kafka=KafkaQueue(self.conf['topic'],self.conf['zookeeper_hosts'],host=self.conf['host'])
         self._is_loop=True
         
     def run(self):

@@ -45,11 +45,12 @@ def catch_error(func):
 
 class KafkaQueue(CDBaseQueue):
 
-    def __init__(self, name, user=None, password=None, host="localhost", port=6379, path='0',
+    def __init__(self, name, zookeeper_hosts,user=None, password=None, host="localhost", port=6379, path='0',
                  maxsize=0, lazy_limit=True, log_level = logging.WARN):
         """
         init
         """
+        self.zookeeper_hosts=zookeeper_hosts
         super(KafkaQueue, self).__init__(name=name, user=user, password=password, host=host, port=port, path=path,
                  maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
         self.qsize=self.qsize()
@@ -66,7 +67,7 @@ class KafkaQueue(CDBaseQueue):
 
         k = self.symbol()
         if not k in connection_pool:
-            self.connect = KafkaClient(hosts=self.host)
+            self.connect = KafkaClient(hosts=self.host,zookeeper_hosts=self.zookeeper_hosts)
             self.connect=self.connect.topics[self.queuename.encode()]
             connection_pool[k] = self.connect
         else:
