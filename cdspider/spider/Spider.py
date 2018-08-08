@@ -311,14 +311,16 @@ class TaskHandler(ProjectHandler):
         if not task:
             task = {}
         task.update({
-                'pid': message['pid'],
-                'project': project,
-                'url': message['url'],
-                'site': {
-                    'sid': 0,
-                    'scripts': itemscript,
-                }
-            })
+            'tid': 0,
+            'pid': message['pid'],
+            'sid': message['sid'],
+            'project': project,
+            'url': message['url'],
+            'site': {
+                'sid': 0,
+                'scripts': itemscript,
+            }
+        })
         if not 'save' in task or not task['save']:
             task['save'] = {}
         task['rid'] = message['rid']
