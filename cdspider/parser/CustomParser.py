@@ -22,12 +22,21 @@ class CustomParser(BaseParser):
             ruleset = self.ruleset
         if not ruleset:
             ruleset = {}
-        if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@json:'):
-            parser = JsonParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
-            return parser.parse()
-        if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@xml:'):
-            parser = XmlParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
-            return parser.parse()
+        if "item" in ruleset:
+            if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@json:'):
+                parser = JsonParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
+                return parser.parse()
+            if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@xml:'):
+                parser = XmlParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
+                return parser.parse()
+        else:
+            rule = list(item_ruleset.values())[0]
+            if 'filter' in rule and rule['filter'] and rule['filter'].startswith('@json:'):
+                parser = JsonParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
+                return parser.parse()
+            if 'filter' in rule and rule['filter'] and rule['filter'].startswith('@xml:'):
+                parser = XmlParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
+                return parser.parse()
         onlyOne = ruleset.get('onlyOne', 1)
         g = Goose({"target_language": "zh", 'stopwords_class': StopWordsChinese, "enable_fewwords_paragraphs": True, "logger": self.logger, "domain": self.domain, "subdomain": self.subdomain, "custom_rule": ruleset if ruleset else {}})
 
