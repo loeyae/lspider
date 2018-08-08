@@ -34,6 +34,9 @@ from . import Base
 
 class SitesDB(Base):
 
+    TYPE_GENERALE = '1';
+    TYPE_SEARCH = '2';
+
     def insert(self, obj={}):
         raise NotImplementedError
 
