@@ -100,5 +100,5 @@ class SitesDB(Mongo, BaseSitesDB):
         if not where:
             where == {}
         where['sid'] = {'$gt': int(id)}
-        where['pid'] = pid
+        where['pid'] = int(pid)
         return self.find(where=where, select=select, **kwargs)
