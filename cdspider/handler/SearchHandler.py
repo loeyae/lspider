@@ -32,7 +32,7 @@ class SearchHandler(BaseHandler, NewTaskTrait):
         """
         url预处理
         """
-        headers = {{'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}}
+        headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
         req = urllib.request.Request(url = url, headers = headers, method = 'GET')
         response = urllib.request.urlopen(req)
         furl = response.geturl()
