@@ -418,8 +418,8 @@ class TaskHandler(ProjectHandler):
         application.register_function(hello, 'hello')
 
         def fetch(task):
-            r_obj=__redirection__()
-            sys.stdout=r_obj
+            r_obj = utils.__redirection__()
+            sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 ret = self.fetch(task, True)
@@ -438,8 +438,8 @@ class TaskHandler(ProjectHandler):
         application.register_function(fetch, 'fetch')
 
         def get_task(data):
-            r_obj=__redirection__()
-            sys.stdout=r_obj
+            r_obj = utils.__redirection__()
+            sys.stdout = r_obj
             message = task = broken_exc = None
             try:
                 message, task = data
