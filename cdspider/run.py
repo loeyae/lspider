@@ -233,29 +233,6 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
 @cli.command()
-@click.option('--worker-cls', default='cdspider.worker.ResultWorker', callback=load_cls, help='worker name')
-@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.pass_context
-def result_work(ctx, worker_cls, no_loop, get_object=False):
-    """
-    Result Wroker: 抓取结果处理
-    """
-    g = ctx.obj
-    Worker = load_cls(ctx, None, worker_cls)
-    proxy = g.get('proxy', None)
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    worker = Worker(db = db, queue = queue, proxy=proxy, log_level=log_level)
-    g['instances'].append(worker)
-    if g.get('testing_mode') or get_object:
-        return worker
-    if no_loop:
-        worker.run_once()
-    else:
-        worker.run()
-
-@cli.command()
 @click.option('--worker-cls', default='cdspider.worker.SearchWorker', callback=load_cls, help='worker name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
