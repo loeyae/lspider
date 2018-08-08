@@ -100,8 +100,6 @@ class ResultTrait(object):
         if not self.process:
             self._init_process()
         urlrule = self.process.get('url', {})
-        if not urlrule:
-            return data
         formated = []
         for item in data:
             if not 'url' in item or not item['url']:
@@ -109,7 +107,7 @@ class ResultTrait(object):
             if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
             item['url'] = self.url_prepare(item['url'])
-            if urlrule:
+            if urlrule and 'name' in urlrule and urlrule['name']:
                 parsed = {urlrule['name']: item['url']}
                 item['url'] = utils.build_url_by_rule(urlrule, parsed)
             else:
