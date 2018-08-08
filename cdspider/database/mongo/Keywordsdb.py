@@ -76,7 +76,7 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
 
     def get_new_list(self, id, select=None, **kwargs):
         kwargs.setdefault('sort', [('kid', 1)])
-        return self.find(where={"kid": {"$gt": int(id)}, "status": self.STATUS_ACTIVE},
+        return self.find(where={"kid": {"$gt": int(id)}},
             select=select, **kwargs)
 
     def get_list(self, where = {}, select=None, **kwargs):
