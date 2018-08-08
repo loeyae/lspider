@@ -217,7 +217,7 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     spider rpc
     """
     g = ctx.obj
-    Spider = load_cls(ctx, None, fetch_cls)
+    Spider = load_cls(ctx, None, spider_cls)
     db = g.get('db')
     queue = g.get('queue')
     proxy = g.get('proxy', None)
