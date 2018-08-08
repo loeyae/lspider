@@ -170,7 +170,7 @@ class BaseHandler(object):
             params = builder.build(request, last_source, self.crawler, save)
             if isinstance(self.crawler, SeleniumCrawler) and params['method'].upper() == 'GET':
                 params['method'] = 'open'
-            if proxy == self.PROXY_TYPE_NEVER and save['proxy']:
+            if proxy == self.PROXY_TYPE_EVER and save['proxy']:
                 params['proxy'] = copy.deepcopy(save['proxy'])
             self.crawler.crawl(**params)
             if self.page == 1:
