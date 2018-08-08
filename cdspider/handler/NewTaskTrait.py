@@ -45,7 +45,7 @@ class NewTaskTrait(object):
         self.logger.debug("%s build_newtask_by_attachment attachment: %s" % (self.__class__.__name__, attachment))
         status = 1 if attachment['status'] == AttachmentDB.STATUS_ACTIVE else 0
         count = self.db['TaskDB'].get_count(project['pid'], {"aid": attachment['aid']}) or 0
-        self._new_task(project['pid'], 0, self.task['url'], attachment['rate'], count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time()) + int(attachment['expire']) * self.EXPIRE_STEP,self.task['rid'])
+        self._new_task(project['pid'], 0, self.task['url'], int(attachment['rate']), count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time()) + int(attachment['expire']) * self.EXPIRE_STEP,self.task['rid'])
 
     def build_newtask_by_keywords(self):
         project = self.task.get("project")
@@ -60,13 +60,13 @@ class NewTaskTrait(object):
         keyword = self.task.get("keyword")
         if not keyword:
             raise CDSpiderHandlerError('No keyword')
-        count = self.task.get_count(project['pid'], {"uid": url['uid'], "kwid": keyword['kwid']})
+        count = self.db['TaskDB'].get_count(project['pid'], {"uid": urls['uid'], "kwid": keyword['kwid']})
         if count:
             return
         self.logger.debug("%s build_newtask_by_urls urls: %s" % (self.__class__.__name__, urls))
-        srate = site.get('rate', 0)
-        urate = urls.get('rate', 0)
-        krate = keyword.get('rate', 0)
+        srate = int(site.get('rate', 0))
+        urate = int(urls.get('rate', 0))
+        krate = int(keyword.get('rate', 0))
         rate = urate if urate > srate else srate
         rate =  krate if krate > rate else rate
         status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE and keyword['status'] == KeywordsDB.STATUS_ACTIVE else 0
@@ -84,9 +84,8 @@ class NewTaskTrait(object):
         if not urls:
             raise CDSpiderHandlerError('No urls')
         self.logger.debug("%s build_newtask_by_urls urls: %s" % (self.__class__.__name__, urls))
-        prate = project.get('rate', 0)
-        srate = site.get('rate', 0)
-        urate = urls.get('rate', 0)
-        rate = urate if urate > srate else (srate if srate > prate else prate)
+        srate = int(site.get('rate', 0))
+        urate = int(urls.get('rate', 0))
+        rate = urate if urate > srate else srate 
         status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE else 0
         self._new_task(project['pid'], site['sid'], urls['url'], rate, urls['uid'], 0, 0, status)
