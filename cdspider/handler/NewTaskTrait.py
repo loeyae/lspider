@@ -7,8 +7,10 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-8-5 23:25:38
 """
-
+import time
 from cdspider.exceptions import *
+from cdspider.database.base import *
+
 
 class NewTaskTrait(object):
 
@@ -41,7 +43,7 @@ class NewTaskTrait(object):
         self.logger.debug("%s build_newtask_by_attachment attachment: %s" % (self.__class__.__name__, attachment))
         status = 1 if attachment['status'] == AttachmentDB.STATUS_ACTIVE else 0
         count = self.db['TaskDB'].get_count(project['pid'], {"aid": attachment['aid']}) or 0
-        self._new_task(project['pid'], 0, self.task['url'], attachment['rate'], count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time) + int(attachment['expire']) * self.EXPIRE_STEP)
+        self._new_task(project['pid'], 0, self.task['url'], attachment['rate'], count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time()) + int(attachment['expire']) * self.EXPIRE_STEP)
 
     def build_newtask_by_keywords(self):
         project = self.task.get("project")
@@ -83,5 +85,5 @@ class NewTaskTrait(object):
         srate = site.get('rate', 0)
         urate = urls.get('rate', 0)
         rate = urate if urate > srate else (srate if srate > prate else prate)
-        status = 1 if project['status'] == self.db['ProjectsDB'].STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE else 0
+        status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE else 0
         self._new_task(project['pid'], site['sid'], urls['url'], rate, urls['uid'], 0, 0, status)

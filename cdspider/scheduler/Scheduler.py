@@ -84,6 +84,7 @@ class Scheduler(object):
             task['project']=project
             task['site'] = {"sid": 0}
             task['site']['scripts'] = attachment['scripts']
+            task['save']={}
         else:
             return self.logger.debug("Schedule NewTask failed")
         handler=load_handler(task, db=self.db,queue=self.queue)
@@ -261,7 +262,10 @@ class Scheduler(object):
             self.logger.info("newTask_schedule once starting...")
             q_data=self.queue['newtask_queue'].get_nowait()
             for k,v in q_data.items():
-                q_data[k]=int(v)
+                try:
+                    q_data[k]=int(v)
+                except:
+                    pass
             self._build_task(q_data)
             self.logger.info("newTask_schedule once end")
         except queue.Empty:
