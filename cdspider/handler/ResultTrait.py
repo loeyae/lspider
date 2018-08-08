@@ -8,7 +8,6 @@
 :date:    2018-8-5 23:26:18
 """
 import time
-from urllib.parse import urljoin
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.parser.lib.time_parser import Parser as TimeParser
