@@ -268,7 +268,8 @@ class ResultTrait(object):
                 result['ctime'] = self.crawl_id
                 result['acid'] = unid
                 result['utime'] = 0
-                self.db['AttachDataDB'].insert(rid, result)
+                result['rid']=rid
+                self.db['AttachDataDB'].insert(result)
         else:
             self.crawl_info['crawl_count']['count'] += len(data)
             new_count = self.crawl_info['crawl_count']['new_count']
