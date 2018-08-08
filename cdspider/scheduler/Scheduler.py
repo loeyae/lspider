@@ -67,6 +67,7 @@ class Scheduler(object):
             task['keyword'] = keyword
         elif 'kwid' in task and task['kwid']:
             self.queue['search_work'].put_nowait({'kwid':task['kwid']})
+            return
         elif 'uid' in task and task['uid']:
             url=self.db['UrlsDB'].get_detail(task['uid'])
             site=self.db['SitesDB'].get_detail(url['sid'])

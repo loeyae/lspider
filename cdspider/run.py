@@ -269,7 +269,7 @@ def search_work(ctx, worker_cls, no_loop, get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    worker = Worker(db = db, queue = queue, proxy=proxy, log_level=log_level)
+    worker = Worker(db = g.get('db'), queue = g.get('queue'), proxy=proxy, log_level=log_level)
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
         return worker
