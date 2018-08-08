@@ -8,6 +8,7 @@
 :date:    2018-8-5 23:25:38
 """
 import time
+from cdspider.libs import utils
 from cdspider.exceptions import *
 from cdspider.database.base import *
 
@@ -68,7 +69,8 @@ class NewTaskTrait(object):
         rate = urate if urate > srate else srate
         rate =  krate if krate > rate else rate
         status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE and keyword['status'] == KeywordsDB.STATUS_ACTIVE else 0
-        self._new_task(project['pid'], site['sid'], url['url'], rate, urls['uid'], 0, keyword['kid'], status)
+        url = utils.build_url_by_rule({"mode": 'format', "base": urls['url']}, {"keyword": keyword['word']})
+        self._new_task(project['pid'], site['sid'], url, rate, urls['uid'], 0, keyword['kwid'], status)
 
     def build_newtask_by_urls(self):
         project = self.task.get("project")
