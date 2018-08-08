@@ -33,10 +33,10 @@ class SearchWorker(BaseWorker):
             keyword = self.db['KeywordsDB'].get_detail(message['kwid'])
             lastsid = 0
             while True:
-                sites = self.db['SitesDB'].get_new_list(lastsid, keyword['pid'])
+                sites = self.db['SitesDB'].get_new_list(lastsid, keyword['pid'], {'type': SitesDB.TYPE_SEARCH})
                 i = 0
                 for site in sites:
-                    self.logger.debug("%s build_search_work_by_kwid project: %s " % (self.__class__.__name__, str(project)))
+                    self.logger.debug("%s build_search_work_by_kwid site: %s " % (self.__class__.__name__, str(site)))
                     self.build_search_work_by_site(site, kwid)
                     if site['sid'] > lastsid:
                         lastsid = site['sid']
