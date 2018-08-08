@@ -309,53 +309,16 @@ def exc_work(ctx, worker_cls, mailer, sender, receiver, no_loop, get_object=Fals
     else:
         worker.run()
 
-
-@cli.command()
-@click.option('--created', default=None, help='拉取数据的时间', show_default=True)
-@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.pass_context
-def rebuild_result(ctx, created, no_loop):
-    import time
-    g = ctx.obj
-    outqueue = g.get('spider2result')
-    ArticlesDB = g.get('ArticlesDB')
-    createtime = 0
-    lastcreatetime = createtime
-    if not created:
-        created = int(time.time())
-    while True:
-        if lastcreatetime == createtime:
-            createtime += 1
-        else:
-            lastcreatetime = createtime
-        g['logger'].debug("current createtime: %s" % createtime)
-        data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.STATUS_INIT), ("ctime", "$gte", createtime)], select={"rid": 1, "url": 1, "ctime": 1}, hits=100)
-        data = list(data)
-        g['logger'].debug("got result: %s" % str(data))
-        i = 0
-        for item in data:
-            if item['url'].startswith('javascript'):
-                ArticlesDB.update(item['rid'], {"status": ArticlesDB.STATUS_DELETED})
-                continue
-            outqueue.put_nowait({"id": item['rid'], "task": 1})
-            if item['createtime'] > createtime:
-                createtime = item['createtime']
-            i += 1
-        if i == 0:
-            g['logger'].info("no rebuid result")
-        if no_loop:
-            break
-        time.sleep(0.5)
-
 @cli.command()
 @click.option('-n', '--name', help='tool名')
 @click.option('-a', '--arg', multiple=True, help='tool参数')
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def tool(ctx, name, arg):
+def tool(ctx, name, arg, no_loop):
     g = ctx.obj
     cls_name = 'cdspider.tools.%s.%s' % (name, name)
     cls = load_cls(ctx, None, cls_name)
-    c = cls(g)
+    c = cls(g, no_loop)
     c.process(*arg)
 
 @cli.command()
