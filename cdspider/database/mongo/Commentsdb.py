@@ -78,9 +78,7 @@ class CommentsDB(Mongo, BaseCommentsDB, SplitTableMixin):
         if not 'rid' in indexes:
             collection.create_index('rid', unique=True, name='rid')
         if not 'acid' in indexes:
-            collection.create_index('acid', unique=True, name='acid')
+            collection.create_index('acid', name='acid')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
         self._collections.add(table)
-
-
