@@ -122,6 +122,10 @@ class UrlsDB(Mongo, BaseUrlsDB):
         kwargs.setdefault('sort', [('uid', 1)])
         return self.find(where=where, select=select, **kwargs)
 
-    def get_new_list(self, id, sid, select=None, **kwargs):
+    def get_new_list(self, id, sid, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uid', 1)])
-        return self.find(where={'uid': {'$gt': int(id)}, 'sid': sid}, select=select, **kwargs)
+        if not where:
+            where = {}
+        where['uid'] = {'$gt': int(id)}
+        where['sid'] = int(sid)
+        return self.find(where = where, select=select, **kwargs)
