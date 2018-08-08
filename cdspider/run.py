@@ -352,9 +352,9 @@ def rebuild_result(ctx, created, no_loop):
 @click.option('-a', '--arg', multiple=True, help='tool参数')
 @click.pass_context
 def tool(ctx, name, arg):
-    cls_name = 'cdspider.tool.%s.%s' % (name, name)
-    cls = utils.load_cls(ctx, None, cls_name)
-    c = cls()
+    cls_name = 'cdspider.tools.%s.%s' % (name, name)
+    cls = load_cls(ctx, None, cls_name)
+    c = cls(g)
     c.process(*arg)
 
 @cli.command()
