@@ -252,6 +252,7 @@ class ResultTrait(object):
         attachment = self.task.get('attachment')
         rid = self.task.get('rid', None)
         self.last_result_id = rid
+        article = self.db['AritclesDB'].get_detail(rid)
         if attachment.get('type', AttachmentDB.TYPE_IMPACT) == AttachmentDB.TYPE_IMPACT:
             '''
             阅读数、点赞数....数据存储
@@ -266,15 +267,16 @@ class ResultTrait(object):
             else:
                 unid, ctime = ArticlesDB.unbuild_id(rid)
                 result['ctime'] = self.crawl_id
-                result['acid'] = unid
+                result['acid'] = article['acid']
                 result['utime'] = 0
-                result['rid']=rid
+                result['rid'] = rid
                 self.db['AttachDataDB'].insert(result)
         else:
             self.crawl_info['crawl_count']['count'] += len(data)
             new_count = self.crawl_info['crawl_count']['new_count']
             for item in data:
                 result = self._build_comments_info(item, rid)
+                result['acid'] = article['acid']
                 if unid:
                     ctime = unid['ctime']
                 else:
