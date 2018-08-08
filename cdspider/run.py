@@ -329,13 +329,13 @@ def rebuild_result(ctx, created, no_loop):
         else:
             lastcreatetime = createtime
         g['logger'].debug("current createtime: %s" % createtime)
-        data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.RESULT_STATUS_INIT), ("createtime", "$gte", createtime)], select={"rid": 1, "url": 1, "createtime": 1}, hits=100)
+        data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.STATUS_INIT), ("ctime", "$gte", createtime)], select={"rid": 1, "url": 1, "ctime": 1}, hits=100)
         data = list(data)
         g['logger'].debug("got result: %s" % str(data))
         i = 0
         for item in data:
             if item['url'].startswith('javascript'):
-                ArticlesDB.update(item['rid'], {"status": ArticlesDB.RESULT_STATUS_DELETED})
+                ArticlesDB.update(item['rid'], {"status": ArticlesDB.STATUS_DELETED})
                 continue
             outqueue.put_nowait({"id": item['rid'], "task": 1})
             if item['createtime'] > createtime:
@@ -352,6 +352,7 @@ def rebuild_result(ctx, created, no_loop):
 @click.option('-a', '--arg', multiple=True, help='tool参数')
 @click.pass_context
 def tool(ctx, name, arg):
+    g = ctx.obj
     cls_name = 'cdspider.tools.%s.%s' % (name, name)
     cls = load_cls(ctx, None, cls_name)
     c = cls(g)
