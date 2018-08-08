@@ -9,10 +9,11 @@ import logging
 @six.add_metaclass(abc.ABCMeta)
 class Base(object):
 
-    def __init__(self, g):
+    def __init__(self, g, no_loop = False):
         self.g = g
         self.logger = g['logger']
         self.logger.setLevel(logging.DEBUG if g['debug'] else logging.WARN)
+        self.no_loop = no_loop
 
     @abc.abstractmethod
     def process(self, *args, **kwargs):
