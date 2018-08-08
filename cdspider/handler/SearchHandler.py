@@ -43,7 +43,7 @@ class SearchHandler(BaseHandler, NewTaskTrait):
             urllist = re.findall(b'window\.location\.replace\((?:\'|")([^\'"]+)(?:\'|")\)', content)
             if urllist:
                 return urllist[0]
-            urllist = re.findall(b'window\.location\.href\s*=\*(?:\'|")([^\'"]+)(?:\'|")\)', content)
+            urllist = re.findall(b'window\.location\.href\s*=\s*(?:\'|")([^\'"]+)(?:\'|")\)', content)
             if urllist:
                 return urllist[0]
 
