@@ -37,7 +37,7 @@ class SearchWorker(BaseWorker):
                 i = 0
                 for site in sites:
                     self.logger.debug("%s build_search_work_by_kwid site: %s " % (self.__class__.__name__, str(site)))
-                    self.build_search_work_by_site(site, kwid)
+                    self.build_search_work_by_site(site, message['kwid'])
                     if site['sid'] > lastsid:
                         lastsid = site['sid']
                     i += 1
