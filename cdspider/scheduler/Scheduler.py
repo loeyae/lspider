@@ -97,7 +97,7 @@ class Scheduler(object):
         for projectid in self.projects:
             while True:
                 newtask_list = self.db['TaskDB'].get_list(projectid,
-                                                          where={'status':TaskDB.STATUS_ACTIVE,'plantime':{'$lte':int(time.time())},'$or':[{'expire':0},{'expire':{'$gt':int(time.time())}}]},
+                                                          where={'$and':[{'status':TaskDB.STATUS_ACTIVE},{'plantime':{'$lte':int(time.time())}},{'$or':[{'expire':0},{'expire':{'$gt':int(time.time())}}]}]},
                                                           sort=[('plantime', 1)])
                 i = 0
                 for task in newtask_list:
