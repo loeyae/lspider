@@ -437,7 +437,7 @@ class TaskHandler(ProjectHandler):
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
 
-            return json.dunmps(result)
+            return json.dumps(result)
         application.register_function(fetch, 'fetch')
 
         def get_task(data):
