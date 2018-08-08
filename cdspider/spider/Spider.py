@@ -246,8 +246,8 @@ class Spider():
         task['site']['scripts'] = attachment['scripts']
         if not 'save' in task or not task['save']:
             task['save'] = {}
-        tasl['save']['mode'] = BaseHandler.MODE_ATT
-        tasl['save']['base_url'] = task['url']
+        task['save']['mode'] = BaseHandler.MODE_ATT
+        task['save']['base_url'] = task['url']
         return task
 
     def _get_task_from_project(self, message, task, project, no_check_status = False):
