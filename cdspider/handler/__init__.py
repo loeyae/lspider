@@ -13,6 +13,7 @@ from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.exceptions import *
 from cdspider.libs.tools import *
+from cdspider.parser import *
 from cdspider.libs.url_builder import UrlBuilder
 
 IGNORE_EXCEPTIONS = (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerNoExists, CDSpiderCrawlerNoSource)
@@ -247,13 +248,14 @@ class BaseHandler(object):
         if not mode:
             mode = self.mode
         if mode == self.MODE_ATT:
-            parser_name = 'custom'
+            parser = CustomParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         elif mode == self.MODE_ITEM:
-            parser_name = 'item'
+            parser = ItemParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         else:
-            parser_name = 'list'
+#            parser_name = 'list'
+            parser = ListParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         self.logger.debug("%s parse start: %s @ %s" % (self.__class__.__name__, str(rule), self.mode))
-        parser = utils.load_parser(parser_name, source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
+#        parser = utils.load_parser(parser_name, source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         parsed = parser.parse()
         self.logger.debug("%s parse end" % (self.__class__.__name__))
         return parsed
