@@ -15,5 +15,5 @@ class Base(object):
         self.logger.setLevel(logging.DEBUG if g['debug'] else logging.WARN)
 
     @abc.abstractmethod
-    def process(self， *args, **kwargs):
+    def process(self, *args, **kwargs):
         pass
