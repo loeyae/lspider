@@ -189,14 +189,19 @@ class BaseHandler(object):
         """
         pass
 
-    def crawl(self, save):
+    def crawl(self, save, crawler = False):
+        """
+        数据抓取
+        :param: save 保持的上下文
+        :param: crawler 是否更新crawler对象
+        """
         broken_exc = None
         final_url = self.task.get('url')
         last_source = None
         try:
             request = self._get_request()
             proxy = request.pop('proxy', 'never')
-            if self.page == 1:
+            if self.page == 1 or crawler or self.crawler is None:
                 self.crawler = self.get_crawler(request)
             request['url'] = self.task.get('url')
             if self.page == 1 and self.mode != self.MODE_ITEM:
