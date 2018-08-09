@@ -264,7 +264,7 @@ class UrlBuilder():
                 for i in range(len(incr_data)):
                     assert 'name' in incr_data[i] and incr_data[i]['name'], "invalid setting name of incr_data"
                     assert 'value' in incr_data[i], "invalid setting value of incr_data"
-                    if not incr_data[i]['value']:
+                    if incr_data[i]['value'] is None or incr_data[i]['value'] == "":
                         incr_data[i]['value'] = 1
                     if not 'step' in incr_data[i] or not incr_data[i]['step']:
                         incr_data[i]['step'] = 1
