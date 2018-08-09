@@ -67,7 +67,7 @@ class KafkaQueue(CDBaseQueue):
 
         k = self.symbol()
         if not k in connection_pool:
-            self.connect = KafkaClient(hosts=self.host,zookeeper_hosts=self.zookeeper_hosts)
+            self.connect = KafkaClient(hosts=self.host)
             self.connect=self.connect.topics[self.queuename.encode()]
             connection_pool[k] = self.connect
         else:
