@@ -276,7 +276,6 @@ class UrlBuilder():
                 save['incr_data'] = incr_data
             for i in range(len(save['incr_data'])):
                 item = save['incr_data'][i]
-                sitem = incr_data[i]
                 if not 'max' in item or not item['max']:
                     item['max'] = 0
                 step = int(item.get('step', 1))
