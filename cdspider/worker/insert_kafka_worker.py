@@ -37,6 +37,7 @@ class insert_kafka_worker(object):
             if 'on_sync' in data:
                 res['flag']=data['on_sync']
             res.pop('rid')
+            res.pop('crawlinfo')
             self.kafka.put_nowait(res)
         except queue.Empty:
             time.sleep(1)
