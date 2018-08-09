@@ -201,7 +201,7 @@ class BaseHandler(object):
         try:
             request = self._get_request()
             proxy = request.pop('proxy', 'never')
-            if self.page == 1 or crawler or self.crawler is None:
+            if crawler or self.crawler is None:
                 self.crawler = self.get_crawler(request)
             request['url'] = self.task.get('url')
             if self.page == 1 and self.mode != self.MODE_ITEM:
