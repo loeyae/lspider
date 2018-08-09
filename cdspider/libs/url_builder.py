@@ -268,7 +268,7 @@ class UrlBuilder():
                         incr_data[i]['value'] = 1
                     if not 'step' in incr_data[i] or not incr_data[i]['step']:
                         incr_data[i]['step'] = 1
-                    if not 'base_page' in incr_data[i]
+                    if not 'base_page' in incr_data[i]:
                         incr_data[i]['base_page'] = int(incr_data[i]['value'])
                     if int(incr_data[i]['value']) > incr_data[i]['base_page']:
                         incr_data[i]['value'] = int(incr_data[i].get('value', 0)) - int(incr_data[i].get('step', 1))
