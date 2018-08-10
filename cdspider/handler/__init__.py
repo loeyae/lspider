@@ -189,7 +189,7 @@ class BaseHandler(object):
         """
         pass
 
-    def crawl(self, save, crawler = False):
+    def crawl(self, save, crawler = None):
         """
         数据抓取
         :param: save 保持的上下文
@@ -222,7 +222,7 @@ class BaseHandler(object):
                 params['proxy'] = copy.deepcopy(save['proxy'])
             self.crawler.crawl(**params)
             if self.page == 1:
-                final_url = self.task['url'] = self.crawler.final_url
+                final_url = save['request_url'] = self.crawler.final_url
             last_source = self.crawler.page_source
         except Exception as exc:
             broken_exc = exc
