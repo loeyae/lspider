@@ -8,6 +8,9 @@
 """
 
 import os
+import re
+import time
+import copy
 from cdspider.tools import Base
 
 class build_url_from_file(Base):
@@ -18,11 +21,21 @@ class build_url_from_file(Base):
     def process(self, *args, **kwargs):
         assert len(args) > 0, 'Please input sid'
         assert len(args) > 1, 'Please input file path'
+        encode = 'utf8'
+        if len(args) > 2:
+            encode = args[2]
         sid = int(args[0])
         fpath = args[1]
         if not sid:
             raise Exception('Site not exists')
-        site = self.g['db']['SitsDB'].get_detail(sid)
+        site = self.g['db']['SitesDB'].get_detail(sid)
+        print('Site info: %s' % str(site))
+        x = None
+        while x not in ('y', 'Y', 'n', 'N'):
+            x = input('Proceed (y[Y]/n[N]):')
+        if x in ('N', 'n'):
+            print('Quit')
+            return
         if not site:
             raise Exception('Site not exists')
         if not os.path.isfile(fpath):
@@ -42,23 +55,31 @@ class UrlHandler(SiteHandler):
             'status': UrlsDB.STATUS_INIT,
             'rate': site['rate'],
             'scripts': urlsscript,
-            'main_process': site['main_process'],
-            'sub_process': site['sub_process'],
-            'unique': None,
+            'main_process': site.get('main_process', None),
+            'sub_process': site.get('sub_process', None),
+            'unique': site.get('unique', None),
             'ctime': int(time.time()),
             'utime': 0,
             'creator': site['creator'],
             'updator': site['updator'],
         }
-        with open(fpath, 'r') as f:
+        print("Urls info: %s" % urls)
+        x = None
+        while x not in ('y', 'Y', 'n', 'N'):
+            x = input('Proceed (y[Y]/n[N]):')
+        if x in ('N', 'n'):
+            print('Quit')
+            return
+        with open(fpath, 'r', encoding=encode) as f:
             line = f.readline()
             i = 1
             while line:
                 self.g['logger'].info('current line: %s', i)
                 title, url = re.split(r'\t', line)
-                urls['title'] = title
-                urls['url'] = url
-                uid = UrlsDB.insert(urls)
+                item = copy.deepcopy(urls)
+                item['name'] = title.strip()
+                item['url'] = url.strip()
+                uid = UrlsDB.insert(item)
                 self.g['logger'].info('inserted urls: %s', uid)
                 i += 1
                 line = f.readline()
