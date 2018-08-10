@@ -16,8 +16,8 @@ class build_url_from_file(Base):
     """
 
     def process(self, *args, **kwargs):
-        assert len(args) > 1, 'Please input sid'
-        assert len(args) > 2, 'Please input file path'
+        assert len(args) > 0, 'Please input sid'
+        assert len(args) > 1, 'Please input file path'
         sid = int(args[0])
         fpath = args[1]
         if not sid:
