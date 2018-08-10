@@ -11,8 +11,8 @@ import base64
 import json
 import hashlib
 import datetime
+import tldextract
 from urllib import parse
-from tld import get_tld
 from types import *
 import subprocess
 import random
@@ -39,12 +39,8 @@ def build_url_by_rule(rule, params):
 
 def parse_domain(url):
     try:
-        presult = parse.urlparse(url)
-        domain = get_tld(url)
-        hostname = presult.hostname
-        end = hostname.find(domain)-1
-        subdomain = hostname[0:end] or ''
-        return subdomain, domain
+        extracted = tldextract.extract(url)
+        return extracted.subdomain, "%s.%s" % (extracted.domain, extracted.suffix)
     except:
         return None, None
 
