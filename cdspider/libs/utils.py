@@ -27,7 +27,7 @@ import datetime
 def build_url_by_rule(rule, params):
     url = rule.get('base')
     if rule.get('mode', 'get') == 'format':
-        keylist = re.findall('\{(\w+)\}', rul)
+        keylist = re.findall('\{(\w+)\}', rule)
         format_params = {}
         for key in keylist:
             if key in params:
