@@ -357,6 +357,8 @@ class TaskHandler(ProjectHandler):
             task = self._get_task_from_item(message, task, project, no_check_status)
         else:
             task = self._get_task_from_project(message, task, project, no_check_status)
+        if not task:
+            return None
         if "incr_data" in task['save'] and task['save']['incr_data']:
             for i in range(len(task['save']['incr_data'])):
                 task['save']['incr_data'][i]['value'] = task['save']['incr_data'][i].get('base_page', 1)
