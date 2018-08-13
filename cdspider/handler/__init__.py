@@ -230,7 +230,7 @@ class BaseHandler(object):
             return last_source, broken_exc, final_url
 
     def _init_process(self, url = None):
-        self.mode == self.MODE_ITEM:
+        if self.mode == self.MODE_ITEM:
             subdomain, domain = self._domain_info(url)
             parserule = None
             if subdomain:
