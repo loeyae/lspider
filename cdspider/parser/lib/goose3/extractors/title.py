@@ -125,10 +125,7 @@ class TitleExtractor(BaseExtractor):
                         rule = '|'.join(known_context_patterns)
                         matched = re.findall(rule, script, re.M)
                         if matched:
-                            data = []
-                            for i in matched:
-                                data.extend(i)
-                            data = utils.filter(data)
+                            data = utils.filter(matched)
                             return {'raw_title': data[0], 'clean_title': self.clean_title(data[0])}
                 known_context_patterns = []
 
