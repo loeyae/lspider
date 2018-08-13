@@ -161,7 +161,11 @@ class BaseHandler(object):
         if attachment:
             identify = attachment.get('unique', None)
         else:
-            identify = urls.get('unique', None) or site.get('unique', None)
+            identify = {
+                "url": urls.get('unique', {}).get("url") or site.get('unique', {}).get("url"),
+                "query": urls.get('unique', {}).get("query") or site.get('unique', {}).get("query"),
+                "data": urls.get('unique', {}).get("data") or site.get('unique', {}).get("data"),
+            }
         u = url
         if identify:
             if 'url' in identify and identify['url']:
