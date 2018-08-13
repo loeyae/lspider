@@ -85,7 +85,7 @@ class StatusSchedule(object):
 
     def schedule_urls(self,data,obj,db_name,id_type,pid):
         if 'status' in obj:
-                self.db['UrlsDB'].update(data[id_type],obj)
+                self.db['UrlsDB'].update(data[id_type],{'status':obj['status']})
                 self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
         else:
             where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
