@@ -215,7 +215,7 @@ class BaseHandler(object):
                         request['incr_data'][i]['isfirst'] = False
                         request['incr_data'][i]['value'] = int(request['incr_data'][i]['value']) + int(request['incr_data'][i].get('step', 1))
             builder = UrlBuilder(self.logger, self.log_level)
-            params = builder.build(request, last_source, self.crawler, save)
+            params = builder.build(request, last_source, self.crawler, copy.deepcopy(save))
             if isinstance(self.crawler, SeleniumCrawler) and params['method'].upper() == 'GET':
                 params['method'] = 'open'
             if proxy == self.PROXY_TYPE_EVER and save['proxy']:
