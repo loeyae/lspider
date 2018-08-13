@@ -1,7 +1,7 @@
 {
     "debug": true,
     "proxy": {
-        "proxy_url": "http://114.112.86.46:8082/get_ips/own/30",
+        "proxy_file": "/home/www/ip.txt",
         "user": "hongmai",
         "password": "soften.cn",
         "type": "socks",
@@ -50,3 +50,4 @@
         ]
     }
 }
+
