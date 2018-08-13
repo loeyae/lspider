@@ -230,11 +230,7 @@ class BaseHandler(object):
             return last_source, broken_exc, final_url
 
     def _init_process(self, url = None):
-        if self.mode == self.MODE_CHANNEL:
-            self.process = self.task.get('urls', {}).get('main_process', None) or self.task.get('site', {}).get('main_process', None) or self.DEFAULT_PROCESS
-        elif self.mode == self.MODE_LIST:
-            self.process = self.task.get('urls', {}).get('sub_process', None) or self.task.get('site', {}).get('sub_process', None) or self.DEFAULT_PROCESS
-        elif self.mode == self.MODE_ITEM:
+        self.mode == self.MODE_ITEM:
             subdomain, domain = self._domain_info(url)
             parserule = None
             if subdomain:
@@ -254,7 +250,13 @@ class BaseHandler(object):
 
         if not self.process:
             self._init_process();
-        request = self.process.get('request', {})
+        if self.mode == self.MODE_ATT:
+            request = self.process.get('request', {})
+        else:
+            if self.mode == self.MODE_CHANNEL:
+                request = self.task.get('urls', {}).get('main_process', {}).get('request', {}) or self.task.get('site', {}).get('main_process', {}).get('request', {}) or self.DEFAULT_PROCESS
+            elif self.mode == self.MODE_LIST:
+                request = self.task.get('urls', {}).get('sub_process', {}).get('request', {}) or self.task.get('site', {}).get('sub_process', {}).get('request', {}) or self.DEFAULT_PROCESS
         if 'cookie' in request and request['cookie']:
             cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
             if len(cookie_list) > 1:
@@ -281,9 +283,15 @@ class BaseHandler(object):
     def _get_paging(self, url = None):
         if not self.process:
             self._init_process(url);
-        paging = self.process.get('paging', None)
+        if self.mode in (self.MODE_ITEM, self.MODE_ATT):
+            paging = self.process.get('paging', None)
+        else:
+            if self.mode == self.MODE_CHANNEL:
+                paging = self.task.get('urls', {}).get('main_process', {}).get('paging', {}) or self.task.get('site', {}).get('main_process', {}).get('paging', {})
+            elif self.mode == self.MODE_LIST:
+                paging = self.task.get('urls', {}).get('sub_process', {}).get('paging', {}) or self.task.get('site', {}).get('sub_process', {}).get('paging', {})
         if paging:
-            if paging['name']:
+            if "name" in paging and paging['name']:
                 return paging
         return None
 
@@ -314,7 +322,14 @@ class BaseHandler(object):
         """
         if not self.process:
             self._init_process(url)
-        parse = self.process.get('parse', {})
+        if self.mode in (self.MODE_ITEM, self.MODE_ATT):
+            parse = self.process.get('parse', {})
+        else:
+            if self.mode == self.MODE_CHANNEL:
+                parse = self.task.get('urls', {}).get('main_process', {}).get('parse', {}) or self.task.get('site', {}).get('main_process', {}).get('parse', {})
+            elif self.mode == self.MODE_LIST:
+                parse = self.task.get('urls', {}).get('sub_process', {}).get('parse', {}) or self.task.get('site', {}).get('sub_process', {}).get('parse', {})
+
         if self.mode == self.MODE_ATT:
             if not 'item' in  parse:
                 parse = dict((key, item) for key, item in parse.items() if 'filter' in item and item['filter'])
