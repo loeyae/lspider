@@ -248,9 +248,9 @@ class BaseHandler(object):
         if self.mode == self.MODE_ITEM:
             return self.DEFAULT_PROCESS
 
-        if not self.process:
-            self._init_process();
         if self.mode == self.MODE_ATT:
+            if not self.process:
+                self._init_process();
             request = self.process.get('request', {})
         else:
             if self.mode == self.MODE_CHANNEL:
@@ -281,9 +281,9 @@ class BaseHandler(object):
         return request
 
     def _get_paging(self, url = None):
-        if not self.process:
-            self._init_process(url);
         if self.mode in (self.MODE_ITEM, self.MODE_ATT):
+            if not self.process:
+                self._init_process(url);
             paging = self.process.get('paging', None)
         else:
             if self.mode == self.MODE_CHANNEL:
@@ -320,9 +320,9 @@ class BaseHandler(object):
         """
         获取解析规则
         """
-        if not self.process:
-            self._init_process(url)
         if self.mode in (self.MODE_ITEM, self.MODE_ATT):
+            if not self.process:
+                self._init_process(url);
             parse = self.process.get('parse', {})
         else:
             if self.mode == self.MODE_CHANNEL:
