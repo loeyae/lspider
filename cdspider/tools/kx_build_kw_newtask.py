@@ -32,10 +32,10 @@ class kx_build_kw_newtask(Base):
                     t['url']=u_item['url'].replace('{keyword}',item['title'])
                     t['status']=1
                     t['newTask_by_tools']=1
-                    try:
-                        print(str(t['uid'])+'==='+item['title'])
-                    except:
-                        pass
+#                     try:
+#                         print(str(t['uid'])+'==='+item['title'])
+#                     except:
+#                         pass
                     uid=u_item['uid']
                     self.g['db']['TaskDB'].insert(t)
                 if u_sum==0:
