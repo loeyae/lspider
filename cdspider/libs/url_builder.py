@@ -12,18 +12,19 @@ import time
 import re
 import logging
 import random
+from cdspider import Component
 from urllib.parse import urljoin
 from cdspider.libs import utils
 from cdspider.exceptions import *
 
-class UrlBuilder():
+class UrlBuilder(Component):
     """
     url builder
     """
     def __init__(self, logger = None, log_level=logging.DEBUG):
-        self.logger = logger or logging.getLogger('spider')
+        logger = logger or logging.getLogger('spider')
         self.log_level = log_level
-        self.logger.setLevel(log_level)
+        super(UrlBuilder, self).__init__(logger, log_level)
 
     def build(self, kwargs, source, crawler, save):
         """
@@ -31,7 +32,7 @@ class UrlBuilder():
         """
         if not kwargs or not 'url' in kwargs:
             return kwargs
-        self.logger.info("UrlBuilder parse params: %s" % kwargs)
+        self.info("UrlBuilder parse params: %s" % kwargs)
         data = save.get("view_data", None)
         if not data and 'view_data' in kwargs:
             data = self._run_parse(kwargs['view_data'], source, save.get('base_url'))
@@ -76,24 +77,24 @@ class UrlBuilder():
         for k,v in kwargs.items():
             if k in keys:
                 params[k] = v
-        self.logger.info("UrlBuilder parsed params: %s" % params)
+        self.info("UrlBuilder parsed params: %s" % params)
         return params
 
     def _run_parse(self, rule, source, url=None):
-        self.logger.info("UrlBuilder run parse start")
+        self.info("UrlBuilder run parse start")
         try:
             data = {}
             for k, item in rule.items():
-                self.logger.info("UrlBuilder run parse: %s => %s" % (k, item))
+                self.info("UrlBuilder run parse: %s => %s" % (k, item))
                 for parser_name, r in item.items():
                     parser = utils.load_parser(parser_name, source=source, ruleset={k: r}, log_level=self.log_level, url=url)
                     parsed = parser.parse()
-                    self.logger.info("UrlBuilder run parse matched data: %s" % str(parsed))
+                    self.info("UrlBuilder run parse matched data: %s" % str(parsed))
                     if parsed:
                         data.update(parsed)
                         break
         finally:
-            self.logger.info("UrlBuilder run parse end")
+            self.info("UrlBuilder run parse end")
         return data
 
     def _parse_url(self, kwargs, source, save):
@@ -177,7 +178,7 @@ class UrlBuilder():
         """
         data = save.get("hard_code", None)
         if not data and 'hard_code' in kwargs and kwargs['hard_code']:
-            self.logger.debug("UrlBuilder parse hard code rule: %s" % str(kwargs['hard_code']))
+            self.debug("UrlBuilder parse hard code rule: %s" % str(kwargs['hard_code']))
             data = []
             for item in kwargs['hard_code']:
                 if 'attr' in item:
@@ -193,7 +194,7 @@ class UrlBuilder():
                     data.append({"name": item['name'], "type": item['type'], "value": item['value']})
             save['hard_code'] = data
         if data:
-            self.logger.debug("UrlBuilder parse hard code data: %s" % str(data))
+            self.debug("UrlBuilder parse hard code data: %s" % str(data))
             for item in data:
                 self._append_kwargs_data(kwargs, item['type'], item['name'], item['value'])
 
@@ -203,7 +204,7 @@ class UrlBuilder():
         """
         data = save.get("cookie_data", None)
         if not data and 'cookie' in kwargs and kwargs['cookie']:
-            self.logger.debug("UrlBuilder parse cookie data rule: %s" % str(kwargs['cookie']))
+            self.debug("UrlBuilder parse cookie data rule: %s" % str(kwargs['cookie']))
             data = []
             for item in kwargs['cookie']:
                 if 'params' in item and item['params']:
@@ -218,7 +219,7 @@ class UrlBuilder():
                 data.append({"name": item['name'], "type": item['type'], "value": value})
             save['cookie_data'] = data
         if data:
-            self.logger.debug("UrlBuilder parse cookie data data: %s" % str(data))
+            self.debug("UrlBuilder parse cookie data data: %s" % str(data))
             for item in data:
                 self._append_kwargs_data(kwargs, item['type'], item['name'], value)
 
@@ -227,7 +228,7 @@ class UrlBuilder():
         随机参数设置
         """
         if 'random' in kwargs and kwargs['random']:
-            self.logger.debug("UrlBuilder parse random data rule: %s" % str(kwargs['random']))
+            self.debug("UrlBuilder parse random data rule: %s" % str(kwargs['random']))
             for item in kwargs['random']:
                 assert 'name' in item and item['name'], "invalid setting name of random data"
                 assert 'value' in item, "invalid setting value of random data"
@@ -256,7 +257,7 @@ class UrlBuilder():
         自增参数设置
         """
         if 'incr_data' in kwargs and kwargs['incr_data']:
-            self.logger.debug("UrlBuilder parse incr data rule: %s" % str(kwargs['incr_data']))
+            self.debug("UrlBuilder parse incr data rule: %s" % str(kwargs['incr_data']))
             incr_data = kwargs['incr_data'].copy()
             if not isinstance(incr_data, list):
                 incr_data = [incr_data]
