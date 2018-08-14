@@ -26,20 +26,11 @@ class build_url_from_file(Base):
             encode = args[2]
         sid = int(args[0])
         fpath = args[1]
-        if not sid:
-            raise Exception('Site not exists')
+        self.broken('Sitenot exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
-        print('Site info: %s' % str(site))
-        x = None
-        while x not in ('y', 'Y', 'n', 'N'):
-            x = input('Proceed (y[Y]/n[N]):')
-        if x in ('N', 'n'):
-            print('Quit')
-            return
-        if not site:
-            raise Exception('Site not exists')
-        if not os.path.isfile(fpath):
-            raise Exception('File not exists')
+        self.broken('Site: %s not exists' % sid, site)
+        self.broken('File: %s not exists' % fpath, os.path.isfile(fpath))
+        self.notic('Selected Site Info:', site)
 
         urlsscript = """
 from cdspider.handler.custom.{projectname} import SiteHandler
@@ -63,13 +54,7 @@ class UrlHandler(SiteHandler):
             'creator': site['creator'],
             'updator': site['updator'],
         }
-        print("Urls info: %s" % urls)
-        x = None
-        while x not in ('y', 'Y', 'n', 'N'):
-            x = input('Proceed (y[Y]/n[N]):')
-        if x in ('N', 'n'):
-            print('Quit')
-            return
+        self.notic('Built Urls Info:', urls)
         with open(fpath, 'r', encoding=encode) as f:
             line = f.readline()
             i = 1
