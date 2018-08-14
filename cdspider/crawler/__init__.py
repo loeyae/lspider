@@ -11,12 +11,13 @@ import random
 import re
 from http import cookiejar as cookielib
 from urllib.parse import *
+from cdspider import Component
 from cdspider.libs import utils
 from cdspider.exceptions import *
 from cdspider.libs.tools import *
 
 @six.add_metaclass(abc.ABCMeta)
-class BaseCrawler(object):
+class BaseCrawler(Component):
     """
     爬虫基类
     """
@@ -46,7 +47,7 @@ class BaseCrawler(object):
             kwargs.setdefault('url', args[0])
         self.logger = kwargs.pop('logger', logging.getLogger('crawler'))
         log_level = kwargs.pop('log_level', logging.WARN)
-        self.logger.setLevel(log_level)
+        super(BaseCrawler, self).__init__(self.logger, log_level)
         self._prepare_setting(**kwargs)
 
         if "url" in kwargs and kwargs['url']:
@@ -218,7 +219,7 @@ class BaseCrawler(object):
                     proxies['addr'] = "%s:%s" % (gs[0], gs[1])
                     proxies.setdefault("type", "http")
                     data = utils.dictunion(proxies, {'addr': None, 'type': None, 'user': None, 'password': None})
-                    self.logger.info('Proxy: %s' % data)
+                    self.info('Proxy: %s' % data)
                     self.set_proxy(**data)
 
     def broken(self, type, message = None):
