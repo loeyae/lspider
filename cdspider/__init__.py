@@ -6,7 +6,7 @@ import logging
 
 class Component(Object):
 
-    def __init__(self, logger, log_level)
+    def __init__(self, logger, log_level):
         self.logger = logger or logging.getLogger('root')
         self.logger.setLevel(log_level)
         self.log_level = log_level
