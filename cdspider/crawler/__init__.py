@@ -49,9 +49,9 @@ class BaseCrawler(Component):
         log_level = kwargs.pop('log_level', logging.WARN)
         super(BaseCrawler, self).__init__(self.logger, log_level)
         self._prepare_setting(**kwargs)
-
-        if "url" in kwargs and kwargs['url']:
-            self.crawl(url)
+#
+#        if "url" in kwargs and kwargs['url']:
+#            self.crawl(url)
 
     def _prepare_setting(self, **kwargs):
         """
@@ -157,6 +157,9 @@ class BaseCrawler(Component):
         设置代理
         """
         pass
+
+    def close(self):
+        raise NotImplementedError
 
     def quit(self):
         raise NotImplementedError
