@@ -260,7 +260,7 @@ class Spider():
             task['save'] = {}
         task['save']['mode'] = message.get('mode', BaseHandler.MODE_DEFAULT);
         task['project'] = project
-        site = self.SitesDB.get_detail(int(task['sid']))
+        site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
         if not site:
             self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
