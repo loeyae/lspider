@@ -12,25 +12,25 @@ class Component(object):
         self.log_level = log_level
 
     def debug(self, message, *args, **kwargs):
-        if self.log_level >= loggin.DEBUG:
+        if self.log_level >= logging.DEBUG:
             self.logger.debug(message, *args, **kwargs)
 
     def info(self, message, *args, **kwargs):
-        if self.log_level >= loggin.INFO:
+        if self.log_level >= logging.INFO:
             self.logger.info(message, *args, **kwargs)
 
     def warn(self, message, *args, **kwargs):
-        if self.log_level >= loggin.WARN:
+        if self.log_level >= logging.WARN:
             self.logger.warn(message, *args, **kwargs)
 
     def error(self, message, *args, **kwargs):
-        if self.log_level >= loggin.ERROR:
+        if self.log_level >= logging.ERROR:
             self.logger.error(message, *args, **kwargs)
 
     def fatal(self, message, *args, **kwargs):
-        if self.log_level >= loggin.FATAL:
+        if self.log_level >= logging.FATAL:
             self.logger.fatal(message, *args, **kwargs)
 
     def critical(self, message, *args, **kwargs):
-        if self.log_level >= loggin.CRITICAL:
+        if self.log_level >= logging.CRITICAL:
             self.logger.critical(message, *args, **kwargs)
