@@ -37,7 +37,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj = {}):
-        obj['uid'] = self._get_increment(self.table)
+        obj['uid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
