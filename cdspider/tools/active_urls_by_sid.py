@@ -15,9 +15,15 @@ class active_urls_by_sid(Base):
         self.broken('Site not exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
-        for item in self.g['db']['UrlsDB'].get_list(where={'sid': sid,'status': 0}):
-            d={}
-            d['status']=1
-            d['uid'] = item['uid']
-            self.logger.info("import status_queue data: %s" %  str(d))
-            self.g['queue']['status_queue'].put_nowait(d)
+        self.notic('Selected Site Info:', site)
+        while True:
+            i = 0
+            for item in self.g['db']['UrlsDB'].get_list(where={'sid': sid,'status': 0}):
+                d={}
+                d['status']=1
+                d['uid'] = item['uid']
+                self.logger.info("import status_queue data: %s" %  str(d))
+                self.g['queue']['status_queue'].put_nowait(d)
+                i += 1
+            if i < 1:
+                return 
