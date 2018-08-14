@@ -12,7 +12,7 @@ class active_urls_by_sid(Base):
     def process(self, *args):
         assert len(args) > 0, 'Please input sid'
         sid = int(args[0])
-        self.broken('Site not exists' % sid, sid)
+        self.broken('Site not exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
         for item in self.g['db']['UrlsDB'].get_list(where={'sid': sid,'status': 0}):
