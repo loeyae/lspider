@@ -52,9 +52,12 @@ class RequestsCrawler(BaseCrawler):
     def __del__(self):
         self.quit()
 
-    def quit(self):
+    def close(self):
         if isinstance(self._response, requests.Response):
             self._response.close()
+
+    def quit(self):
+        self.close()
         if isinstance(self._ses, requests.Session):
             self._ses.close()
         self._ses = None
