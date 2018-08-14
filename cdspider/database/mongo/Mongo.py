@@ -157,7 +157,7 @@ class Mongo(BaseDataBase):
 
 
     def _get_increment(self, name):
-        collection = self._db.get_collection('_ids')
+        collection = self._db.get_collection('inc_ids')
         indexes = collection.index_information()
         if not 'name' in indexes:
             collection.create_index('name', unique=True, name='name')
