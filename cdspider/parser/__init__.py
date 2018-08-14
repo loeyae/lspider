@@ -27,7 +27,7 @@ class BaseParser(object):
         self.source = kwargs.pop("source", None)
         self.logger = kwargs.pop('logger', logging.getLogger('parser'))
         log_level = kwargs.pop('log_level', logging.WARN)
-        super(BaseParser).__init__(self.logger, log_level)
+        super(BaseParser, self).__init__(self.logger, log_level)
         url = kwargs.pop('url', None)
         self.final_url = url
         self.domain = kwargs.pop('domain', None)
