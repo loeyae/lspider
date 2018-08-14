@@ -10,6 +10,7 @@ import traceback
 import copy
 from urllib.parse import urljoin
 from cdspider import Component
+from cdspider.crawler import BaseCrawler
 from cdspider.crawler import SeleniumCrawler
 from cdspider.database.base import *
 from cdspider.libs import utils
@@ -57,6 +58,7 @@ class BaseHandler(Component):
         self.log_level = kwargs.pop('log_level', logging.WARN)
         super(BaseHandler, self).__init__(self.logger, self.log_level)
         self.task = kwargs.pop('task')
+        self.crawler_list = kwargs.pop('crawler')
         self.attach_storage = kwargs.pop('attach_storage', None)
         self.db = kwargs.pop('db',None)
         self.queue = kwargs.pop('queue',None)
@@ -75,12 +77,17 @@ class BaseHandler(Component):
             "traceback": None
         }
         self._settings = kwargs or {}
+        self.mycrawler = True
         self.crawler = None
         self.process = None
         self.mode = self.task.get('save',{}).get('mode', self.MODE_DEFAULT)
         self.page = 1
         self.last_result_id = None
 
+    def __del__(self):
+        if self.mycrawler and isinstance(self.crawler, BaseCrawler):
+            self.crawler.quit()
+            
     def _domain_info(self, url):
         subdomain, domain = utils.parse_domain(url)
         return "%s.%s" % (subdomain, domain), domain
@@ -142,6 +149,9 @@ class BaseHandler(Component):
 
     def get_crawler(self, rule):
         crawler = rule.get('crawler', 'requests')
+        if crawler in self.crawler_list:
+            self.mycrawler = False
+            return self.crawler_list[crawler]
         return utils.load_crawler(crawler, headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
 
     def prepare(self, save):
