@@ -9,7 +9,7 @@ from cdspider import Component
 from cdspider.libs.utils import parse_domain, patch_result
 
 @six.add_metaclass(abc.ABCMeta)
-class BaseParser(object):
+class BaseParser(Component):
     """
     解析基类
     """
