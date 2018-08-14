@@ -136,7 +136,7 @@ class Spider():
             if 'incr_data' in save and isinstance(save['incr_data'], list) and save['incr_data']:
                 for item in save['incr_data']:
                     if int(item.get('base_page', 1)) >= int(item.get('value', 1)):
-                        item['first'] = True
+                        item['isfirst'] = True
             if not return_result:
                 task['last_source'] = last_source
                 handler.on_error(e)
