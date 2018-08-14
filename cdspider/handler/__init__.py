@@ -112,9 +112,14 @@ class BaseHandler(object):
     def build_url_by_rule(self, data, base_url = None):
         if not base_url:
             base_url = self.task.get('url')
-        if not self.process:
-            self._init_process()
-        urlrule = self.process.get('url', {})
+        if self.mode in (self.MODE_ITEM, self.MODE_ATT):
+            if not self.process:
+                self._init_process()
+            urlrule = self.process.get('url', {})
+        elif self.mode == self.MODE_CHANNEL:
+            urlrule = self.task.get('urls', {}).get('main_process', {}).get('url', {}) or self.task.get('site', {}).get('main_process', {}).get('url', {})
+        elif self.mode == self.MODE_LIST:
+            urlrule = self.task.get('urls', {}).get('sub_process', {}).get('url', {}) or self.task.get('site', {}).get('sub_process', {}).get('url', {})
         formated = []
         for item in data:
             if not 'url' in item or not item['url']:
