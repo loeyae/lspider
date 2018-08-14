@@ -161,8 +161,8 @@ class Mongo(BaseDataBase):
         indexes = collection.index_information()
         if not 'name' in indexes:
             collection.create_index('name', unique=True, name='name')
-        res = collection.find_one_and_update({"name": name}, {"$inc": {"seq": 1}}, upsert=True, return_document=True)
-        return res['seq']
+        res = collection.find_one_and_update({"name": name}, {"$inc": {"id": 1}}, upsert=True, return_document=True)
+        return res['id']
 
 class SplitTableMixin(object):
 
