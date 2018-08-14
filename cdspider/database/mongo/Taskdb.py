@@ -36,7 +36,7 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         table = self._table_name(pid)
         obj['utime'] = int(time.time())
         return super(TaskDB, self).update(setting=obj, where={"tid": int(id)}, table=table, multi=False)
-    
+
     def update_many(self , pid, obj, where=None):
         obj['plantime']=int(time.time())
         if where=={} or where==None:
