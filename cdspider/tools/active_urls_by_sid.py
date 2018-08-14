@@ -7,7 +7,7 @@ Created on 2018年6月20日
 '''
 from cdspider.tools import Base
 
-class send_queue(Base):
+class active_urls_by_sid(Base):
 
     def process(self, *args):
         assert len(args) > 0, 'Please input sid'
