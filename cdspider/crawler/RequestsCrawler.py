@@ -89,10 +89,10 @@ class RequestsCrawler(BaseCrawler):
         stream = self._setting.get('stream')
         verify = self._setting.get('verify')
         cert = self._setting.get('cert')
-        self.logger.info("Requests request url: %s" % url)
-        self.logger.info("Requests request data: %s" % str(data))
-        self.logger.info("Requests request params: %s" % str(params))
-        self.logger.info("Requests request setting: %s" % str(self._setting))
+        self.info("Requests request url: %s" % url)
+        self.info("Requests request data: %s" % str(data))
+        self.info("Requests request params: %s" % str(params))
+        self.info("Requests request setting: %s" % str(self._setting))
         try:
             req = requests.Request(method.upper(), url,
                 data=data,
@@ -135,8 +135,8 @@ class RequestsCrawler(BaseCrawler):
             raise CDSpiderCrawlerNoResponse(base_url = self._base_url)
         self._cookies = requests.cookies.merge_cookies(self._cookies, self._response.cookies)
         self._status_code = self._response.status_code
-        self.logger.info('Requests response status: %s' % self._status_code)
-        self.logger.info('Requests response cookies: %s' % self._cookies)
+        self.info('Requests response status: %s' % self._status_code)
+        self.info('Requests response cookies: %s' % self._cookies)
         url = self._response.url
         if isinstance(self._response.reason, bytes):
             try:
@@ -203,7 +203,7 @@ class RequestsCrawler(BaseCrawler):
         if l > 1:
             kwargs.setdefault('method', args[1])
         kwargs.setdefault('method', 'get')
-        self.logger.info("Requests crawl params: %s" % kwargs)
+        self.info("Requests crawl params: %s" % kwargs)
         self._prepare_setting(**kwargs)
         if kwargs.get('ajax', False):
             self.set_header('x-requested-with', 'XMLHttpRequest')
@@ -255,7 +255,7 @@ class RequestsCrawler(BaseCrawler):
         """
         设置cookie
         """
-        self.logger.info("Requests request set cookie: name:%s, value:%s, %s" % (str(name),
+        self.info("Requests request set cookie: name:%s, value:%s, %s" % (str(name),
             str(value), str(kwargs)))
         if 'httponly' in kwargs:
             kwargs['rest'] = {'HttpOnly': kwargs['httponly']}
@@ -288,7 +288,7 @@ class RequestsCrawler(BaseCrawler):
         """
         设置header
         """
-        self.logger.info("Requests set header: %s => %s" % (str(name), str(value)))
+        self.info("Requests set header: %s => %s" % (str(name), str(value)))
         self._headers.update({name: value})
 
     @property

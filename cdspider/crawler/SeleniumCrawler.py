@@ -96,7 +96,7 @@ class SeleniumCrawler(BaseCrawler):
         service_args = None
         if self.service_args:
             service_args = [ k +"="+ v for k,v in self.service_args.items()]
-            self.logger.info("Selenium set service_args: %s" % (str(service_args)))
+            self.info("Selenium set service_args: %s" % (str(service_args)))
         self._driver = webdriver.PhantomJS(executable_path=self.execut, service_args=service_args)
 
     def start(self):
@@ -131,7 +131,7 @@ class SeleniumCrawler(BaseCrawler):
         if l > 1:
             kwargs.setdefault('method', args[1])
         kwargs.setdefault('method', 'open')
-        self.logger.info("Selenium crawl params: %s" % kwargs)
+        self.info("Selenium crawl params: %s" % kwargs)
         if not hasattr(self, kwargs['method']):
             self.request(**kwargs)
         else:
@@ -150,7 +150,7 @@ class SeleniumCrawler(BaseCrawler):
         self._prepare_request(curl)
         self.start()
         self._request_crawler = None
-        self.logger.info("Selenium request url: %s" % curl)
+        self.info("Selenium request url: %s" % curl)
         try:
             self._driver.get(curl)
         except TimeoutException as e:
@@ -410,7 +410,7 @@ class SeleniumCrawler(BaseCrawler):
         while True:
             i = 0
             for method in method_pool:
-                self.logger.info("Selenium wait item: %s time: %s end_time: %s" % (method, time.time(), end_time))
+                self.info("Selenium wait item: %s time: %s end_time: %s" % (method, time.time(), end_time))
                 try:
                     value = method(self._driver)
                     if value:
@@ -441,7 +441,7 @@ class SeleniumCrawler(BaseCrawler):
         """
         设置cookie
         """
-        self.logger.info("Selenium request set cookie: name:%s, value:%s, %s" % (str(name),
+        self.info("Selenium request set cookie: name:%s, value:%s, %s" % (str(name),
             str(value), str(kwargs)))
 
         kwargs['name'] = name
@@ -466,7 +466,7 @@ class SeleniumCrawler(BaseCrawler):
         """
         设置header
         """
-        self.logger.info("Selenium set header: %s => %s" % (str(name), str(value)))
+        self.info("Selenium set header: %s => %s" % (str(name), str(value)))
         self._cap["phantomjs.page.customHeaders."+ name] = value
 
     @property
