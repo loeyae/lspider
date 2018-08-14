@@ -20,15 +20,16 @@ class Base(object):
     def process(self, *args, **kwargs):
         pass
 
+    def broken(self, message, data):
+        if not data:
+            self.show_message(message)
+            sys.exit(0)
+
     def notice(self, message, data = None, checked = True):
         """
         notice
         """
-        print('=============================================')
-        print(str(message))
-        if data:
-            print(str(data))
-        print('=============================================')
+        self.show_message(message, data)
         if checked:
             x = None
             while x not in ('y', 'Y', 'n', 'N'):
@@ -36,3 +37,10 @@ class Base(object):
             if x in ('N', 'n'):
                 print('Quit')
                 sys.exit(0)
+
+    def show_message(self, message, data = None):
+        print('=============================================')
+        print(str(message))
+        if data:
+            print(str(data))
+        print('=============================================')
