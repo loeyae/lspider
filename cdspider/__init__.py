@@ -24,13 +24,10 @@ class Component(object):
             self.logger.warn(message, *args, **kwargs)
 
     def error(self, message, *args, **kwargs):
-        if self.log_level >= logging.ERROR:
-            self.logger.error(message, *args, **kwargs)
+        self.logger.error(message, *args, **kwargs)
 
     def fatal(self, message, *args, **kwargs):
-        if self.log_level >= logging.FATAL:
-            self.logger.fatal(message, *args, **kwargs)
+        self.logger.fatal(message, *args, **kwargs)
 
     def critical(self, message, *args, **kwargs):
-        if self.log_level >= logging.CRITICAL:
-            self.logger.critical(message, *args, **kwargs)
+        self.logger.critical(message, *args, **kwargs)
