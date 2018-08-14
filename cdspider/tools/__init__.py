@@ -20,8 +20,8 @@ class Base(object):
     def process(self, *args, **kwargs):
         pass
 
-    def broken(self, message, data):
-        if not data:
+    def broken(self, message, condition):
+        if not condition:
             self.show_message(message)
             sys.exit(0)
 
