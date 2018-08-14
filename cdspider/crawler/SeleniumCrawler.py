@@ -66,9 +66,12 @@ class SeleniumCrawler(BaseCrawler):
         self.quit()
         self._driver = None
 
-    def quit(self):
+    def close(self):
         if isinstance(self._driver, webdriver.PhantomJS):
             self._driver.close()
+
+    def quit(self):
+        if isinstance(self._driver, webdriver.PhantomJS):
             self._driver.quit()
 
     def _init_cap(self):
