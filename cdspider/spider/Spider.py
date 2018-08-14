@@ -49,7 +49,8 @@ class Spider(Component):
         self.attach_storage = attach_storage
         self.ioloop = tornado.ioloop.IOLoop()
         self.set_handler(handler)
-        self.url_builder = UrlBuilder(self, self.log_level)
+        self.log_level = log_level
+        self.url_builder = UrlBuilder(self, log_level)
         super(Spider, self).__init__(logging.getLogger('spider'), log_level)
 
     def set_handler(self, handler):
