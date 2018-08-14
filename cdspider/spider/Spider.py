@@ -53,6 +53,7 @@ class Spider(Component):
         logger = logging.getLogger('spider')
         self.url_builder = UrlBuilder(logger, log_level)
         super(Spider, self).__init__(logger, log_level)
+        self.crawler = {"requests": utils.load_crawler("requests", log_level=self.log_level)}
 
     def set_handler(self, handler):
         if handler and isinstance(handler, BaseHandler):
@@ -226,7 +227,7 @@ class Spider(Component):
         if hasattr(self, 'handler'):
             return self.handler
         task['project'].setdefault("name", "Project%s" % task.get("pid"))
-        return load_handler(task = task, spider = self, db = self.db, queue = self.queue, log_level=self.log_level, attach_storage = self.attach_storage)
+        return load_handler(task = task, crawler = self.crawler, db = self.db, queue = self.queue, log_level=self.log_level, attach_storage = self.attach_storage)
 
     def _get_task_from_attachment(self, message, task, project, no_check_status = False):
         if not task:
