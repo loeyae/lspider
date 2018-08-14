@@ -16,6 +16,8 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
 
     __tablename__ = 'keywords'
 
+    incr_key = 'keyword'
+
     def __init__(self, connector, table=None, **kwargs):
         super(KeywordsDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
@@ -30,7 +32,7 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
-        obj['kwid'] = self._get_increment(self.table)
+        obj['kwid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
