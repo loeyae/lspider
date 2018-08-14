@@ -30,7 +30,7 @@ class build_url_from_file(Base):
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
         self.broken('File: %s not exists' % fpath, os.path.isfile(fpath))
-        self.notic('Selected Site Info:', site)
+        self.notice('Selected Site Info:', site)
 
         urlsscript = """
 from cdspider.handler.custom.{projectname} import SiteHandler
@@ -54,7 +54,7 @@ class UrlHandler(SiteHandler):
             'creator': site['creator'],
             'updator': site['updator'],
         }
-        self.notic('Built Urls Info:', urls)
+        self.notice('Built Urls Info:', urls)
         with open(fpath, 'r', encoding=encode) as f:
             line = f.readline()
             i = 1
