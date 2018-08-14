@@ -33,7 +33,7 @@ class SitesDB(Mongo, BaseSitesDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj={}):
-        obj['sid'] = self._get_increment(self.table)
+        obj['sid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
