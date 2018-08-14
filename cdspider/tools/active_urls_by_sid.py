@@ -22,8 +22,8 @@ class active_urls_by_sid(Base):
                 d={}
                 d['status']=1
                 d['uid'] = item['uid']
-                self.logger.info("import status_queue data: %s" %  str(d))
+                self.logger.info("push status_queue data: %s" %  str(d))
                 self.g['queue']['status_queue'].put_nowait(d)
                 i += 1
             if i < 1:
-                return 
+                return
