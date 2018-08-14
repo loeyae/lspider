@@ -17,6 +17,8 @@ class ProjectsDB(Mongo, BaseProjectsDB):
 
     __tablename__ = 'projects'
 
+    incr_key = 'project'
+
     def __init__(self, connector, table=None, **kwargs):
         super(ProjectsDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
@@ -30,7 +32,7 @@ class ProjectsDB(Mongo, BaseProjectsDB):
         return self.get(where={'pid': int(id)})
 
     def insert(self, obj):
-        obj['pid'] = self._get_increment(self.table)
+        obj['pid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
