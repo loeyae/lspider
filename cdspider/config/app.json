@@ -21,7 +21,8 @@
         "spider2scheduler",
         "excinfo_queue",
         "search_work",
-        "result2kafka"
+        "result2kafka",
+        "result2wechat"
     ],
     "media_type": {
         "1": "新闻",
