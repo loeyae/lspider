@@ -17,6 +17,7 @@ import tornado.ioloop
 from tld import get_tld
 from six.moves import queue
 
+from cdspider import Component
 from cdspider.handler import BaseHandler
 from cdspider.exceptions import *
 from cdspider.libs import utils
@@ -26,7 +27,7 @@ from cdspider.database.base import *
 
 CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse)
 
-class Spider():
+class Spider(Component):
     """
     爬虫流程实现
     """
@@ -46,12 +47,10 @@ class Spider():
         self.queue = queue
         self.proxy = proxy
         self.attach_storage = attach_storage
-        self.logger = logging.getLogger('spider')
-        self.log_level = log_level
-        self.logger.setLevel(log_level)
         self.ioloop = tornado.ioloop.IOLoop()
         self.set_handler(handler)
-        self.url_builder = UrlBuilder(self.logger, self.log_level)
+        self.url_builder = UrlBuilder(self, self.log_level)
+        super(Spider, self).__init__(logging.getLogger('spider'), log_level)
 
     def set_handler(self, handler):
         if handler and isinstance(handler, BaseHandler):
@@ -62,9 +61,9 @@ class Spider():
         抓取操作
         """
         if not task:
-            self.logger.debug("Spider fetch exit with no task")
+            self.debug("Spider fetch exit with no task")
             return
-        self.logger.info("Spider fetch start, task: %s" % task)
+        self.info("Spider fetch start, task: %s" % task)
         last_source = None
         if not "save" in task or not task['save']:
             task['save'] = {}
@@ -74,7 +73,7 @@ class Spider():
         if return_result:
             return_data = []
         try:
-            self.logger.info("Spider loaded handler: %s" % handler)
+            self.info("Spider loaded handler: %s" % handler)
             save.setdefault('base_url', task['url'])
             save.setdefault('referer', task['url'])
             save.setdefault('continue_exceptions', handler.continue_exceptions)
@@ -83,13 +82,13 @@ class Spider():
             refresh_base = save.get('rebase', False)
             last_source_unid = None
             last_url = None
-            self.logger.info("Spider process start")
+            self.info("Spider process start")
             try:
-                self.logger.info("Spider fetch prepare start")
+                self.info("Spider fetch prepare start")
                 handler.prepare(save)
-                self.logger.info("Spider fetch prepare end")
+                self.info("Spider fetch prepare end")
                 while True:
-                    self.logger.info('Spider crawl start')
+                    self.info('Spider crawl start')
                     last_source, broken_exc, final_url = handler.crawl(save)
                     if isinstance(broken_exc, CONTINUE_EXCEPTIONS):
                         handler.on_continue(broken_exc, save)
@@ -105,14 +104,14 @@ class Spider():
                     if refresh_base:
                         save['base_url'] = final_url
                     save['request_url'] = final_url
-                    self.logger.info("Spider crawl end, result: %s" % str((last_source, broken_exc, final_url)))
-                    self.logger.info('Spider parse start')
+                    self.info("Spider crawl end, result: %s" % str((last_source, broken_exc, final_url)))
+                    self.info('Spider parse start')
                     if not last_source:
                         if broken_exc:
                             raise broken_exc
                         raise CDSpiderCrawlerError('Spider crawl failed')
                     result = handler.parse(last_source, save.get("parent_url", final_url))
-                    self.logger.info('Spider parse end, result: %s' % str(result))
+                    self.info('Spider parse end, result: %s' % str(result))
                     if return_result:
                         return_data.append((result, broken_exc, last_source, final_url, save))
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
@@ -131,7 +130,7 @@ class Spider():
             finally:
                 if mode == BaseHandler.MODE_ITEM:
                     handler.on_sync()
-                self.logger.info("Spider process end")
+                self.info("Spider process end")
         except Exception as e:
             if 'incr_data' in save and isinstance(save['incr_data'], list) and save['incr_data']:
                 for item in save['incr_data']:
@@ -142,11 +141,11 @@ class Spider():
                 handler.on_error(e)
             else:
                 return_data.append((None, traceback.format_exc(), None, None, None))
-            self.logger.error(traceback.format_exc())
+            self.error(traceback.format_exc())
         finally:
             if not return_result:
                 handler.finish()
-            self.logger.info("Spider fetch end" )
+            self.info("Spider fetch end" )
             if return_result:
                 return return_data
 
@@ -172,11 +171,11 @@ class Spider():
                 else:
                     haystack = attr
             else:
-                self.logger.info("Spider run condition save attr: %s" % ruleset['attr'])
+                self.info("Spider run condition save attr: %s" % ruleset['attr'])
                 return False
         if 'type' in ruleset:
             _type = ruleset['type']
-            self.logger.debug("Spider run condition haystack type: %s type: %s" % (type(haystack), _type))
+            self.debug("Spider run condition haystack type: %s type: %s" % (type(haystack), _type))
             if _type == 'None':
                 return (haystack == None and [True] or [False])[0]
             if _type == 'empty':
@@ -187,7 +186,7 @@ class Spider():
         if 'value' in ruleset:
             needle = ruleset['value']
             operator = ruleset.get('operator', '$ne')
-            self.logger.debug("Spider run condition haystack: %s operator: %s needle: %s" % (haystack, operator, needle))
+            self.debug("Spider run condition haystack: %s operator: %s needle: %s" % (haystack, operator, needle))
             if operator == '$gt':
                 return (haystack > needle and [True] or [False])[0]
             if operator == '$gte':
@@ -205,20 +204,20 @@ class Spider():
             return (haystack == needle and [True] or [False])[0]
 
     def _run_parse(self, rule, source, url=None):
-        self.logger.info("Spider run parse start")
+        self.info("Spider run parse start")
         try:
             data = {}
             for k, item in rule.items():
-                self.logger.info("Spider run parse: %s => %s" % (k, item))
+                self.info("Spider run parse: %s => %s" % (k, item))
                 for parser_name, r in item.items():
                     parser = utils.load_parser(parser_name, source=source, ruleset=copy.deepcopy(r), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
                     parsed = parser.parse()
-                    self.logger.info("Spider run parse matched data: %s" % str(parsed))
+                    self.info("Spider run parse matched data: %s" % str(parsed))
                     if parsed:
                         data[k] = parsed
                         break
         finally:
-            self.logger.info("Spider run parse end")
+            self.info("Spider run parse end")
         return data
 
     def get_handler(self, task):
@@ -231,14 +230,14 @@ class Spider():
         if not task:
             raise CDSpiderDBDataNotFound("Task: %s not found" % message['tid'])
         if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
-            self.logger.debug("Task: %s not active" % task)
+            self.debug("Task: %s not active" % task)
             return None
         attachment = self.AttachmentDB.get_detail(int(task['aid']))
         if not attachment:
             self.status_queue.put_nowait({"aid": task['aid'], 'status': AttachmentDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Attachment: %s not found" % task['aid'])
         if not no_check_status and attachment.get('status', AttachmentDB.STATUS_INIT) != AttachmentDB.STATUS_ACTIVE:
-            self.logger.debug("Attachment: %s" % attachment)
+            self.debug("Attachment: %s" % attachment)
             return None
         task['project'] = project
         task['site'] = {"sid": 0}
@@ -254,7 +253,7 @@ class Spider():
         if not task:
             raise CDSpiderDBDataNotFound("Task: %s not found" % message['tid'])
         if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
-            self.logger.debug("Task: %s not active" % task)
+            self.debug("Task: %s not active" % task)
             return None
         if not 'save' in task or not task['save']:
             task['save'] = {}
@@ -265,7 +264,7 @@ class Spider():
             self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
         if not no_check_status and site.get('status', SitesDB.STATUS_INIT) != SitesDB.STATUS_ACTIVE:
-            self.logger.debug("Site: %s not active" % site)
+            self.debug("Site: %s not active" % site)
             return None
         if not 'main_process' in site or not site['main_process']:
             site['main_process'] = {}
@@ -278,7 +277,7 @@ class Spider():
                 self.status_queue.put_nowait({"aid": task['aid'], 'status': UrlsDB.STATUS_DELETED})
                 raise CDSpiderDBDataNotFound("Url: %s not found" % task['uid'])
             if not no_check_status and urls.get('status', UrlsDB.STATUS_INIT) != UrlsDB.STATUS_ACTIVE:
-                self.logger.debug("Urls: %s" % urls)
+                self.debug("Urls: %s" % urls)
                 return None
             if not 'main_process' in urls or not urls['main_process']:
                 urls['main_process'] = {}
@@ -291,7 +290,7 @@ class Spider():
                 self.status_queue.put_nowait({"kwid": task['kwid'], 'status': KeywordsDB.STATUS_DELETED})
                 raise CDSpiderDBDataNotFound("Keyword: %s not found" % task['kwid'])
             if not no_check_status and keywords.get('status', KeywordsDB.STATUS_INIT) != KeywordsDB.STATUS_ACTIVE:
-                self.logger.debug("Keywords: %s" % keywords)
+                self.debug("Keywords: %s" % keywords)
                 return None
             task['save']['hard_code'] = [{'name': 'keyword', 'type': 'format', 'value': keywords['word']}]
         task['save'].setdefault('base_url', task['url'])
@@ -349,7 +348,7 @@ class TaskHandler(ProjectHandler):
             self.status_queue.put_nowait({"pid": pid, 'status': ProjectsDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Project: %s not found" % pid)
         if not no_check_status and project.get('status', ProjectsDB.STATUS_INIT) != ProjectsDB.STATUS_ACTIVE:
-            self.logger.debug("Project: %s not active" % project)
+            self.debug("Project: %s not active" % project)
             return None
         if mode == BaseHandler.MODE_ATT:
             task = self._get_task_from_attachment(message, task, project, no_check_status)
@@ -367,21 +366,21 @@ class TaskHandler(ProjectHandler):
 
 
     def run_once(self):
-        self.logger.info("Spider once starting...")
+        self.info("Spider once starting...")
         message = self.inqueue.get_nowait()
-        self.logger.debug("Spider get message: %s" % message)
+        self.debug("Spider get message: %s" % message)
         task = self.get_task(message)
-        self.logger.debug("Spider get task: %s" % task)
+        self.debug("Spider get task: %s" % task)
         self.fetch(task)
         if hasattr(self, 'handler'):
             del self.handler
-        self.logger.info("Spider once end")
+        self.info("Spider once end")
 
     def run(self):
         """
         spider运行方法
         """
-        self.logger.info("Spider starting...")
+        self.info("Spider starting...")
 
         def queue_loop():
             if not self.inqueue:
@@ -396,7 +395,7 @@ class TaskHandler(ProjectHandler):
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
-                    self.logger.exception(e)
+                    self.exception(e)
                     break
 
         tornado.ioloop.PeriodicCallback(queue_loop, 100, io_loop=self.ioloop).start()
@@ -407,7 +406,7 @@ class TaskHandler(ProjectHandler):
         except KeyboardInterrupt:
             pass
 
-        self.logger.info("Spider exiting...")
+        self.info("Spider exiting...")
 
     def xmlrpc_run(self, port=24444, bind='127.0.0.1'):
         import umsgpack
@@ -433,7 +432,7 @@ class TaskHandler(ProjectHandler):
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
                     parsed, broken_exc, last_source, final_url, save = ret[0]
                 else:
-                    self.logger.error(ret)
+                    self.error(ret)
                 if last_source:
                     last_source = utils.decode(last_source)
             except :
@@ -466,7 +465,7 @@ class TaskHandler(ProjectHandler):
         self.xmlrpc_ioloop = tornado.ioloop.IOLoop()
         self.xmlrpc_server = tornado.httpserver.HTTPServer(container, io_loop=self.xmlrpc_ioloop)
         self.xmlrpc_server.listen(port=port, address=bind)
-        self.logger.info('spider.xmlrpc listening on %s:%s', bind, port)
+        self.info('spider.xmlrpc listening on %s:%s', bind, port)
         self.xmlrpc_ioloop.start()
 
     def quit(self):
