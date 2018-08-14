@@ -4,7 +4,7 @@
 
 import logging
 
-class Component(Object):
+class Component(object):
 
     def __init__(self, logger, log_level):
         self.logger = logger or logging.getLogger('root')
