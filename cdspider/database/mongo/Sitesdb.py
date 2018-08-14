@@ -17,6 +17,8 @@ class SitesDB(Mongo, BaseSitesDB):
 
     __tablename__ = 'sites'
 
+    incr_key = 'site'
+
     def __init__(self, connector, table=None, **kwargs):
         super(SitesDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
