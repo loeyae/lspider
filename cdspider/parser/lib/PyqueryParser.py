@@ -35,8 +35,8 @@ class PyqueryParser(BaseParser):
                 source = decode(source)
             except:
                 pass
-#        self.logger.info("Pyquery source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(content)))
-#        self.logger.info("Pyquery ruleset: %s" % str(ruleset))
+#        self.info("Pyquery source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(content)))
+#        self.info("Pyquery ruleset: %s" % str(ruleset))
         if source and ruleset:
             pq = PyQuery(source)
             data = {}
@@ -45,25 +45,25 @@ class PyqueryParser(BaseParser):
                     data[k] = source
                     continue
                 if 'type' in ruleset[k] or 'filter' in ruleset[k]:
-                    self.logger.info("Pyquery rule: %s" % str(ruleset[k]))
+                    self.info("Pyquery rule: %s" % str(ruleset[k]))
                     data[k] = self._filter(pq, ruleset[k])
-                    self.logger.info("Pyquery data: %s" % str(data[k]))
+                    self.info("Pyquery data: %s" % str(data[k]))
                 else:
                     rule = ruleset[k]
                     if isinstance(rule, list):
                         for r in rule:
-                            self.logger.info("rule: %s" % str(r))
+                            self.info("rule: %s" % str(r))
                             item = self._filter(pq, r)
-                            self.logger.info("data: %s" % str(item))
+                            self.info("data: %s" % str(item))
                             if item:
                                 data[k] = item
                                 break
                     else:
                         rest = {}
                         for idx in rule:
-                            self.logger.info("Pyquery rule: %s=>%s" % (idx, str(rule[idx])))
+                            self.info("Pyquery rule: %s=>%s" % (idx, str(rule[idx])))
                             rest[idx] = self._filter(pq, rule[idx])
-                            self.logger.info("Pyquery data: %s=>%s" % (idx, str(rest[idx])))
+                            self.info("Pyquery data: %s=>%s" % (idx, str(rest[idx])))
                         data[k] = rest
             return data
         return source

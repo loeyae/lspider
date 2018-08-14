@@ -5,6 +5,7 @@ import abc
 import six
 import re
 import logging
+from cdspider import Component
 from cdspider.libs.utils import parse_domain, patch_result
 
 @six.add_metaclass(abc.ABCMeta)
@@ -25,6 +26,8 @@ class BaseParser(object):
         self.ruleset = kwargs.pop("ruleset", None)
         self.source = kwargs.pop("source", None)
         self.logger = kwargs.pop('logger', logging.getLogger('parser'))
+        log_level = kwargs.pop('log_level', logging.WARN)
+        super(BaseParser).__init__(self.logger, log_level)
         url = kwargs.pop('url', None)
         self.final_url = url
         self.domain = kwargs.pop('domain', None)
@@ -35,9 +38,7 @@ class BaseParser(object):
                 self.subdomain = subdomain
             if domain:
                 self.domain = domain
-        log_level = kwargs.pop('log_level', logging.WARN)
         self._settings = kwargs or {}
-        self.logger.setLevel(log_level)
 
     @abc.abstractmethod
     def parse(self, source = None, ruleset = None):

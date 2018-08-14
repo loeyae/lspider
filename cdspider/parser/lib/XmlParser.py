@@ -32,8 +32,8 @@ class XmlParser(BaseParser):
                 source = decode(source)
             except:
                 source = str(source)
-#        self.logger.info("Xml source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(source)))
-#        self.logger.info("Xml ruleset: %s" % str(ruleset))
+#        self.info("Xml source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(source)))
+#        self.info("Xml ruleset: %s" % str(ruleset))
         try:
             root  = lxml.etree.fromstring(source)
         except:

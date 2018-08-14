@@ -39,8 +39,8 @@ class JsonParser(BaseParser):
                 source = utils.decode(source)
             except:
                 source = str(source)
-#        self.logger.info("Json source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(source)))
-#        self.logger.info("Json ruleset: %s" % str(ruleset))
+#        self.info("Json source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(source)))
+#        self.info("Json ruleset: %s" % str(ruleset))
         if source and ruleset:
             source = source.strip()
             ll = source[0:1]
