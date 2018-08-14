@@ -126,7 +126,7 @@ class ResultTrait(object):
             for item in formated:
                 inserted = False
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
-                self.logger.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+                self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     crawlinfo =  self._build_crawl_info(final_url)
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
@@ -167,7 +167,7 @@ class ResultTrait(object):
                     break
         if not unid:
             inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(final_url, data), ctime)
-            self.logger.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+            self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
         if inserted:
             if isfirst:
                 self.crawl_info['crawl_count']['new_count'] += 1
@@ -242,7 +242,7 @@ class ResultTrait(object):
                 inserted = True
                 if not unid:
                     inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(final_url, data), ctime)
-                    self.logger.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+                    self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     result_id = self.db['CommentsDB'].insert(result)
                     if result_id:

@@ -17,7 +17,7 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
         """
         on result
         """
-        self.logger.debug("%s on_result: %s @ %s %s" % (self.__class__.__name__, str(data), self.mode, str(broken_exc)))
+        self.debug("%s on_result: %s @ %s %s" % (self.__class__.__name__, str(data), self.mode, str(broken_exc)))
         if not data:
             if broken_exc:
                 raise broken_exc
