@@ -281,7 +281,7 @@ class UrlBuilder():
                 step = int(item.get('step', 1))
                 if not item.get('isfirst', True):
                     item['value'] = int(item['value']) + step
-                if "max" in item and int(item["max"]) > 0:
+                if not item.get('isfirst', True) and "max" in item and int(item["max"]) > 0:
                     page = (int(item['value']) - int(item['base_page'])) / step + 1
                     if page > int(item['max']):
                         raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % item['max'],
