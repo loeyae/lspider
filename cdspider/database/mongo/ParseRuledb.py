@@ -18,6 +18,8 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
 
     __tablename__ = 'parse_rules'
 
+    incr_key = 'parseRule'
+
     def __init__(self, connector, table=None, **kwargs):
         super(ParseRuleDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
@@ -34,7 +36,7 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
-        obj['prid'] = self._get_increment(self.table)
+        obj['prid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
