@@ -50,8 +50,9 @@ class Spider(Component):
         self.ioloop = tornado.ioloop.IOLoop()
         self.set_handler(handler)
         self.log_level = log_level
-        self.url_builder = UrlBuilder(self, log_level)
-        super(Spider, self).__init__(logging.getLogger('spider'), log_level)
+        logger = logging.getLogger('spider')
+        self.url_builder = UrlBuilder(logger, log_level)
+        super(Spider, self).__init__(logger, log_level)
 
     def set_handler(self, handler):
         if handler and isinstance(handler, BaseHandler):
