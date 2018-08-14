@@ -27,7 +27,7 @@ class Component(object):
         if self.log_level <= logging.ERROR:
             self.logger.error(message, *args, **kwargs)
 
-    def exception(self, message, *atgs, exc_info=exc_info, **kwargs):
+    def exception(self, message, *atgs, exc_info=True, **kwargs):
         if self.log_level <= logging.ERROR:
             self.logger.exception(message, *args, exc_info=exc_info, **kwargs)
 
