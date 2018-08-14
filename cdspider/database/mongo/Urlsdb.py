@@ -17,6 +17,8 @@ class UrlsDB(Mongo, BaseUrlsDB):
 
     __tablename__ = 'urls'
 
+    incr_key = 'url'
+
     def __init__(self, connector, table=None, **kwargs):
         super(UrlsDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
