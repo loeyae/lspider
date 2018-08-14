@@ -9,6 +9,7 @@ import logging
 import traceback
 import copy
 from urllib.parse import urljoin
+from cdspider import Component
 from cdspider.crawler import SeleniumCrawler
 from cdspider.database.base import *
 from cdspider.libs import utils
@@ -22,7 +23,7 @@ RETRY_EXCEPTIONS = (CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout)
 NOT_EXISTS_EXCEPTIONS = (CDSpiderCrawlerNotFound, CDSpiderCrawlerNoSource, CDSpiderParserError)
 
 @six.add_metaclass(abc.ABCMeta)
-class BaseHandler(object):
+class BaseHandler(Component):
     """
     handler基类
     """
@@ -54,7 +55,7 @@ class BaseHandler(object):
         """
         self.logger = kwargs.pop('logger', logging.getLogger('handler'))
         self.log_level = kwargs.pop('log_level', logging.WARN)
-        self.logger.setLevel(self.log_level)
+        super(BaseHandler, self).__init__(self.logger, self.log_level)
         self.task = kwargs.pop('task')
         self.attach_storage = kwargs.pop('attach_storage', None)
         self.db = kwargs.pop('db',None)
@@ -319,10 +320,10 @@ class BaseHandler(object):
         else:
 #            parser_name = 'list'
             parser = ListParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
-        self.logger.debug("%s parse start: %s @ %s" % (self.__class__.__name__, str(rule), self.mode))
+        self.debug("%s parse start: %s @ %s" % (self.__class__.__name__, str(rule), self.mode))
 #        parser = utils.load_parser(parser_name, source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         parsed = parser.parse()
-        self.logger.debug("%s parse end" % (self.__class__.__name__))
+        self.debug("%s parse end" % (self.__class__.__name__))
         return parsed
 
     def _get_parse(self, url = None):
@@ -348,7 +349,7 @@ class BaseHandler(object):
         """
         获取附加任务链接，并push newtask
         """
-        self.logger.debug("%s attach start: %s @ %s" % (self.__class__.__name__, str(url), self.mode))
+        self.debug("%s attach start: %s @ %s" % (self.__class__.__name__, str(url), self.mode))
         pid = self.task.get('pid')
         subdomain, domain = self._domain_info(url)
         attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain)
@@ -356,7 +357,7 @@ class BaseHandler(object):
         if not attach_list:
             attach_list = self.db['AttachmentDB'].get_list_by_domain(pid, domain)
             attach_list = list(attach_list)
-        self.logger.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
+        self.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
             pparse = each.get('preparse', {}).get('parse', None)
             parse = {}
@@ -366,27 +367,27 @@ class BaseHandler(object):
                 parsed = self.parse(source, url, parse, self.MODE_ATT)
                 if not parsed:
                     continue
-                self.logger.debug("%s attach parsed: %s" % (self.__class__.__name__, parsed))
+                self.debug("%s attach parsed: %s" % (self.__class__.__name__, parsed))
                 urlrule = each.get('preparse', {}).get('url', None)
                 attachurl = utils.build_url_by_rule(urlrule, parsed)
                 message = {'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid'), 'rid': self.last_result_id}
-                self.logger.debug("%s attach create task: %s" % (self.__class__.__name__, str(message)))
+                self.debug("%s attach create task: %s" % (self.__class__.__name__, str(message)))
                 self.queue['newtask_queue'].put_nowait(message)
 
-        self.logger.debug("%s attach end" % (self.__class__.__name__))
+        self.debug("%s attach end" % (self.__class__.__name__))
 
     def on_sync(self):
         """
         同步大数据平台
         """
-        self.logger.info("result2kafka  starting...")
+        self.info("result2kafka  starting...")
         res={}
         on_sync=self.task.get('project', {}).get('on_sync', None)
         if on_sync!=None and on_sync!='':
             res['on_sync']=on_sync
         res['rid']=self.last_result_id
         self.queue['result2kafka'].put_nowait(res)
-        self.logger.info("result2kafka  end data: %s" % str(res))
+        self.info("result2kafka  end data: %s" % str(res))
 
 
     def on_repetition(self):
