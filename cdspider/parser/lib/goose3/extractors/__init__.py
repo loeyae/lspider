@@ -137,7 +137,7 @@ class BaseExtractor(object):
             custom_rule = custom_rule[5:]
             rule, key = rule2pattern(custom_rule)
             if not rule or not key:
-                return custom_rule
+                return None
             matched = None
             if onlyOne:
                 r = re.search(rule, str(self.article.raw_html), re.S|re.I)
