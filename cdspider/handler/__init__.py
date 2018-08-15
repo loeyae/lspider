@@ -150,7 +150,7 @@ class BaseHandler(Component):
     def get_crawler(self, rule):
         crawler = rule.get('crawler', 'requests')
         if crawler == 'requests':
-            return utils.load_crawler("ternado", headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
+            return utils.load_crawler("tornado", headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
         if crawler in self.crawler_list:
             self.mycrawler = False
             return self.crawler_list[crawler]
