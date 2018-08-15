@@ -35,7 +35,7 @@ require_packages = [
         'beautifulsoup4>=4.6.0',
         'tld>=0.7.9',
         'pykafka>=2.7.0',
-        'pycul>=7.43.0.0',
+        'pycurl>=7.43.0.0',
     ]
 if sys.platform != 'win32':
     require_packages.append('gssapi>=1.5.0')
