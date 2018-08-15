@@ -62,7 +62,7 @@ class BaseHandler(Component):
         self.attach_storage = kwargs.pop('attach_storage', None)
         self.db = kwargs.pop('db',None)
         self.queue = kwargs.pop('queue',None)
-        self.crawl_id = self.task.get('save', {}).get('crawl_id', int(time.time()))
+        self.crawl_id = int(time.time())
         self.crawl_info  = {
             "crawl_start": self.crawl_id,
             "crawl_end": None,
@@ -87,7 +87,7 @@ class BaseHandler(Component):
     def __del__(self):
         if self.mycrawler and isinstance(self.crawler, BaseCrawler):
             self.crawler.quit()
-            
+
     def _domain_info(self, url):
         subdomain, domain = utils.parse_domain(url)
         return "%s.%s" % (subdomain, domain), domain
@@ -149,6 +149,8 @@ class BaseHandler(Component):
 
     def get_crawler(self, rule):
         crawler = rule.get('crawler', 'requests')
+        if crawler == 'requests':
+            return utils.load_crawler("ternado", headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
         if crawler in self.crawler_list:
             self.mycrawler = False
             return self.crawler_list[crawler]
