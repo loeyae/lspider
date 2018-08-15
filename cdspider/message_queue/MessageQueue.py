@@ -251,7 +251,7 @@ class AmqpQueue(PikaQueue):
             if pack:
                 msg = amqp.Message(umsgpack.packb(obj))
             else:
-                msg = json.dumps(obj)
+                msg = amqp.Message(json.dumps(obj))
             return self.channel.basic_publish(msg, exchange=self.exchange, routing_key=self.queuename)
 
     @catch_error
