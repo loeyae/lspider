@@ -83,7 +83,7 @@ class ResultTrait(object):
             'pid': self.task.get('pid'),
             'sid': self.task.get('sid'),
             'uid': self.task.get('uid', 0),
-            'kwid': self.task.get('kwid', 0)
+            'kwid': self.task.get('kwid', 0),
             'rid': rid,
             'url': data.pop('url'),
             'save': data,
