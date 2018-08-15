@@ -229,7 +229,7 @@ class Spider(Component):
         if hasattr(self, 'handler'):
             return self.handler
         task['project'].setdefault("name", "Project%s" % task.get("pid"))
-        return load_handler(task = task, crawler = self.crawler, db = self.db, queue = self.queue, log_level=self.log_level, attach_storage = self.attach_storage)
+        return load_handler(task = task, crawler = self.crawler, spider = self, db = self.db, queue = self.queue, log_level=self.log_level, attach_storage = self.attach_storage)
 
     def _get_task_from_attachment(self, message, task, project, no_check_status = False):
         if not task:
