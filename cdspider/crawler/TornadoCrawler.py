@@ -83,6 +83,9 @@ class TornadoCrawler(BaseCrawler):
         pass
 
     def _prefetch(self, **kwargs):
+        if self._proxy:
+            self.parse_proxy(**self._proxy)
+            self._proxy['init'] = False
         self.max_redirects = kwargs.get('max_redirects', self.max_redirects)
         fetch = copy.deepcopy(self.fetch)
         fetch['method'] = kwargs['method'].upper()
