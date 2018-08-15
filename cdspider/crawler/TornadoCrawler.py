@@ -10,6 +10,7 @@ import sys
 import time
 import copy
 import traceback
+import pycurl
 import six
 import functools
 import threading
