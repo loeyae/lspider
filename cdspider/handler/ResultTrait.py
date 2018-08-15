@@ -38,7 +38,7 @@ class ResultTrait(object):
                 #TODO 更新列表页抓取任务的crawlinfo
                 pubtime = src.get('pubtime', None)
             if not pubtime and not nocreated:
-                pubtime = self.crawl_id
+                pubtime = int(time.time())
             r = {
                 'status': kwargs.get('status', ArticlesDB.STATUS_INIT),            # 状态
                 'url': kwargs['final_url'],
@@ -116,7 +116,7 @@ class ResultTrait(object):
         """
         列表数据生成详情任务
         """
-        ctime = self.crawl_id
+        ctime = int(time.time())
         if not data:
             raise CDSpiderParserNoContent()
         else:
@@ -149,7 +149,7 @@ class ResultTrait(object):
         if unid:
             ctime = unid['ctime']
         else:
-            ctime = self.crawl_id
+            ctime = int(time.time())
         if not data:
             raise CDSpiderParserNoContent()
         inserted = True
@@ -220,11 +220,11 @@ class ResultTrait(object):
             result = self._build_attach_data_info(data[0])
             attach_data = self.db['AttachDataDB'].get_detail(rid)
             if attach_data:
-                result['utime'] = self.crawl_id
+                result['utime'] = int(time.time())
                 self.db['AttachDataDB'].update(rid, result)
             else:
                 unid, ctime = ArticlesDB.unbuild_id(rid)
-                result['ctime'] = self.crawl_id
+                result['ctime'] = int(time.time())
                 result['acid'] = article['acid']
                 result['utime'] = 0
                 result['rid'] = rid
@@ -238,7 +238,7 @@ class ResultTrait(object):
                 if unid:
                     ctime = unid['ctime']
                 else:
-                    ctime = self.crawl_id
+                    ctime = int(time.time())
                 inserted = True
                 if not unid:
                     inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(final_url, data), ctime)
