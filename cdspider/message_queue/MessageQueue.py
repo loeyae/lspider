@@ -15,7 +15,6 @@ import select
 import logging
 import umsgpack
 import threading
-
 import pika
 import pika.exceptions
 import amqp
@@ -143,7 +142,7 @@ class PikaQueue(CDBaseQueue):
                     time.sleep(self.max_timeout)
 
     @catch_error
-    def put_nowait(self, obj):
+    def put_nowait(self, obj, pack = True):
         if self.lazy_limit and self.qsize_diff < self.qsize_diff_limit:
             pass
         elif self.full():
@@ -152,7 +151,9 @@ class PikaQueue(CDBaseQueue):
             self.qsize_diff = 0
         with self.lock:
             self.qsize_diff += 1
-            return self.channel.basic_publish("", self.queuename, umsgpack.packb(obj))
+            if pack:
+                return self.channel.basic_publish("", self.queuename, umsgpack.packb(obj))
+            return self.channel.basic_publish("", self.queuename, json.dumps(obj))
 
     @catch_error
     def get(self, block=True, timeout=None, ack=False):
@@ -238,7 +239,7 @@ class AmqpQueue(PikaQueue):
         return message_count
 
     @catch_error
-    def put_nowait(self, obj):
+    def put_nowait(self, obj, pack = True):
         if self.lazy_limit and self.qsize_diff < self.qsize_diff_limit:
             pass
         elif self.full():
@@ -247,7 +248,10 @@ class AmqpQueue(PikaQueue):
             self.qsize_diff = 0
         with self.lock:
             self.qsize_diff += 1
-            msg = amqp.Message(umsgpack.packb(obj))
+            if pack:
+                msg = amqp.Message(umsgpack.packb(obj))
+            else:
+                msg = json.dumps(obj)
             return self.channel.basic_publish(msg, exchange=self.exchange, routing_key=self.queuename)
 
     @catch_error
