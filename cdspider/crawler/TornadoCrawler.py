@@ -89,7 +89,7 @@ class TornadoCrawler(BaseCrawler):
         self.max_redirects = kwargs.get('max_redirects', self.max_redirects)
         fetch = copy.deepcopy(self.fetch)
         fetch['method'] = kwargs['method'].upper()
-        fetch['url'] = kwargs['url']
+        fetch['url'] = utils.quote_chinese(kwargs['url'])
         fetch['headers'] = tornado.httputil.HTTPHeaders(fetch['headers'])
 
         if kwargs.get('last_modified', kwargs.get('last_modifed', True)):
