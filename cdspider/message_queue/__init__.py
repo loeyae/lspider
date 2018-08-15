@@ -82,7 +82,7 @@ class BaseQueue(object):
         pass
 
     @abc.abstractmethod
-    def put_nowait(self, obj):
+    def put_nowait(self, obj, pack = True):
         """
         直接发送
         """
