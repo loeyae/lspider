@@ -84,7 +84,7 @@ class TornadoCrawler(BaseCrawler):
     def _prefetch(self, **kwargs):
         self.max_redirects = kwargs.get('max_redirects', self.max_redirects)
         fetch = copy.deepcopy(self.fetch)
-        fetch['method'] = kwargs['method']
+        fetch['method'] = kwargs['method'].upper()
         fetch['url'] = kwargs['url']
         fetch['headers'] = tornado.httputil.HTTPHeaders(fetch['headers'])
 
