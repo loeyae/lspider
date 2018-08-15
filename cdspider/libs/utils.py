@@ -512,14 +512,18 @@ def list2dict(keylist, valuelist):
         return None
     return dict((keylist[idx],valuelist[idx]) for idx in range(len(keylist)))
 
-def dictjoin(dict1, dict2):
+def dictjoin(dict1, dict2, replace = False):
     """
     返回出现在dict1或dict2中key对应的字典，如果dict1和dict2中都存在该key，并且都不为空，则保留dict1中的值
     """
     for key in dict1:
         val = dict2.pop(key, None)
-        if (dict1[key] == None or dict1[key] == '') and val != None and val != '':
-            dict1[key] = val
+        if replace:
+            if val != None and val != '':
+                dict1[key] = val
+        else:
+            if (dict1[key] == None or dict1[key] == '') and val != None and val != '':
+                dict1[key] = val
     dict1.update(dict2)
     return dict1
 
