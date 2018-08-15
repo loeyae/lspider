@@ -22,7 +22,8 @@
         "excinfo_queue",
         "search_work",
         "result2kafka",
-        "result2wechat"
+        "result2wechat",
+        "result2newtask"
     ],
     "media_type": {
         "1": "新闻",
