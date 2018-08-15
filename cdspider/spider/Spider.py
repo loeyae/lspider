@@ -319,6 +319,8 @@ class TaskHandler(ProjectHandler):
             'tid': 0,
             'pid': message['pid'],
             'sid': message['sid'],
+            'uid': message.get('uid', 0),
+            'kwid': message.get('kwid', 0),
             'project': project,
             'url': message['url'],
             'site': {
