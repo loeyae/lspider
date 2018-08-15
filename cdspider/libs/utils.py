@@ -69,14 +69,14 @@ def remove_whitespace(content):
 
 def decode(data, errors="ignore"):
     if isinstance(data, bytes):
-        encoding =  chardet.detect(data)
-        u = encoding['encoding']
+        find_charset = re.compile(
+            br'<meta.*?charset=["\']*([a-z0-9\-_]+?) *?["\'>]', flags=re.I
+        ).findall
+        encoding = [item.decode('utf-8') for item in find_charset(data)]
+        u = encoding and encoding[0] or None
         if not u:
-            find_charset = re.compile(
-                br'<meta.*?charset=["\']*([a-z0-9\-_]+?) *?["\'>]', flags=re.I
-            ).findall
-            encoding = [item.decode('utf-8') for item in find_charset(data)]
-            u = encoding and encoding[0] or None
+            encoding =  chardet.detect(data)
+            u = encoding['encoding']
         if u:
             return data.decode(u, errors=errors)
         try:
