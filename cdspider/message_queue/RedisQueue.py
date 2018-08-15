@@ -11,6 +11,7 @@ import time
 import logging
 import socket
 import umsgpack
+import json
 import redis
 from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
@@ -139,7 +140,7 @@ class RedisQueue(CDBaseQueue):
         return s
 
     @catch_error
-    def put_nowait(self, obj):
+    def put_nowait(self, obj, pack = True):
         """
         直接发送
         """
@@ -150,7 +151,9 @@ class RedisQueue(CDBaseQueue):
         else:
             self.qsize_diff = 0
         self.qsize_diff += 1
-        return self.connect.rpush(self.queuename, umsgpack.packb(obj))
+        if pack:
+            return self.connect.rpush(self.queuename, umsgpack.packb(obj))
+        return self.connect.rpush(self.queuename, json.dumps(obj))
 
     @catch_error
     def qsize(self):
