@@ -53,7 +53,8 @@ class Spider(Component):
         logger = logging.getLogger('spider')
         self.url_builder = UrlBuilder(logger, log_level)
         super(Spider, self).__init__(logger, log_level)
-        self.crawler = {"requests": utils.load_crawler("requests", log_level=self.log_level)}
+        self.crawler = {}
+#        self.crawler = {"requests": utils.load_crawler("requests", log_level=self.log_level)}
 
     def set_handler(self, handler):
         if handler and isinstance(handler, BaseHandler):
