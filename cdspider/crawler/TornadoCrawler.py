@@ -66,7 +66,7 @@ class TornadoCrawler(BaseCrawler):
         self.fetch = copy.deepcopy(self.default_options)
         self.result = None
         self._cookies = cookies.RequestsCookieJar()
-        self.poolsize = kwargs.get('poolsize', 100)
+        self.poolsize = kwargs.get('poolsize', 2)
         self.async = kwargs.get('async', True)
         self.ioloop = tornado.ioloop.IOLoop()
         self.max_redirects = 5
