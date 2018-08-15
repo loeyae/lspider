@@ -140,7 +140,7 @@ class KafkaQueue(CDBaseQueue):
         return msg
 
     @catch_error
-    def put_nowait(self, obj):
+    def put_nowait(self, obj, pack = True):
         """
         直接发送
         （obj>>json格式）
@@ -164,7 +164,7 @@ class KafkaQueue(CDBaseQueue):
 #             sum=self.connect.latest_available_offsets()[0][0][0]
 #             if sum==0:
 #                 self.qsize=0
-#                 return self.qsize 
+#                 return self.qsize
 #             c=consumer.consume()
 #             self.qsize=sum-c.offset
 #             producer = self.connect.get_producer()
@@ -176,7 +176,7 @@ class KafkaQueue(CDBaseQueue):
 
     def close(self):
         pass
-    
+
 if __name__=='__main__':
     k=KafkaQueue('test2_queue',host='114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667')
     for i in range(5):
