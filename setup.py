@@ -71,6 +71,7 @@ setup(
             'cdspider = cdspider.run:main',
         ],
         'cdspider.crawler': [
+            'tornado=cdspider.crawler:TornadoCrawler',
             'requests=cdspider.crawler:RequestsCrawler',
             'selenium=cdspider.crawler:SeleniumCrawler',
         ],
@@ -98,4 +99,3 @@ setup(
         ]
     }
 )
-
