@@ -18,30 +18,6 @@ import json
 
 
 connection_pool = {}
-def catch_error(func):
-    """
-    Catch errors of kafka then reconnect
-    """
-    logger = logging.getLogger('queue')
-    try:
-        connect_exceptions = (
-            exceptions.KafkaException,
-        )
-    except ImportError:
-        connect_exceptions = ()
-
-    connect_exceptions += (
-        socket.error,
-    )
-
-    def wrap(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        except connect_exceptions as e:
-            logger.error('Kafka error: %r, reconnect.', e)
-            self.connect()
-            return func(self, *args, **kwargs)
-    return wrap
 
 class KafkaQueue(CDBaseQueue):
 
@@ -53,12 +29,6 @@ class KafkaQueue(CDBaseQueue):
         self.zookeeper_hosts=zookeeper_hosts
         super(KafkaQueue, self).__init__(name=name, user=user, password=password, host=host, port=port, path=path,
                  maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
-        self.qsize=self.qsize()
-        if self.lazy_limit and self.maxsize:
-            self.qsize_diff_limit = int(self.maxsize * 0.1)
-        else:
-            self.qsize_diff_limit = 0
-        self.qsize_diff = self.qsize - self.maxsize
 
     def connect(self):
         """
@@ -73,19 +43,7 @@ class KafkaQueue(CDBaseQueue):
         else:
             self.connect = connection_pool[k]
 
-    def empty(self):
-        if self.qsize() == 0:
-            return True
-        else:
-            return False
 
-    def full(self):
-        if self.maxsize and self.qsize() >= self.maxsize:
-            return True
-        else:
-            return False
-
-    @catch_error
     def get(self, block=True, timeout=None, ack=False):
         """
         获取queue
@@ -107,7 +65,6 @@ class KafkaQueue(CDBaseQueue):
                 else:
                     time.sleep(self.max_timeout)
 
-    @catch_error
     def put(self, obj, block=True, timeout=None):
         if not block:
             return self.put_nowait()
@@ -126,7 +83,6 @@ class KafkaQueue(CDBaseQueue):
                 else:
                     time.sleep(self.max_timeout)
 
-    @catch_error
     def get_nowait(self, ack=False):
         consumer = self.connect.get_simple_consumer(b'cdspider',auto_commit_enable=True,auto_commit_interval_ms=1)
 #         sum=self.connect.latest_available_offsets()[0][0][0]
@@ -139,8 +95,8 @@ class KafkaQueue(CDBaseQueue):
             raise BaseQueue.Empty
         return msg
 
-    @catch_error
-    def put_nowait(self, obj, pack = True):
+    def put_nowait(self, obj):
+        print(obj)
         """
         直接发送
         （obj>>json格式）
@@ -153,30 +109,19 @@ class KafkaQueue(CDBaseQueue):
         producer.stop()
         self.logger.info('send kafka end data: %s' % obj)
 
+    def empty(self):
+        pass
 
-    @catch_error
+    def full(self):
+        pass
+
     def qsize(self):
-        """
-        queue的条数
-        """
-#         if self.qsize:
-#             consumer = self.connect.get_simple_consumer(b'cdspider')
-#             sum=self.connect.latest_available_offsets()[0][0][0]
-#             if sum==0:
-#                 self.qsize=0
-#                 return self.qsize
-#             c=consumer.consume()
-#             self.qsize=sum-c.offset
-#             producer = self.connect.get_producer()
-#             producer.produce(c.value)
-#             producer.stop()
-        self.qsize=100
-        return self.qsize
+        pass
 
 
     def close(self):
         pass
-
+    
 if __name__=='__main__':
     k=KafkaQueue('test2_queue',host='114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667')
     for i in range(5):
