@@ -99,7 +99,10 @@ class Parser(object):
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
 
         else:
-            return timestring
+            try:
+                return int(timestring)
+            except:
+                return None
 
     @staticmethod
     def parser_time(html, now = False):
