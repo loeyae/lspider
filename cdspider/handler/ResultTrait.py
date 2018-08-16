@@ -182,6 +182,7 @@ class ResultTrait(object):
                 else:
                     result['parentid'] = parentid
                     result_id = self.db['ArticlesDB'].insert(result)
+                self.item_result_post(result, unid)
             else:
                 result = self.db['ArticlesDB'].get_detail_by_unid(**unid)
                 result_id = result['rid']

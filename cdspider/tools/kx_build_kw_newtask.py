@@ -37,7 +37,7 @@ class kx_build_kw_newtask(Base):
                 t['expire']=int(time.time())+(60*60*24*30)
                 if sid==3:
                     t['expire']=int(time.time())+(60*60*24*7)
-                t['sid']=2
+                t['sid']=sid
                 t['pid']=1
                 t['uid']=u_item['uid']
                 t['utime']=int(time.time())
