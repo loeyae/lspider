@@ -11,7 +11,6 @@
 import re
 import traceback
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
-from cdspider.libs import utils
 
 
 class CustomExtractor(BaseExtractor):
@@ -39,7 +38,7 @@ class CustomExtractor(BaseExtractor):
             if rule:
                 matched = self.custom_match(rule, dtype=custom_rule.get('type', 'text'), target=custom_rule.get('target', 'value'), onlyOne=onlyOne)
                 if matched:
-                    return matched
+                    return self.correction_result(matched, custom_rule, custom_rule.get('callback'))
             self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN.update(custom_rule.get('pattern4domain', {}))
             self.KNOWN_CUSTOM_TAGS_BY_DOMAIN.update(custom_rule.get('tags4domain', {}))
             self.KNOWN_CUSTOM_TAGS.extend(custom_rule.get('tags', []))
@@ -60,8 +59,8 @@ class CustomExtractor(BaseExtractor):
                         matched = re.findall(rule, script, re.M)
                         if matched:
                             if onlyOne:
-                                return matched[0]
-                        return matched
+                                return self.correction_result(matched[0], custom_rule, custom_rule.get('callback'))
+                        return self.correction_result(matched, custom_rule, custom_rule.get('callback'))
                 known_context_patterns = []
 
             if fulldomain in self.KNOWN_CUSTOM_TAGS_BY_DOMAIN:
@@ -73,15 +72,15 @@ class CustomExtractor(BaseExtractor):
                     matched = self.get_message_by_tag(tags)
                     if matched:
                         if onlyOne:
-                            return matched[0]
-                    return matched
+                            return self.correction_result(matched[0], custom_rule, custom_rule.get('callback'))
+                    return self.correction_result(matched, custom_rule, custom_rule.get('callback'))
 
             for tags in self.KNOWN_CUSTOM_TAGS:
                 matched = self.get_message_by_tag(tags)
                 if matched:
                     if onlyOne:
-                        return matched[0]
-                    return matched
+                        return self.correction_result(matched[0], custom_rule, custom_rule.get('callback'))
+                    return self.correction_result(matched, custom_rule, custom_rule.get('callback'))
 
         except:
             self.config.logger.error(traceback.format_exc())
