@@ -302,9 +302,9 @@ class Spider(Component):
 
     def _get_task_from_item(self, message, task, project, no_check_status = False):
         itemscript = """
-from cdspider.handler.custom.{projectname} import ProjectHandler
+from cdspider.handler.custom.{projectname} import SiteHandler
 
-class TaskHandler(ProjectHandler):
+class TaskHandler(SiteHandler):
 
     def newtask(self):
         pass
@@ -320,11 +320,19 @@ class TaskHandler(ProjectHandler):
             'kwid': message.get('kwid', 0),
             'project': project,
             'url': message['url'],
-            'site': {
-                'sid': message['sid'],
+            'urls': {
+                'uid': message.get('uid', 0),
                 'scripts': itemscript,
             }
         })
+        site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
+        if not site:
+            self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
+            raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
+        if not no_check_status and site.get('status', SitesDB.STATUS_INIT) != SitesDB.STATUS_ACTIVE:
+            self.debug("Site: %s not active" % site)
+            return None
+        task['site'] = site
         if not 'save' in task or not task['save']:
             task['save'] = {}
         task['rid'] = message['rid']
