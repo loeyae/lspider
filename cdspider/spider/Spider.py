@@ -81,7 +81,7 @@ class Spider(Component):
             save.setdefault('base_url', task['url'])
             save.setdefault('referer', task['url'])
             save.setdefault('continue_exceptions', handler.continue_exceptions)
-            save.setdefault('proxy', self.proxy)
+            save['proxy'] = self.proxy
             referer = save.get('flush_referer', False)
             refresh_base = save.get('rebase', False)
             last_source_unid = None
