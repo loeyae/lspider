@@ -76,10 +76,12 @@ def decode(data, errors="ignore"):
         u = encoding and encoding[0] or None
         if not u:
             detector = UniversalDetector()
-            for line in usock.readlines():
+            for line in re.findall(b'\<h\d+\>([^\w]+)\<\/h\d+\>|', data):
                 #分块进行测试，直到达到阈值
-                detector.feed(line)
-                if detector.done: break
+                if line:
+                    print(line)
+                    detector.feed(line)
+                    break
             #关闭检测对象
             detector.close()
             u = detector.result['encoding']
