@@ -4,7 +4,6 @@
 import sys
 import os
 import re
-import chardet
 import logging
 import traceback
 import base64
@@ -12,17 +11,18 @@ import json
 import hashlib
 import datetime
 import tldextract
-from urllib import parse
-from types import *
 import subprocess
 import random
 import types
 import string
 import six
-from threading import Thread
-from multiprocessing import Process
 import stevedore
 import datetime
+from threading import Thread
+from multiprocessing import Process
+from chardet.universaldetector import UniversalDetector
+from urllib import parse
+from types import *
 
 def build_url_by_rule(rule, params):
     url = rule.get('base')
@@ -75,8 +75,14 @@ def decode(data, errors="ignore"):
         encoding = [item.decode('utf-8') for item in find_charset(data)]
         u = encoding and encoding[0] or None
         if not u:
-            encoding =  chardet.detect(data)
-            u = encoding['encoding']
+            detector = UniversalDetector()
+            for line in usock.readlines():
+                #分块进行测试，直到达到阈值
+                detector.feed(line)
+                if detector.done: break
+            #关闭检测对象
+            detector.close()
+            u = detector.result['encoding']
         if u:
             return data.decode(u, errors=errors)
         try:
