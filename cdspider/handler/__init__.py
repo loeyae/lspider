@@ -428,6 +428,7 @@ class BaseHandler(Component):
             self.db['ArticlesDB'].update(self.task['rid'], {"status": self.db['ArticlesDB'].STATUS_DELETED})
             return
         if not isinstance(exc, IGNORE_EXCEPTIONS) and self.queue['excinfo_queue']:
+            self.crawl_info['err_message'] = str(traceback.format_exc())
             message = {
                 'mode':  self.mode,
                 'base_url': self.task.get("save", {}).get("base_url", None),
