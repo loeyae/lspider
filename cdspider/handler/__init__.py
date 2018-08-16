@@ -116,7 +116,7 @@ class BaseHandler(Component):
         url预处理
         """
         return url
-    
+
     def item_result_post(self, result, unid):
         pass
 
@@ -384,7 +384,7 @@ class BaseHandler(Component):
                 urlrule['base'] = url
             parsed = {}
             if parse:
-                parsed = self.parse(source, url, parse, self.MODE_ATT)
+                parsed = utils.filter(self.parse(source, url, parse, self.MODE_ATT))
                 if not parsed:
                     continue
                 self.debug("%s attach parsed: %s" % (self.__class__.__name__, parsed))
