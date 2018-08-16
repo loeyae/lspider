@@ -365,10 +365,10 @@ class BaseHandler(Component):
         psubdomain, pdomain = self._domain_info(list_url)
         if pdomain == domain:
             subdomain = psubdomain
-        attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain)
+        attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain, where={"status": AttachmentDB.STATUS_ACTIVE})
         attach_list = list(attach_list)
         if not attach_list:
-            attach_list = self.db['AttachmentDB'].get_list_by_domain(pid, domain)
+            attach_list = self.db['AttachmentDB'].get_list_by_domain(pid, domain, where={"status": AttachmentDB.STATUS_ACTIVE})
             attach_list = list(attach_list)
         self.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
