@@ -93,7 +93,10 @@ class JsonParser(BaseParser):
                 onlyOne = bool(int(rule.get('onlyOne', 0)))
                 return self._item_filter(data, rule, onlyOne, noLeaf = True)
             else:
-                return data
+                rst = {}
+                for key, val in rule.items():
+                    rst[key] = self._filter(data, val)
+                return rst
         elif isinstance(rule, list):
             rst = []
             for item in rule:
