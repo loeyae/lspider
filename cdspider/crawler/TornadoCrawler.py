@@ -58,7 +58,7 @@ class TornadoCrawler(BaseCrawler):
         },
         'use_gzip': True,
         'timeout': 120,
-        'connect_timeout': 20,
+        'connect_timeout': 30,
         'validate_cert': False,
     }
 
