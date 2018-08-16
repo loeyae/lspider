@@ -58,7 +58,7 @@ class BaseHandler(Component):
         self.log_level = kwargs.pop('log_level', logging.WARN)
         super(BaseHandler, self).__init__(self.logger, self.log_level)
         self.task = kwargs.pop('task')
-        self.crawler_list = kwargs.pop('crawler', None)
+        self.crawler_list = kwargs.pop('crawler', [])
         self.attach_storage = kwargs.pop('attach_storage', None)
         self.db = kwargs.pop('db',None)
         self.queue = kwargs.pop('queue',None)
@@ -149,9 +149,7 @@ class BaseHandler(Component):
 
     def get_crawler(self, rule):
         crawler = rule.get('crawler', 'requests')
-        if crawler == 'requests':
-            return utils.load_crawler("tornado", headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
-        if crawler in self.crawler_list:
+        if self.crawler_list and isinstance(self.crawler_list, (list, tuple)) and crawler in self.crawler_list:
             self.mycrawler = False
             return self.crawler_list[crawler]
         return utils.load_crawler(crawler, headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
