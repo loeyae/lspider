@@ -390,6 +390,8 @@ def url_encode(params):
     return parse.urlencode(g_encode_params)
 
 def build_query(url, query):
+    if not query:
+        return url
     arr = parse.urlparse(url)
     if arr.query:
         query1 = parse.parse_qs(arr.query)
