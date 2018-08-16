@@ -6,7 +6,6 @@ from cdspider.libs import utils
 from . import BaseParser
 from .lib import Goose
 from .lib import JsonParser
-from .lib import XmlParser
 from .lib.goose3.text import StopWordsChinese
 
 class ListParser(BaseParser):
@@ -27,9 +26,6 @@ class ListParser(BaseParser):
             ruleset = {}
         if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@json:'):
             parser = JsonParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
-            return parser.parse()
-        if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@xml:'):
-            parser = XmlParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
             return parser.parse()
         g = Goose({"target_language": "zh", 'stopwords_class': StopWordsChinese, "enable_fewwords_paragraphs": True, "logger": self.logger, "domain": self.domain, "subdomain": self.subdomain, "custom_rule": ruleset if ruleset else {}})
 
