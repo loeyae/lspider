@@ -27,7 +27,6 @@ class ResultTrait(object):
 
     def _build_result_info(self, **kwargs):
         result = kwargs.get('result', {})
-        nocreated = kwargs.get('nocreated', False)
         update = kwargs.get('update', False)
         if self.mode == self.MODE_ITEM:
             pubtime = result.pop('pubtime', 0)
