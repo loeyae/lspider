@@ -77,7 +77,7 @@ class Spider(Component):
         if return_result:
             return_data = []
         try:
-            self.info("Spider loaded handler: %s" % handler)
+            self.info("Spider loaded handler: %s" % handler.__class__.__name___)
             save.setdefault('base_url', task['url'])
             save.setdefault('referer', task['url'])
             save.setdefault('continue_exceptions', handler.continue_exceptions)
