@@ -195,10 +195,10 @@ class ResultTrait(object):
 
     def _build_attach_data_info(self, data):
         result = {
-            "views": data.get('views', 0),
-            "like_num": data.get('like_num', 0),
-            "reposts_num": data.get('reposts_num', 0),
-            "comments_num": data.get('comments_num', 0),
+            "views": int(data.get('views', 0)),
+            "like_num": int(data.get('like_num', 0)),
+            "reposts_num": int(data.get('reposts_num', 0)),
+            "comments_num": int(data.get('comments_num', 0)),
         }
         return result
 
@@ -217,9 +217,7 @@ class ResultTrait(object):
             '''
             阅读数、点赞数....数据存储
             '''
-            if isinstance(data, dict):
-                data = [data]
-            result = self._build_attach_data_info(data[0])
+            result = self._build_attach_data_info(data)
             attach_data = self.db['AttachDataDB'].get_detail(rid)
             if attach_data:
                 result['utime'] = int(time.time())
