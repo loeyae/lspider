@@ -50,7 +50,8 @@ class Parser(object):
 
     @staticmethod
     def timeformat(timestring):
-        aaa=''
+        if not timestring:
+            return None
         if re.findall(r'年',timestring):
             return Parser.get_timestamp(timestring, 'local')
         elif re.findall(r'\-',timestring):
