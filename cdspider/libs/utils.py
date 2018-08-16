@@ -70,7 +70,7 @@ def remove_whitespace(content):
 def decode(data, errors="ignore"):
     if isinstance(data, bytes):
         detector = UniversalDetector()
-        for line in re.findall(b'\<h\d+\>([^\w]+)\<\/h\d+\>|', data):
+        for line in re.findall(b'\<h\d+\>.*?([^\w]+).*\<\/h\d+\>|', data):
             #分块进行测试，直到达到阈值
             if line:
                 detector.feed(line)
