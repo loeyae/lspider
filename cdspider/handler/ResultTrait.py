@@ -29,15 +29,15 @@ class ResultTrait(object):
         result = kwargs.get('result', {})
         nocreated = kwargs.get('nocreated', False)
         update = kwargs.get('update', False)
-        pubtime = result.pop('pubtime', 0)
-        if pubtime:
-            pubtime = TimeParser.timeformat(str(pubtime))
         if self.mode == self.MODE_ITEM:
+            pubtime = result.pop('pubtime', 0)
+            if pubtime:
+                pubtime = TimeParser.timeformat(str(pubtime))
             if update:
-                src = self.db['ArticlesDB'].get_detail_by_unid(kwargs['unid'], kwargs['ctime'])
+                src = self.db['ArticlesDB'].get_detail_by_unid(kwargs['unid'], int(kwargs['ctime']))
                 #TODO 更新列表页抓取任务的crawlinfo
-                pubtime = src.get('pubtime', None)
-            if not pubtime and not nocreated:
+                pubtime = pubtime or src.get('pubtime', None)
+            if not pubtime:
                 pubtime = int(time.time())
             r = {
                 'status': kwargs.get('status', ArticlesDB.STATUS_INIT),            # 状态
