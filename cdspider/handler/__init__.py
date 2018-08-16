@@ -357,13 +357,16 @@ class BaseHandler(Component):
                 parse = dict((key, item) for key, item in parse.items() if 'filter' in item and item['filter'])
         return parse
 
-    def on_attach(self, source, url):
+    def on_attach(self, source, url, list_url):
         """
         获取附加任务链接，并push newtask
         """
         self.debug("%s attach start: %s @ %s" % (self.__class__.__name__, str(url), self.mode))
         pid = self.task.get('pid')
         subdomain, domain = self._domain_info(url)
+        psubdomain, pdomain = self._domain_info(list_url)
+        if pdomain == domain:
+            subdomain = psubdomain
         attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain)
         attach_list = list(attach_list)
         if not attach_list:
@@ -375,16 +378,19 @@ class BaseHandler(Component):
             parse = {}
             for item in pparse.values():
                 parse[item.pop('key')] = item
+            urlrule = each.get('preparse', {}).get('url', None)
+            if urlrule['base'] == 'parent_url':
+                urlrule['base'] = url
+            parsed = {}
             if parse:
                 parsed = self.parse(source, url, parse, self.MODE_ATT)
                 if not parsed:
                     continue
                 self.debug("%s attach parsed: %s" % (self.__class__.__name__, parsed))
-                urlrule = each.get('preparse', {}).get('url', None)
-                attachurl = utils.build_url_by_rule(urlrule, parsed)
-                message = {'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid'), 'rid': self.last_result_id}
-                self.debug("%s attach create task: %s" % (self.__class__.__name__, str(message)))
-                self.queue['newtask_queue'].put_nowait(message)
+            attachurl = utils.build_url_by_rule(urlrule, parsed)
+            message = {'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid'), 'rid': self.last_result_id}
+            self.debug("%s attach create task: %s" % (self.__class__.__name__, str(message)))
+            self.queue['newtask_queue'].put_nowait(message)
 
         self.debug("%s attach end" % (self.__class__.__name__))
 
