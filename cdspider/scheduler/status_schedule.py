@@ -99,7 +99,12 @@ class StatusSchedule(object):
     def schedule_attachment(self, obj,db_name,id_type,pid):
         if 'status' in obj:
             self.db['AttachmentDB'].update(data[id_type],obj)
-            self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+            p_status=self.db['ProjectsDB'].get_detail(pid)['status']
+            if obj['status']==Base.STATUS_DELETED or obj['status']==Base.STATUS_INIT:
+                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+            else:
+                if p_status==Base.STATUS_ACTIVE:
+                    self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
         else:
             where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
             self.db['TaskDB'].update_many(pid,obj=obj,where=where)
