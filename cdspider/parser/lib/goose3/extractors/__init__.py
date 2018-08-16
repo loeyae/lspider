@@ -22,7 +22,7 @@ limitations under the License.
 """
 import re
 import lxml
-from cdspider.libs.utils import rule2pattern
+from cdspider.libs.utils import rule2pattern, patch_result, extract_result
 
 class BaseExtractor(object):
 
@@ -157,6 +157,15 @@ class BaseExtractor(object):
             if onlyOne:
                 return self.f(ret[0], dtype, target) if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
             return [self.f(item, dtype, target) for item in ret] if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
+
+    def correction_result(self, data, rule, callback=None):
+        return self.patch_result(self.extract_result(data, rule, callback), rule, None)
+    
+    def patch_result(self, data, rule, callback=None):
+        return patch_result(data, rule, callback)
+
+    def extract_result(self, data, rule, callback=None):
+        return extract_result(data, rule, callback)
 
     def f(self, doc, dtype, target=None):
         if isinstance(doc, lxml.html.HtmlElement):
