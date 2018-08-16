@@ -58,7 +58,7 @@ class BaseHandler(Component):
         self.log_level = kwargs.pop('log_level', logging.WARN)
         super(BaseHandler, self).__init__(self.logger, self.log_level)
         self.task = kwargs.pop('task')
-        self.crawler_list = kwargs.pop('crawler')
+        self.crawler_list = kwargs.pop('crawler', None)
         self.attach_storage = kwargs.pop('attach_storage', None)
         self.db = kwargs.pop('db',None)
         self.queue = kwargs.pop('queue',None)
