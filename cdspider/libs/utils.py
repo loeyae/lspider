@@ -69,22 +69,21 @@ def remove_whitespace(content):
 
 def decode(data, errors="ignore"):
     if isinstance(data, bytes):
-        find_charset = re.compile(
-            br'<meta.*?charset=["\']*([a-z0-9\-_]+?) *?["\'>]', flags=re.I
-        ).findall
-        encoding = [item.decode('utf-8') for item in find_charset(data)]
-        u = encoding and encoding[0] or None
+        detector = UniversalDetector()
+        for line in re.findall(b'\<h\d+\>([^\w]+)\<\/h\d+\>|', data):
+            #分块进行测试，直到达到阈值
+            if line:
+                detector.feed(line)
+                break
+        #关闭检测对象
+        detector.close()
+        u = detector.result['encoding']
         if not u:
-            detector = UniversalDetector()
-            for line in re.findall(b'\<h\d+\>([^\w]+)\<\/h\d+\>|', data):
-                #分块进行测试，直到达到阈值
-                if line:
-                    print(line)
-                    detector.feed(line)
-                    break
-            #关闭检测对象
-            detector.close()
-            u = detector.result['encoding']
+            find_charset = re.compile(
+                br'<meta.*?charset=["\']*([a-z0-9\-_]+?) *?["\'>]', flags=re.I
+            ).findall
+            encoding = [item.decode('utf-8') for item in find_charset(data)]
+            u = encoding and encoding[0] or None
         if u:
             return data.decode(u, errors=errors)
         try:
