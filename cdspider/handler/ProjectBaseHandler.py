@@ -39,9 +39,9 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
             self.attach_to_result(final_url, data, typeinfo, page_source, unique)
 
     def parse_domain(self, final_url):
-        _url = final_url
         parent_url = self.task.get('save', {}).get('parent_url', None)
-        if parent_url and get_tld(parent_url) == get_tld(final_url):
-            _url = parent_url
-        typeinfo = self._typeinfo(_url)
-        return typeinfo
+        subdomain, domain = self._domain_info(final_url)
+        psubdomain, pdomain = self._domain_info(parent_url)
+        if pdomain == domain:
+            subdomain = psubdomain
+        return {"domain": domain, "subdomain": subdomain}
