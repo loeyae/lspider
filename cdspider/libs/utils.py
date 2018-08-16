@@ -165,7 +165,7 @@ def patch_result(data, rule, callback=None):
     prefix = rule.get('prefix', '')
     suffix = rule.get('suffix', '')
     patch = rule.get('patch', None)
-    if isinstance(data, list):
+    if isinstance(data, (list, tuple)):
         if patch:
             return [re.sub('\[\w+\]', str(callback_result(callback, d)), patch) if not isinstance(d, (list, dict)) and d else d for d in data]
         return ["%s%s%s" %(prefix, callback_result(callback, d), suffix) if not isinstance(d, (list, dict)) and d else d for d in data]
@@ -194,7 +194,7 @@ def extract_result(data, rule, callback=None):
     extract = rule.get('extract', None)
     if not extract:
         return data
-    if isinstance(data, list):
+    if isinstance(data, (list, tuple)):
         return [preg(callback_result(callback, d), extract) if not isinstance(d, (list, dict)) and d else d for d in data]
     elif isinstance(data, dict):
         return dict((k, preg(callback_result(callback, d), extract)) if not isinstance(d, (list, dict)) and d else d for k,d in data.items())
