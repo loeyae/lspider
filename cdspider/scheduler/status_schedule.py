@@ -96,7 +96,7 @@ class StatusSchedule(object):
                 obj['rate']=s_rate
             self.db['TaskDB'].update_many(pid,obj={'rate':obj['rate']},where=where)
 
-    def schedule_attachment(self, obj,db_name,id_type,pid):
+    def schedule_attachment(self, data,obj,db_name,id_type,pid):
         if 'status' in obj:
             self.db['AttachmentDB'].update(data[id_type],obj)
             p_status=self.db['ProjectsDB'].get_detail(pid)['status']
