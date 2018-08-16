@@ -61,7 +61,7 @@ class ResultTrait(object):
                 'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
                 'title': result.pop('title', None),                                # 标题
                 'author': result.pop('author', None),                              # 作者
-                'pubtime': result.pop('pubtime', None),                            # 发布时间
+                'pubtime': TimeParser.timeformat(str(result.pop('pubtime', ''))),                            # 发布时间
                 'channel': result.pop('channel', None),                            # 频道信息
                 'crawlinfo': kwargs.get('crawlinfo')
             }
