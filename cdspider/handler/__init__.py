@@ -116,6 +116,9 @@ class BaseHandler(Component):
         url预处理
         """
         return url
+    
+    def item_result_post(self, result, unid):
+        pass
 
     def build_url_by_rule(self, data, base_url = None):
         if not base_url:
