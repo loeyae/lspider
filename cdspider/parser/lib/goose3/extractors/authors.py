@@ -27,6 +27,7 @@ from cdspider.libs import utils
 
 KNOWN_META_AUTHOR_TAGS = [
     {'attribute': 'itemprop', 'value': 'author', 'content': 'text'},
+    {'attribute': 'itemprop', 'value': 'publisher', 'content': 'text'},
     {'attribute': 'property', 'value': 'article:author', 'content': 'content'},
 ]
 KNOWN_AUTHOR_TAGS_BY_DOMAIN = {
