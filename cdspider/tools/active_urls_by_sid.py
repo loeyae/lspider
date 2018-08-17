@@ -17,6 +17,8 @@ class active_urls_by_sid(Base):
         self.broken('Site: %s not exists' % sid, site)
         self.notice('Selected Site Info:', site)
         uid = 0
+        if len(args) > 1:
+            uid = int(args[1])
         while True:
             i = 0
             for item in self.g['db']['UrlsDB'].get_new_list(uid, sid, where={'status': 0}):
