@@ -55,6 +55,10 @@ KNOWN_AUTHOR_PATTERN_BY_DOMAIN = {
     ]
 }
 
+KNOWN_AUTHOR_PATTERN = [
+    '\>\s*（?来源：\s*(?:\<[^\>]+\>)?([^\<\>]+)）?\s*\<'
+]
+
 class AuthorsExtractor(BaseExtractor):
 
     def extract(self):
@@ -103,6 +107,12 @@ class AuthorsExtractor(BaseExtractor):
                 if data:
                     authors.extend(data)
                     return authors
+
+            for rule in KNOWN_AUTHOR_PATTERN:
+                matched = re.findall(rule, self.article.raw_html, re.M)
+                if matched:
+                    authors.extend(matched)
+                    return matched
 
         except:
             self.config.logger.error(traceback.format_exc())
