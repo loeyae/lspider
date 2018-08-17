@@ -241,6 +241,11 @@ def load_handler(task, **kwargs):
     if urls and "scripts" in urls and urls['scripts']:
         urls['project'] = {"name": project['name']}
         mod = TaskLoader(urls, mod).load_module()
+    if 'scripts' in task and task['scripts']:
+        t = {}
+        t['project'] = {"name": project['name']}
+        t['scripts'] = task['scripts']
+        mod = TaskLoader(t, mod).load_module()
     if mod:
         _class_list = []
         for each in list(six.itervalues(mod.__dict__)):
