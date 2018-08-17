@@ -65,7 +65,7 @@ class UrlHandler(SiteHandler):
                 item['name'] = title.strip()
                 item['url'] = url.strip()
                 uid = UrlsDB.insert(item)
-                self.g['logger'].info('inserted urls: %s', uid):
+                self.g['logger'].info('inserted urls: %s', uid)
                 d={}
                 d['uid'] = uid
                 self.logger.info("push newtask_queue data: %s" %  str(d))
