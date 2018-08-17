@@ -11,6 +11,7 @@
 import re
 import traceback
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
+from cdspider.libs import utils
 
 
 class CustomExtractor(BaseExtractor):
@@ -58,9 +59,16 @@ class CustomExtractor(BaseExtractor):
                         rule = '|'.join(known_context_patterns)
                         matched = re.findall(rule, script, re.M)
                         if matched:
+                            data = []
+                            for i in matched:
+                                if isinstance(i, (list, tuple)):
+                                    data.extend(i)
+                                else:
+                                    data.append(i)
+                            data = utils.filter(data)
                             if onlyOne:
-                                return self.correction_result(matched[0], custom_rule, custom_rule.get('callback'))
-                        return self.correction_result(matched, custom_rule, custom_rule.get('callback'))
+                                return self.correction_result(data[0], custom_rule, custom_rule.get('callback'))
+                        return self.correction_result(data, custom_rule, custom_rule.get('callback'))
                 known_context_patterns = []
 
             if fulldomain in self.KNOWN_CUSTOM_TAGS_BY_DOMAIN:

@@ -86,7 +86,10 @@ class AuthorsExtractor(BaseExtractor):
                         matched = re.findall(rule, script, re.M)
                         if matched:
                             for i in matched:
-                                authors.extend(i)
+                                if isinstance(i, (list, tuple)):
+                                    authors.extend(i)
+                                else:
+                                    authors.append(i)
                             authors = utils.filter(authors)
                             return authors
                 known_context_patterns = []

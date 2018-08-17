@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import re
 import traceback
 from copy import deepcopy
 
@@ -405,7 +406,10 @@ class ContentExtractor(BaseExtractor):
                         if matched:
                             data = []
                             for i in matched:
-                                data.extend(i)
+                                if isinstance(i, (list, tuple)):
+                                    data.extend(i)
+                                else:
+                                    data.append(i)
                             data = utils.filter(data)
                             return '\r\n'.join(data)
                 known_context_patterns = []
