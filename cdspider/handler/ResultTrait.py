@@ -224,6 +224,8 @@ class ResultTrait(object):
                 self.db['AttachDataDB'].update(rid, result)
             else:
                 unid, ctime = ArticlesDB.unbuild_id(rid)
+                result['domain'] = article['domain']
+                result['subdomain'] = article['subdomain']
                 result['ctime'] = int(time.time())
                 result['acid'] = article['acid']
                 result['utime'] = 0
