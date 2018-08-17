@@ -78,8 +78,10 @@ class AttachDataDB(Mongo, BaseAttachDataDB, SplitTableMixin):
             collection.create_index('rid', unique=True, name='rid')
         if not 'acid' in indexes:
             collection.create_index('acid', unique=True, name='acid')
+        if not 'domain' in indexes:
+            collection.create_index('domain', unique=True, name='domain')
+        if not 'subdomain' in indexes:
+            collection.create_index('subdomain', unique=True, name='subdomain')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
         self._collections.add(table)
-
-
