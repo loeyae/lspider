@@ -320,10 +320,7 @@ class TaskHandler(SiteHandler):
             'kwid': message.get('kwid', 0),
             'project': project,
             'url': message['url'],
-            'urls': {
-                'uid': message.get('uid', 0),
-                'scripts': itemscript,
-            }
+            'scripts': itemscript
         })
         site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
         if not site:
@@ -333,6 +330,10 @@ class TaskHandler(SiteHandler):
             self.debug("Site: %s not active" % site)
             return None
         task['site'] = site
+        if task['uid']:
+            urls = task.get('urls') or self.UrlsDB.get_detail(int(task['uid']))
+            if urls:
+                task['urls'] = urls
         if not 'save' in task or not task['save']:
             task['save'] = {}
         task['rid'] = message['rid']
