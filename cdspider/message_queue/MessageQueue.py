@@ -227,7 +227,7 @@ class AmqpQueue(PikaQueue):
             self.connection = connection_pool[k]["c"]
             self.channel = connection_pool[k]["ch"]
         try:
-            self.channel.queue_declare(self.queuename)
+            self.channel.queue_declare(self.queuename, durable=True)
         except amqp.exceptions.PreconditionFailed:
             pass
 
@@ -235,7 +235,7 @@ class AmqpQueue(PikaQueue):
     def qsize(self):
         with self.lock:
             name, message_count, consumer_count = self.channel.queue_declare(
-                self.queuename, passive=True)
+                self.queuename, durable=True, passive=True)
         return message_count
 
     @catch_error
@@ -252,7 +252,7 @@ class AmqpQueue(PikaQueue):
                 msg = amqp.Message(umsgpack.packb(obj))
             else:
                 msg = amqp.Message(json.dumps(obj))
-            return self.channel.basic_publish(msg, exchange=self.exchange, routing_key=self.queuename)
+            return self.channel.basic_publish(msg, routing_key=self.queuename)
 
     @catch_error
     def get_nowait(self, ack=False):
