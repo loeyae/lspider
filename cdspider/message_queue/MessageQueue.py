@@ -39,6 +39,7 @@ def catch_error(func):
     connect_exceptions += (
         select.error,
         socket.error,
+        amqp.ConnectionError
     )
 
     def wrap(self, *args, **kwargs):
