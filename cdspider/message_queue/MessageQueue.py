@@ -195,6 +195,7 @@ class PikaQueue(CDBaseQueue):
 
     def close(self):
         try:
+            self.connection.close()
             self.channel.close()
         except:
             pass
