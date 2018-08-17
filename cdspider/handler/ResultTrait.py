@@ -200,12 +200,14 @@ class ResultTrait(object):
             "reposts_num": int(data.get('reposts_num', 0)),
             "comments_num": int(data.get('comments_num', 0)),
         }
+        result = self.result_prepare(result)
         return result
 
     def _build_comments_info(self, data, rid):
         result = {
             ""
         }
+        result = self.result_prepare(result)
         return result
 
     def attach_to_result(self, final_url, data, typeinfo, page_source, unid=None):
