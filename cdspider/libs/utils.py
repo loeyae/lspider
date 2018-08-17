@@ -72,7 +72,7 @@ def decode(data, errors="ignore"):
         detector = UniversalDetector()
         hlist = filter(re.findall(b'\<h\d+\>.*?([^\w]+).*\<\/h\d+\>|', data))
         if not hlist:
-            hlist = re.findall(b'\<title\>.*?([^\w]+).*\<\/title\>|', data)
+            hlist = re.findall(b'\<title\>[^<]+\<\/title\>|', data)
         for line in hlist:
             #分块进行测试，直到达到阈值
             if line:
