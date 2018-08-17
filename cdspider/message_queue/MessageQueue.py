@@ -252,7 +252,7 @@ class AmqpQueue(PikaQueue):
                 msg = amqp.Message(umsgpack.packb(obj))
             else:
                 msg = amqp.Message(json.dumps(obj))
-            return self.channel.basic_publish(msg, exchange=self.exchange, routing_key=self.queuename)
+            return self.channel.basic_publish(msg, exchange=self.exchange, routing_key=self.queuenamem)
 
     @catch_error
     def get_nowait(self, ack=False):
