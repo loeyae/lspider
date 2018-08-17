@@ -151,7 +151,7 @@ class BaseHandler(Component):
         return self.page
 
     def get_crawler(self, rule):
-        crawler = rule.get('crawler', 'requests')
+        crawler = rule.get('crawler', '') or 'requests'
         if self.crawler_list and isinstance(self.crawler_list, (list, tuple)) and crawler in self.crawler_list:
             self.mycrawler = False
             return self.crawler_list[crawler]
