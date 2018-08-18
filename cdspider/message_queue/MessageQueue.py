@@ -47,7 +47,6 @@ def catch_error(func):
             return func(self, *args, **kwargs)
         except connect_exceptions as e:
             logger.error('RabbitMQ error: %r, reconnect.', e)
-            k = self.symbol()
             self.connect()
             return func(self, *args, **kwargs)
     return wrap
