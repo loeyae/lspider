@@ -39,8 +39,7 @@ def catch_error(func):
     connect_exceptions += (
         select.error,
         socket.error,
-        amqp.ConnectionError,
-        amqp.exceptions.RecoverableConnectionError,
+        amqp.ConnectionError
     )
 
     def wrap(self, *args, **kwargs):
@@ -99,16 +98,16 @@ class PikaQueue(CDBaseQueue):
                                            credentials)
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
-            connection_pool[k] = {"c": self.connection, "ch": self.channel}
+            connection_pool[k] = self.connection
         else:
-            self.connection = connection_pool[k]['c']
-            self.channel = connection_pool[k]['ch']
+            self.connection = connection_pool[k]
+            self.channel = self.connection.channel()
         try:
             self.channel.queue_declare(self.queuename)
         except pika.exceptions.ChannelClosed:
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
-            connection_pool[k] = {"c": self.connection, "ch": self.channel}
+            connection_pool[k] = self.connection
             self.channel.queue_declare(self.queuename)
         #self.channel.queue_purge(self.queuename)
 
@@ -231,10 +230,11 @@ class AmqpQueue(PikaQueue):
                                                   self.path.lstrip('/') or '%2F'))
             self.connection.connect()
             self.channel = self.connection.channel()
-            connection_pool[k] = {"c": self.connection, "ch": self.channel}
+            connection_pool[k] = self.connection
         else:
-            self.connection = connection_pool[k]["c"]
-            self.channel = connection_pool[k]["ch"]
+            self.connection = connection_pool[k]
+            self.connection.connect()
+            self.channel = self.connection.channel()
         try:
             self.channel.queue_declare(self.queuename, durable=True)
         except amqp.exceptions.PreconditionFailed:
