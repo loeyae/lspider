@@ -70,17 +70,19 @@ def remove_whitespace(content):
 def decode(data, errors="ignore"):
     if isinstance(data, bytes):
         detector = UniversalDetector()
-        hlist = filter(re.findall(b'\<h\d+\>.*?([^\w]+).*\<\/h\d+\>', data))
+        hlist = filter(re.findall(b'\<h\d+\>[^<]+\<\/h\d+\>', data))
         if not hlist:
-            hlist = filter(re.findall(b'\<p\s*[^\>]*>.*?([^\w]+).*\<\/p\>|', data))
+            hlist = filter(re.findall(b'\<p\s*[^\>]*>[^<]+\<\/p\>|', data))
         if not hlist:
             hlist = re.findall(b'\<title\>[^<]+\<\/title\>', data)
-        for line in hlist:
-            #分块进行测试，直到达到阈值
-            if line:
-                detector.feed(line)
+        line = ''
+        for item in hlist:
+            if len(item) > len(line):
+                line = item
+            if len(line) > 100:
                 break
-        #关闭检测对象
+        if line:
+            detector.feed(line)
         detector.close()
         u = detector.result['encoding']
         if not u:
