@@ -40,7 +40,7 @@ def catch_error(func):
     connect_exceptions += (
         select.error,
         socket.error,
-        amqp.ConnectionError
+        amqp.ConnectionError,
         amqp.exceptions.RecoverableConnectionError,
     )
 
