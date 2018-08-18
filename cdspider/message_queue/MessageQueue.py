@@ -18,6 +18,7 @@ import threading
 import pika
 import pika.exceptions
 import amqp
+import errno
 from six.moves.urllib.parse import unquote
 from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
@@ -46,9 +47,10 @@ def catch_error(func):
         try:
             return func(self, *args, **kwargs)
         except connect_exceptions as e:
-            logger.error('RabbitMQ error: %r, reconnect.', e)
-            self.connect()
-            return func(self, *args, **kwargs)
+            if e.errno != errno.ECONNRESET:
+                logger.error('RabbitMQ error: %r, reconnect.', e)
+                self.connect()
+                return func(self, *args, **kwargs)
     return wrap
 
 class PikaQueue(CDBaseQueue):
