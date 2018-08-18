@@ -399,6 +399,8 @@ class BaseHandler(Component):
         """
         同步大数据平台
         """
+        if not self.last_result_id:
+            return
         self.info("result2kafka  starting...")
         res={}
         on_sync=self.task.get('project', {}).get('on_sync', None)
