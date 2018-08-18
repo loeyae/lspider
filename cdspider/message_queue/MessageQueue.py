@@ -48,16 +48,6 @@ def catch_error(func):
         except connect_exceptions as e:
             logger.error('RabbitMQ error: %r, reconnect.', e)
             k = self.symbol()
-            if k in connection_pool:
-                try:
-                    connection_pool[k]['ch'].close()
-                except:
-                    pass
-                try:
-                    connection_pool[k]['c'].close()
-                except:
-                    pass
-                del connection_pool[k]
             self.connect()
             return func(self, *args, **kwargs)
     return wrap
