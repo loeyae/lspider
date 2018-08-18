@@ -52,9 +52,9 @@ def catch_error(func):
             self.connect()
             return func(self, *args, **kwargs)
         except:
-            k = self.symbol()
-            del connect_exceptions[k]
-            self.connect()
+#            k = self.symbol()
+#            del connect_exceptions[k]
+#            self.connect()
             return func(self, *args, **kwargs)
     return wrap
 
