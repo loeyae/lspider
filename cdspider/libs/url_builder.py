@@ -10,6 +10,7 @@
 import six
 import time
 import re
+import copy
 import logging
 import random
 from cdspider import Component
@@ -258,7 +259,7 @@ class UrlBuilder(Component):
         """
         if 'incr_data' in kwargs and kwargs['incr_data']:
             self.debug("UrlBuilder parse incr data rule: %s" % str(kwargs['incr_data']))
-            incr_data = kwargs['incr_data'].copy()
+            incr_data = copy.deepcopy(kwargs['incr_data'])
             if not isinstance(incr_data, list):
                 incr_data = [incr_data]
             if not "incr_data" in save or not save['incr_data']:
@@ -276,7 +277,7 @@ class UrlBuilder(Component):
                     incr_data[i].setdefault('type', 'url')
                 save['incr_data'] = incr_data
             for i in range(len(save['incr_data'])):
-                item = save['incr_data'][i]
+                item = copy.deepcopy(save['incr_data'][i])
                 if not 'max' in item or not item['max']:
                     item['max'] = 0
                 step = int(item.get('step', 1))
