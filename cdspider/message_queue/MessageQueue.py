@@ -47,10 +47,14 @@ def catch_error(func):
         try:
             return func(self, *args, **kwargs)
         except connect_exceptions as e:
-            if e.errno != errno.ECONNRESET:
-                logger.error('RabbitMQ error: %r, reconnect.', e)
-                self.connect()
-                return func(self, *args, **kwargs)
+            logger.error('RabbitMQ error: %r, reconnect.', e)
+            self.connect()
+            return func(self, *args, **kwargs)
+        except:
+            k = self.symbol()
+            del connect_exceptions[k]
+            self.connect()
+            return func(self, *args, **kwargs)
     return wrap
 
 class PikaQueue(CDBaseQueue):
