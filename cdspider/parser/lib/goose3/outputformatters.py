@@ -75,8 +75,16 @@ class OutputFormatter(object):
 
     def convert_to_text(self):
         txts = []
-        for node in list(self.get_top_node()):
-            txt = self.parser.getText(node)
+        top_node = self.get_top_node()
+        if len(top_node) > 0:
+            for node in list(self.get_top_node()):
+                txt = self.parser.getText(node)
+                if txt:
+                    txt = html.unescape(txt)
+                    txt_lis = innerTrim(txt).split(r'\n')
+                    txts.extend(txt_lis)
+        else:
+            txt = self.parser.getText(top_node)
             if txt:
                 txt = html.unescape(txt)
                 txt_lis = innerTrim(txt).split(r'\n')
