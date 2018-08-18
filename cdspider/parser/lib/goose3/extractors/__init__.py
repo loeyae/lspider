@@ -160,7 +160,7 @@ class BaseExtractor(object):
 
     def correction_result(self, data, rule, callback=None):
         return self.patch_result(self.extract_result(data, rule, callback), rule, None)
-    
+
     def patch_result(self, data, rule, callback=None):
         return patch_result(data, rule, callback)
 
