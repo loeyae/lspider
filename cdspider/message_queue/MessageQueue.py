@@ -50,7 +50,7 @@ def catch_error(func):
             if e.errno != errno.ECONNRESET:
                 logger.error('RabbitMQ error: %r, reconnect.', e)
                 self.connect()
-            return func(self, *args, **kwargs)
+                return func(self, *args, **kwargs)
     return wrap
 
 class PikaQueue(CDBaseQueue):
