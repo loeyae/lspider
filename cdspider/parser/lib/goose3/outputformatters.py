@@ -77,7 +77,7 @@ class OutputFormatter(object):
         txts = []
         top_node = self.get_top_node()
         if len(top_node) > 0:
-            for node in list(self.get_top_node()):
+            for node in list(top_node):
                 txt = self.parser.getText(node)
                 if txt:
                     txt = html.unescape(txt)
