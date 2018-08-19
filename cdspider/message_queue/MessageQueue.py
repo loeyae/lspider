@@ -217,7 +217,7 @@ class AmqpQueue(PikaQueue):
         """
         连接rabbitmq服务器
         """
-        k = self.symbol()
+#        k = self.symbol()
 #        if not k in connection_pool:
         self.connection = amqp.Connection(host="%s:%s" % (self.host, self.port),
                                           userid=self.username or 'guest',
