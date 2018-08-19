@@ -235,6 +235,8 @@ class AmqpQueue(PikaQueue):
             logger.error('ccccccccccccccccccccccccccccccccccccccc')
             logger.error(self.connection.connected)
             self.connection.connect()
+            logger.error('ccccccccccccccccccccccccccccccccccccccc')
+            logger.error(self.connection.connected)
             self.channel = self.connection.channel()
         try:
             self.channel.queue_declare(self.queuename, durable=True)
