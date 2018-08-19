@@ -226,7 +226,7 @@ class AmqpQueue(PikaQueue):
                                               self.path.lstrip('/') or '%2F'))
         self.connection.connect()
         self.channel = self.connection.channel()
-            connection_pool[k] = self.connection
+#            connection_pool[k] = self.connection
 #        else:
 #            self.connection = connection_pool[k]
 #            self.connection.connect()
