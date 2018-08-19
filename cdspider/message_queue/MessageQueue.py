@@ -47,15 +47,16 @@ def catch_error(func):
     def wrap(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except connect_exceptions as e:
-            logger.error('RabbitMQ error: %r, reconnect.', e)
+#        except connect_exceptions as e:
+#            logger.error('RabbitMQ error: %r, reconnect.', e)
+#            self.connect()
+#            return func(self, *args, **kwargs)
+        except Exception as e:
+            print(type(e))
+#            k = self.symbol()
+#            del connect_exceptions[k]
             self.connect()
             return func(self, *args, **kwargs)
-#        except:
-##            k = self.symbol()
-##            del connect_exceptions[k]
-##            self.connect()
-#            return func(self, *args, **kwargs)
     return wrap
 
 class PikaQueue(CDBaseQueue):
@@ -217,20 +218,20 @@ class AmqpQueue(PikaQueue):
         """
         连接rabbitmq服务器
         """
-#        k = self.symbol()
-#        if not k in connection_pool:
-        self.connection = amqp.Connection(host="%s:%s" % (self.host, self.port),
-                                          userid=self.username or 'guest',
-                                          password=self.password or 'guest',
-                                          virtual_host=unquote(
-                                              self.path.lstrip('/') or '%2F'))
-        self.connection.connect()
-        self.channel = self.connection.channel()
-#            connection_pool[k] = self.connection
-#        else:
-#            self.connection = connection_pool[k]
-#            self.connection.connect()
-#            self.channel = self.connection.channel()
+        k = self.symbol()
+        if not k in connection_pool:
+            self.connection = amqp.Connection(host="%s:%s" % (self.host, self.port),
+                                              userid=self.username or 'guest',
+                                              password=self.password or 'guest',
+                                              virtual_host=unquote(
+                                                  self.path.lstrip('/') or '%2F'))
+            self.connection.connect()
+            self.channel = self.connection.channel()
+            connection_pool[k] = self.connection
+        else:
+            self.connection = connection_pool[k]
+            self.connection.connect()
+            self.channel = self.connection.channel()
         try:
             self.channel.queue_declare(self.queuename, durable=True)
         except amqp.exceptions.PreconditionFailed:
