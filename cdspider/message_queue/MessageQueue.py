@@ -235,10 +235,12 @@ class AmqpQueue(PikaQueue):
             logger.error('ccccccccccccccccccccccccccccccccccccccc')
             logger.error(self.connection.connected)
             if not self.connection.connected:
-                self.connection.connect()
+                del connection_pool[k]
+                self.connect()
+            else:
+                self.channel = self.connection.channel()
             logger.error('ccccccccccccccccccccccccccccccccccccccc')
             logger.error(self.connection.connected)
-            self.channel = self.connection.channel()
         try:
             self.channel.queue_declare(self.queuename, durable=True)
         except amqp.exceptions.PreconditionFailed:
