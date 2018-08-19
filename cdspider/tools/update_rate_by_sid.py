@@ -7,8 +7,9 @@
 :date:    2018-8-19 17:20:05
 """
 import time
+from cdspider.tools import Base
 
-class update_rate_by_sid(object):
+class update_rate_by_sid(Base):
     """
     update rate by sid
     """
