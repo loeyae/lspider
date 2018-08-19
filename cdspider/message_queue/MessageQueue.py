@@ -23,11 +23,11 @@ from six.moves.urllib.parse import unquote
 from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
 connection_pool = {}
+logger = logging.getLogger('queue')
 
 def catch_error(func):
     """Catch errors of rabbitmq then reconnect"""
     import amqp
-    logger = logging.getLogger('queue')
     try:
         import pika.exceptions
         connect_exceptions = (
