@@ -434,22 +434,22 @@ class BaseHandler(Component):
         if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in self.task and self.task['rid'] and self.db['ArticlesDB']:
             self.db['ArticlesDB'].update(self.task['rid'], {"status": self.db['ArticlesDB'].STATUS_DELETED})
             return
-        if not isinstance(exc, IGNORE_EXCEPTIONS) and self.queue['excinfo_queue']:
-            self.crawl_info['err_message'] = str(traceback.format_exc())
-            message = {
-                'mode':  self.mode,
-                'base_url': self.task.get("save", {}).get("base_url", None),
-                'request_url': self.task.get("save", {}).get("request_url", None),
-                'project': self.task.get("pid", None),
-                'site': self.task.get("sid", None),
-                'urls': self.task.get("uid", None),
-                'keyword': self.task.get("kwid", None),
-                'crawltime': self.crawl_id,
-                'err_message': str(exc),
-                'tracback': traceback.format_exc(),
-                'last_source': self.task.get('last_source', None),
-            }
-            self.queue['excinfo_queue'].put_nowait(message)
+#        if not isinstance(exc, IGNORE_EXCEPTIONS) and self.queue['excinfo_queue']:
+#            self.crawl_info['err_message'] = str(traceback.format_exc())
+#            message = {
+#                'mode':  self.mode,
+#                'base_url': self.task.get("save", {}).get("base_url", None),
+#                'request_url': self.task.get("save", {}).get("request_url", None),
+#                'project': self.task.get("pid", None),
+#                'site': self.task.get("sid", None),
+#                'urls': self.task.get("uid", None),
+#                'keyword': self.task.get("kwid", None),
+#                'crawltime': self.crawl_id,
+#                'err_message': str(exc),
+#                'tracback': traceback.format_exc(),
+#                'last_source': self.task.get('last_source', None),
+#            }
+#            self.queue['excinfo_queue'].put_nowait(message)
 
     @abc.abstractmethod
     def on_result(self, data, broken_exc, page_source, final_url):
