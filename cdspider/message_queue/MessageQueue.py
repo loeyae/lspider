@@ -53,7 +53,7 @@ def catch_error(func):
 #            return func(self, *args, **kwargs)
         except Exception as e:
             logger.error('==================================')
-            logger.error（type(e))
+            logger.error(type(e))
 #            k = self.symbol()
 #            del connect_exceptions[k]
             self.connect()
