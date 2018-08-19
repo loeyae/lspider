@@ -47,10 +47,10 @@ def catch_error(func):
     def wrap(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-#        except connect_exceptions as e:
-#            logger.error('RabbitMQ error: %r, reconnect.', e)
-#            self.connect()
-#            return func(self, *args, **kwargs)
+        except connect_exceptions as e:
+            logger.error('RabbitMQ error: %r, reconnect.', e)
+            self.connect()
+            return func(self, *args, **kwargs)
         except Exception as e:
             logger.error('==================================')
             logger.error(type(e))
@@ -59,10 +59,11 @@ def catch_error(func):
             logger.error(str(self.connection))
             logger.error(str(self.channel))
             logger.error(str(self.queuename))
+            pass
 #            k = self.symbol()
 #            del connect_exceptions[k]
-            self.connect()
-            return func(self, *args, **kwargs)
+#            self.connect()
+#            return func(self, *args, **kwargs)
     return wrap
 
 class PikaQueue(CDBaseQueue):
@@ -232,15 +233,11 @@ class AmqpQueue(PikaQueue):
             connection_pool[k] = self.connection
         else:
             self.connection = connection_pool[k]
-            logger.error('ccccccccccccccccccccccccccccccccccccccc')
-            logger.error(self.connection.connected)
             if not self.connection.connected:
                 del connection_pool[k]
                 self.connect()
             else:
                 self.channel = self.connection.channel()
-            logger.error('ccccccccccccccccccccccccccccccccccccccc')
-            logger.error(self.connection.connected)
         try:
             self.channel.queue_declare(self.queuename, durable=True)
         except amqp.exceptions.PreconditionFailed:
