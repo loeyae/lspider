@@ -234,7 +234,8 @@ class AmqpQueue(PikaQueue):
             self.connection = connection_pool[k]
             logger.error('ccccccccccccccccccccccccccccccccccccccc')
             logger.error(self.connection.connected)
-            self.connection.connect()
+            if not self.connection.connected:
+                self.connection.connect()
             logger.error('ccccccccccccccccccccccccccccccccccccccc')
             logger.error(self.connection.connected)
             self.channel = self.connection.channel()
