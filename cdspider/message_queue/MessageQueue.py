@@ -204,11 +204,7 @@ class PikaQueue(CDBaseQueue):
             return self.channel.queue_delete(queue=self.queuename)
 
     def close(self):
-        try:
-            self.channel.close()
-            self.connection.close()
-        except:
-            pass
+        pass
 
 class AmqpQueue(PikaQueue):
 
