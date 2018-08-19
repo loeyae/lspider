@@ -59,7 +59,7 @@ def catch_error(func):
             logger.error(str(self.connection))
             logger.error(str(self.channel))
             logger.error(str(self.queuename))
-            pass
+            raise e
 #            k = self.symbol()
 #            del connect_exceptions[k]
 #            self.connect()
