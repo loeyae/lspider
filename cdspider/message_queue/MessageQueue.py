@@ -41,7 +41,7 @@ def catch_error(func):
         select.error,
         socket.error,
         amqp.ConnectionError,
-#        amqp.exceptions.RecoverableConnectionError,
+        amqp.exceptions.RecoverableConnectionError,
     )
 
     def wrap(self, *args, **kwargs):
@@ -51,19 +51,6 @@ def catch_error(func):
             logger.error('RabbitMQ error: %r, reconnect.', e)
             self.connect()
             return func(self, *args, **kwargs)
-        except Exception as e:
-            logger.error('==================================')
-            logger.error(type(e))
-            logger.error(str(args))
-            logger.error(str(kwargs))
-            logger.error(str(self.connection))
-            logger.error(str(self.channel))
-            logger.error(str(self.queuename))
-            raise e
-#            k = self.symbol()
-#            del connect_exceptions[k]
-#            self.connect()
-#            return func(self, *args, **kwargs)
     return wrap
 
 class PikaQueue(CDBaseQueue):
