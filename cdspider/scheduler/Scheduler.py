@@ -110,7 +110,6 @@ class Scheduler(object):
                     obj['pid']=task['pid']
                     obj['tid']=task['tid']
                     self.queue['scheduler2spider'].put_nowait(obj)
-                    print()
                     self.plan_task(task)
                     i += 1
                 if i == 0:
