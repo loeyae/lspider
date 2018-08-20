@@ -7,6 +7,7 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-9 17:39:24
 """
+import socks
 import requests
 import time
 from urllib.parse import *
@@ -116,18 +117,20 @@ class RequestsCrawler(BaseCrawler):
                     allow_redirects=allow_redirects,
                     timeout=timeout,
                 )
+        except socks.ProxyConnectionError:
+            raise CDSpiderCrawlerProxyError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
         except ConnectTimeout as e:
-            raise CDSpiderCrawlerConnectTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            raise CDSpiderCrawlerConnectTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
         except ReadTimeout as e:
-            raise CDSpiderCrawlerReadTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            raise CDSpiderCrawlerReadTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
         except Timeout as e:
-            raise CDSpiderCrawlerTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            raise CDSpiderCrawlerTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
         except ConnectionError as e:
             if self._setting.get('proxy'):
-                raise CrawlerProxyExpored(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
-            raise CDSpiderCrawlerConnectionError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+                raise CrawlerProxyExpored(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
+            raise CDSpiderCrawlerConnectionError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
         except Exception as e:
-            raise CDSpiderCrawlerError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            raise CDSpiderCrawlerError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
 
     def _prepare_response(self, referer):
         """
