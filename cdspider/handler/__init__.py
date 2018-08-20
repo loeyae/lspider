@@ -480,7 +480,7 @@ class BaseHandler(Component):
             for i in range(len(save['incr_data'])):
                 if int(save['incr_data'][i]['value']) > int(save['incr_data'][i]['base_page']):
                     save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
-        if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CrawlerProxyExpored)):
+        if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CDSpiderCrawlerProxyExpired)):
             data = {"addr": self.crawler.proxy_str, 'ctime': int(time.time())}
             typeinfo = self._typeinfo(self.task['url'])
             data.update(typeinfo)
