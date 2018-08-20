@@ -222,6 +222,7 @@ class ResultTrait(object):
             result = self._build_attach_data_info(data)
             attach_data = self.db['AttachDataDB'].get_detail(rid)
             if attach_data:
+                result = utils.dictunion(result, data)
                 result['utime'] = int(time.time())
                 self.db['AttachDataDB'].update(rid, result)
             else:
