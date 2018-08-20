@@ -81,7 +81,7 @@ class Spider(Component):
             save.setdefault('base_url', task['url'])
             save.setdefault('referer', task['url'])
             save.setdefault('continue_exceptions', handler.continue_exceptions)
-            save['proxy'] = self.proxy
+            save['proxy'] = copy.deepcopy(self.proxy)
             referer = save.get('flush_referer', False)
             refresh_base = save.get('rebase', False)
             last_source_unid = None
@@ -93,6 +93,7 @@ class Spider(Component):
                 self.info("Spider fetch prepare end")
                 while True:
                     self.info('Spider crawl start')
+                    save['proxy'] = copy.deepcopy(self.proxy)
                     last_source, broken_exc, final_url = handler.crawl(save)
                     if isinstance(broken_exc, CONTINUE_EXCEPTIONS):
                         handler.on_continue(broken_exc, save)
