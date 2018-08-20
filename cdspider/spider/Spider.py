@@ -233,7 +233,7 @@ class Spider(Component):
         if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
             self.debug("Task: %s not active" % task)
             return None
-        attachment = self.AttachmentDB.get_detail(int(task['aid']))
+        attachment = task.get('attachment') or self.AttachmentDB.get_detail(int(task['aid']))
         if not attachment:
             self.status_queue.put_nowait({"aid": task['aid'], 'status': AttachmentDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Attachment: %s not found" % task['aid'])
@@ -273,7 +273,7 @@ class Spider(Component):
             site['sub_process'] = {}
         task['site'] = site
         if 'uid' in task and task['uid']:
-            urls = self.UrlsDB.get_detail(int(task['uid']))
+            urls = task.get('urls') or self.UrlsDB.get_detail(int(task['uid']))
             if not urls:
                 self.status_queue.put_nowait({"aid": task['aid'], 'status': UrlsDB.STATUS_DELETED})
                 raise CDSpiderDBDataNotFound("Url: %s not found" % task['uid'])
@@ -286,7 +286,7 @@ class Spider(Component):
                 urls['sub_process'] = {}
             task['urls'] = urls
         if 'kwid' in task and task['kwid']:
-            keywords = self.KeywordsDB.get_detail(int(task['kwid']))
+            keywords = task.get('keyword') or self.KeywordsDB.get_detail(int(task['kwid']))
             if not keywords:
                 self.status_queue.put_nowait({"kwid": task['kwid'], 'status': KeywordsDB.STATUS_DELETED})
                 raise CDSpiderDBDataNotFound("Keyword: %s not found" % task['kwid'])
@@ -355,7 +355,7 @@ class TaskHandler(SiteHandler):
         taskid = message.get('tid')
         if task is None and taskid:
             task = self.TaskDB.get_detail(taskid, pid, True)
-        project = message.get('project', None) or self.ProjectsDB.get_detail(pid)
+        project = task.get('project', None) or self.ProjectsDB.get_detail(pid)
         if not project:
             self.status_queue.put_nowait({"pid": pid, 'status': ProjectsDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Project: %s not found" % pid)
