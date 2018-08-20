@@ -274,13 +274,10 @@ class BaseHandler(Component):
         """
         获取请求配置
         """
-        if self.mode == self.MODE_ITEM:
-            return self.DEFAULT_PROCESS
-
-        if self.mode == self.MODE_ATT:
+        if self.mode == self.MODE_ITEM or self.mode == self.MODE_ATT:
             if not self.process:
                 self._init_process();
-            request = self.process.get('request', {})
+            request = self.process.get('request', {}) or self.DEFAULT_PROCESS
         else:
             if self.mode == self.MODE_CHANNEL:
                 url_process = self.task.get('urls', {}).get('main_process', {}) or {}
