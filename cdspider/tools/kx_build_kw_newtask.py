@@ -15,7 +15,7 @@ class kx_build_kw_newtask(Base):
             try:
                 data=self.g['queue']['result2newtask'].get_nowait()
             except queue.Empty:
-                time.slee(0.5)
+                time.sleep(0.5)
             except:
                 time.sleep(2)
                 break
