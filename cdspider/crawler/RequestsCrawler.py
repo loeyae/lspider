@@ -126,8 +126,8 @@ class RequestsCrawler(BaseCrawler):
         except Timeout as e:
             raise CDSpiderCrawlerTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
         except ConnectionError as e:
-            if self._setting.get('proxy'):
-                raise CrawlerProxyExpored(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            if self._setting.get('proxies'):
+                raise CDSpiderCrawlerProxyExpired(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
             raise CDSpiderCrawlerConnectionError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
         except Exception as e:
             raise CDSpiderCrawlerError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
