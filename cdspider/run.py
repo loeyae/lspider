@@ -50,7 +50,7 @@ def cli(ctx, **kwargs):
     db_object = {}
     if db_setting:
         connector = connect_db(ctx, None, db_setting)
-        db_object['base'] = load_cls(ctx, None, 'cdspider.database.{protocol}.Base'.format(protocol = db_setting.get('protocol')))
+        db_object['base'] = load_cls(ctx, None, 'cdspider.database.{protocol}.Base'.format(protocol = db_setting.get('protocol')))(connector)
         for d in app_config.get("database", {}):
             db = 'cdspider.database.{protocol}.{db}'.format(protocol = db_setting.get('protocol'), db= d)
             db_object[d] = load_cls(ctx, None, db)(connector)
