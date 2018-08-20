@@ -222,7 +222,6 @@ class AmqpQueue(PikaQueue):
                                               virtual_host=unquote(
                                                   self.path.lstrip('/') or '%2F'))
             self.connection.connect()
-            self.channel = self.connection.channel()
             connection_pool[k] = self.connection
         else:
             self.connection = connection_pool[k]
@@ -230,7 +229,7 @@ class AmqpQueue(PikaQueue):
                 del connection_pool[k]
                 self.connect()
             self.close()
-            self.channel = self.connection.channel()
+        self.channel = self.connection.channel()
         try:
             self.channel.queue_declare(self.queuename, durable=True)
         except amqp.exceptions.PreconditionFailed:
