@@ -43,6 +43,7 @@ KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN = {
     ],
     'ifeng.com': [
         {'attribute': 'class', 'value': 'yc_tit', 'leaf': {'tag': 'span', 'content': 'text'},},
+        {'attribute': 'class', 'value': 'vTit_crumbs', 'leaf': {'attribute': 'class', 'value': 'data', 'content': 'text'},},
     ],
     'news.cn':[
         {'attribute': 'class', 'value': 'h-info', 'leaf': {'attribute': 'class', 'value': 'h-time', 'content': 'text'}},
