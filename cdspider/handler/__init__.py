@@ -480,8 +480,9 @@ class BaseHandler(Component):
             for i in range(len(save['incr_data'])):
                 if int(save['incr_data'][i]['value']) > int(save['incr_data'][i]['base_page']):
                     save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
-        if self.task['save']['retry'] < self.MAX_RETRY:
-            self.task['save']['retry'] += 1
+        if save['retry'] < self.MAX_RETRY:
+            save['retry'] += 1
+            self.info('Retry to fetch: %s, current times: %s' % (self.task['url'], self.task['save']['retry']))
         else:
             raise broken_exc
 
