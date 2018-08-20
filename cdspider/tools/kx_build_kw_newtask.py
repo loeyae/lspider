@@ -6,6 +6,7 @@ Created on 2018年8月9日
 @author: Wang Fengwei
 '''
 import time
+from six.moves import queue
 from cdspider.tools import Base
 
 class kx_build_kw_newtask(Base):
@@ -13,6 +14,8 @@ class kx_build_kw_newtask(Base):
         while True:
             try:
                 data=self.g['queue']['result2newtask'].get_nowait()
+            except queue.Empty:
+                time.slee(0.5)
             except:
                 time.sleep(2)
                 break
@@ -22,7 +25,7 @@ class kx_build_kw_newtask(Base):
             self._insert_task(title, 2)
             self._insert_task(title, 3)
 #             self.g['db']['ArticlesDB'].update(item['rid'],obj={'crawlinfo.title_to_task':1})
-            
+
     def _insert_task(self,title,sid):
         uid=0
         while True:
@@ -52,4 +55,3 @@ class kx_build_kw_newtask(Base):
                 self.g['db']['TaskDB'].insert(t)
             if u_sum==0:
                 break
-        
