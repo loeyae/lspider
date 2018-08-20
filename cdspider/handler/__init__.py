@@ -233,8 +233,8 @@ class BaseHandler(Component):
         try:
             request = copy.deepcopy(self._get_request(final_url))
             proxy = request.pop('proxy', 'never')
-            if crawler or self.crawler is None:
-                self.crawler = self.get_crawler(request)
+            if not self.crawler:
+                self.crawler = crawler or self.get_crawler(request)
             request['url'] = self.task.get('url')
             if self.page == 1 and self.mode != self.MODE_ITEM:
                 request['incr_data'] = self._get_paging(save.get("parent_url", request['url']))
@@ -480,6 +480,8 @@ class BaseHandler(Component):
             for i in range(len(save['incr_data'])):
                 if int(save['incr_data'][i]['value']) > int(save['incr_data'][i]['base_page']):
                     save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
+        if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CrawlerProxyExpored)):
+            self.db['base'].insert({"addr": self.crawler.proxy_str})
         if save['retry'] < self.MAX_RETRY:
             save['retry'] += 1
             self.info('Retry to fetch: %s, current times: %s' % (self.task['url'], self.task['save']['retry']))
