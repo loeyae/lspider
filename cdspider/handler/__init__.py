@@ -447,6 +447,7 @@ class BaseHandler(Component):
         if isinstance(exc, NOT_EXISTS_EXCEPTIONS) and 'rid' in self.task and self.task['rid'] and self.db['ArticlesDB']:
             self.db['ArticlesDB'].update(self.task['rid'], {"status": self.db['ArticlesDB'].STATUS_DELETED})
             return
+        self.crawl_info['err_message'] = str(traceback.format_exc())
 #        if not isinstance(exc, IGNORE_EXCEPTIONS) and self.queue['excinfo_queue']:
 #            self.crawl_info['err_message'] = str(traceback.format_exc())
 #            message = {
