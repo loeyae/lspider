@@ -154,7 +154,7 @@ class BaseCrawler(Component):
 
     @property
     def proxy_str(self):
-        raise self.__proxy_str
+        return self.__proxy_str
 
     @abc.abstractmethod
     def set_proxy(self, addr, type = 'http', user = None, passwrod = None):
