@@ -141,7 +141,10 @@ class BaseHandler(Component):
                 raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(task)))
             if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
-            item['url'] = self.url_prepare(item['url'])
+            try:
+                item['url'] = self.url_prepare(item['url'])
+            except:
+                continue
             if urlrule and 'name' in urlrule and urlrule['name']:
                 parsed = {urlrule['name']: item['url']}
                 item['url'] = utils.build_url_by_rule(urlrule, parsed)
