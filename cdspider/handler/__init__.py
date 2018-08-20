@@ -492,13 +492,13 @@ class BaseHandler(Component):
             crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
             if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
                 del crawlinfo_sorted[0]
-        save = self.task.get("save")
-        if 'incr_data' in save:
-            for i in range(len(save['incr_data'])):
-                if int(save['incr_data'][i]['value']) > int(save['incr_data'][i]['base_page']):
-                    save['incr_data'][i]['last_page'] = int(save['incr_data'][i]['value'])
-                    save['incr_data'][i]['value'] = int(save['incr_data'][i]['base_page'])
-                save['incr_data'][i]['isfirst'] = True
+            save = self.task.get("save")
+            if 'incr_data' in save:
+                for i in range(len(save['incr_data'])):
+                    if int(save['incr_data'][i]['value']) > int(save['incr_data'][i]['base_page']):
+                        save['incr_data'][i]['last_page'] = int(save['incr_data'][i]['value'])
+                        save['incr_data'][i]['value'] = int(save['incr_data'][i]['base_page'])
+                    save['incr_data'][i]['isfirst'] = True
             self.db['TaskDB'].update(self.task.get('tid'), self.task.get('pid'), {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": save})
             #TODO 自动调节抓取频率
 
