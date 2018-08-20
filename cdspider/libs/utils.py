@@ -87,6 +87,8 @@ def decode(data, errors="ignore"):
             ).findall
             encoding = [item.decode('utf-8') for item in find_charset(data)]
             u = encoding and encoding[0] or None
+        if u == 'ISO-8859-1':
+            u = 'GBK'
         if u:
             return data.decode(u, errors=errors)
         try:
