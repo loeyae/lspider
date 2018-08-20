@@ -223,7 +223,6 @@ class AmqpQueue(PikaQueue):
             if not self.connection.connected:
                 del connection_pool[k]
                 self.connect()
-            else:
                 self.channel = self.connection.channel()
         try:
             self.channel.queue_declare(self.queuename, durable=True)
