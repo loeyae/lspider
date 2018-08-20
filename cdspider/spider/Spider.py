@@ -89,11 +89,18 @@ class Spider(Component):
             self.info("Spider process start")
             try:
                 self.info("Spider fetch prepare start")
-                handler.prepare(save)
+                while True:
+                    try:
+                        handler.prepare(save)
+                    except CONTINUE_EXCEPTIONS as e:
+                        handler.on_continue(e, save)
+                        continue
+                    break
                 self.info("Spider fetch prepare end")
                 while True:
                     self.info('Spider crawl start')
                     save['proxy'] = copy.deepcopy(self.proxy)
+                    save['retry'] = 0
                     last_source, broken_exc, final_url = handler.crawl(save)
                     if isinstance(broken_exc, CONTINUE_EXCEPTIONS):
                         handler.on_continue(broken_exc, save)
@@ -354,9 +361,9 @@ class TaskHandler(SiteHandler):
         mode = message.get('mode', BaseHandler.MODE_DEFAULT)
         pid = message.get('pid')
         taskid = message.get('tid')
-        if task is None and taskid:
+        if not task and taskid:
             task = self.TaskDB.get_detail(taskid, pid, True)
-        project = task.get('project', None) or self.ProjectsDB.get_detail(pid)
+        project = (task.get('project', None) if task else None) or self.ProjectsDB.get_detail(pid)
         if not project:
             self.status_queue.put_nowait({"pid": pid, 'status': ProjectsDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Project: %s not found" % pid)
