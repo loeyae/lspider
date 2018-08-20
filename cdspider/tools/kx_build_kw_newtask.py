@@ -37,7 +37,7 @@ class kx_build_kw_newtask(Base):
                 t={}
                 t['kwid']=0
                 t['rid']=0
-                t['expire']=int(time.time())+2592000
+                t['expire']=int(time.time())+604800 #2592000
                 if sid==3:
                     t['expire']=int(time.time())+604800
                 t['sid']=sid
