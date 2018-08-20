@@ -128,9 +128,13 @@ class BaseHandler(Component):
                 self._init_process()
             urlrule = self.process.get('url', {})
         elif self.mode == self.MODE_CHANNEL:
-            urlrule = self.task.get('urls', {}).get('main_process', {}).get('url', {}) or self.task.get('site', {}).get('main_process', {}).get('url', {})
+            url_process = self.task.get('urls', {}).get('main_process', {}) or {}
+            site_process = self.task.get('site', {}).get('main_process', {}) or {}
+            urlrule = url_process.get('url', {}) or site_process.get('url', {})
         elif self.mode == self.MODE_LIST:
-            urlrule = self.task.get('urls', {}).get('sub_process', {}).get('url', {}) or self.task.get('site', {}).get('sub_process', {}).get('url', {})
+            url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
+            site_process = self.task.get('site', {}).get('sub_process', {}) or {}
+            urlrule = url_process.get('url', {}) or site_process.get('url', {})
         formated = []
         for item in data:
             if not 'url' in item or not item['url']:
@@ -279,9 +283,13 @@ class BaseHandler(Component):
             request = self.process.get('request', {})
         else:
             if self.mode == self.MODE_CHANNEL:
-                request = self.task.get('urls', {}).get('main_process', {}).get('request', {}) or self.task.get('site', {}).get('main_process', {}).get('request', {}) or self.DEFAULT_PROCESS
+                url_process = self.task.get('urls', {}).get('main_process', {}) or {}
+                site_process = self.task.get('site', {}).get('main_process', {}) or {}
+                request = url_process.get('request', {}) or site_process.get('request', {}) or self.DEFAULT_PROCESS
             elif self.mode == self.MODE_LIST:
-                request = self.task.get('urls', {}).get('sub_process', {}).get('request', {}) or self.task.get('site', {}).get('sub_process', {}).get('request', {}) or self.DEFAULT_PROCESS
+                url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
+                site_process = self.task.get('site', {}).get('sub_process', {}) or {}
+                request = url_process.get('request', {}) or site_process.get('request', {}) or self.DEFAULT_PROCESS
         if 'cookie' in request and request['cookie']:
             cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
             if len(cookie_list) > 1:
@@ -312,9 +320,13 @@ class BaseHandler(Component):
             paging = self.process.get('paging', None)
         else:
             if self.mode == self.MODE_CHANNEL:
-                paging = self.task.get('urls', {}).get('main_process', {}).get('paging', {}) or self.task.get('site', {}).get('main_process', {}).get('paging', {})
+                url_process = self.task.get('urls', {}).get('main_process', {}) or {}
+                site_process = self.task.get('site', {}).get('main_process', {}) or {}
+                paging = url_process.get('paging', {}) or site_process.get('paging', {})
             elif self.mode == self.MODE_LIST:
-                paging = self.task.get('urls', {}).get('sub_process', {}).get('paging', {}) or self.task.get('site', {}).get('sub_process', {}).get('paging', {})
+                url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
+                site_process = self.task.get('site', {}).get('sub_process', {}) or {}
+                paging = url_process.get('paging', {}) or site_process.get('paging', {})
         if paging:
             if "name" in paging and paging['name']:
                 return paging
@@ -351,9 +363,13 @@ class BaseHandler(Component):
             parse = self.process.get('parse', {})
         else:
             if self.mode == self.MODE_CHANNEL:
-                parse = self.task.get('urls', {}).get('main_process', {}).get('parse', {}) or self.task.get('site', {}).get('main_process', {}).get('parse', {})
+                url_process = self.task.get('urls', {}).get('main_process', {}) or {}
+                site_process = self.task.get('site', {}).get('main_process', {}) or {}
+                parse = url_process.get('parse', {}) or site_process.get('parse', {})
             elif self.mode == self.MODE_LIST:
-                parse = self.task.get('urls', {}).get('sub_process', {}).get('parse', {}) or self.task.get('site', {}).get('sub_process', {}).get('parse', {})
+                url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
+                site_process = self.task.get('site', {}).get('sub_process', {}) or {}
+                parse = url_process.get('parse', {}) or site_process.get('parse', {})
 
         if self.mode == self.MODE_ATT:
             if not 'item' in  parse:
