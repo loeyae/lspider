@@ -81,6 +81,10 @@ class PikaQueue(CDBaseQueue):
         连接queue服务器
         """
         k = self.symbol()
+        if k in connection_pool:
+            self.connection = connection_pool[k]
+            if not self.connection.is_open:
+                del connection_pool[k]
         if not k in connection_pool:
             credentials = pika.PlainCredentials(self.username, self.password)
             parameters = pika.ConnectionParameters(self.host,
@@ -90,9 +94,8 @@ class PikaQueue(CDBaseQueue):
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
             connection_pool[k] = self.connection
-        else:
-            self.connection = connection_pool[k]
-            self.channel = self.connection.channel()
+
+
         try:
             self.channel.queue_declare(self.queuename)
         except pika.exceptions.ChannelClosed:
