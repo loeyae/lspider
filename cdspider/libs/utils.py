@@ -70,7 +70,7 @@ def remove_whitespace(content):
 def decode(data, errors="ignore"):
     if isinstance(data, bytes):
         detector = UniversalDetector()
-        hlist = filter(re.findall(b'[^\w]+', data))
+        hlist = filter(re.findall(b'[^\x00-\xf7]', data))
         line = ''
         for item in hlist:
             if len(item) > len(line):
@@ -81,7 +81,7 @@ def decode(data, errors="ignore"):
             detector.feed(line)
         detector.close()
         u = detector.result['encoding']
-        if not u:
+        if not u or u == 'ascii':
             find_charset = re.compile(
                 br'<meta.*?charset=["\']*([a-z0-9\-_]+?) *?["\'>]', flags=re.I
             ).findall
