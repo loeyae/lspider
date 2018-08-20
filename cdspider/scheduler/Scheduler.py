@@ -98,7 +98,7 @@ class Scheduler(object):
             while True:
                 newtask_list = self.db['TaskDB'].get_list(projectid,
                                                           where={'$and':[{'status':TaskDB.STATUS_ACTIVE},{'plantime':{'$lte':int(time.time())}},{'$or':[{'expire':0},{'expire':{'$gt':int(time.time())}}]}]},
-                                                          sort=[('plantime', 1)])
+                                                          sort=[('plantime', 1)],hits=200)
                 i = 0
                 for task in newtask_list:
                     self.logger.debug("Schedule check_tasks task@%s: %s " % (projectid, str(task)))
@@ -112,6 +112,7 @@ class Scheduler(object):
                     self.queue['scheduler2spider'].put_nowait(obj)
                     self.plan_task(task)
                     i += 1
+                    time.sleep(0.1)
                 if i == 0:
                     self.logger.debug("Schedule check_tasks no newtask@%s" % projectid)
                     break
