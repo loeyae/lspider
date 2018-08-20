@@ -228,7 +228,7 @@ class BaseHandler(Component):
         final_url = self.task.get('url')
         last_source = None
         try:
-            request = self._get_request()
+            request = self._get_request(final_url)
             proxy = request.pop('proxy', 'never')
             if crawler or self.crawler is None:
                 self.crawler = self.get_crawler(request)
@@ -270,13 +270,13 @@ class BaseHandler(Component):
         elif self.mode == self.MODE_ATT:
             self.process = self.task.get('attachment', {}).get('process', None) or self.DEFAULT_PROCESS
 
-    def _get_request(self):
+    def _get_request(self, url):
         """
         获取请求配置
         """
         if self.mode == self.MODE_ITEM or self.mode == self.MODE_ATT:
             if not self.process:
-                self._init_process();
+                self._init_process(url);
             request = self.process.get('request', {}) or self.DEFAULT_PROCESS
         else:
             if self.mode == self.MODE_CHANNEL:
