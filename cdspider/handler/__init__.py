@@ -48,7 +48,7 @@ class BaseHandler(Component):
         }
     }
 
-    MAX_RETRY = 3
+    MAX_RETRY = 5
 
     def __init__(self, *args, **kwargs):
         """
