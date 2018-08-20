@@ -266,9 +266,9 @@ class BaseHandler(Component):
                 parserule = self.db['ParseRuleDB'].get_detail_by_subdomain(subdomain)
             if not parserule:
                 parserule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
-            self.process = parserule or self.DEFAULT_PROCESS
+            self.process = parserule or copy.deepcopy(self.DEFAULT_PROCESS)
         elif self.mode == self.MODE_ATT:
-            self.process = self.task.get('attachment', {}).get('process', None) or self.DEFAULT_PROCESS
+            self.process = self.task.get('attachment', {}).get('process', None) or copy.deepcopy(self.DEFAULT_PROCESS)
 
     def _get_request(self, url):
         """
@@ -277,16 +277,16 @@ class BaseHandler(Component):
         if self.mode == self.MODE_ITEM or self.mode == self.MODE_ATT:
             if not self.process:
                 self._init_process(url);
-            request = utils.dictjoin(self.process.get('request', {}), self.DEFAULT_PROCESS['request'])
+            request = utils.dictjoin(self.process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
         else:
             if self.mode == self.MODE_CHANNEL:
                 url_process = self.task.get('urls', {}).get('main_process', {}) or {}
                 site_process = self.task.get('site', {}).get('main_process', {}) or {}
-                request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), self.DEFAULT_PROCESS['request'])
+                request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
             elif self.mode == self.MODE_LIST:
                 url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
                 site_process = self.task.get('site', {}).get('sub_process', {}) or {}
-                request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), self.DEFAULT_PROCESS['request'])
+                request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
         if 'cookie' in request and request['cookie']:
             cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
             if len(cookie_list) > 1:
