@@ -14,17 +14,17 @@ class kx_build_kw_newtask(Base):
         while True:
             try:
                 data=self.g['queue']['result2newtask'].get_nowait()
+                title=data['title']
+    #         for item in self.g['db']['ArticlesDB'].get_list(ctime=int(time.time()),where={'$and':[{'crawlinfo.title_to_task':{'$exists':False}},{'crawlinfo.sid':1}]}):
+    #             title=item['title']
+                self._insert_task(title, 2)
+                self._insert_task(title, 3)
+    #             self.g['db']['ArticlesDB'].update(item['rid'],obj={'crawlinfo.title_to_task':1})
             except queue.Empty:
                 time.sleep(0.5)
             except:
                 time.sleep(2)
                 break
-            title=data['title']
-#         for item in self.g['db']['ArticlesDB'].get_list(ctime=int(time.time()),where={'$and':[{'crawlinfo.title_to_task':{'$exists':False}},{'crawlinfo.sid':1}]}):
-#             title=item['title']
-            self._insert_task(title, 2)
-            self._insert_task(title, 3)
-#             self.g['db']['ArticlesDB'].update(item['rid'],obj={'crawlinfo.title_to_task':1})
 
     def _insert_task(self,title,sid):
         if title==None or title=='':
