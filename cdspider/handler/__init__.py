@@ -481,7 +481,10 @@ class BaseHandler(Component):
                 if int(save['incr_data'][i]['value']) > int(save['incr_data'][i]['base_page']):
                     save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
         if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CrawlerProxyExpored)):
-            self.db['base'].insert({"addr": self.crawler.proxy_str})
+            data = {"addr": self.crawler.proxy_str, 'ctime': int(time.time())}
+            typeinfo = self._typeinfo(self.task['url'])
+            data.update(typeinfo)
+            self.db['base'].insert(data, 'proxy_log')
         if save['retry'] < self.MAX_RETRY:
             save['retry'] += 1
             self.info('Retry to fetch: %s, current times: %s' % (self.task['url'], self.task['save']['retry']))
