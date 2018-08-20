@@ -117,7 +117,7 @@ class RequestsCrawler(BaseCrawler):
                     allow_redirects=allow_redirects,
                     timeout=timeout,
                 )
-        except socks.ProxyConnectionError:
+        except (TimeoutError, socks.ProxyConnectionError):
             raise CDSpiderCrawlerProxyError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
         except ConnectTimeout as e:
             raise CDSpiderCrawlerConnectTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files, proxy = self._setting.get("proxies", ''))
