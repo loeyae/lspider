@@ -29,6 +29,7 @@ class BaseCrawler(Component):
     STATUS_CODE_GATEWAY_TIMEOUT = 504
 
     _proxy = None
+    __proxy_str = None
 
     user_agent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36"
 
@@ -151,6 +152,10 @@ class BaseCrawler(Component):
     def final_url(self):
         raise NotImplementedError
 
+    @property
+    def proxy_str(self):
+        raise self.__proxy_str
+
     @abc.abstractmethod
     def set_proxy(self, addr, type = 'http', user = None, passwrod = None):
         """
@@ -215,6 +220,7 @@ class BaseCrawler(Component):
         elif len(args) > 0:
             proxies['addr'] = args[0]
         if "addr" in proxies and proxies['addr']:
+            self.__proxy_str = addr
             g = re.search('(\d+\.\d+\.\d+.\d+):(\d+)', proxies['addr'])
             if g and g.groups():
                 gs = g.groups()
