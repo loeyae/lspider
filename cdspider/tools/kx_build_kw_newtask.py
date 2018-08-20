@@ -55,3 +55,4 @@ class kx_build_kw_newtask(Base):
                 self.g['db']['TaskDB'].insert(t)
             if u_sum==0:
                 break
+            time.sleep(0.1)
