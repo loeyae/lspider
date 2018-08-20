@@ -220,7 +220,7 @@ class BaseCrawler(Component):
         elif len(args) > 0:
             proxies['addr'] = args[0]
         if "addr" in proxies and proxies['addr']:
-            self.__proxy_str = addr
+            self.__proxy_str = proxies['addr']
             g = re.search('(\d+\.\d+\.\d+.\d+):(\d+)', proxies['addr'])
             if g and g.groups():
                 gs = g.groups()
