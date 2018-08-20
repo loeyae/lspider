@@ -231,7 +231,7 @@ class BaseHandler(Component):
         final_url = self.task.get('url')
         last_source = None
         try:
-            request = self._get_request(final_url)
+            request = copy.deepcopy(self._get_request(final_url))
             proxy = request.pop('proxy', 'never')
             if crawler or self.crawler is None:
                 self.crawler = self.get_crawler(request)
@@ -239,7 +239,7 @@ class BaseHandler(Component):
             if self.page == 1 and self.mode != self.MODE_ITEM:
                 request['incr_data'] = self._get_paging(save.get("parent_url", request['url']))
 
-            #列表页抓取时，第一页不添加分页参数,因此在第二页时，先将自增字段自增
+            #详情页抓取时，第一页不添加分页参数,因此在第二页时，先将自增字段自增
             if self.page == 2 and self.mode == self.MODE_ITEM:
                 request['incr_data'] = self._get_paging(save.get("parent_url", request['url']))
                 for i in request['incr_data']:
