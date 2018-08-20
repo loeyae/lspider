@@ -27,19 +27,19 @@ class kx_build_kw_newtask(Base):
 #             self.g['db']['ArticlesDB'].update(item['rid'],obj={'crawlinfo.title_to_task':1})
 
     def _insert_task(self,title,sid):
+        if title==None or title=='':
+            return
         uid=0
         while True:
             u_sum=0
             for u_item in self.g['db']['UrlsDB'].get_list(where={'sid':sid,'uid':{'$gt':uid}}):
                 u_sum=u_sum+1
-                if title==None or title=='':
-                    continue
                 t={}
                 t['kwid']=0
                 t['rid']=0
-                t['expire']=int(time.time())+(60*60*24*30)
+                t['expire']=int(time.time())+2592000
                 if sid==3:
-                    t['expire']=int(time.time())+(60*60*24*7)
+                    t['expire']=int(time.time())+604800
                 t['sid']=sid
                 t['pid']=1
                 t['uid']=u_item['uid']
