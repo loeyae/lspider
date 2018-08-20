@@ -277,16 +277,16 @@ class BaseHandler(Component):
         if self.mode == self.MODE_ITEM or self.mode == self.MODE_ATT:
             if not self.process:
                 self._init_process(url);
-            request = self.process.get('request', {}) or self.DEFAULT_PROCESS
+            request = utils.dictjoin(self.process.get('request', {}), self.DEFAULT_PROCESS)
         else:
             if self.mode == self.MODE_CHANNEL:
                 url_process = self.task.get('urls', {}).get('main_process', {}) or {}
                 site_process = self.task.get('site', {}).get('main_process', {}) or {}
-                request = url_process.get('request', {}) or site_process.get('request', {}) or self.DEFAULT_PROCESS
+                request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), self.DEFAULT_PROCESS)
             elif self.mode == self.MODE_LIST:
                 url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
                 site_process = self.task.get('site', {}).get('sub_process', {}) or {}
-                request = url_process.get('request', {}) or site_process.get('request', {}) or self.DEFAULT_PROCESS
+                request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), self.DEFAULT_PROCESS)
         if 'cookie' in request and request['cookie']:
             cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
             if len(cookie_list) > 1:
