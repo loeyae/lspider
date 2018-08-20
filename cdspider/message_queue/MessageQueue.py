@@ -195,7 +195,10 @@ class PikaQueue(CDBaseQueue):
             return self.channel.queue_delete(queue=self.queuename)
 
     def close(self):
-        pass
+        try:
+            self.channel.close()
+        except:
+            pass
 
 class AmqpQueue(PikaQueue):
 
@@ -226,7 +229,8 @@ class AmqpQueue(PikaQueue):
             if not self.connection.connected:
                 del connection_pool[k]
                 self.connect()
-                self.channel = self.connection.channel()
+            self.close()
+            self.channel = self.connection.channel()
         try:
             self.channel.queue_declare(self.queuename, durable=True)
         except amqp.exceptions.PreconditionFailed:
