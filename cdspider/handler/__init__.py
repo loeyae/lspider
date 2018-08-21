@@ -396,7 +396,9 @@ class BaseHandler(Component):
             pparse = each.get('preparse', {}).get('parse', None)
             parse = {}
             for item in pparse.values():
-                parse[item.pop('key')] = item
+                key = item.pop('key')
+                if key and item['filter']:
+                    parse[key] = item
             urlrule = each.get('preparse', {}).get('url', None)
             if urlrule['base'] == 'parent_url':
                 urlrule['base'] = url
