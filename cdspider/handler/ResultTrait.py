@@ -195,10 +195,10 @@ class ResultTrait(object):
 
     def _build_attach_data_info(self, data):
         result = {
-            "views": int(data.get('views', 0)),
-            "like_num": int(data.get('like_num', 0)),
-            "reposts_num": int(data.get('reposts_num', 0)),
-            "comments_num": int(data.get('comments_num', 0)),
+            "views": int(data.get('views') or 0),
+            "like_num": int(data.get('like_num') or 0),
+            "reposts_num": int(data.get('reposts_num') or 0),
+            "comments_num": int(data.get('comments_num') or 0),
         }
         result = self.result_prepare(result)
         return result
