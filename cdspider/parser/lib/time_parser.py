@@ -58,13 +58,13 @@ class Parser(object):
     def timeformat(timestring):
         if not timestring:
             return None
-        if re.findall(r'^\d{1,2}月\d{1,2}日'):
+        if re.findall(r'^\d{1,2}月\d{1,2}日', timestring):
             timestring = "%s年%s" % (datetime.datetime.now().year, timestring)
-        elif re.findall(r'^\d{1,2}-\d{1,2}[^-]*'):
+        elif re.findall(r'^\d{1,2}-\d{1,2}[^-]*', timestring):
             timestring = "%s-%s" % (datetime.datetime.now().year, timestring)
-        elif re.findall(r'^\d{1,2}\/\d{1,2}[^\/]*'):
+        elif re.findall(r'^\d{1,2}\/\d{1,2}[^\/]*', timestring):
             timestring = "%s/%s" % (datetime.datetime.now().year, timestring)
-        elif re.findall(r'^\d{1,2}\.\d{1,2}[^\.]*'):
+        elif re.findall(r'^\d{1,2}\.\d{1,2}[^\.]*', timestring):
             timestring = "%s.%s" % (datetime.datetime.now().year, timestring)
         if re.findall(r'年',timestring):
             return Parser.get_timestamp(timestring, 'local')
