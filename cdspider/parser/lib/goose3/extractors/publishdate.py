@@ -90,6 +90,7 @@ class PublishDateExtractor(BaseExtractor):
                                 else:
                                     data.append(i)
                             data = utils.filter(data)
+                            if data and data[0]:
                             return TimeParser.timeformat(TimeParser.parser_time(data[0]))
                 known_context_patterns = []
 
