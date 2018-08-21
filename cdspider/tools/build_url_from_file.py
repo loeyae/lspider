@@ -37,7 +37,7 @@ from cdspider.handler.custom.{projectname} import SiteHandler
 
 class UrlHandler(SiteHandler):
     pass
-        """
+"""
         urlsscript = urlsscript.format(projectname="Project%s" % site['pid'])
         UrlsDB = self.g['db']['UrlsDB']
         urls = {
