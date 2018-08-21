@@ -46,7 +46,7 @@ class BaseExtractor(object):
 
     def get_message_by_tag(self, tags, doc = None):
         if doc is None:
-            doc = self.article.doc if len(self.article.doc) > 0 else self.article._raw_doc
+            doc = self.article._raw_doc
         if isinstance(doc, list) and doc:
             doc = doc.pop(0)
         leaf = tags.pop('leaf', None)
