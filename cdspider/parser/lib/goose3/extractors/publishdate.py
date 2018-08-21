@@ -67,7 +67,7 @@ class PublishDateExtractor(BaseExtractor):
             if custom_rule:
                 matched = self.custom_match(custom_rule, dtype=self.custom_rule.get('created', {}).get('type', 'text'), target=self.custom_rule.get('created', {}).get('target', 'value'))
                 if matched:
-                    return TimeParser.timeformat(TimeParser.parser_time(self.correction_result(matched)))
+                    return TimeParser.timeformat(TimeParser.parser_time(self.correction_result(matched)) or self.correction_result(matched))
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
             if fulldomain in KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN:
@@ -91,7 +91,7 @@ class PublishDateExtractor(BaseExtractor):
                                     data.append(i)
                             data = utils.filter(data)
                             if data and data[0]:
-                            return TimeParser.timeformat(TimeParser.parser_time(data[0]))
+                                return TimeParser.timeformat(TimeParser.parser_time(data[0]) or data[0])
                 known_context_patterns = []
 
             if fulldomain in KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN:
@@ -102,13 +102,16 @@ class PublishDateExtractor(BaseExtractor):
                 for tags in known_context_patterns:
                     data = self.get_message_by_tag(tags)
                     if data:
-                        return TimeParser.timeformat(TimeParser.parser_time(data[0]))
+                        return TimeParser.timeformat(TimeParser.parser_time(data[0]) or data[0])
 
             for tags in KNOWN_PUBLISH_DATE_TAGS:
                 data = self.get_message_by_tag(tags)
                 if data:
-                    return TimeParser.timeformat(TimeParser.parser_time(data[0]))
+                    return TimeParser.timeformat(TimeParser.parser_time(data[0]) or data[0])
         except:
             self.config.logger.error(traceback.format_exc())
-
+        if self.article.top_node is not None:
+            _d = TimeParser.parser_time(self.parser.outerHtml(self.parser.getParent(self.article.top_node)))
+            if _d:
+                return TimeParser.timeformat(_d)
         return TimeParser.timeformat(TimeParser.parser_time(self.article.raw_html, True))
