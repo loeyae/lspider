@@ -21,6 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import re
+import copy
 import traceback
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.parser.lib.time_parser import Parser as TimeParser
@@ -71,9 +72,9 @@ class PublishDateExtractor(BaseExtractor):
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
             if fulldomain in KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN[fulldomain]))
             if self.domain in KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 script_nodes = self.parser.getElementsByTag(self.article.doc,
                                                             tag='script')
@@ -95,16 +96,16 @@ class PublishDateExtractor(BaseExtractor):
                 known_context_patterns = []
 
             if fulldomain in KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN[fulldomain]))
             if self.domain in KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 for tags in known_context_patterns:
                     data = self.get_message_by_tag(tags)
                     if data:
                         return TimeParser.timeformat(TimeParser.parser_time(data[0]) or data[0])
 
-            for tags in KNOWN_PUBLISH_DATE_TAGS:
+            for tags in copy.deepcopy(KNOWN_PUBLISH_DATE_TAGS):
                 data = self.get_message_by_tag(tags)
                 if data:
                     return TimeParser.timeformat(TimeParser.parser_time(data[0]) or data[0])

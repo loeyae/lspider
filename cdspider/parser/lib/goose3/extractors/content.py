@@ -392,9 +392,9 @@ class ContentExtractor(BaseExtractor):
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
             if fulldomain in KNOWN_CONTENT_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_CONTENT_PATTERN_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(deepcopy(KNOWN_CONTENT_PATTERN_BY_DOMAIN[fulldomain]))
             if self.domain in KNOWN_CONTENT_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_CONTENT_PATTERN_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(deepcopy(KNOWN_CONTENT_PATTERN_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 script_nodes = self.parser.getElementsByTag(self.article.raw_doc,
                                                             tag='script')
@@ -415,16 +415,16 @@ class ContentExtractor(BaseExtractor):
                 known_context_patterns = []
 
             if fulldomain in KNOWN_CONTENT_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_CONTENT_TAGS_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(deepcopy(KNOWN_CONTENT_TAGS_BY_DOMAIN[fulldomain]))
             if self.domain in KNOWN_CONTENT_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_CONTENT_TAGS_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(deepcopy(KNOWN_CONTENT_TAGS_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 for tags in known_context_patterns:
                     data = self.get_message_by_tag(tags, self.article.raw_doc)
                     if data:
                         return '\r\n'.join(data)
 
-            for tags in KNOWN_CONTENT_TAGS:
+            for tags in deepcopy(KNOWN_CONTENT_TAGS):
                 data = self.get_message_by_tag(tags, self.article.raw_doc)
                 if data:
                     return '\r\n'.join(data)

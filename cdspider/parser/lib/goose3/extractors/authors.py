@@ -21,6 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import re
+import copy
 import traceback
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.libs import utils
@@ -74,9 +75,9 @@ class AuthorsExtractor(BaseExtractor):
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
             if fulldomain in KNOWN_AUTHOR_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_AUTHOR_PATTERN_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_AUTHOR_PATTERN_BY_DOMAIN[fulldomain]))
             if self.domain in KNOWN_AUTHOR_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_AUTHOR_PATTERN_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_AUTHOR_PATTERN_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 script_nodes = self.parser.getElementsByTag(self.article.doc,
                                                             tag='script')
@@ -96,9 +97,9 @@ class AuthorsExtractor(BaseExtractor):
                 known_context_patterns = []
 
             if fulldomain in KNOWN_AUTHOR_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_AUTHOR_TAGS_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_AUTHOR_TAGS_BY_DOMAIN[fulldomain]))
             if self.domain in KNOWN_AUTHOR_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_AUTHOR_TAGS_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_AUTHOR_TAGS_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 for tags in known_context_patterns:
                     data = self.get_message_by_tag(tags)
@@ -106,13 +107,13 @@ class AuthorsExtractor(BaseExtractor):
                         authors.extend(data)
                         return authors
 
-            for tags in KNOWN_META_AUTHOR_TAGS:
+            for tags in copy.deepcopy(KNOWN_META_AUTHOR_TAGS):
                 data = self.get_message_by_tag(tags)
                 if data:
                     authors.extend(data)
                     return authors
 
-            for rule in KNOWN_AUTHOR_PATTERN:
+            for rule in copy.deepcopy(KNOWN_AUTHOR_PATTERN):
                 matched = re.findall(rule, self.article.raw_html, re.M)
                 if matched:
                     authors.extend(matched)

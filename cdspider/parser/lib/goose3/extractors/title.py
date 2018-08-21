@@ -21,6 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import re
+import copy
 import traceback
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.libs import utils
@@ -113,9 +114,9 @@ class TitleExtractor(BaseExtractor):
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
             if fulldomain in KNOWN_TITLE_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_TITLE_PATTERN_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_TITLE_PATTERN_BY_DOMAIN[fulldomain]))
             if self.domain in KNOWN_TITLE_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_TITLE_PATTERN_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_TITLE_PATTERN_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 script_nodes = self.parser.getElementsByTag(self.article.doc,
                                                             tag='script')
@@ -136,9 +137,9 @@ class TitleExtractor(BaseExtractor):
                 known_context_patterns = []
 
             if fulldomain in KNOWN_TITLE_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_TITLE_TAGS_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_TITLE_TAGS_BY_DOMAIN[fulldomain]))
             if self.domain in KNOWN_TITLE_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(KNOWN_TITLE_TAGS_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(copy.deepcopy(KNOWN_TITLE_TAGS_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 for tags in known_context_patterns:
                     data = self.get_message_by_tag(tags)
@@ -151,7 +152,7 @@ class TitleExtractor(BaseExtractor):
                     title = self.article.opengraph['title']
                     return {'raw_title': title, 'clean_title': self.clean_title(title)}
 
-            for tags in KNOWN_TITLE_TAGS:
+            for tags in copy.deepcopy(KNOWN_TITLE_TAGS):
                 data = self.get_message_by_tag(tags)
                 if data:
                     return {'raw_title': data[0], 'clean_title': self.clean_title(data[0])}

@@ -9,6 +9,7 @@
 :version: SVN: $Id: custom.py 1511 2018-06-25 07:38:26Z zhangyi $
 """
 import re
+import copy
 import traceback
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.libs import utils
@@ -47,9 +48,9 @@ class CustomExtractor(BaseExtractor):
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
             if fulldomain in self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(copy.deepcopy(self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN[fulldomain]))
             if self.domain in self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN:
-                known_context_patterns.extend(self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(copy.deepcopy(self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 script_nodes = self.parser.getElementsByTag(self.article.doc,
                                                             tag='script')
@@ -72,9 +73,9 @@ class CustomExtractor(BaseExtractor):
                 known_context_patterns = []
 
             if fulldomain in self.KNOWN_CUSTOM_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(self.KNOWN_CUSTOM_TAGS_BY_DOMAIN[fulldomain])
+                known_context_patterns.extend(copy.deepcopy(self.KNOWN_CUSTOM_TAGS_BY_DOMAIN[fulldomain]))
             if self.domain in self.KNOWN_CUSTOM_TAGS_BY_DOMAIN:
-                known_context_patterns.extend(self.KNOWN_CUSTOM_TAGS_BY_DOMAIN[self.domain])
+                known_context_patterns.extend(copy.deepcopy(self.KNOWN_CUSTOM_TAGS_BY_DOMAIN[self.domain]))
             if known_context_patterns:
                 for tags in known_context_patterns:
                     matched = self.get_message_by_tag(tags)

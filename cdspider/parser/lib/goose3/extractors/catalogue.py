@@ -52,7 +52,7 @@ class CatalogueExtractor(BaseExtractor):
     def extract(self):
         if self.custom_rule and 'item' in self.custom_rule and self.custom_rule['item']:
             if 'filter' in self.custom_rule and self.custom_rule['filter']:
-                doc = self.custom_match_elements(self.custom_rule['filter'], doc=self.article.doc)
+                doc = self.custom_match_elements(copy.deepcopy(self.custom_rule['filter']), doc=self.article.doc)
             else:
                 doc = self.article.doc
             custom_rule = copy.deepcopy(self.custom_rule['item'])
@@ -88,9 +88,9 @@ class CatalogueExtractor(BaseExtractor):
         known_context_patterns = []
         fulldomain = "%s.%s" % (self.subdomain, self.domain)
         if fulldomain in self.KNOWN_URLS_PATTERN_BY_DOMAIN:
-            known_context_patterns.extend(self.KNOWN_URLS_PATTERN_BY_DOMAIN[fulldomain])
+            known_context_patterns.extend(copy.deepcopy(self.KNOWN_URLS_PATTERN_BY_DOMAIN[fulldomain]))
         if self.domain in self.KNOWN_URLS_PATTERN_BY_DOMAIN:
-            known_context_patterns.extend(self.KNOWN_URLS_PATTERN_BY_DOMAIN[self.domain])
+            known_context_patterns.extend(copy.deepcopy(self.KNOWN_URLS_PATTERN_BY_DOMAIN[self.domain]))
         if known_context_patterns:
             for rule in known_context_patterns:
                 nodes = self.parser.getElementsByTag(self.article.doc, tag='a', attr='href', value=rule)
@@ -110,9 +110,9 @@ class CatalogueExtractor(BaseExtractor):
 
         known_context_patterns = []
         if fulldomain in self.KNOWN_URLS_TAGS_BY_DOMAIN:
-            known_context_patterns.extend(self.KNOWN_URLS_TAGS_BY_DOMAIN[fulldomain])
+            known_context_patterns.extend(copy.deepcopy(self.KNOWN_URLS_TAGS_BY_DOMAIN[fulldomain]))
         if self.domain in self.KNOWN_URLS_TAGS_BY_DOMAIN:
-            known_context_patterns.extend(self.KNOWN_URLS_TAGS_BY_DOMAIN[self.domain])
+            known_context_patterns.extend(copy.deepcopy(self.KNOWN_URLS_TAGS_BY_DOMAIN[self.domain]))
         if known_context_patterns:
             for tags in known_context_patterns:
                 data = self.get_message_by_tag(tags)
@@ -123,7 +123,7 @@ class CatalogueExtractor(BaseExtractor):
         if data:
             return data
 
-        for tags in self.KNOWN_URLS_TAGS:
+        for tags in copy.deepcopy(self.KNOWN_URLS_TAGS):
             data = self.get_message_by_tag(tags)
             if data:
                 return utils.table2kvlist({'url': data})
