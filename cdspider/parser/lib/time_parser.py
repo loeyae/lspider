@@ -120,4 +120,4 @@ class Parser(object):
                     return item
         if now:
             return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
-        return html and html or None
+        return None
