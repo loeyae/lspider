@@ -295,7 +295,11 @@ class RequestsCrawler(BaseCrawler):
         设置header
         """
         self.info("Requests set header: %s => %s" % (str(name), str(value)))
-        self._headers.update({name: value})
+        try:
+            value = value.decode('latin-1')
+            self._headers.update({name: value})
+        except:
+            pass
 
     @property
     def page_source(self):
