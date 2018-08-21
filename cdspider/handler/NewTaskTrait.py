@@ -45,7 +45,7 @@ class NewTaskTrait(object):
         self.debug("%s build_newtask_by_attachment attachment: %s" % (self.__class__.__name__, attachment))
         status = 1 if attachment['status'] == AttachmentDB.STATUS_ACTIVE else 0
         count = self.db['TaskDB'].get_count(project['pid'], {"aid": attachment['aid']}) or 0
-        self._new_task(project['pid'], 0, self.task['url'], int(attachment['rate']), count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time()) + int(attachment['expire']) * self.EXPIRE_STEP, self.task['rid'])
+        self._new_task(project['pid'], 0, self.task['url'], int(attachment['rate']), count + 1, attachment['aid'], 0, status, self.task['save'], int(time.time()) + int(attachment['expire'] or 30) * self.EXPIRE_STEP, self.task['rid'])
 
     def build_newtask_by_keywords(self):
         project = self.task.get("project")
