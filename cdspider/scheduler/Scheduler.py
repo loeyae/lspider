@@ -115,7 +115,7 @@ class Scheduler(object):
                 if i == 0:
                     self.logger.debug("Schedule check_tasks no newtask@%s" % projectid)
                     break
-                time.sleep(0.1)
+                time.sleep(0.01)
         self.logger.info("Schedule check_tasks end")
 
     def plan_task(self, task):
