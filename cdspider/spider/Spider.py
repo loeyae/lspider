@@ -90,6 +90,7 @@ class Spider(Component):
             self.info("Spider process start")
             try:
                 self.info("Spider fetch prepare start")
+                save['retry'] = 0
                 while True:
                     try:
                         handler.prepare(save)
