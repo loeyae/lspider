@@ -125,10 +125,10 @@ class Parser(object):
     @staticmethod
     def parser_time(html, now = False):
         rule1='((?:(?:(?:(?:20)?[01]\d)|(?:19)?[98]\d)年\d{1,2}月\d{1,2}日?(?:\D*\d{2}:\d{2}(?::\d{2})?)?)|(?:(?:(?:(?:20)?[01]\d)|(?:19)?[9]\d)[\-\/]\d{1,2}[\-\/]\d{1,2}(?:\D*\d{1,2}:\d{2}(?::\d{2})?)?))'
-        rule11 = '\>\s*'+ rule1 +'[\s\<]'
+        rule11 = '\>\s*'+ rule1 +'[\s&\<]'
         rule12 = '(?:发表于|发布时间)(?:\:|：)?\s*'+ rule1
         rule13 = rule1 +'\s*发布'
-        rule14 = '[\s\<]' + rule1 +'\s*\<'
+        rule14 = '[\s\<;]' + rule1 +'\s*\<'
         if isinstance(html, bytes):
             try:
                 html = decode(html)
