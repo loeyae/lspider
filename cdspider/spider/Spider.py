@@ -410,6 +410,7 @@ class TaskHandler(SiteHandler):
                     message = self.inqueue.get_nowait()
                     task = self.get_task(message)
                     self.fetch(task)
+                    time.sleep(0.1)
                 except queue.Empty:
                     break
                 except KeyboardInterrupt:
