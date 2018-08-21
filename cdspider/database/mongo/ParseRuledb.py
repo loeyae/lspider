@@ -59,7 +59,7 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
         return self.get(where={"prid": int(id)})
 
     def get_detail_by_domain(self, domain):
-        where = {'domain': domain}
+        where = {'domain': domain, 'subdomain': {"$in": ["", None]}}
         return self.get(where=where)
 
     def get_detail_by_subdomain(self, subdomain):
