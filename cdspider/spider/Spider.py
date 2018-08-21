@@ -8,6 +8,7 @@
 :date:    2018-1-9 18:01:26
 :version: SVN: $Id: Spider.py 2266 2018-07-06 06:50:15Z zhangyi $
 """
+import time
 import sys
 import logging
 import traceback
