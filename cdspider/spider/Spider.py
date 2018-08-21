@@ -97,10 +97,10 @@ class Spider(Component):
                         continue
                     break
                 self.info("Spider fetch prepare end")
+                save['retry'] = 0
                 while True:
                     self.info('Spider crawl start')
                     save['proxy'] = copy.deepcopy(self.proxy)
-                    save['retry'] = 0
                     last_source, broken_exc, final_url = handler.crawl(save)
                     if isinstance(broken_exc, CONTINUE_EXCEPTIONS):
                         handler.on_continue(broken_exc, save)
