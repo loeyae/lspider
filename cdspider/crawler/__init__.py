@@ -196,7 +196,7 @@ class BaseCrawler(Component):
         elif 'proxy_file' in kwargs and kwargs['proxy_file']:
             if os.path.isfile(kwargs['proxy_file']):
                 f = open(kwargs['proxy_file'], 'rb')
-                c = str(f.readline())
+                c = f.readline().decode()
                 f.close()
                 if len(c) > 0:
                     proxies['proxies'] = c.split('|')
