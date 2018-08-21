@@ -94,7 +94,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
             where = {}
         where['pid'] = pid
         where['domain'] = domain
-        where['subdomain'] = ""
+        where['subdomain'] = {"$in": ["", None]}
         return self.find(where=where, select=select, **kwargs)
 
     def get_list_by_subdomain(self, pid, subdomain, where = {}, select=None, **kwargs):
