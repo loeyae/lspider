@@ -112,10 +112,10 @@ class Scheduler(object):
                     self.queue['scheduler2spider'].put_nowait(obj)
                     self.plan_task(task)
                     i += 1
-                    time.sleep(0.1)
                 if i == 0:
                     self.logger.debug("Schedule check_tasks no newtask@%s" % projectid)
                     break
+                time.sleep(0.1)
         self.logger.info("Schedule check_tasks end")
 
     def plan_task(self, task):
