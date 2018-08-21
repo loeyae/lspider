@@ -64,11 +64,11 @@ KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN = {
 class PublishDateExtractor(BaseExtractor):
     def extract(self):
         try:
-            custom_rule = self.custom_rule.get('created', {}).get('filter') if self.custom_rule else None
+            custom_rule = self.custom_rule.get('pubtime', {}).get('filter') if self.custom_rule else None
             if custom_rule:
-                matched = self.custom_match(custom_rule, dtype=self.custom_rule.get('created', {}).get('type', 'text'), target=self.custom_rule.get('created', {}).get('target', 'value'))
+                matched = self.custom_match(custom_rule, dtype=self.custom_rule.get('pubtime', {}).get('type', 'text'), target=self.custom_rule.get('pubtime', {}).get('target', 'value'))
                 if matched:
-                    return TimeParser.timeformat(TimeParser.parser_time(self.correction_result(matched)) or self.correction_result(matched))
+                    return TimeParser.timeformat(TimeParser.parser_time(self.correction_result(matched, copy.deepcopy(self.custom_rule))) or self.correction_result(matched, copy.deepcopy(self.custom_rule)))
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
             if fulldomain in KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN:

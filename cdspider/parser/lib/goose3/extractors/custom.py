@@ -40,7 +40,7 @@ class CustomExtractor(BaseExtractor):
             if rule:
                 matched = self.custom_match(rule, dtype=custom_rule.get('type', 'text'), target=custom_rule.get('target', 'value'), onlyOne=onlyOne)
                 if matched:
-                    return self.correction_result(matched, custom_rule, custom_rule.get('callback'))
+                    return self.correction_result(matched, , copy.deepcopy(custom_rule), custom_rule.get('callback'))
             self.KNOWN_CUSTOM_PATTERN_BY_DOMAIN.update(custom_rule.get('pattern4domain', {}))
             self.KNOWN_CUSTOM_TAGS_BY_DOMAIN.update(custom_rule.get('tags4domain', {}))
             self.KNOWN_CUSTOM_TAGS.extend(custom_rule.get('tags', []))
