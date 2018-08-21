@@ -148,9 +148,6 @@ class Crawler(object):
         # open graph
         self.article._opengraph = self.opengraph_extractor.extract()
 
-        # publishdate
-        self.article._publish_date = self.publishdate_extractor.extract()
-
         # meta
         metas = self.metas_extractor.extract()
         # print(metas)
@@ -194,6 +191,9 @@ class Crawler(object):
 
         if self.article._top_node is not None:
 
+            # publishdate
+            self.article._publish_date = self.publishdate_extractor.extract()
+
             # article links
             self.article._links = self.links_extractor.extract()
 
@@ -213,6 +213,10 @@ class Crawler(object):
             self.article._cleaned_text = self.formatter.get_formatted_text()
         else:
             self.article._top_node = self.extractor.calculate_best_node()
+
+            # publishdate
+            self.article._publish_date = self.publishdate_extractor.extract()
+            
             # if we have a top node
             # let's process it
             if self.article._top_node is not None:
