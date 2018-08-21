@@ -41,6 +41,7 @@ KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN = {
     ],
     'sohu.com': [
         {'attribute': 'property', 'value': 'og:release_date', 'content': 'content'},
+        {'attribute': 'id', 'value': 'news-time', 'content': 'text'},
     ],
     'ifeng.com': [
         {'attribute': 'class', 'value': 'yc_tit', 'leaf': {'tag': 'span', 'content': 'text'},},
