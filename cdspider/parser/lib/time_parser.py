@@ -31,6 +31,12 @@ class Parser(object):
                 'datetime': '%Y/%m/%d %H:%M:%S',
                 'datetimes': '%Y/%m/%d %H:%M',
             },
+            'global3': {
+                'ym': '%Y.%m',
+                'date': '%Y.%m.%d',
+                'datetime': '%Y.%m.%d %H:%M:%S',
+                'datetimes': '%Y.%m.%d %H:%M',
+            },
         }
         if re.findall(r':', timestring):
             try:
@@ -52,6 +58,14 @@ class Parser(object):
     def timeformat(timestring):
         if not timestring:
             return None
+        if re.findall(r'^\d{1,2}月\d{1,2}日'):
+            timestring = "%s年%s" % (datetime.datetime.now().year, timestring)
+        elif re.findall(r'^\d{1,2}-\d{1,2}[^-]*'):
+            timestring = "%s-%s" % (datetime.datetime.now().year, timestring)
+        elif re.findall(r'^\d{1,2}\/\d{1,2}[^\/]*'):
+            timestring = "%s/%s" % (datetime.datetime.now().year, timestring)
+        elif re.findall(r'^\d{1,2}\.\d{1,2}[^\.]*'):
+            timestring = "%s.%s" % (datetime.datetime.now().year, timestring)
         if re.findall(r'年',timestring):
             return Parser.get_timestamp(timestring, 'local')
         elif re.findall(r'\-',timestring):
@@ -60,6 +74,9 @@ class Parser(object):
         elif re.findall(r'\/',timestring):
             timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
             return Parser.get_timestamp(timestring, 'global2')
+        elif re.findall(r'\.', timestring):
+            timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
+            return Parser.get_timestamp(timestring, 'global3')
         elif re.findall(r':',timestring):
             timestring = "%s %s" % (time.strftime("%Y-%m-%d"), timestring)
             return Parser.get_timestamp(timestring, 'global1')
