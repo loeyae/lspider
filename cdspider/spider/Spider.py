@@ -26,7 +26,7 @@ from cdspider.libs import UrlBuilder
 from cdspider.libs.tools import *
 from cdspider.database.base import *
 
-CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse)
+CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse, CDSpiderCrawlerForbidden)
 
 class Spider(Component):
     """
