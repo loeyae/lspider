@@ -484,6 +484,7 @@ class BaseHandler(Component):
                     save['incr_data'][i]['value'] = int(save['incr_data'][i]['value']) - int(save['incr_data'][i].get('step', 1))
         if isinstance(broken_exc, (CDSpiderCrawlerForbidden,)):
             if isinstance(self.crawler, RequestsCrawler):
+                self.info('Change crawler to Tornado')
                 self.crawler.close()
                 self.crawler = utils.load_crawler('tornado', log_level=self.log_level)
         if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CDSpiderCrawlerProxyExpired)):
