@@ -67,14 +67,22 @@ class Parser(object):
         elif re.findall(r'^\d{1,2}\.\d{1,2}[^\.]*', timestring):
             timestring = "%s.%s" % (datetime.datetime.now().year, timestring)
         if re.findall(r'年',timestring):
+            if re.findall(r'^\d{2}年', timestring):
+                timestring = "%s%s" % (20, timestring)
             return Parser.get_timestamp(timestring, 'local')
         elif re.findall(r'\-',timestring):
+            if re.findall(r'^\d{2}-\d{1,2}-\d{1,2}', timestring):
+                timestring = "%s%s" % (20, timestring)
             timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
             return Parser.get_timestamp(timestring, 'global1')
         elif re.findall(r'\/',timestring):
+            if re.findall(r'^\d{2}\/\d{1,2}\/\d{1,2}', timestring):
+                timestring = "%s%s" % (20, timestring)
             timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
             return Parser.get_timestamp(timestring, 'global2')
         elif re.findall(r'\.', timestring):
+            if re.findall(r'^\d{2}\.\d{1,2}\.\d{1,2}', timestring):
+                timestring = "%s%s" % (20, timestring)
             timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
             return Parser.get_timestamp(timestring, 'global3')
         elif re.findall(r':',timestring):
