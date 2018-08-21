@@ -75,9 +75,9 @@ class RequestsCrawler(BaseCrawler):
         if not self._base_url:
             self._base_url = url
         if not self._referer:
-            self._referer = self._base_url
+            self._referer = utils.quote_chinese(self._base_url)
         if self._referer != url and urlparse(self._referer).netloc == urlparse(url).netloc:
-            self._headers.update({'Referer': utils.quote_chinese(self._referer)})
+            self._headers.update({'Referer': self._referer})
 
     def _request(self, method, url, data = None, params = None, files = None, json_data = None):
         """
