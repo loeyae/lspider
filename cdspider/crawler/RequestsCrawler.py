@@ -98,7 +98,7 @@ class RequestsCrawler(BaseCrawler):
         self.info("Requests request params: %s" % str(params))
         self.info("Requests request setting: %s" % str(self._setting))
         try:
-            req = requests.Request(method.upper(), url,
+            req = requests.Request(method.upper(), utils.quote_chinese(url),
                 data=data,
                 files=files,
                 json=json_data,
