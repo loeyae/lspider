@@ -69,7 +69,7 @@ class CustomExtractor(BaseExtractor):
                             data = utils.filter(data)
                             if onlyOne:
                                 return self.correction_result(data[0], custom_rule, custom_rule.get('callback'))
-                        return self.correction_result(data, custom_rule, custom_rule.get('callback'))
+                            return self.correction_result(data, custom_rule, custom_rule.get('callback'))
                 known_context_patterns = []
 
             if fulldomain in self.KNOWN_CUSTOM_TAGS_BY_DOMAIN:

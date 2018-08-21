@@ -53,7 +53,7 @@ KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN = {
 
 KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN = {
     'mp.weixin.qq.com': [
-        'var\s+ct\s*=\s*"(\d+)".*?;'
+        'var\s+ct\s*=\s*"(\d+)".*?;',
         'var\s+publish_time\s*=\s*"([^"]+)"\s+\|\|\s+"([^"]+)";',
     ],
     'toutiao.com': [
@@ -76,7 +76,7 @@ class PublishDateExtractor(BaseExtractor):
             if self.domain in KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN:
                 known_context_patterns.extend(copy.deepcopy(KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN[self.domain]))
             if known_context_patterns:
-                script_nodes = self.parser.getElementsByTag(self.article.doc,
+                script_nodes = self.parser.getElementsByTag(self.article.raw_doc,
                                                             tag='script')
                 for script_node in script_nodes:
                     script = self.parser.getText(script_node)

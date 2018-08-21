@@ -71,7 +71,7 @@ class BaseExtractor(object):
     def custom_match_elements(self, custom_rule, onlyOne = True, doc = None):
         ret = []
         if doc is None:
-            doc = self.article.doc
+            doc = self.article.raw_doc
         if isinstance(doc, list) and doc:
             doc = doc.pop(0)
         if doc is None:
@@ -117,7 +117,7 @@ class BaseExtractor(object):
 
     def custom_match(self, custom_rule, onlyOne = True, dtype='text', target=None, doc = None):
         if doc is None:
-            doc = self.article.doc
+            doc = self.article.raw_doc
         if isinstance(doc, list) and doc:
             doc = doc.pop(0)
         if doc is None:
