@@ -34,5 +34,7 @@ class newtask_by_sid(Base):
                 i += 1
                 if item['uid'] > uid:
                     uid = item['uid']
-            if i < 1 or (maxuid > 0 and maxuid <= uid):
+                if maxuid > 0 and maxuid <= uid:
+                    return
+            if i < 1:
                 return
