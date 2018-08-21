@@ -49,7 +49,7 @@ KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN = {
     ],
     'news.cn':[
         {'attribute': 'class', 'value': 'h-info', 'leaf': {'attribute': 'class', 'value': 'h-time', 'content': 'text'}},
-    ]
+    ],
 }
 
 KNOWN_PUBLISH_DATE_PATTERN_BY_DOMAIN = {
