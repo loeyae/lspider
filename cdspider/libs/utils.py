@@ -70,7 +70,7 @@ def remove_whitespace(content):
 def decode(data, errors="ignore"):
     if isinstance(data, bytes):
         detector = UniversalDetector()
-        hlist = filter(re.findall(b'[^\x00-\xf7]', data))
+        hlist = filter(re.findall(b'[\x7f-\xf7]', data))
         line = ''
         for item in hlist:
             if len(item) > len(line):
