@@ -8,7 +8,7 @@ import time
 import logging
 import traceback
 import copy
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, urlunparse
 from cdspider import Component
 from cdspider.crawler import BaseCrawler
 from cdspider.crawler import RequestsCrawler, SeleniumCrawler
@@ -206,7 +206,12 @@ class BaseHandler(Component):
                     ret = re.search(identify['url'], url)
                     if ret:
                         u = ret.group(0)
-#            u = re.sub('\/\/www\.', '//', u)
+            subdomain, domain = utils.parse_domain(u)
+            if not subdomain:
+                parsed = urlparse(u)
+                arr = list(parsed)
+                arr[1] = "www.%s" % domain
+                u = urlunparse(arr)
             if 'query' in identify and identify['query']:
                 u = utils.build_filter_query(url, identify['query'])
             if 'data' in identify and identify['data']:
