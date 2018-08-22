@@ -194,7 +194,14 @@ class BaseHandler(Component):
                 "query": urls_unique.get("query") or site_unique.get("query"),
                 "data": urls_unique.get("data") or site_unique.get("data"),
             }
-        u = url
+        subdomain, domain = utils.parse_domain(url)
+        if not subdomain:
+            parsed = urlparse(url)
+            arr = list(parsed)
+            arr[1] = "www.%s" % domain
+            u = urlunparse(arr)
+        else:
+            u = url
         if identify:
             if 'url' in identify and identify['url']:
                 rule, key = utils.rule2pattern(identify['url'])
@@ -206,12 +213,6 @@ class BaseHandler(Component):
                     ret = re.search(identify['url'], url)
                     if ret:
                         u = ret.group(0)
-            subdomain, domain = utils.parse_domain(u)
-            if not subdomain:
-                parsed = urlparse(u)
-                arr = list(parsed)
-                arr[1] = "www.%s" % domain
-                u = urlunparse(arr)
             if 'query' in identify and identify['query']:
                 u = utils.build_filter_query(url, identify['query'])
             if 'data' in identify and identify['data']:
