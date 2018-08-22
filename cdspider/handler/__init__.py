@@ -444,7 +444,8 @@ class BaseHandler(Component):
         self.crawl_info['broken'] = str(exc)
         if 'queue' in self.task and self.task['queue'] and 'queue_message' in self.task and self.task['queue_message']:
             if isinstance(exc, RETRY_EXCEPTIONS) or not isinstance(exc, CDSpiderError):
-                self.task['queue_message']['retry'] = self.task['save']['retry']
+                if  not 'retry' in self.task['queue_message']:
+                    self.task['queue_message']['retry'] = self.task['save']['retry']
                 if self.task['queue_message']['retry'] < self.MAX_RETRY:
                     self.task['queue_message']['retry'] += 1
                     self.task['queue'].put_nowait(self.task['queue_message'])
