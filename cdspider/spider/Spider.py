@@ -351,8 +351,7 @@ class TaskHandler(SiteHandler):
         task['save']['base_url'] = message['url']
         task['item'] = message['save']
         task['queue'] = self.queue['scheduler2spider']
-        message = copy.deepcopy(message)
-        task['queue_message'] = message
+        task['queue_message'] = copy.deepcopy(message)
         task['save']['retry'] = message.get('retry', 0)
         return task
 
