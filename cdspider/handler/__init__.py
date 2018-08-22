@@ -206,7 +206,7 @@ class BaseHandler(Component):
                     ret = re.search(identify['url'], url)
                     if ret:
                         u = ret.group(0)
-            u = re.sub('\/\/www\.', '//', u)
+#            u = re.sub('\/\/www\.', '//', u)
             if 'query' in identify and identify['query']:
                 u = utils.build_filter_query(url, identify['query'])
             if 'data' in identify and identify['data']:
