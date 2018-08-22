@@ -388,9 +388,8 @@ class BaseHandler(Component):
             subdomain = psubdomain
         attach_list = self.db['AttachmentDB'].get_list_by_subdomain(pid, subdomain, where={"status": AttachmentDB.STATUS_ACTIVE})
         attach_list = list(attach_list)
-        if not attach_list:
-            attach_list = self.db['AttachmentDB'].get_list_by_domain(pid, domain, where={"status": AttachmentDB.STATUS_ACTIVE})
-            attach_list = list(attach_list)
+        dattach_list = self.db['AttachmentDB'].get_list_by_domain(pid, domain, where={"status": AttachmentDB.STATUS_ACTIVE})
+        attach_list.extend(ist(dattach_list))
         self.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
         for each in attach_list:
             pparse = each.get('preparse', {}).get('parse', None)
