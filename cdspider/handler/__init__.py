@@ -404,6 +404,8 @@ class BaseHandler(Component):
             for item in pparse.values():
                 key = item.pop('key')
                 if key and item['filter']:
+                    if item['filter'] == '@value:parent_url':
+                        item['filter'] == '@value:%s' % url
                     parse[key] = item
             urlrule = each.get('preparse', {}).get('url', None)
             if urlrule['base'] == 'parent_url':
