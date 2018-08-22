@@ -31,7 +31,7 @@ def build_url_by_rule(rule, params):
         format_params = {}
         for key in keylist:
             if key in params:
-                format_params[key] = params[key]
+                format_params[key] = parse.quote_plus(params[key])
             else:
                 format_params[key] = '{%s}' % key
         return url.format(**format_params)
