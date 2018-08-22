@@ -19,6 +19,7 @@ class kx_build_kw_newtask(Base):
     #             title=item['title']
                 self._insert_task(title, 2)
                 self._insert_task(title, 3)
+                self._insert_task(title, 9)
     #             self.g['db']['ArticlesDB'].update(item['rid'],obj={'crawlinfo.title_to_task':1})
             except queue.Empty:
                 time.sleep(0.5)
@@ -27,8 +28,16 @@ class kx_build_kw_newtask(Base):
                 break
 
     def _insert_task(self,title,sid):
+        title_list=title.split('-')
+        if len(title_list)>1:
+            title=title[-1]
+        title_list=title.split('_')
+        if len(title_list)>1:
+            title=title[-1]
         if title==None or title=='':
             return
+        if len(title)<8:
+            return 
         uid=0
         while True:
             u_sum=0
