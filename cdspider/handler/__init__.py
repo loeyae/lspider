@@ -108,7 +108,7 @@ class BaseHandler(Component):
         解析媒体类型
         """
         if 'media_type' in self.process and self.process['media_type']:
-            return self.process['media_type']
+            return int(self.process['media_type'])
         return 1
 
     def url_prepare(self, url):
