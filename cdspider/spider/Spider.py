@@ -318,6 +318,14 @@ class Spider(Component):
     def _get_task_from_item(self, message, task, project, no_check_status = False):
         if not task:
             task = {}
+        subdomain, domain = utils.parse_domain(message['url'])
+        parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
+        if not parse_rule and subdomain:
+            parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
+        if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
+            itemscript = parse_rule['scripts'].format(projectname = "Project%s" % message['pid'])
+        else:
+            itemscript = DEFAULT_ITEM_SCRIPTS.format(projectname = "Project%s" % message['pid'])
         task.update({
             'tid': 0,
             'pid': message['pid'],
@@ -328,14 +336,6 @@ class Spider(Component):
             'url': message['url'],
             'scripts': itemscript
         })
-        subdomain, domain = utils.parse_domain(message['url'])
-        parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
-        if not parse_rule and subdomain:
-            parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
-        if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
-            itemscript = parse_rule['scripts'].format(projectname = "Project%s" % message['pid'])
-        else:
-            itemscript = DEFAULT_ITEM_SCRIPTS.format(projectname = "Project%s" % message['pid'])
         site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
         if not site:
             self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
