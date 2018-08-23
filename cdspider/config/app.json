@@ -11,7 +11,8 @@
         "SitesDB",
         "TaskDB",
         "UniqueDB",
-        "UrlsDB"
+        "UrlsDB",
+        "MediaTypesDB"
     ],
     "queues": [
         "newtask_queue",
