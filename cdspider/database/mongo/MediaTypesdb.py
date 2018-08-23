@@ -8,10 +8,10 @@
 :date:    2018-8-4 23:51:39
 """
 import time
-from cdspider.database.base import ParseRuleDB as BaseParseRuleDB
+from cdspider.database.base import MediaTypesDB as BaseMediaTypesDB
 from .Mongo import Mongo
 
-class ParseRuleDB(Mongo, BaseParseRuleDB):
+class MediaTypesDB(Mongo, BaseMediaTypesDB):
     """
     parse_rule data object
     """
@@ -24,8 +24,6 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
         super(ParseRuleDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'prid' in indexes:
-            collection.create_index('prid', unique=True, name='prid')
         if not 'domain' in indexes:
             collection.create_index('domain', name='domain')
         if not 'subdomain' in indexes:
@@ -36,27 +34,23 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
-        obj['prid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
-        _id = super(ParseRuleDB, self).insert(setting=obj)
+        _id = super(MediaTypesDB, self).insert(setting=obj)
         return obj['kwid']
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(ParseRuleDB, self).update(setting=obj, where={"prid": int(id)}, multi=False)
+        return super(MediaTypesDB, self).update(setting=obj, where={"_id": id}, multi=False)
 
     def delete(self, id, wherer = {}):
         if not where:
-            where = {'prid': int(id)}
+            where = {'_id': id}
         else:
-            where.update({'prid': int(id)})
-        return super(ParseRuleDB, self).update(setting={"status": self.STATUS_DELETED},
+            where.update({'_id': id})
+        return super(MediaTypesDB, self).update(setting={"status": self.STATUS_DELETED},
                 where=where, multi=False)
-
-    def get_detail(self, id):
-        return self.get(where={"prid": int(id)})
 
     def get_detail_by_domain(self, domain):
         where = {'domain': domain, 'subdomain': {"$in": ["", None]}}

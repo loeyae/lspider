@@ -14,6 +14,7 @@ from .Attachmentdb import AttachmentDB
 from .Commentsdb import CommentsDB
 from .CrawlLogdb import CrawlLogDB
 from .Keywordsdb import KeywordsDB
+from .MediaTypesdb import MediaTypesDB
 from .ParseRuledb import ParseRuleDB
 from .Projectsdb import ProjectsDB
 from .Sitesdb import SitesDB
