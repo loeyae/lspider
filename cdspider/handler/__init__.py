@@ -416,7 +416,7 @@ class BaseHandler(Component):
                 if key and item['filter']:
                     if item['filter'] == '@value:parent_url':
                         item['filter'] = '@value:%s' % url
-                    elif iten['filter'].startswith('@url:'):
+                    elif item['filter'].startswith('@url:'):
                         r = item['filter'][5:]
                         v = utils.preg(url, r)
                         if not v:
