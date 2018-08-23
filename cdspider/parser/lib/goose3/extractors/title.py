@@ -183,11 +183,11 @@ class TitleExtractor(BaseExtractor):
                     ts = ele.xpath('text()')
                     if len(ts) == 1 and ts[0].strip():
                         title = ts[0].strip()
-                        return {'raw_title': data[0], 'clean_title': self.clean_title(data[0])}
+                        return {'raw_title': title, 'clean_title': self.clean_title(title)}
                     ts = ele.xpath('span/text()')
                     if len(ts) == 1 and ts[0].strip():
                         title = ts[0].strip()
-                        return {'raw_title': data[0], 'clean_title': self.clean_title(data[0])}
+                        return {'raw_title': title, 'clean_title': self.clean_title(title)}
 
             # otherwise use the title meta
             title_element = self.parser.getElementsByTag(self.article.doc, tag='title')
