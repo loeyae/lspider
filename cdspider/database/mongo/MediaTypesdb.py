@@ -16,9 +16,9 @@ class MediaTypesDB(Mongo, BaseMediaTypesDB):
     parse_rule data object
     """
 
-    __tablename__ = 'parse_rules'
+    __tablename__ = 'media_types'
 
-    incr_key = 'parseRule'
+    incr_key = 'mediaTypes'
 
     def __init__(self, connector, table=None, **kwargs):
         super(ParseRuleDB, self).__init__(connector, table = table, **kwargs)
