@@ -41,6 +41,7 @@ from cdspider.parser.lib.goose3.extractors.publishdate import PublishDateExtract
 from cdspider.parser.lib.goose3.extractors.metas import MetasExtractor
 from cdspider.parser.lib.goose3.extractors.custom import CustomExtractor
 from cdspider.parser.lib.goose3.extractors.catalogue  import CatalogueExtractor
+from cdspider.parser.lib.goose3.extractors.reportagenewsarticle  import ReportageNewsArticleExtractor
 from cdspider.parser.lib.goose3.cleaners import StandardDocumentCleaner
 from cdspider.parser.lib.goose3.outputformatters import StandardOutputFormatter
 
