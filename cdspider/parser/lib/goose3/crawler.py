@@ -227,7 +227,7 @@ class Crawler(object):
             # clean_text
             self.article._cleaned_text = self.formatter.get_formatted_text()
         else:
-            self.article._top_node = self.extractor.calculate_best_node(docself.article._doc)
+            self.article._top_node = self.extractor.calculate_best_node(self.article._doc)
 
             # publishdate
             self.article._publish_date = self.publishdate_extractor.extract()
@@ -342,7 +342,7 @@ class Crawler(object):
 
     def release_resources(self):
         if not self.config.local_storage_path:
-            return 
+            return
         path = os.path.join(self.config.local_storage_path, '%s_*' % self.article.link_hash)
         for fname in glob.glob(path):
             try:
