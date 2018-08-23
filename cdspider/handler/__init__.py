@@ -503,7 +503,7 @@ class BaseHandler(Component):
             self.db['base'].insert(data, 'proxy_log')
         if save['retry'] < self.MAX_RETRY:
             save['retry'] += 1
-            self.info('Retry to fetch: %s, current times: %s' % (self.task['url'], self.task['save']['retry']))
+            self.info('Retry to fetch: %s because of %s, current times: %s' % (self.task['url'], str(broken_exc), self.task['save']['retry']))
         else:
             raise broken_exc
 
