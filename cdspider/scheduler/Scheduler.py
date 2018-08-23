@@ -124,7 +124,7 @@ class Scheduler(object):
 #             self.send_task(task)
             obj = {
                 'queuetime': currenttime,
-                'plantime': currenttime if init or replan else currenttime + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0]
+                'plantime': currenttime if init or replan else currenttime + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0])
             }
         self.db['TaskDB'].update(task['tid'], task['pid'], obj=obj)
 
