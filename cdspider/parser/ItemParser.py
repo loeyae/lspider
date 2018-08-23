@@ -51,7 +51,7 @@ class ItemParser(BaseParser):
             elif i == 'content':
                 data[i] = article.infos['cleaned_text']
                 data["raw_content"] = '\r\n'.join(article.top_node_html) if isinstance(article.top_node_html, (list, tuple)) else article.top_node_html
-                data["raw_content"] = re.sub('[\u3000\xa0]', '', str(data["raw_content"]))
+                data["raw_content"] = re.sub('[\u3000\xa0]', ' ', str(data["raw_content"]))
             elif i == 'pubtime':
                 data[i] = article.infos['publish_date']
             elif i == 'author':
@@ -63,7 +63,7 @@ class ItemParser(BaseParser):
         if not 'content' in data:
             data['content'] = article.infos['cleaned_text']
             data["raw_content"] = '\r\n'.join(article.top_node_html) if isinstance(article.top_node_html, (list, tuple)) else article.top_node_html
-            data["raw_content"] = re.sub('[\u3000\xa0]', '', str(data["raw_content"]))
+            data["raw_content"] = re.sub('[\u3000\xa0]', ' ', str(data["raw_content"]))
         if not 'pubtime' in data:
             data['pubtime'] = article.infos['publish_date']
         if not 'author' in data:
