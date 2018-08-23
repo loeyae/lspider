@@ -110,7 +110,7 @@ class Scheduler(object):
                     obj['pid']=task['pid']
                     obj['tid']=task['tid']
                     self.queue['scheduler2spider'].put_nowait(obj)
-                    self.plan_task(task)
+                    self.plan_task(task, False if task['plantime'] > 0 else True)
                     i += 1
                 if i == 0:
                     self.logger.debug("Schedule check_tasks no newtask@%s" % projectid)
@@ -118,13 +118,13 @@ class Scheduler(object):
                 time.sleep(1)
         self.logger.info("Schedule check_tasks end")
 
-    def plan_task(self, task):
+    def plan_task(self, task, init = False, replan = False):
         currenttime = int(time.time())
         if task['rate'] != 0 or init:
 #             self.send_task(task)
             obj = {
                 'queuetime': currenttime,
-                'plantime': currenttime+self.rate_map[str(task['rate'])][0]
+                'plantime': currenttime if init or replan else currenttime + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0]
             }
         self.db['TaskDB'].update(task['tid'], task['pid'], obj=obj)
 
