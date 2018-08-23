@@ -15,7 +15,6 @@ import traceback
 import copy
 import json
 import tornado.ioloop
-from tld import get_tld
 from six.moves import queue
 
 from cdspider import Component
@@ -27,6 +26,14 @@ from cdspider.libs.tools import *
 from cdspider.database.base import *
 
 CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse, CDSpiderCrawlerForbidden)
+DEFAULT_ITEM_SCRIPTS = """
+from cdspider.handler.custom.{projectname} import SiteHandler
+
+class TaskHandler(SiteHandler):
+
+    def newtask(self):
+        pass
+"""
 
 class Spider(Component):
     """
@@ -309,15 +316,6 @@ class Spider(Component):
         return task
 
     def _get_task_from_item(self, message, task, project, no_check_status = False):
-        itemscript = """
-from cdspider.handler.custom.{projectname} import SiteHandler
-
-class TaskHandler(SiteHandler):
-
-    def newtask(self):
-        pass
-"""
-        itemscript = itemscript.format(projectname = "Project%s" % message['pid'])
         if not task:
             task = {}
         task.update({
@@ -330,6 +328,14 @@ class TaskHandler(SiteHandler):
             'url': message['url'],
             'scripts': itemscript
         })
+        subdomain, domain = utils.parse_domain(message['url'])
+        parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
+        if not parse_url and subdomain:
+            parse_url = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
+        if parse_url and 'scripts' in parse_url and parse_url['scripts']:
+            itemscript = parse_url['scripts'].format(projectname = "Project%s" % message['pid'])
+        else:
+            itemscript = DEFAULT_ITEM_SCRIPTS.format(projectname = "Project%s" % message['pid'])
         site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
         if not site:
             self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
