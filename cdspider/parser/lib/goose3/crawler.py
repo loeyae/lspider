@@ -341,6 +341,8 @@ class Crawler(object):
 
 
     def release_resources(self):
+        if not self.config.local_storage_path:
+            return 
         path = os.path.join(self.config.local_storage_path, '%s_*' % self.article.link_hash)
         for fname in glob.glob(path):
             try:
