@@ -281,6 +281,8 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             collection.create_index('aid', name='aid')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
+        if not 'expire' in indexes:
+            collection.create_index('expire', name='expire')
         if not 'plantime' in indexes:
             collection.create_index('plantime', name='plantime')
         if not 'ctime' in indexes:
