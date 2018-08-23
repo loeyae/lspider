@@ -21,7 +21,7 @@ class MediaTypesDB(Mongo, BaseMediaTypesDB):
     incr_key = 'mediaTypes'
 
     def __init__(self, connector, table=None, **kwargs):
-        super(ParseRuleDB, self).__init__(connector, table = table, **kwargs)
+        super(MediaTypesDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
         if not 'domain' in indexes:
