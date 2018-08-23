@@ -174,6 +174,21 @@ class TitleExtractor(BaseExtractor):
                 if data:
                     return {'raw_title': data[0], 'clean_title': self.clean_title(data[0])}
 
+            for tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+                elements = self.parser.getElementsByTag(self.article.doc, tag=tag)
+                if elements is not None:
+                    if len(elements) > 1:
+                        break
+                    ele = elements[0]
+                    ts = ele.xpath('text()')
+                    if len(ts) == 1 and ts[0].strip():
+                        title = ts.strip()
+                        return {'raw_title': data[0], 'clean_title': self.clean_title(data[0])}
+                    ts = ele.xpath('span/text()')
+                    if len(ts) == 1 and ts[0].strip():
+                        title = ts.strip()
+                        return {'raw_title': data[0], 'clean_title': self.clean_title(data[0])}
+
             # otherwise use the title meta
             title_element = self.parser.getElementsByTag(self.article.doc, tag='title')
             if title_element is not None and len(title_element) > 0:
