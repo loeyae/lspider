@@ -330,10 +330,10 @@ class Spider(Component):
         })
         subdomain, domain = utils.parse_domain(message['url'])
         parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
-        if not parse_url and subdomain:
-            parse_url = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
-        if parse_url and 'scripts' in parse_url and parse_url['scripts']:
-            itemscript = parse_url['scripts'].format(projectname = "Project%s" % message['pid'])
+        if not parse_rule and subdomain:
+            parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
+        if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
+            itemscript = parse_rule['scripts'].format(projectname = "Project%s" % message['pid'])
         else:
             itemscript = DEFAULT_ITEM_SCRIPTS.format(projectname = "Project%s" % message['pid'])
         site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
