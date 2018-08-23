@@ -105,7 +105,7 @@ class BaseHandler(Component):
         """
         return data
 
-    def parse_media_type(self, ulr):
+    def parse_media_type(self, url):
         """
         解析媒体类型
         """
