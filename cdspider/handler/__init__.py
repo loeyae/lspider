@@ -406,6 +406,12 @@ class BaseHandler(Component):
                 if key and item['filter']:
                     if item['filter'] == '@value:parent_url':
                         item['filter'] = '@value:%s' % url
+                    elif iten['filter'].startswith('@url:'):
+                        r = item['filter'][5:]
+                        v = utils.preg(url, r)
+                        if not v:
+                            continue
+                        item['filter'] = '@value:%s' % v
                     parse[key] = item
             urlrule = each.get('preparse', {}).get('url', None)
             if urlrule['base'] == 'parent_url':
@@ -413,7 +419,7 @@ class BaseHandler(Component):
             parsed = {}
             if parse:
                 parsed = utils.filter(self.parse(source, url, parse, self.MODE_ATT))
-                if not parsed:
+                if not parsed or parse.keys() != parsed.keys():
                     continue
                 self.debug("%s attach parsed: %s" % (self.__class__.__name__, parsed))
             attachurl = utils.build_url_by_rule(urlrule, parsed)
