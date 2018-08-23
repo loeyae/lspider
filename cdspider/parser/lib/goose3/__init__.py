@@ -142,7 +142,7 @@ class Goose(object):
                     raise ex
             return article
 
-        ''' use the wrapper '''
+        # use the wrapper
         parsers = list(self.config.available_parsers)
         parsers.remove(self.config.parser_class)
         return crawler_wrapper(self.config.parser_class, parsers, crawl_candidate)

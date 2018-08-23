@@ -31,6 +31,7 @@ class Article(object):
         self._meta_lang = ""
         self._meta_favicon = ""
         self._meta_keywords = ""
+        self._meta_encoding = []
         self._canonical_link = ""
         self._domain = ""
         self._top_node = None
@@ -46,6 +47,7 @@ class Article(object):
         self._final_url = ""
         self._link_hash = ""
         self._raw_html = ""
+        self._schema = None
         self._doc = None
         self._raw_doc = None
         self._publish_date = None
@@ -98,6 +100,14 @@ class Article(object):
             Note:
                 Read only '''
         return self._meta_keywords
+
+    @property
+    def meta_encoding(self):
+        ''' str: Contents of the encoding/charset field from the HTML source
+
+            Note:
+                Read only '''
+        return self._meta_encoding
 
     @property
     def canonical_link(self):
@@ -199,6 +209,7 @@ class Article(object):
     @property
     def final_url(self):
         ''' str: The URL that was used to pull and parsed; `None` if raw_html was used
+            and no url element was found.
 
             Note:
                 Read only '''
@@ -237,6 +248,14 @@ class Article(object):
         return self._raw_doc
 
     @property
+    def schema(self):
+        ''' dict: All schema tag data
+
+            Note:
+                Read only '''
+        return self._schema
+
+    @property
     def publish_date(self):
         ''' str: The date the article was published based on meta tag extraction
 
@@ -272,6 +291,7 @@ class Article(object):
                 "keywords": self.meta_keywords,
                 "favicon": self.meta_favicon,
                 "canonical": self.canonical_link,
+                "encoding": self.meta_encoding
             },
             "image": None,
             "domain": self.domain,

@@ -27,7 +27,7 @@ from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.libs import utils
 
 
-TITLE_SPLITTERS = ["|", "-", "»", "_"]
+TITLE_SPLITTERS = ["|", "-", "»", ":"]
 
 KNOWN_TITLE_TAGS = [
     {'tag': 'meta', 'attribute': 'name', 'value': 'headline', 'content': 'content'},
@@ -69,6 +69,11 @@ class TitleExtractor(BaseExtractor):
             site_name = self.article.opengraph['site_name']
             # remove the site name from title
             title = title.replace(site_name, '').strip()
+        elif (self.article.schema and "publisher" in self.article.schema and
+                "name" in self.article.schema["publisher"]):
+            site_name = self.article.schema["publisher"]["name"]
+            # remove the site name from title
+            title = title.replace(site_name, '').strip()
 
         # try to remove the domain from url
         if self.article.domain:
@@ -78,16 +83,17 @@ class TitleExtractor(BaseExtractor):
         # split the title in words
         # TechCrunch | my wonderfull article
         # my wonderfull article | TechCrunch
-        # check for an empty title
-        # so that we don't get an IndexError below
         title_words = title.split()
-        if len(title_words) == 0:
-            return ""
 
         # check if first letter is in TITLE_SPLITTERS
         # if so remove it
-        if title_words[0] in TITLE_SPLITTERS:
+        if title_words and title_words[0] in TITLE_SPLITTERS:
             title_words.pop(0)
+
+        # check for a title that is empty or consists of only a
+        # title splitter to avoid a IndexError below
+        if not title_words:
+            return ""
 
         # check if last letter is in TITLE_SPLITTERS
         # if so remove it
@@ -151,6 +157,17 @@ class TitleExtractor(BaseExtractor):
                 if "title" in list(self.article.opengraph.keys()):
                     title = self.article.opengraph['title']
                     return {'raw_title': title, 'clean_title': self.clean_title(title)}
+
+            # rely on opengraph in case we have the data
+            if "title" in list(self.article.opengraph.keys()):
+                title = self.article.opengraph['title']
+                return {'raw_title': title, 'clean_title': self.clean_title(title)}
+            elif self.article.schema and "headline" in self.article.schema:
+                title = self.article.schema['headline']
+                return {'raw_title': title, 'clean_title': self.clean_title(title)}
+
+            # try to fetch the meta headline
+
 
             for tags in copy.deepcopy(KNOWN_TITLE_TAGS):
                 data = self.get_message_by_tag(tags)

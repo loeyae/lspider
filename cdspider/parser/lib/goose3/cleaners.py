@@ -56,7 +56,7 @@ class DocumentCleaner(object):
         self.nauthy_ids_re = "//*[re:test(@id, '%s', 'i')]" % self.remove_nodes_re
         self.nauthy_classes_re = "//*[re:test(@class, '%s', 'i')]" % self.remove_nodes_re
         self.nauthy_names_re = "//*[re:test(@name, '%s', 'i')]" % self.remove_nodes_re
-        self.div_to_p_re = r"<(a|blockquote|dl|div|img|ol|p|pre|table|ul)"
+        # self.div_to_p_re = r"<(a|blockquote|dl|div|img|ol|p|pre|table|ul)"
         self.caption_re = "^caption$"
         self.google_re = " google "
         self.entries_re = "^[^entry-]more.*$"
@@ -188,9 +188,9 @@ class DocumentCleaner(object):
                 replace_text = self.tablines_replacements.replaceAll(kid_text)
                 if(len(replace_text)) > 1:
                     previous_sibling_node = self.parser.previousSibling(kid_text_node)
-                    while previous_sibling_node is not None \
-                        and self.parser.getTag(previous_sibling_node) == "a" \
-                        and self.parser.getAttribute(previous_sibling_node, 'grv-usedalready') != 'yes':
+                    while (previous_sibling_node is not None
+                            and self.parser.getTag(previous_sibling_node) == "a"
+                            and self.parser.getAttribute(previous_sibling_node, 'grv-usedalready') != 'yes'):
                         outer = " " + self.parser.outerHtml(previous_sibling_node) + " "
                         replacement_text.append(outer)
                         nodes_to_remove.append(previous_sibling_node)
@@ -202,9 +202,9 @@ class DocumentCleaner(object):
                     replacement_text.append(replace_text)
                     #
                     next_sibling_node = self.parser.nextSibling(kid_text_node)
-                    while next_sibling_node is not None \
-                        and self.parser.getTag(next_sibling_node) == "a" \
-                        and self.parser.getAttribute(next_sibling_node, 'grv-usedalready') != 'yes':
+                    while (next_sibling_node is not None
+                            and self.parser.getTag(next_sibling_node) == "a"
+                            and self.parser.getAttribute(next_sibling_node, 'grv-usedalready') != 'yes'):
                         outer = " " + self.parser.outerHtml(next_sibling_node) + " "
                         replacement_text.append(outer)
                         nodes_to_remove.append(next_sibling_node)

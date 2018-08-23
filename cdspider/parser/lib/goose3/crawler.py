@@ -79,11 +79,14 @@ class Crawler(object):
         # metas extractor
         self.metas_extractor = self.get_metas_extractor()
 
-        # publishdate extractor
-        self.publishdate_extractor = self.get_publishdate_extractor()
-
         # opengraph extractor
         self.opengraph_extractor = self.get_opengraph_extractor()
+
+        # reportage news article extractor
+        self.reportagenewsarticle_extractor = self.get_reportagenewsarticle_extractor()
+
+        # publishdate extractor
+        self.publishdate_extractor = self.get_publishdate_extractor()
 
         # tags extractor
         self.tags_extractor = self.get_tags_extractor()
@@ -148,6 +151,15 @@ class Crawler(object):
         # open graph
         self.article._opengraph = self.opengraph_extractor.extract()
 
+        # schema (ReportageNewsArticle) https://pending.schema.org/ReportageNewsArticle
+        self.article._schema = self.reportagenewsarticle_extractor.extract()
+
+        if not self.article._final_url:
+            if "url" in self.article.opengraph:
+                self.article._final_url = self.article.opengraph["url"]
+            elif self.article.schema and "url" in self.article.schema:
+                self.article._final_url = self.article.schema["url"]
+
         # meta
         metas = self.metas_extractor.extract()
         # print(metas)
@@ -155,6 +167,7 @@ class Crawler(object):
         self.article._meta_favicon = metas['favicon']
         self.article._meta_description = metas['description']
         self.article._meta_keywords = metas['keywords']
+        self.article._meta_encoding = metas['encoding']
         self.article._canonical_link = metas['canonical']
         self.article._domain = metas['domain']
 
@@ -178,18 +191,19 @@ class Crawler(object):
         # this will prevent the cleaner to remove unwanted text content
         article_body = self.extractor.get_known_article_tags()
         if article_body is not None:
-            self.article._doc = article_body
+            doc = article_body
 
         # before we do any calcs on the body itself let's clean up the document
-        if not isinstance(self.article.doc, list):
-            self.article._doc = [self.cleaner.clean(self.article.doc)]
+        if not isinstance(doc, list):
+            doc = [self.cleaner.clean(doc)]
         else:
-            self.article._doc = [self.cleaner.clean(deepcopy(x)) for x in self.article.doc]
+            doc = [self.cleaner.clean(deepcopy(x)) for x in doc]
 
         # big stuff
-        self.article._top_node = self.extractor.custom_top_node()
+        self.article._top_node = self.extractor.custom_top_node(doc)
 
         if self.article._top_node is not None:
+            self.article._doc = doc
 
             # publishdate
             self.article._publish_date = self.publishdate_extractor.extract()
@@ -212,34 +226,35 @@ class Crawler(object):
             # clean_text
             self.article._cleaned_text = self.formatter.get_formatted_text()
         else:
-            self.article._top_node = self.extractor.calculate_best_node()
+            self.article._top_node = self.extractor.calculate_best_node(docself.article._doc)
 
             # publishdate
             self.article._publish_date = self.publishdate_extractor.extract()
-            
-            # if we have a top node
-            # let's process it
-            if self.article._top_node is not None:
-                # article links
-                self.article._links = self.links_extractor.extract()
 
-                # tweets
-                self.article._tweets = self.tweets_extractor.extract()
+        # if we have a top node
+        # let's process it
+        if self.article._top_node is not None:
 
-                # video handling
-                self.article._movies = self.video_extractor.get_videos()
+            # article links
+            self.article._links = self.links_extractor.extract()
 
-                # image handling
-                if self.config.enable_image_fetching:
-                    self.get_image()
+            # tweets
+            self.article._tweets = self.tweets_extractor.extract()
 
-                # post cleanup
-                self.article._top_node = self.extractor.post_cleanup()
+            # video handling
+            self.article._movies = self.video_extractor.get_videos()
 
-                self.article._top_node_html = self.parser.outerHtml(self.article._top_node)
+            # image handling
+            if self.config.enable_image_fetching:
+                self.get_image()
 
-                # clean_text
-                self.article._cleaned_text = self.formatter.get_formatted_text()
+            # post cleanup
+            self.article._top_node = self.extractor.post_cleanup()
+
+            self.article._top_node_html = self.parser.outerHtml(self.article._top_node)
+
+            # clean_text
+            self.article._cleaned_text = self.formatter.get_formatted_text()
 
         if not self.article._cleaned_text:
             self.article._cleaned_text = self.extractor.extract()
@@ -279,6 +294,9 @@ class Crawler(object):
 
     def get_opengraph_extractor(self):
         return OpenGraphExtractor(self.config, self.article)
+
+    def get_reportagenewsarticle_extractor(self):
+        return ReportageNewsArticleExtractor(self.config, self.article)
 
     def get_tags_extractor(self):
         return TagsExtractor(self.config, self.article)

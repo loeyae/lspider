@@ -57,27 +57,39 @@ class ContentExtractor(BaseExtractor):
     def get_known_article_tags(self):
         nodes = []
         for item in self.config.known_context_patterns:
-            nodes.extend(self.parser.getElementsByTag(self.article.doc, **item))
+            # if this is a domain specific config and the current
+            # article domain does not match the configured domain,
+            # do not use the configured content pattern
+            if item.domain and self.article.domain != item.domain:
+                continue
+
+            nodes.extend(self.parser.getElementsByTag(self.article.doc, tag=item.tag,
+                                                      attr=item.attr, value=item.value))
         if nodes:
             return nodes
         return None
 
     def is_articlebody(self, node):
         for item in self.config.known_context_patterns:
+            # if this is a domain specific config and the current
+            # article domain does not match the configured domain,
+            # do not use the configured content pattern
+            if item.domain and self.article.domain != item.domain:
+                continue
+
             # attribute
-            if "attr" in item and "value" in item:
-                if self.parser.getAttribute(node, item['attr']) == item['value']:
+            if item.attr:
+                if self.parser.getAttribute(node, item.attr) == item.value:
                     return True
+
             # tag
-            if "tag" in item:
-                if node.tag == item['tag']:
+            if item.tag:
+                if node.tag == item.tag:
                     return True
 
         return False
 
-    def calculate_best_node(self):
-
-        doc = self.article.doc
+    def calculate_best_node(self, doc):
         top_node = None
         try:
             nodes_to_check = self.nodes_to_check(doc)
@@ -102,6 +114,7 @@ class ContentExtractor(BaseExtractor):
             nodes_number = len(nodes_with_text)
             negative_scoring = 0
             bottom_negativescore_nodes = float(nodes_number) * 0.25
+
             for node in nodes_with_text:
                 boost_score = float(0)
                 # boost
@@ -119,7 +132,8 @@ class ContentExtractor(BaseExtractor):
                             boost_score = float(5)
 
                 text_node = self.parser.getText(node)
-                word_stats = self.stopwords_class(language=self.get_language()).get_stopword_count(text_node)
+                word_stats = self.stopwords_class(
+                        language=self.get_language()).get_stopword_count(text_node)
                 upscore = int(word_stats.get_stopword_count() + boost_score)
 
                 # parent node
@@ -176,7 +190,8 @@ class ContentExtractor(BaseExtractor):
                 if steps_away >= max_stepsaway_from_node:
                     return False
                 para_text = self.parser.getText(current_node)
-                word_stats = self.stopwords_class(language=self.get_language()).get_stopword_count(para_text)
+                word_stats = self.stopwords_class(
+                        language=self.get_language()).get_stopword_count(para_text)
                 if word_stats.get_stopword_count() > minimum_stopword_count:
                     return True
                 steps_away += 1
@@ -223,7 +238,8 @@ class ContentExtractor(BaseExtractor):
             for first_paragraph in potential_paragraphs:
                 text = self.parser.getText(first_paragraph)
                 if text:  # no len(text) > 0
-                    word_stats = self.stopwords_class(language=self.get_language()).get_stopword_count(text)
+                    word_stats = self.stopwords_class(
+                            language=self.get_language()).get_stopword_count(text)
                     paragraph_score = word_stats.get_stopword_count()
                     sibling_baseline_score = float(.30)
                     high_link_density = self.is_highlink_density(first_paragraph, word_stats.get_word_count())
@@ -366,24 +382,29 @@ class ContentExtractor(BaseExtractor):
         clusters of links, or paras with no gusto
         """
         try:
+            parse_tags = ['p']
+            if self.config.parse_lists:
+                parse_tags.extend(['ul', 'ol'])
+            if self.config.parse_headers:
+                parse_tags.extend(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+
             target_node = self.article.top_node
             node = self.add_siblings(target_node)
             for elm in self.parser.getChildren(node):
                 e_tag = self.parser.getTag(elm)
-                if e_tag != 'p':
-                    if self.is_highlink_density(elm) \
-                        or self.is_table_and_no_para_exist(elm) \
-                        or not self.is_nodescore_threshold_met(node, elm):
+                if e_tag not in parse_tags:
+                    if (self.is_highlink_density(elm) or self.is_table_and_no_para_exist(elm)
+                            or not self.is_nodescore_threshold_met(node, elm)):
                         self.parser.remove(elm)
             return node
         except:
             self.config.logger.error(traceback.format_exc())
             return None
 
-    def custom_top_node(self):
+    def custom_top_node(self, doc=None):
         custom_rule = self.custom_rule.get('content', {}).get('filter') if self.custom_rule else None
         if custom_rule:
-            custom_match_elements = self.custom_match_elements(custom_rule)
+            custom_match_elements = self.custom_match_elements(custom_rule, doc=doc)
             return custom_match_elements
         return None
 

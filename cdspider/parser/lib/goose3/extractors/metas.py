@@ -26,6 +26,8 @@ import traceback
 from urllib.parse import urlparse, urljoin
 
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
+from cdspider.parser.lib.goose3.text import get_encodings_from_content
+
 
 
 RE_LANG = r'^[A-Za-z]{2}$'
@@ -34,12 +36,9 @@ RE_LANG = r'^[A-Za-z]{2}$'
 class MetasExtractor(BaseExtractor):
 
     def get_domain(self):
-        try:
-            if self.article.final_url:
-                o = urlparse(self.article.final_url)
-                return o.hostname
-        except:
-            self.config.logger.error(traceback.format_exc())
+        if self.article.final_url:
+            o = urlparse(self.article.final_url)
+            return o.hostname
         return None
 
     def get_favicon(self):
@@ -49,36 +48,30 @@ class MetasExtractor(BaseExtractor):
         <link rel="shortcut icon" type="image/png" href="favicon.png" />
         <link rel="icon" type="image/png" href="favicon.png" />
         """
-        try:
-            kwargs = {'tag': 'link', 'attr': 'rel', 'value': 'icon'}
-            meta = self.parser.getElementsByTag(self.article.doc, **kwargs)
-            if meta:
-                favicon = self.parser.getAttribute(meta[0], 'href')
-                return favicon
-        except:
-            self.config.logger.error(traceback.format_exc())
+        kwargs = {'tag': 'link', 'attr': 'rel', 'value': 'icon'}
+        meta = self.parser.getElementsByTag(self.article.doc, **kwargs)
+        if meta:
+            favicon = self.parser.getAttribute(meta[0], 'href')
+            return favicon
         return ''
 
     def get_canonical_link(self):
         """
         if the article has meta canonical link set in the url
         """
-        try:
-            if self.article.final_url:
-                kwargs = {'tag': 'link', 'attr': 'rel', 'value': 'canonical'}
-                meta = self.parser.getElementsByTag(self.article.doc, **kwargs)
-                if meta is not None and len(meta) > 0:
-                    href = self.parser.getAttribute(meta[0], 'href')
-                    if href:
-                        href = href.strip()
-                        o = urlparse(href)
-                        if not o.hostname:
-                            tmp = urlparse(self.article.final_url)
-                            domain = '%s://%s' % (tmp.scheme, tmp.hostname)
-                            href = urljoin(domain, href)
-                        return href
-        except:
-            self.config.logger.error(traceback.format_exc())
+        if self.article.final_url:
+            kwargs = {'tag': 'link', 'attr': 'rel', 'value': 'canonical'}
+            meta = self.parser.getElementsByTag(self.article.doc, **kwargs)
+            if meta is not None and len(meta) > 0:
+                href = self.parser.getAttribute(meta[0], 'href')
+                if href:
+                    href = href.strip()
+                    o = urlparse(href)
+                    if not o.hostname:
+                        tmp = urlparse(self.article.final_url)
+                        domain = '%s://%s' % (tmp.scheme, tmp.hostname)
+                        href = urljoin(domain, href)
+                    return href
         return self.article.final_url
 
     def get_meta_lang(self):
@@ -86,26 +79,23 @@ class MetasExtractor(BaseExtractor):
         Extract content language from meta
         """
         # we have a lang attribute in html
-        try:
-            attr = self.parser.getAttribute(self.article.doc, attr='lang')
-            if attr is None:
-                # look up for a Content-Language in meta
-                items = [
-                    {'tag': 'meta', 'attr': 'http-equiv', 'value': 'content-language'},
-                    {'tag': 'meta', 'attr': 'name', 'value': 'lang'}
-                ]
-                for item in items:
-                    meta = self.parser.getElementsByTag(self.article.doc, **item)
-                    if meta:
-                        attr = self.parser.getAttribute(meta[0], attr='content')
-                        break
+        attr = self.parser.getAttribute(self.article.doc, attr='lang')
+        if attr is None:
+            # look up for a Content-Language in meta
+            items = [
+                {'tag': 'meta', 'attr': 'http-equiv', 'value': 'content-language'},
+                {'tag': 'meta', 'attr': 'name', 'value': 'lang'}
+            ]
+            for item in items:
+                meta = self.parser.getElementsByTag(self.article.doc, **item)
+                if meta:
+                    attr = self.parser.getAttribute(meta[0], attr='content')
+                    break
 
-            if attr:
-                value = attr[:2]
-                if re.search(RE_LANG, value):
-                    return value.lower()
-        except:
-            self.config.logger.error(traceback.format_exc())
+        if attr:
+            value = attr[:2]
+            if re.search(RE_LANG, value):
+                return value.lower()
 
         return None
 
@@ -113,17 +103,14 @@ class MetasExtractor(BaseExtractor):
         """
         Extract a given meta content form document
         """
-        try:
-            meta = self.parser.css_select(self.article.doc, meta_name)
-            content = None
+        meta = self.parser.css_select(self.article.doc, meta_name)
+        content = None
 
-            if meta is not None and len(meta) > 0:
-                content = self.parser.getAttribute(meta[0], 'content')
+        if meta is not None and len(meta) > 0:
+            content = self.parser.getAttribute(meta[0], 'content')
 
-            if content:
-                return content.strip()
-        except:
-            self.config.logger.error(traceback.format_exc())
+        if content:
+            return content.strip()
 
         return ''
 
@@ -139,6 +126,11 @@ class MetasExtractor(BaseExtractor):
         """
         return self.get_meta_content("meta[name=keywords]")
 
+    def get_meta_encoding(self):
+        """ Parse the meta encoding """
+        encoding = get_encodings_from_content(self.article.raw_html)
+        return encoding and encoding[0] or None
+
     def extract(self):
         return {
             "description": self.get_meta_description(),
@@ -146,5 +138,6 @@ class MetasExtractor(BaseExtractor):
             "lang": self.get_meta_lang(),
             "favicon": self.get_favicon(),
             "canonical": self.get_canonical_link(),
-            "domain": self.get_domain()
+            "domain": self.get_domain(),
+            "encoding": self.get_meta_encoding()
         }

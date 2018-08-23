@@ -34,27 +34,65 @@ AVAILABLE_PARSERS = {
     'soup': ParserSoup,
 }
 
+
+class ArticleContextPattern(object):
+
+    def __init__(self, attr=None, value=None, tag=None, domain=None):
+        if (not attr and not value) and not tag:
+            raise Exception("`attr` and `value` must be set or `tag` must be set")
+        self.attr = attr
+        self.value = value
+        self.tag = tag
+        self.domain = domain
+
+    def __repr__(self):
+        return "ArticleContextPattern(attr={} value={} tag={} domain={})".format(
+                    self.attr, self.value, self.tag, self.domain)
+
+
 KNOWN_ARTICLE_CONTENT_PATTERNS = [
-    {'attr': 'class', 'value': 'short-story'},
-    {'attr': 'itemprop', 'value': 'articleBody'},
-    {'attr': 'class', 'value': 'post-content'},
-    {'attr': 'class', 'value': 'g-content'},
-    {'tag': 'article'},
+    ArticleContextPattern(attr='class', value='short-story'),
+    ArticleContextPattern(attr='itemprop', value='articleBody'),
+    ArticleContextPattern(attr='class', value='post-content'),
+    ArticleContextPattern(attr='class', value='g-content'),
+    ArticleContextPattern(tag='article')
 ]
+
 KNOWN_ARTICLE_CONTENT_PATTERNS_BY_DOMAIN = {
     'qq.com': [
-        {'attr': 'class', 'value': 'content-article'},
+        ArticleContextPattern(attr='class', value='content-article'),
     ],
     'sina.com.cn': [
-        {'attr': 'id', 'value': 'article'},
+        ArticleContextPattern(attr='id', value='article'),
     ],
     'ifeng.com': [
-        {'attr': 'id', 'value': 'yc_con_txt'},
+        ArticleContextPattern(attr='id', value='yc_con_txt'),
     ],
     '163.com': [
-        {'attr': 'class', 'value': 'post_text'},
+        ArticleContextPattern(attr='class', value='post_text'),
     ]
 }
+
+class PublishDatePattern(object):
+
+    def __init__(self, attr, value, content, domain=None):
+        self.attr = attr
+        self.value = value
+        self.content = content
+        self.domain = domain
+
+    def __repr__(self):
+        return "PublishDatePattern(attr={} value={} content={} domain={})".format(
+                    self.attr, self.value, self.content, self.domain)
+
+
+KNOWN_PUBLISH_DATE_TAGS = [
+    PublishDatePattern(attr='property', value='rnews:datePublished', content='content'),
+    PublishDatePattern(attr='property', value='article:published_time', content='content'),
+    PublishDatePattern(attr='name', value='OriginalPublicationDate', content='content'),
+    PublishDatePattern(attr='itemprop', value='datePublished', content='datetime'),
+    PublishDatePattern(attr='name', value='published_time_telegram', content='content')
+]
 
 
 class Configuration(object):
@@ -77,7 +115,8 @@ class Configuration(object):
 
         # extraction information
         self._local_storage_path = os.path.join(tempfile.gettempdir(), 'goose')
-        self._known_context_patterns = KNOWN_ARTICLE_CONTENT_PATTERNS
+        self._known_context_patterns = KNOWN_ARTICLE_CONTENT_PATTERNS[:]
+        self._known_publish_date_tags = KNOWN_PUBLISH_DATE_TAGS[:]
         self._target_language = 'en'
         self._use_meta_language = True
 
@@ -98,6 +137,10 @@ class Configuration(object):
 
         self._domain = None
         self._subdomain = None
+
+        self._parse_lists = True
+        self._pretty_lists = True
+        self._parse_headers = True
 
         self._custom_rule = {}
 
@@ -165,10 +208,64 @@ class Configuration(object):
                 or [{'attr': 'class', 'value': 'my-article-class'},
                     {'attr': 'id', 'value': 'my-article-id'}]
         '''
+        def create_pat_from_dict(val):
+            '''Helper function used to create an ArticleContextPattern from a dictionary
+            '''
+            if "tag" in val:
+                pat = ArticleContextPattern(tag=val["tag"])
+            elif "attr" in val:
+                pat = ArticleContextPattern(attr=val["attr"], value=val["value"])
+
+            if "domain" in val:
+                pat.domain = val["domain"]
+
+            return pat
+
         if isinstance(val, list):
             self._known_context_patterns = val + self.known_context_patterns
         else:
             self._known_context_patterns.insert(0, val)
+
+    @property
+    def known_publish_date_tags(self):
+        ''' list: The tags to search to find the likely published date
+
+            Note:
+                Each entry must be a dictionary with the following keys: `attribute`, `value`, \
+                and `content`.
+        '''
+        return self._known_publish_date_tags
+
+    @known_publish_date_tags.setter
+    def known_publish_date_tags(self, val):
+        ''' val must be a dictionary or list of dictionaries
+            e.g., {'attrribute': 'name', 'value': 'my-pubdate', 'content': 'datetime'}
+                or [{'attrribute': 'name', 'value': 'my-pubdate', 'content': 'datetime'},
+                    {'attrribute': 'property', 'value': 'pub_time', 'content': 'content'}]
+        '''
+        def create_pat_from_dict(val):
+            '''Helper function used to create an PublishDatePattern from a dictionary
+            '''
+            if "attribute" in val:
+                pat = PublishDatePattern(attr=val["attribute"], value=val["value"],
+                                         content=val["content"])
+
+            if "domain" in val:
+                pat.domain = val["domain"]
+
+            return pat
+
+        if isinstance(val, list):
+            self._known_publish_date_tags = [
+                x if isinstance(x, PublishDatePattern) else create_pat_from_dict(x)
+                for x in val
+            ] + self.known_publish_date_tags
+        elif isinstance(val, PublishDatePattern):
+            self._known_publish_date_tags.insert(0, val)
+        elif isinstance(val, dict):
+            self._known_publish_date_tags.insert(0, create_pat_from_dict(val))
+        else:
+            raise Exception("Unknown type: {}. Use a PublishDatePattern.".format(type(val)))
 
     @property
     def strict(self):
@@ -209,8 +306,7 @@ class Configuration(object):
     @local_storage_path.setter
     def local_storage_path(self, val):
         ''' set the local_storage_path property '''
-        if val:
-            self._local_storage_path = val
+        self._local_storage_path = val
 
     @property
     def debug(self):
@@ -426,6 +522,43 @@ class Configuration(object):
     def images_min_bytes(self, val):
         ''' set the images_min_bytes property '''
         self._images_min_bytes = int(val)
+
+    @property
+    def pretty_lists(self):
+        ''' bool: Specify if lists should be pretty printed in the cleaned_text
+            output
+
+            Note:
+                Defaults to `True` '''
+        return self._pretty_lists
+
+    @pretty_lists.setter
+    def pretty_lists(self, val):
+        ''' set if lists should be pretty printed '''
+        self._pretty_lists = bool(val)
+
+    @property
+    def parse_lists(self):
+        return self._parse_lists
+
+    @parse_lists.setter
+    def parse_lists(self, val):
+        ''' set if headers should be parsed '''
+        self._parse_lists = bool(val)
+
+    @property
+    def parse_headers(self):
+        ''' bool: Specify if headers should be pulled or not in the cleaned_text
+            output
+
+            Note:
+                Defaults to `True`'''
+        return self._parse_headers
+
+    @parse_headers.setter
+    def parse_headers(self, val):
+        ''' set if headers should be parsed '''
+        self._parse_headers = bool(val)
 
     def get_parser(self):
         ''' Retrieve the current parser class to use for extraction

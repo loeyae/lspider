@@ -27,14 +27,6 @@ from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.parser.lib.time_parser import Parser as TimeParser
 from cdspider.libs import utils
 
-KNOWN_PUBLISH_DATE_TAGS = [
-    {'attribute': 'property', 'value': 'rnews:datePublished', 'content': 'content'},
-    {'attribute': 'property', 'value': 'article:published_time', 'content': 'content'},
-    {'attribute': 'name', 'value': 'OriginalPublicationDate', 'content': 'content'},
-    {'attribute': 'itemprop', 'value': 'datePublished', 'content': 'datetime'},
-    {'attribute': 'class', 'value': 'publish_time', 'content': 'text'},
-]
-
 KNOWN_PUBLISH_DATE_TAGS_BY_DOMAIN = {
     'qq.com': [
         {'attribute': 'name', 'value': '_pubtime', 'content': 'content'},
@@ -106,10 +98,22 @@ class PublishDateExtractor(BaseExtractor):
                     if data:
                         return TimeParser.timeformat(TimeParser.parser_time(data[0]) or data[0])
 
-            for tags in copy.deepcopy(KNOWN_PUBLISH_DATE_TAGS):
-                data = self.get_message_by_tag(tags)
-                if data:
-                    return TimeParser.timeformat(TimeParser.parser_time(data[0]) or data[0])
+            if "article:published_time" in self.article.opengraph:
+                return self.article.opengraph["article:published_time"]
+            if self.article.schema and "datePublished" in self.article.schema:
+                return self.article.schema["datePublished"]
+            for known_meta_tag in copy.deepcopy(self.config.known_publish_date_tags):
+                # if this is a domain specific config and the current
+                # article domain does not match the configured domain,
+                # do not use the configured publish date pattern
+                if known_meta_tag.domain and known_meta_tag.domain != self.article.domain:
+                    continue
+                meta_tags = self.parser.getElementsByTag(self.article.doc,
+                                                         attr=known_meta_tag.attr,
+                                                         value=known_meta_tag.value)
+                if meta_tags:
+                    data = self.parser.getAttribute(meta_tags[0], known_meta_tag.content)
+                    return TimeParser.timeformat(TimeParser.parser_time(data) or data)
         except:
             self.config.logger.error(traceback.format_exc())
         if self.article.top_node is not None:

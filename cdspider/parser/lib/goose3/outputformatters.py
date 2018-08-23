@@ -68,6 +68,7 @@ class OutputFormatter(object):
             self.replace_with_text()
             if not self.config.enable_fewwords_paragraphs:
                 self.remove_fewwords_paragraphs()
+            self.make_list_elms_pretty()
             return self.convert_to_text()
         except:
             self.config.logger.error(traceback.format_exc())
@@ -83,6 +84,15 @@ class OutputFormatter(object):
                     txt = html.unescape(txt)
                     txt_lis = innerTrim(txt).split(r'\n')
                     txts.extend(txt_lis)
+            text = '\n\n'.join(txts)
+            # ensure no double newlines at the beginning of lists
+            if self.config.parse_lists:
+                # Split out the lists and clean them up! Ensuring no trailing spaces
+                txt = text.replace('\n•', '•').split('• ')
+                txt = [x.strip() for x in txt]
+
+                if self.config.pretty_lists:
+                    text = '\n• '.join(txt)
         else:
             txt = self.parser.getText(top_node)
             if txt:
@@ -101,6 +111,12 @@ class OutputFormatter(object):
         should be considered text into text
         """
         self.parser.stripTags(self.get_top_node(), 'a')
+
+    def make_list_elms_pretty(self):
+        """ make any list element read like a list
+        """
+        for elm in self.parser.getElementsByTag(self.top_node, tag='li'):
+            elm.text = r'• {}'.format(elm.text)
 
     def remove_negativescores_nodes(self):
         """\
@@ -136,9 +152,9 @@ class OutputFormatter(object):
             tag = self.parser.getTag(elm)
             text = self.parser.getText(elm)
             stop_words = self.stopwords_class(language=self.get_language()).get_stopword_count(text)
-            if (tag != 'br' or text != '\\r') and stop_words.get_stopword_count() < 3 \
-                and len(self.parser.getElementsByTag(elm, tag='object')) == 0 \
-                and len(self.parser.getElementsByTag(elm, tag='embed')) == 0:
+            if ((tag != 'br' or text != '\\r') and stop_words.get_stopword_count() < 3
+                    and len(self.parser.getElementsByTag(elm, tag='object')) == 0
+                    and len(self.parser.getElementsByTag(elm, tag='embed')) == 0):
                 self.parser.remove(elm)
             # TODO
             # check if it is in the right place
