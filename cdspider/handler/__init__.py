@@ -90,6 +90,8 @@ class BaseHandler(Component):
 
     def _domain_info(self, url):
         subdomain, domain = utils.parse_domain(url)
+        if not subdomain:
+            subdomain = 'www'
         return "%s.%s" % (subdomain, domain), domain
 
     def _typeinfo(self, url):
@@ -107,8 +109,16 @@ class BaseHandler(Component):
         """
         解析媒体类型
         """
+        subdomain, domain = self._domain_info(url)
+        media_type = self.db['MediaTypesDB'].get_detail_by_subdomain(subdomain)
+        if media_type:
+            return int(media_type['mediaType'])
+        media_type = self.db['MediaTypesDB'].get_detail_by_domain(domain)
+        if media_type:
+            return int(media_type['mediaType'])
         if 'media_type' in self.process and self.process['media_type']:
             return int(self.process['media_type'])
+
         return 1
 
     def url_prepare(self, url):
