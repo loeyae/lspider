@@ -323,14 +323,12 @@ class Spider(Component):
         parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
         if not parse_rule and subdomain:
             parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
+        format_params = {"projectname": "Project%s" % message['pid'], "parenthandler": "SiteHandler"}
         if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
             keylist = re.findall('\{(\w+)\}', parse_rule['scripts'])
-            format_params = {}
             for key in keylist:
-                if key  == 'projectname':
-                    format_params[key] = "Project%s" % message['pid']
-                elif key == 'parenthandler':
-                    format_params[key] = "SiteHandler"
+                if key in ('projectname', 'parenthandler'):
+                    continue
                 else:
                     format_params[key] = '{%s}' % key
             itemscript = parse_rule['scripts']
