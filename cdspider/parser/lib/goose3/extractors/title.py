@@ -178,7 +178,7 @@ class TitleExtractor(BaseExtractor):
                 elements = self.parser.getElementsByTag(self.article.doc, tag=tag)
                 if elements is not None:
                     if len(elements) > 1 or len(elements) < 1:
-                        break
+                        continue
                     ele = elements[0]
                     ts = ele.xpath('text()')
                     if len(ts) == 1 and ts[0].strip():
