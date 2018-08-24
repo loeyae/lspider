@@ -8,6 +8,7 @@
 :date:    2018-1-9 18:01:26
 :version: SVN: $Id: Spider.py 2266 2018-07-06 06:50:15Z zhangyi $
 """
+import re
 import time
 import sys
 import logging
@@ -27,9 +28,9 @@ from cdspider.database.base import *
 
 CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse, CDSpiderCrawlerForbidden)
 DEFAULT_ITEM_SCRIPTS = """
-from cdspider.handler.custom.{projectname} import SiteHandler
+from cdspider.handler.custom.{projectname} import {parenthandler}
 
-class TaskHandler(SiteHandler):
+class TaskHandler({parenthandler}):
 
     def newtask(self):
         pass
@@ -323,9 +324,18 @@ class Spider(Component):
         if not parse_rule and subdomain:
             parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
         if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
-            itemscript = parse_rule['scripts'].format(projectname = "Project%s" % message['pid'])
+            keylist = re.findall('\{(\w+)\}', parse_rule['scripts'])
+            format_params = {}
+            for key in keylist:
+                if key  == 'projectname':
+                    format_params[key] = "Project%s" % message['pid']
+                elif key == 'parenthandler':
+                    format_params[key] = "SiteHandler"
+                else:
+                    format_params[key] = '{%s}' % key
+            itemscript = parse_rule['scripts']
         else:
-            itemscript = DEFAULT_ITEM_SCRIPTS.format(projectname = "Project%s" % message['pid'])
+            itemscript = DEFAULT_ITEM_SCRIPTS
         task.update({
             'tid': 0,
             'pid': message['pid'],
@@ -348,6 +358,7 @@ class Spider(Component):
             urls = task.get('urls') or self.UrlsDB.get_detail(int(task['uid']))
             if urls:
                 task['urls'] = urls
+                format_params["parenthandler"] = "UrlHandler"
         if not 'save' in task or not task['save']:
             task['save'] = {}
         task['rid'] = message['rid']
@@ -359,6 +370,7 @@ class Spider(Component):
         task['queue'] = self.queue['scheduler2spider']
         task['queue_message'] = copy.deepcopy(message)
         task['save']['retry'] = message.get('retry', 0)
+        task['scripts'] = task['scripts'].format(**format_params)
         return task
 
     def get_task(self, message, task=None, no_check_status = False):
