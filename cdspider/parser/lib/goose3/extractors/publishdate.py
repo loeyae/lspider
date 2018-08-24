@@ -120,4 +120,8 @@ class PublishDateExtractor(BaseExtractor):
             _d = TimeParser.parser_time(self.parser.outerHtml(self.parser.getParent(self.article.top_node)))
             if _d:
                 return TimeParser.timeformat(_d)
+        if self.article.final_url:
+            _d = TimeParser.parser_time_from_url(self.article.final_url)
+            if _d:
+                return _d
         return TimeParser.timeformat(TimeParser.parser_time(self.article.raw_html, True))
