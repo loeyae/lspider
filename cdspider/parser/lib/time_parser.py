@@ -131,6 +131,9 @@ class Parser(object):
 
     @staticmethod
     def parser_time_from_url(url):
+        d = re.findall(r'20[012]-\d{1,2}-\d{1,2}', url)
+        if d:
+            return int(time.mktime(time.strptime(d[0],'%Y-%m-%d')))
         d = re.findall(r'20[012]\d[01]\d[0123]\d', url)
         if d:
             return int(time.mktime(time.strptime(d[0],'%Y%m%d')))
