@@ -194,6 +194,7 @@ class TitleExtractor(BaseExtractor):
                     if len(ts) == 1 and ts[0].strip():
                         title = ts[0].strip()
                         return {'raw_title': title, 'clean_title': self.clean_title(title)}
+                    break
 
             # otherwise use the title meta
             title_element = self.parser.getElementsByTag(self.article.doc, tag='title')
