@@ -177,7 +177,9 @@ class TitleExtractor(BaseExtractor):
             for tag in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
                 elements = self.parser.getElementsByTag(self.article.doc, tag=tag)
                 if elements is not None:
-                    if len(elements) > 1 or len(elements) < 1:
+                    if len(elements) > 1:
+                        break
+                    if len(elements) < 1:
                         continue
                     ele = elements[0]
                     ts = ele.xpath('text()')
