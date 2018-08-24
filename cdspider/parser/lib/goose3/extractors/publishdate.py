@@ -108,7 +108,7 @@ class PublishDateExtractor(BaseExtractor):
                 # do not use the configured publish date pattern
                 if known_meta_tag.domain and known_meta_tag.domain != self.article.domain:
                     continue
-                meta_tags = self.parser.getElementsByTag(self.article.doc,
+                meta_tags = self.parser.getElementsByTag(self.article.raw_doc,
                                                          attr=known_meta_tag.attr,
                                                          value=known_meta_tag.value)
                 if meta_tags:
