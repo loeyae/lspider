@@ -123,12 +123,22 @@ class Parser(object):
         elif re.findall(r'前天',timestring):
             d = (datetime.date.today() - datetime.timedelta(days = 2)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
-
         else:
             try:
                 return int(timestring)
             except:
                 return None
+
+    @staticmethod
+    def parser_time_from_url(url):
+        d = re.findall(r'20[012]\d[01]\d[0123]\d', url)
+        if d:
+            return int(time.mktime(time.strptime(d[0],'%Y%m%d')))
+        r = '20[012]\d(?:%s)%s' % ('|'.join([str(i) for i in range(1, 13)]), '|'.join([str(i) for i in range(1, 32)]))
+        d = re.findall(r, url)
+        if d:
+            return int(time.mktime(time.strptime(d[0],'%Y%m%d')))
+        return None
 
     @staticmethod
     def parser_time(html, now = False):
