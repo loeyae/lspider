@@ -86,4 +86,14 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
             collection.create_index('pubtime', name='pubtime')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
+        if not 'pid' in indexes:
+            collection.create_index('crawlinfo.pid', name='pid')
+        if not 'sid' in indexes:
+            collection.create_index('crawlinfo.sid', name='sid')
+        if not 'uid' in indexes:
+            collection.create_index('crawlinfo.uid', name='uid')
+        if not 'kwid' in indexes:
+            collection.create_index('crawlinfo.kwid', name='kwid')
+        if not 'aid' in indexes:
+            collection.create_index('crawlinfo.aid', name='aid')
         self._collections.add(table)
