@@ -78,16 +78,12 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
             collection.create_index('rid', unique=True, name='rid')
         if not 'acid' in indexes:
             collection.create_index('acid', unique=True, name='acid')
-        if not 'pid' in indexes:
-            collection.create_index('pid', name='pid')
-        if not 'sid' in indexes:
-            collection.create_index('sid', name='sid')
-        if not 'uid' in indexes:
-            collection.create_index('uid', name='uid')
-        if not 'aid' in indexes:
-            collection.create_index('aid', name='aid')
-        if not 'kwid' in indexes:
-            collection.create_index('kwid', name='kwid')
+        if not 'domain' in indexes:
+            collection.create_index('domain', name='domain')
+        if not 'subdomain' in indexes:
+            collection.create_index('subdomain', name='subdomain')
+        if not 'pubtime' in indexes:
+            collection.create_index('pubtime', name='pubtime')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
         self._collections.add(table)
