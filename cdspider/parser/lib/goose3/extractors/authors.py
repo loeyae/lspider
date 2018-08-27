@@ -58,7 +58,7 @@ KNOWN_AUTHOR_PATTERN_BY_DOMAIN = {
 }
 
 KNOWN_AUTHOR_PATTERN = [
-    '[\>\040]\040*（?来源\040*[：:]\040*(?:\<[^\>]+\>)?([^\<\>\s）]+)）?'
+    '[\>\040]\040*（?来源\040*[：:]\040*(?:\<[^\>]+\>)?([^\<\>\s）&]+)）?'
 ]
 
 class AuthorsExtractor(BaseExtractor):
