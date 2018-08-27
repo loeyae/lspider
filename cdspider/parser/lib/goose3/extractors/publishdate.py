@@ -117,9 +117,11 @@ class PublishDateExtractor(BaseExtractor):
         except:
             self.config.logger.error(traceback.format_exc())
         if self.article.top_node is not None:
-            _d = TimeParser.parser_time(self.parser.outerHtml(self.parser.getParent(self.article.top_node)))
-            if _d:
-                return TimeParser.timeformat(_d)
+            parent_node = self.parser.getParent(self.article.top_node)
+            if parent_node is not None:
+                _d = TimeParser.parser_time(self.parser.outerHtml(parent_node))
+                if _d:
+                    return TimeParser.timeformat(_d)
         if self.article.final_url:
             _d = TimeParser.parser_time_from_url(self.article.final_url)
             if _d:
