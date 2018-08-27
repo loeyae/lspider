@@ -69,6 +69,7 @@ class Parser(object):
         if re.findall(r'年',timestring):
             if re.findall(r'^\d{2}年', timestring):
                 timestring = "%s%s" % (20, timestring)
+            timestring = re.sub('(\d{4}年)\s*(\d{1,2}月)\s*(\d{1,2}日.*)', r'\1\2\3', timestring)
             return Parser.get_timestamp(timestring, 'local')
         elif re.findall(r'\-',timestring):
             if re.findall(r'^\d{2}-\d{1,2}-\d{1,2}', timestring):
