@@ -23,6 +23,8 @@ class Component(object):
         if self.log_level <= logging.WARN:
             self.logger.warn(message, *args, **kwargs)
 
+    warning = warn
+
     def error(self, message, *args, **kwargs):
         if self.log_level <= logging.ERROR:
             self.logger.error(message, *args, **kwargs)
