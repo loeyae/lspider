@@ -71,7 +71,7 @@ class AuthorsExtractor(BaseExtractor):
                 matched = self.custom_match(custom_rule, dtype=self.custom_rule.get('author', {}).get('type', 'text'), target=self.custom_rule.get('author', {}).get('target', 'value'))
                 if matched:
                     authors.extend([matched])
-                    return authors
+                    return self.correction_result(authors, self.custom_rule.get('author', {}))
             known_context_patterns = []
             fulldomain = "%s.%s" % (self.subdomain, self.domain)
             if fulldomain in KNOWN_AUTHOR_PATTERN_BY_DOMAIN:
