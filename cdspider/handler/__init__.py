@@ -80,6 +80,7 @@ class BaseHandler(Component):
         self.mycrawler = True
         self.crawler = None
         self.process = None
+        self.force_proxy = False
         self.mode = self.task.get('save',{}).get('mode', self.MODE_DEFAULT)
         self.page = 1
         self.last_result_id = None
@@ -267,7 +268,7 @@ class BaseHandler(Component):
             params = builder.build(request, last_source, self.crawler, save)
             if isinstance(self.crawler, SeleniumCrawler) and params['method'].upper() == 'GET':
                 params['method'] = 'open'
-            if proxy == self.PROXY_TYPE_EVER and save['proxy']:
+            if (proxy == self.PROXY_TYPE_EVER or self.force_proxy) and save['proxy']:
                 params['proxy'] = copy.deepcopy(save['proxy'])
             self.crawler.crawl(**params)
             if self.page == 1:
@@ -512,6 +513,8 @@ class BaseHandler(Component):
                 self.info('Change crawler to Tornado')
                 self.crawler.close()
                 self.crawler = utils.load_crawler('tornado', log_level=self.log_level)
+            else:
+                self.force_proxy = True
         if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CDSpiderCrawlerProxyExpired)):
             data = {"addr": self.crawler.proxy_str, 'ctime': int(time.time())}
             typeinfo = self._typeinfo(self.task['url'])
