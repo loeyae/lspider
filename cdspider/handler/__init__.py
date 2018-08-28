@@ -81,6 +81,7 @@ class BaseHandler(Component):
         self.crawler = None
         self.process = None
         self.force_proxy = False
+        self.auto_proxy = False
         self.mode = self.task.get('save',{}).get('mode', self.MODE_DEFAULT)
         self.page = 1
         self.last_result_id = None
@@ -268,7 +269,7 @@ class BaseHandler(Component):
             params = builder.build(request, last_source, self.crawler, save)
             if isinstance(self.crawler, SeleniumCrawler) and params['method'].upper() == 'GET':
                 params['method'] = 'open'
-            if (proxy == self.PROXY_TYPE_EVER or self.force_proxy) and save['proxy']:
+            if (proxy == self.PROXY_TYPE_EVER or self.force_proxy or (proxy == self.PROXY_TYPE_AUTO and self.auto_proxy)) and save['proxy']:
                 params['proxy'] = copy.deepcopy(save['proxy'])
             self.crawler.crawl(**params)
             if self.page == 1:
@@ -515,11 +516,13 @@ class BaseHandler(Component):
                 self.crawler = utils.load_crawler('tornado', log_level=self.log_level)
             else:
                 self.force_proxy = True
-        if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CDSpiderCrawlerProxyExpired)):
+        elif isinstance(broken_exc, (CDSpiderCrawlerProxyError, CDSpiderCrawlerProxyExpired)):
             data = {"addr": self.crawler.proxy_str, 'ctime': int(time.time())}
             typeinfo = self._typeinfo(self.task['url'])
             data.update(typeinfo)
             self.db['base'].insert(data, 'proxy_log')
+        else:
+            self.auto_proxy = True
         if save['retry'] < self.MAX_RETRY:
             save['retry'] += 1
             self.info('Retry to fetch: %s because of %s, current times: %s' % (self.task['url'], str(broken_exc), self.task['save']['retry']))
