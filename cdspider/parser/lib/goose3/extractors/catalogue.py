@@ -61,27 +61,27 @@ class CatalogueExtractor(BaseExtractor):
                 for k, rule in custom_rule.items():
                     val = self.custom_match(rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'), target=rule.get('target', None))
                     if val:
-                        data[k] = utils.patch_result(val, rule)
+                        data[k] = self.correction_result(val, rule)
                 return utils.table2kvlist(data)
             if 'filter' in urls_pattern and urls_pattern['filter']:
                 if not urls_pattern['filter'].startswith('@'):
                     rule, key = utils.rule2pattern(urls_pattern['filter'])
                     if not key:
                         urls = self.custom_match(urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'), target=urls_pattern.get('target', 'href'), doc=doc)
-                        urls = utils.patch_result(urls, urls_pattern)
+                        urls = self.correction_result(urls, urls_pattern)
                     else:
                         urls = self.get_message_by_tag({'tag': 'a', 'attr': 'href', 'value': rule, 'content': 'href'}, doc=doc)
-                        urls = utils.patch_result(urls, urls_pattern)
+                        urls = self.correction_result(urls, urls_pattern)
                 else:
                     urls = self.custom_match(urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'), target=urls_pattern.get('target', 'href'), doc=doc)
-                    urls = utils.patch_result(urls, urls_pattern)
+                    urls = self.correction_resultt(urls, urls_pattern)
                 if urls:
                     data = {'url': urls}
                     for k, rule in custom_rule.items():
                         if rule and 'filter' in rule and rule['filter']:
                             val = self.custom_match(rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'), target=rule.get('target', None))
                             if val:
-                                data[k] = utils.patch_result(val, rule)
+                                data[k] = self.correction_result(val, rule)
                     return utils.table2kvlist(data)
                 return []
 
