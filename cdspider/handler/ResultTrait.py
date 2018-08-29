@@ -36,6 +36,8 @@ class ResultTrait(object):
                 src = self.db['ArticlesDB'].get_detail_by_unid(kwargs['unid'], int(kwargs['ctime']))
                 #TODO 更新列表页抓取任务的crawlinfo
                 pubtime = pubtime or src.get('pubtime', None)
+            else:
+                src = {}
             if not pubtime:
                 pubtime = int(time.time())
             r = {
@@ -44,11 +46,11 @@ class ResultTrait(object):
                 'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
                 'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
                 'media_type': self.parse_media_type(kwargs['final_url']),          # 媒体类型
-                'title': result.pop('title'),                                      # 标题
-                'author': result.pop('author', None),                              # 作者
+                'title': src.get('title', None) or result.pop('title'),                                      # 标题
+                'author': src.get('author', None) or result.pop('author', None),                              # 作者
                 'pubtime': pubtime,                                                # 发布时间
                 'content': result.pop('content', None),                            # 详情
-                'channel': result.pop('channel', None),                            # 频道信息
+                'channel': src.get('channel', None) or result.pop('channel', None),                            # 频道信息
                 'crawlinfo': kwargs.get('crawlinfo')
                 }
             r['result'] = result or None
