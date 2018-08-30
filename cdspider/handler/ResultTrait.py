@@ -33,7 +33,8 @@ class ResultTrait(object):
             if pubtime:
                 pubtime = TimeParser.timeformat(str(pubtime))
             if update:
-                src = self.db['ArticlesDB'].get_detail_by_unid(kwargs['unid'], int(kwargs['ctime']))
+                self.error("artcle: acid: %s ctime: %s rid: %s" % (kwargs['unid'], int(kwargs['ctime']), kwargs['rid']))
+                src = self.db['ArticlesDB'].get_detail(kwargs['rid'])
                 #TODO 更新列表页抓取任务的crawlinfo
                 pubtime = pubtime or src.get('pubtime', None)
             else:
@@ -46,7 +47,7 @@ class ResultTrait(object):
                 'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
                 'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
                 'media_type': self.parse_media_type(kwargs['final_url']),          # 媒体类型
-                'title': src.get('title', None) or result.pop('title'),                                      # 标题
+                'title': src.get('title', None) or result.pop('title', None),                                      # 标题
                 'author': src.get('author', None) or result.pop('author', None),                              # 作者
                 'pubtime': pubtime,                                                # 发布时间
                 'content': result.pop('content', None),                            # 详情
@@ -177,7 +178,7 @@ class ResultTrait(object):
                 crawlinfo = self._build_crawl_info(final_url)
                 item = self.task.get('item', {})
                 data = utils.dictjoin(data, item, replace = True)
-                result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ArticlesDB.STATUS_PARSED, update=update, **unid)
+                result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ArticlesDB.STATUS_PARSED, update=update, rid=rid, **unid)
                 if rid:
                     self.db['ArticlesDB'].update(rid, result)
                     result_id = rid
