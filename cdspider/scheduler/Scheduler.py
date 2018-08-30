@@ -161,6 +161,7 @@ class Scheduler(object):
                 self._exceptions += 1
                 if self._exceptions > self.EXCEPTION_LIMIT:
                     break
+                time.sleep(0.1)
 
         self.logger.info("scheduler exit")
 
