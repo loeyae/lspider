@@ -48,7 +48,7 @@ class ResultTrait(object):
                 'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
                 'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
                 'media_type': self.parse_media_type(kwargs['final_url']),          # 媒体类型
-                'title': src.get('title', None) or result.pop('title', None),                                      # 标题
+                'title': result.pop('title', None),                                # 标题
                 'author': src.get('author', None) or result.pop('author', None),                              # 作者
                 'pubtime': pubtime,                                                # 发布时间
                 'content': result.pop('content', None),                            # 详情
