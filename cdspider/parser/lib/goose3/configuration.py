@@ -91,7 +91,8 @@ KNOWN_PUBLISH_DATE_TAGS = [
     PublishDatePattern(attr='property', value='article:published_time', content='content'),
     PublishDatePattern(attr='name', value='OriginalPublicationDate', content='content'),
     PublishDatePattern(attr='itemprop', value='datePublished', content='datetime'),
-    PublishDatePattern(attr='name', value='published_time_telegram', content='content')
+    PublishDatePattern(attr='name', value='published_time_telegram', content='content'),
+    PublishDatePattern(tag='time')
 ]
 
 
