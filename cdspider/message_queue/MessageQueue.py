@@ -23,6 +23,7 @@ from six.moves.urllib.parse import unquote
 from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
 connection_pool = {}
+channel_pool = {}
 logger = logging.getLogger('queue')
 
 def catch_error(func):
@@ -222,14 +223,18 @@ class AmqpQueue(PikaQueue):
                                               virtual_host=unquote(
                                                   self.path.lstrip('/') or '%2F'))
             self.connection.connect()
+            self.channel = self.connection.channel()
             connection_pool[k] = self.connection
+            channel_pool[k] = self.channel
         else:
             self.connection = connection_pool[k]
             if not self.connection.connected:
                 del connection_pool[k]
+                channel_pool[k].close()
+                del channel_pool[k]
                 self.connect()
-            self.close()
-        self.channel = self.connection.channel()
+            else:
+                self.channel = channel_pool[k]
         try:
             self.channel.queue_declare(self.queuename, durable=True)
         except amqp.exceptions.PreconditionFailed:
