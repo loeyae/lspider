@@ -77,6 +77,7 @@ class PublishDatePattern(object):
 
     def __init__(self, attr, value, content, domain=None):
         self.attr = attr
+        self.tag = tag
         self.value = value
         self.content = content
         self.domain = domain
