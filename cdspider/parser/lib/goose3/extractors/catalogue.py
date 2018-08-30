@@ -74,7 +74,7 @@ class CatalogueExtractor(BaseExtractor):
                         urls = self.correction_result(urls, urls_pattern)
                 else:
                     urls = self.custom_match(urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'), target=urls_pattern.get('target', 'href'), doc=doc)
-                    urls = self.correction_resultt(urls, urls_pattern)
+                    urls = self.correction_result(urls, urls_pattern)
                 if urls:
                     data = {'url': urls}
                     for k, rule in custom_rule.items():
