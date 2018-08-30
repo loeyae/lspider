@@ -40,8 +40,9 @@ class ResultTrait(object):
                 pubtime = pubtime or src.get('pubtime', None)
             else:
                 src = {}
-            if not pubtime:
-                pubtime = int(time.time())
+            now = int(time.time())
+            if not pubtime or pubtime > now:
+                pubtime = now
             r = {
                 'status': kwargs.get('status', ArticlesDB.STATUS_INIT),            # 状态
                 'url': kwargs['final_url'],
