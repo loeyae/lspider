@@ -434,6 +434,7 @@ class Spider(Component):
                     break
                 except Exception as e:
                     self.exception(e)
+                    break
 
         tornado.ioloop.PeriodicCallback(queue_loop, 100, io_loop=self.ioloop).start()
         self._running = True
