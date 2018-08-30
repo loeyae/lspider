@@ -113,7 +113,10 @@ class PublishDateExtractor(BaseExtractor):
                                                          attr=known_meta_tag.attr,
                                                          value=known_meta_tag.value)
                 if meta_tags:
-                    data = self.parser.getAttribute(meta_tags[0], known_meta_tag.content)
+                    if known_meta_tag.content == 'text':
+                        data = self.parser.getText(meta_tags[0])
+                    else:
+                        data = self.parser.getAttribute(meta_tags[0], known_meta_tag.content)
                     return TimeParser.timeformat(TimeParser.parser_time(data) or data)
         except:
             self.config.logger.error(traceback.format_exc())
