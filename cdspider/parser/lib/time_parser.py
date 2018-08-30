@@ -158,9 +158,8 @@ class Parser(object):
                 html = str(html)
         if html:
             g1 = re.findall(rule12, html) or re.findall(rule13, html) or re.findall(rule11, html) or re.findall(rule14, html)
-            for item in g1:
-                if item:
-                    return item
+            if len(g1) == 1:
+                return g1[0]
         if now:
             return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
         return None
