@@ -8,6 +8,7 @@
 :date:    2018-8-5 23:26:18
 """
 import time
+import copy
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.parser.lib.time_parser import Parser as TimeParser
@@ -139,7 +140,7 @@ class ResultTrait(object):
                     if not result_id:
                         raise CDSpiderDBError("Result insert failed")
                     self.crawl_info['crawl_count']['new_count'] += 1
-                    self.build_item_task(item, final_url, result_id, unid)
+                    self.build_item_task(copy.deepcopy(item), final_url, result_id, copy.deepcopy(unid))
 #                elif unid:
 #                    self.db['ArticlesDB'].add_crwal_info(unid['unid'], unid['ctime'], crawlinfo=crawlinfo)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
