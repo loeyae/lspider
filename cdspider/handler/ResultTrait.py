@@ -38,9 +38,10 @@ class ResultTrait(object):
                 src = self.db['ArticlesDB'].get_detail(kwargs['rid'])
                 #TODO 更新列表页抓取任务的crawlinfo
                 pubtime = pubtime or src.get('pubtime', None)
+                now = src.get('ctime')
             else:
                 src = {}
-            now = int(time.time())
+                now = int(time.time())
             if not pubtime or pubtime > now:
                 pubtime = now
             r = {
@@ -59,6 +60,10 @@ class ResultTrait(object):
             r['result'] = result or None
             r = self.result_prepare(r)
         else:
+            now = int(time.time())
+            pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
+            if pubtime and pubtime > now:
+                pubtime = now
             r = {
                 "status": kwargs.get('status', ArticlesDB.STATUS_INIT),
                 'url': kwargs['final_url'],
@@ -66,7 +71,7 @@ class ResultTrait(object):
                 'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
                 'title': result.pop('title', None),                                # 标题
                 'author': result.pop('author', None),                              # 作者
-                'pubtime': TimeParser.timeformat(str(result.pop('pubtime', ''))),                            # 发布时间
+                'pubtime': pubtime,                            # 发布时间
                 'channel': result.pop('channel', None),                            # 频道信息
                 'crawlinfo': kwargs.get('crawlinfo')
             }
