@@ -24,9 +24,10 @@ class newtask_by_sid(Base):
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
         self.notice('Selected Site Info:', site)
+        UrlsDB = self.g['db']['UrlsDB']
         while True:
             i = 0
-            for item in self.g['db']['UrlsDB'].get_new_list(uid, sid, where={'status': 0}):
+            for item in UrlsDB.get_new_list(uid, sid, where={'status': UrlsDB.STATUS_INIT}):
                 d={}
                 d['uid'] = item['uid']
                 self.logger.info("push newtask_queue data: %s" %  str(d))
