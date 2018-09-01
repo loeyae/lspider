@@ -17,6 +17,9 @@ class rebuild_result(Base):
 
     def process(self, *args, **kwargs):
         created = None if not args else int(args[0])
+        no_loop = False
+        if len(args) > 1:
+           no_loop = bool(args[1])
         outqueue = self.g['queue'].get('scheduler2spider')
         ArticlesDB = self.g['db'].get('ArticlesDB')
         createtime = 0
@@ -29,7 +32,7 @@ class rebuild_result(Base):
             else:
                 lastcreatetime = createtime
             self.g['logger'].debug("current createtime: %s" % createtime)
-            data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.STATUS_INIT), ("ctime", "$gte", createtime)], select={"rid": 1, "url": 1, "ctime": 1}, hits=100)
+            data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.STATUS_INIT), ("ctime", "$gte", createtime)], select={"rid": 1, "url": 1, "ctime": 1, "acid": 1, "ctime": 1, "crawlinfo": 1}, hits=100)
             data = list(data)
             self.g['logger'].debug("got result: %s" % str(data))
             i = 0
@@ -39,15 +42,9 @@ class rebuild_result(Base):
                     continue
                 message = {
                     'mode': 'item',
-                    'tid': 0,
-                    'pid': item['crawlinfo'].get('pid'),
-                    'sid': item['crawlinfo'].get('sid', 0),
-                    'rid': item['rid'],
-                    'url': item('url'),
-                    'save': None,
-                    'unid': item['acid'],
-                    'parent_url': item['crawlinfo'].get('url'),
+                    'rid': item['rid']
                 }
+                self.g['logger'].info("message: %s" % message)
                 outqueue.put_nowait(message)
                 if item['ctime'] > createtime:
                     createtime = item['ctime']
