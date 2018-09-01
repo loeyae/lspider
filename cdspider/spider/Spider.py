@@ -338,6 +338,7 @@ class Spider(Component):
         task.update({
             'tid': 0,
             'pid': article['crawlinfo']['pid'],
+            'project': project,
             'sid': article['crawlinfo']['sid'],
             'uid': article['crawlinfo'].get('uid', 0),
             'kwid': article['crawlinfo'].get('kwid', 0),
