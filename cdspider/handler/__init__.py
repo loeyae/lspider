@@ -85,6 +85,7 @@ class BaseHandler(Component):
         self.mode = self.task.get('save',{}).get('mode', self.MODE_DEFAULT)
         self.page = 1
         self.last_result_id = None
+        self.no_sync = False
 
     def __del__(self):
         if self.mycrawler and isinstance(self.crawler, BaseCrawler):
@@ -362,6 +363,8 @@ class BaseHandler(Component):
         if mode == self.MODE_ATT:
             parser = CustomParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         elif mode == self.MODE_ITEM:
+#            if not isinstance(rule, list):
+#                rule = [rule]
             parser = ItemParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         else:
 #            parser_name = 'list'
@@ -445,7 +448,7 @@ class BaseHandler(Component):
         """
         同步大数据平台
         """
-        if not self.last_result_id:
+        if not self.last_result_id or self.no_sync:
             return
         self.info("result2kafka  starting...")
         res={}
