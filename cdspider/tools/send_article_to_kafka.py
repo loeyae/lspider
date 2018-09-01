@@ -14,7 +14,7 @@ class send_article_to_kafka(Base):
     def process(self):
         assert len(args) > 0, 'Please input where'
         where = json.loads(args[0])
-        created = 0
+        created = int(time.time())
         if len(args) > 1:
             created = int(created)
         sum=0
