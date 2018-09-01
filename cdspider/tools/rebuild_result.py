@@ -16,7 +16,7 @@ class rebuild_result(Base):
     """
 
     def process(self, *args, **kwargs):
-        created = None if not args else args[0]
+        created = None if not args else int(args[0])
         outqueue = self.g['queue'].get('scheduler2spider')
         ArticlesDB = self.g['db'].get('ArticlesDB')
         createtime = 0
