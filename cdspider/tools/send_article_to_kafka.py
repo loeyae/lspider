@@ -20,6 +20,7 @@ class send_article_to_kafka(Base):
         sum=0
         acid = '0'
         where['acid'] = {"$gt": acid}
+        where['status'] = 1
         self.notice('Where Info:', where)
         while True:
             n=0
