@@ -88,6 +88,7 @@ class ResultTrait(object):
         """
         message = {
             'mode': 'item',
+            'pid': self.task.get('pid'),
             'rid': rid,
         }
         self.queue['scheduler2spider'].put_nowait(message)
