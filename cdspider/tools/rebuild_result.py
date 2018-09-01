@@ -28,7 +28,8 @@ class rebuild_result(Base):
         acid = '0'
         while True:
             self.g['logger'].debug("current createtime: %s" % createtime)
-            data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.STATUS_INIT), ("acid", "$gt", acid)], select={"rid": 1, "url": 1, "ctime": 1, "acid": 1, "ctime": 1, "crawlinfo": 1}, sort=[('acid', 1)], hits=100)
+            where = {"status": ArticlesDB.STATUS_INIT, "acid": {"$gt": acid}}
+            data = ArticlesDB.get_list(created, where = where, select={"rid": 1, "url": 1, "ctime": 1, "acid": 1, "ctime": 1, "crawlinfo": 1}, sort=[('acid', 1)], hits=100)
             data = list(data)
             self.g['logger'].debug("got result: %s" % str(data))
             i = 0
