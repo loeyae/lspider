@@ -42,6 +42,7 @@ class rebuild_result(Base):
                     continue
                 message = {
                     'mode': 'item',
+                    'pid': item['crawlinfo']['pid'],
                     'rid': item['rid']
                 }
                 self.g['logger'].info("message: %s" % message)
