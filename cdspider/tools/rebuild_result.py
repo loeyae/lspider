@@ -25,6 +25,7 @@ class rebuild_result(Base):
         createtime = 0
         if not created:
             created = int(time.time())
+        sum = 0
         acid = '0'
         while True:
             self.g['logger'].debug("current createtime: %s" % createtime)
@@ -48,6 +49,7 @@ class rebuild_result(Base):
                 i += 1
             if i == 0:
                 self.g['logger'].info("no rebuid result")
-            if no_loop:
-                break
+                if no_loop:
+                    break
+            print("totle: %s" % sum)
             time.sleep(0.5)
