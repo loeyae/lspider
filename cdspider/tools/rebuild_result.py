@@ -26,13 +26,10 @@ class rebuild_result(Base):
         lastcreatetime = createtime
         if not created:
             created = int(time.time())
+        acid = '0'
         while True:
-            if lastcreatetime == createtime:
-                createtime += 1
-            else:
-                lastcreatetime = createtime
             self.g['logger'].debug("current createtime: %s" % createtime)
-            data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.STATUS_INIT), ("ctime", "$gte", createtime)], select={"rid": 1, "url": 1, "ctime": 1, "acid": 1, "ctime": 1, "crawlinfo": 1}, hits=100)
+            data = ArticlesDB.get_list(created, where = [("status", ArticlesDB.STATUS_INIT), ("acid", "$gte", acid)], select={"rid": 1, "url": 1, "ctime": 1, "acid": 1, "ctime": 1, "crawlinfo": 1}, sort=[('acid', 1)], hits=100)
             data = list(data)
             self.g['logger'].debug("got result: %s" % str(data))
             i = 0
@@ -47,8 +44,7 @@ class rebuild_result(Base):
                 }
                 self.g['logger'].info("message: %s" % message)
                 outqueue.put_nowait(message)
-                if item['ctime'] > createtime:
-                    createtime = item['ctime']
+                acid = item['acid']
                 i += 1
             if i == 0:
                 self.g['logger'].info("no rebuid result")
