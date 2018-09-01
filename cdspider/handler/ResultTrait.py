@@ -82,22 +82,13 @@ class ResultTrait(object):
             })
         return r
 
-    def build_item_task(self, data, parent_url, rid, unid):
+    def build_item_task(self, rid):
         """
         生成详情抓取任务并入队
         """
         message = {
             'mode': 'item',
-            'tid': 0,
-            'pid': self.task.get('pid'),
-            'sid': self.task.get('sid'),
-            'uid': self.task.get('uid', 0),
-            'kwid': self.task.get('kwid', 0),
             'rid': rid,
-            'url': data.pop('url'),
-            'save': data,
-            'unid': unid,
-            'parent_url': parent_url,
         }
         self.queue['scheduler2spider'].put_nowait(message)
 
@@ -146,7 +137,7 @@ class ResultTrait(object):
                     if not result_id:
                         raise CDSpiderDBError("Result insert failed")
                     self.crawl_info['crawl_count']['new_count'] += 1
-                    self.build_item_task(copy.deepcopy(item), final_url, result_id, copy.deepcopy(unid))
+                    self.build_item_task(result_id)
 #                elif unid:
 #                    self.db['ArticlesDB'].add_crwal_info(unid['unid'], unid['ctime'], crawlinfo=crawlinfo)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
