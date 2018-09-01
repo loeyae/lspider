@@ -11,7 +11,7 @@ import time
 
 class send_article_to_kafka(Base):
 
-    def process(self):
+    def process(self, *args, **kwargs):
         assert len(args) > 0, 'Please input where'
         where = json.loads(args[0])
         created = int(time.time())
@@ -19,11 +19,11 @@ class send_article_to_kafka(Base):
             created = int(created)
         sum=0
         acid = '0'
-        where['acid'] = {"$gt": acid}
         where['status'] = 1
         self.notice('Where Info:', where)
         while True:
             n=0
+            where['acid'] = {"$gt": acid}
             for item in self.g['db']['ArticlesDB'].get_list(created, where=where):
                 n=n+1
                 sum=sum+1
