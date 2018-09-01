@@ -82,6 +82,8 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
             collection.create_index('domain', name='domain')
         if not 'subdomain' in indexes:
             collection.create_index('subdomain', name='subdomain')
+        if not 'status' in indexes:
+            collection.create_index('status', name='status')
         if not 'pubtime' in indexes:
             collection.create_index('pubtime', name='pubtime')
         if not 'ctime' in indexes:
