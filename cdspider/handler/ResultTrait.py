@@ -60,6 +60,7 @@ class ResultTrait(object):
             r['result'] = result or None
             if not r['title']:
                 r['status'] = ArticlesDB.STATUS_DELETED
+                self.no_sync = True
             r = self.result_prepare(r)
         else:
             now = int(time.time())
