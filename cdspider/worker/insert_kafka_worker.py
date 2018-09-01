@@ -36,6 +36,8 @@ class insert_kafka_worker(object):
             res=self.db['ArticlesDB'].get_detail(data['rid'])
             if 'on_sync' in data:
                 res['flag']=data['on_sync']
+            if '_id' in res:
+                res.pop('_id')
             res.pop('rid')
             res.pop('crawlinfo')
             self.kafka.put_nowait(res)
