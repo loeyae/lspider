@@ -58,6 +58,8 @@ class ResultTrait(object):
                 'crawlinfo': kwargs.get('crawlinfo')
                 }
             r['result'] = result or None
+            if not r['title']:
+                r['status'] = ArticlesDB.STATUS_DELETED
             r = self.result_prepare(r)
         else:
             now = int(time.time())
