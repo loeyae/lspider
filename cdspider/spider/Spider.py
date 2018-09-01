@@ -340,6 +340,7 @@ class Spider(Component):
             'pid': article['crawlinfo']['pid'],
             'sid': article['crawlinfo']['sid'],
             'uid': article['crawlinfo'].get('uid', 0),
+            'kwid': article['crawlinfo'].get('kwid', 0),
             'rid': article['rid'],
             'url': article['url'],
             'save': {},
