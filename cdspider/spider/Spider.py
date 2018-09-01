@@ -319,11 +319,12 @@ class Spider(Component):
     def _get_task_from_item(self, message, task, project, no_check_status = False):
         if not task:
             task = {}
-        subdomain, domain = utils.parse_domain(message['url'])
+        article = self.db['ArticlesDB'].get_detail(message['rid'])
+        subdomain, domain = utils.parse_domain(article['url'])
         parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
         if not parse_rule and subdomain:
             parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
-        format_params = {"projectname": "Project%s" % message['pid'], "parenthandler": "SiteHandler"}
+        format_params = {"projectname": "Project%s" % article['crawlinfo']['pid'], "parenthandler": "SiteHandler"}
         if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
             keylist = re.findall('\{(\w+)\}', parse_rule['scripts'])
             for key in keylist:
@@ -336,12 +337,12 @@ class Spider(Component):
             itemscript = DEFAULT_ITEM_SCRIPTS
         task.update({
             'tid': 0,
-            'pid': message['pid'],
-            'sid': message['sid'],
-            'uid': message.get('uid', 0),
-            'kwid': message.get('kwid', 0),
-            'project': project,
-            'url': message['url'],
+            'pid': article['crawlinfo']['pid'],
+            'sid': article['crawlinfo']['sid'],
+            'uid': article['crawlinfo'].get('uid', 0),
+            'rid': article['rid'],
+            'url': article['url'],
+            'save': {},
             'scripts': itemscript
         })
         site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
@@ -360,11 +361,11 @@ class Spider(Component):
         if not 'save' in task or not task['save']:
             task['save'] = {}
         task['rid'] = message['rid']
-        task['unid'] = message['unid']
+        task['unid'] = {"unid": article['acid'], "ctime": article['ctime']}
         task['save']['mode'] = message['mode'];
-        task['save']['parent_url'] = message['parent_url'];
-        task['save']['base_url'] = message['url']
-        task['item'] = message['save']
+        task['save']['parent_url'] = article['crawlinfo'].get('url');
+        task['save']['base_url'] = article['url']
+        task['item'] = article
         task['queue'] = self.queue['scheduler2spider']
         task['queue_message'] = copy.deepcopy(message)
         task['save']['retry'] = message.get('retry', 0)
