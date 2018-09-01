@@ -16,7 +16,7 @@ class send_article_to_kafka(Base):
         where = json.loads(args[0])
         created = int(time.time())
         if len(args) > 1:
-            created = int(created)
+            created = int(args[1])
         sum=0
         acid = '0'
         where['status'] = 1
@@ -24,7 +24,7 @@ class send_article_to_kafka(Base):
         while True:
             n=0
             where['acid'] = {"$gt": acid}
-            for item in self.g['db']['ArticlesDB'].get_list(created, where=where):
+            for item in self.g['db']['ArticlesDB'].get_list(created, where=where, sort=[('acid', 1)]):
                 n=n+1
                 sum=sum+1
                 d={}
