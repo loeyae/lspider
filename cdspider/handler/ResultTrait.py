@@ -134,6 +134,8 @@ class ResultTrait(object):
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     crawlinfo =  self._build_crawl_info(final_url)
+                    if self.task.get('site', {}).get('type', SitesDB.TYPE_SEARCH) == SitesDB.TYPE_SEARCH:
+                        typeinfo = self._typeinfo(item['url'])
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                     result_id = self.db['ArticlesDB'].insert(result)
                     self.last_result_id = result_id
