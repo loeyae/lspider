@@ -317,21 +317,6 @@ class Spider(Component):
         return task
 
     def _get_task_from_item(self, message, task, project, no_check_status = False):
-        subdomain, domain = utils.parse_domain(article['url'])
-        parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
-        if not parse_rule and subdomain:
-            parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
-        format_params = {"projectname": "Project%s" % message['pid'], "parenthandler": "SiteHandler"}
-        if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
-            keylist = re.findall('\{(\w+)\}', parse_rule['scripts'])
-            for key in keylist:
-                if key in ('projectname', 'parenthandler'):
-                    continue
-                else:
-                    format_params[key] = '{%s}' % key
-            itemscript = parse_rule['scripts']
-        else:
-            itemscript = DEFAULT_ITEM_SCRIPTS
         if not task:
             task = {}
         if 'rid' in message and message['rid']:
@@ -352,6 +337,22 @@ class Spider(Component):
             task['save']['parent_url'] = article['crawlinfo'].get('url');
             task['save']['base_url'] = article['url']
             task['item'] = article
+
+        subdomain, domain = utils.parse_domain(task['url'])
+        parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
+        if not parse_rule and subdomain:
+            parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
+        format_params = {"projectname": "Project%s" % message['pid'], "parenthandler": "SiteHandler"}
+        if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
+            keylist = re.findall('\{(\w+)\}', parse_rule['scripts'])
+            for key in keylist:
+                if key in ('projectname', 'parenthandler'):
+                    continue
+                else:
+                    format_params[key] = '{%s}' % key
+            itemscript = parse_rule['scripts']
+        else:
+            itemscript = DEFAULT_ITEM_SCRIPTS
         task['scripts']= itemscript
         site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
         if not site:
