@@ -373,6 +373,7 @@ class Spider(Component):
                 format_params["parenthandler"] = "UrlHandler"
         if not 'save' in task or not task['save']:
             task['save'] = {}
+        task['save'].setdefault('base_url', task['url'])
         task['save']['mode'] = message['mode'];
         task['save']['retry'] = message.get('retry', 0)
         task['scripts'] = task['scripts'].format(**format_params)
