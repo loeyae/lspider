@@ -367,7 +367,7 @@ class Spider(Component):
         task['save']['mode'] = message['mode'];
         task['save']['parent_url'] = article['crawlinfo'].get('url');
         task['save']['base_url'] = article['url']
-        task['item'] = article
+        task['item'] = {"title": article.get("title", None),"author": article.get("author", None), "pubtime": article.get("pubtime", None)}
         task['queue'] = self.queue['scheduler2spider']
         task['queue_message'] = copy.deepcopy(message)
         task['save']['retry'] = message.get('retry', 0)
