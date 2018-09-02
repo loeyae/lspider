@@ -319,20 +319,24 @@ class Spider(Component):
     def _get_task_from_item(self, message, task, project, no_check_status = False):
         if not task:
             task = {}
+        task.update({
+            'tid': 0,
+            'pid': message['pid'],
+            'project': project,
+            'save': {},
+        })
         if 'rid' in message and message['rid']:
+            task['queue'] = self.queue['scheduler2spider']
+            task['queue_message'] = copy.deepcopy(message)
             task['rid'] = message['rid']
             article = self.db['ArticlesDB'].get_detail(message['rid'])
             task['unid'] = {"unid": article['acid'], "ctime": article['ctime']}
             task.update({
-                'tid': 0,
-                'pid': article['crawlinfo']['pid'],
-                'project': project,
                 'sid': article['crawlinfo']['sid'],
                 'uid': article['crawlinfo'].get('uid', 0),
                 'kwid': article['crawlinfo'].get('kwid', 0),
                 'rid': article['rid'],
                 'url': article['url'],
-                'save': {},
             })
             task['save']['parent_url'] = article['crawlinfo'].get('url');
             task['save']['base_url'] = article['url']
@@ -370,8 +374,6 @@ class Spider(Component):
         if not 'save' in task or not task['save']:
             task['save'] = {}
         task['save']['mode'] = message['mode'];
-        task['queue'] = self.queue['scheduler2spider']
-        task['queue_message'] = copy.deepcopy(message)
         task['save']['retry'] = message.get('retry', 0)
         task['scripts'] = task['scripts'].format(**format_params)
         return task
