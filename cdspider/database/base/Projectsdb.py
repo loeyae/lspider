@@ -15,7 +15,7 @@ from . import Base
         'name': str,          # 项目名称
         'status': int,        # 项目状态
         'scripts': str,       # 自定义handler
-        'comments': str,      # 项目描述       
+        'comments': str,      # 项目描述
         'ctime': int,         # 创建时间
         'utime': int,         # 最后一次更新时间
         'creator': int,       # 创建人id
@@ -45,9 +45,9 @@ class ProjectsDB(Base):
 
     def get_list(self, where = {}, select = None):
         raise NotImplementedError
-    
+
     def get_count(self, where = {}, select = None):
         raise NotImplementedError
-    
+
     def get_list_c(self, where = {}, select = None):
         raise NotImplementedError
