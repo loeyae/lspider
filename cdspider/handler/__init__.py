@@ -272,6 +272,8 @@ class BaseHandler(Component):
                 params['method'] = 'open'
             if (proxy == self.PROXY_TYPE_EVER or self.force_proxy or (proxy == self.PROXY_TYPE_AUTO and self.auto_proxy)) and save['proxy']:
                 params['proxy'] = copy.deepcopy(save['proxy'])
+            else:
+                params['proxy'] = None
             self.crawler.crawl(**params)
             if self.page == 1:
                 final_url = save['request_url'] = self.crawler.final_url
