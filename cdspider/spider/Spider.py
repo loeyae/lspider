@@ -324,7 +324,7 @@ class Spider(Component):
             'pid': message['pid'],
             'project': project,
         })
-        if not 'save' in task:
+        if not "save" in task or not task['save']:
             task['save'] = {}
         if 'rid' in message and message['rid']:
             task['queue'] = self.queue['scheduler2spider']
