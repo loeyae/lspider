@@ -34,8 +34,7 @@ class ResultTrait(object):
             if pubtime:
                 pubtime = TimeParser.timeformat(str(pubtime))
             if update:
-                self.error("artcle: acid: %s ctime: %s rid: %s" % (kwargs['unid'], int(kwargs['ctime']), kwargs['rid']))
-                src = self.db['ArticlesDB'].get_detail(kwargs['rid'])
+                src = kwargs.get('src', {})
                 #TODO 更新列表页抓取任务的crawlinfo
                 pubtime = pubtime or src.get('pubtime', None)
                 now = src.get('ctime')
@@ -179,8 +178,7 @@ class ResultTrait(object):
                 self.crawl_info['crawl_count']['new_count'] += 1
                 crawlinfo = self._build_crawl_info(final_url)
                 item = self.task.get('item', {})
-                data = utils.dictjoin(data, item, replace = True)
-                result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ArticlesDB.STATUS_PARSED, update=update, rid=rid, **unid)
+                result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ArticlesDB.STATUS_PARSED, update=update, rid=rid, src=item, **unid)
                 if rid:
                     self.db['ArticlesDB'].update(rid, result)
                     result_id = rid
