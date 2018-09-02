@@ -211,7 +211,7 @@ class BaseHandler(Component):
         if not subdomain:
             parsed = urlparse(url)
             arr = list(parsed)
-            arr[1] = "www.%s" % domain
+            arr[1] = "www.%s" % arr[1]
             u = urlunparse(arr)
         else:
             u = url
