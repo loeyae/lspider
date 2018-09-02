@@ -210,6 +210,7 @@ class RequestsCrawler(BaseCrawler):
             kwargs.setdefault('method', args[1])
         kwargs.setdefault('method', 'get')
         self.info("Requests crawl params: %s" % kwargs)
+        self._setting['proxies'] = None
         self._prepare_setting(**kwargs)
         if kwargs.get('ajax', False):
             self.set_header('x-requested-with', 'XMLHttpRequest')
