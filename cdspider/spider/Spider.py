@@ -323,8 +323,9 @@ class Spider(Component):
             'tid': 0,
             'pid': message['pid'],
             'project': project,
-            'save': {},
         })
+        if not 'save' in task:
+            task['save'] = {}
         if 'rid' in message and message['rid']:
             task['queue'] = self.queue['scheduler2spider']
             task['queue_message'] = copy.deepcopy(message)
