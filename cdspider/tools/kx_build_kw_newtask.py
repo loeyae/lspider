@@ -5,6 +5,7 @@ Created on 2018年8月9日
 
 @author: Wang Fengwei
 '''
+import re
 import time
 from six.moves import queue
 from cdspider.tools import Base
@@ -28,16 +29,12 @@ class kx_build_kw_newtask(Base):
                 break
 
     def _insert_task(self,title,sid):
-        title_list=title.split('-')
-        if len(title_list)>1:
-            title=title[-1]
-        title_list=title.split('_')
-        if len(title_list)>1:
-            title=title[-1]
+        title_list=re.split('[-_|]', title)
+        title = title_list[0]
         if title==None or title=='':
             return
         if len(title)<8:
-            return 
+            return
         uid=0
         while True:
             u_sum=0
@@ -46,11 +43,11 @@ class kx_build_kw_newtask(Base):
                 t={}
                 t['kwid']=0
                 t['rid']=0
-                t['expire']=int(time.time())+604800 #2592000
-                if sid==3:
+                t['expire']=int(time.time()) + 2592000
+                if sid==3 or sid == 9:
                     t['expire']=int(time.time())+604800
                 t['sid']=sid
-                t['pid']=1
+                t['pid']=u_item['pid']
                 t['uid']=u_item['uid']
                 t['utime']=int(time.time())
                 t['aid']=0
