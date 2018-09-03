@@ -39,26 +39,29 @@ class kx_build_kw_newtask(Base):
         while True:
             u_sum=0
             for u_item in self.g['db']['UrlsDB'].get_list(where={'sid':sid,'uid':{'$gt':uid}}):
-                u_sum=u_sum+1
-                t={}
-                t['kwid']=0
-                t['rid']=0
-                t['expire']=int(time.time()) + 2592000
-                if sid==3 or sid == 9:
-                    t['expire']=int(time.time())+604800
-                t['sid']=sid
-                t['pid']=u_item['pid']
-                t['uid']=u_item['uid']
-                t['utime']=int(time.time())
-                t['aid']=0
-                t['plantime']=int(time.time())
-                t['rate']=u_item['rate']
-                t['url']=u_item['url'].replace('{keyword}',title)
-                t['status']=1
-                t['newTask_by_tools']=1
-                uid=u_item['uid']
-                self.g['logger'].info('insert data: %s',str(t))
-                self.g['db']['TaskDB'].insert(t)
+                try:
+                    u_sum=u_sum+1
+                    t={}
+                    t['kwid']=0
+                    t['rid']=0
+                    t['expire']=int(time.time()) + 2592000
+                    if sid==3 or sid == 9:
+                        t['expire']=int(time.time())+604800
+                    t['sid']=sid
+                    t['pid']=u_item['pid']
+                    t['uid']=u_item['uid']
+                    t['utime']=int(time.time())
+                    t['aid']=0
+                    t['plantime']=int(time.time())
+                    t['rate']=u_item['rate']
+                    t['url']=u_item['url'].replace('{keyword}',title)
+                    t['status']=1
+                    t['newTask_by_tools']=1
+                    uid=u_item['uid']
+                    self.g['logger'].info('insert data: %s',str(t))
+                    self.g['db']['TaskDB'].insert(t)
+                except:
+                    pass
             if u_sum==0:
                 break
             time.sleep(0.1)
