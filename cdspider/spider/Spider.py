@@ -135,7 +135,9 @@ class Spider(Component):
                     result = handler.parse(last_source, save.get("parent_url", final_url))
                     self.info('Spider parse end, result: %s' % str(result))
                     if return_result:
-                        attach_data = handler.on_attach(last_source, final_url, parent_url, return_result = return_result)
+                        attach_data = None
+                        if mode == BaseHandler.MODE_ITEM:
+                            attach_data = handler.on_attach(last_source, final_url, parent_url, return_result = return_result)
                         return_data.append((result, broken_exc, last_source, final_url, save, attach_data))
 
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
