@@ -47,7 +47,7 @@ class Mongo(BaseDataBase):
         self.logger.debug('find %s from %s where %s' % (select, table or self.table, where))
         cursor = collection.find(filter=self._build_where(where), projection=self._build_projection(select), sort = sort, skip = offset, limit = hits)
         for each in cursor:
-            if each and '_id' in each and select and not '_id' in select:
+            if each and '_id' in each and (select and not '_id' in select or not select):
                 del each['_id']
             yield each
 
@@ -58,7 +58,7 @@ class Mongo(BaseDataBase):
         collection = self._db.get_collection(table or self.table)
         self.logger.debug('find %s from %s where %s' % (select, table or self.table, where))
         doc = collection.find_one(filter=self._build_where(where), projection=self._build_projection(select), sort = sort)
-        if doc and '_id' in doc and select and not '_id' in select:
+        if doc and '_id' in doc and (select and not '_id' in select or not select):
             del doc['_id']
         return doc
 
