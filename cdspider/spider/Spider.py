@@ -134,20 +134,17 @@ class Spider(Component):
                         raise CDSpiderCrawlerError('Spider crawl failed')
                     result = handler.parse(last_source, save.get("parent_url", final_url))
                     self.info('Spider parse end, result: %s' % str(result))
+                    result = handler.on_result(result, broken_exc, last_source, final_url, return_result)
+                    attach_data = None
+                    if mode == BaseHandler.MODE_ITEM and handler.current_page == 1:
+                        parent_url = save.get("parent_url", None)
+                        attach_data = handler.on_attach(last_source, final_url, parent_url, return_result)
                     if return_result:
-                        attach_data = None
-                        if mode == BaseHandler.MODE_ITEM:
-                            attach_data = handler.on_attach(last_source, final_url, parent_url, return_result = return_result)
                         return_data.append((result, broken_exc, last_source, final_url, save, attach_data))
 
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
-                    else:
-                        handler.on_result(result, broken_exc, last_source, final_url)
-                        if mode == BaseHandler.MODE_ITEM and handler.current_page == 1:
-                            parent_url = save.get("parent_url", None)
-                            handler.on_attach(last_source, final_url, parent_url)
-                        if broken_exc:
-                            raise broken_exc
+                    if broken_exc:
+                        raise broken_exc
                     if not 'incr_data' in save:
                         break
             finally:
@@ -155,11 +152,11 @@ class Spider(Component):
                     handler.on_sync()
                 self.info("Spider process end")
         except Exception as e:
-            if 'incr_data' in save and isinstance(save['incr_data'], list) and save['incr_data']:
-                for item in save['incr_data']:
-                    if int(item.get('base_page', 1)) >= int(item.get('value', 1)):
-                        item['isfirst'] = True
             if not return_result:
+                if 'incr_data' in save and isinstance(save['incr_data'], list) and save['incr_data']:
+                    for item in save['incr_data']:
+                        if int(item.get('base_page', 1)) >= int(item.get('value', 1)):
+                            item['isfirst'] = True
                 task['last_source'] = last_source
                 handler.on_error(e)
             else:
@@ -348,9 +345,11 @@ class Spider(Component):
             task['item'] = article
 
         subdomain, domain = utils.parse_domain(task['url'])
-        parse_rule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
+        parse_rule = task.get("parse_rule", {})
         if not parse_rule and subdomain:
             parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
+        if not parse_rule:
+            self.db['ParseRuleDB'].get_detail_by_domain(domain)
         format_params = {"projectname": "Project%s" % message['pid'], "parenthandler": "SiteHandler"}
         if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
             keylist = re.findall('\{(\w+)\}', parse_rule['scripts'])
