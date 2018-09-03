@@ -474,12 +474,12 @@ class Spider(Component):
         def fetch(task):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
-            parsed = broken_exc = last_source = final_url = save = None
+            parsed = broken_exc = last_source = final_url = save = attach_task = None
             try:
                 task = json.loads(task)
                 ret = self.fetch(task, True)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
-                    parsed, broken_exc, last_source, final_url, save = ret[0]
+                    parsed, broken_exc, last_source, final_url, save, attach_task = ret[0]
                 else:
                     self.error(ret)
                 if last_source:
@@ -487,7 +487,7 @@ class Spider(Component):
             except :
                 broken_exc = traceback.format_exc()
             output = sys.stdout.read()
-            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, 'attach_task': attach_task}
 
             return json.dumps(result)
         application.register_function(fetch, 'fetch')
