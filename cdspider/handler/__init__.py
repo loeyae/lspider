@@ -400,7 +400,7 @@ class BaseHandler(Component):
                 parse = dict((key, item) for key, item in parse.items() if 'filter' in item and item['filter'])
         return parse
 
-    def on_attach(self, source, url, list_url):
+    def on_attach(self, source, url, list_url, return_result = False):
         """
         获取附加任务链接，并push newtask
         """
@@ -415,6 +415,8 @@ class BaseHandler(Component):
         dattach_list = self.db['AttachmentDB'].get_list_by_domain(pid, domain, where={"status": AttachmentDB.STATUS_ACTIVE})
         attach_list.extend(list(dattach_list))
         self.debug("%s attach list: %s" % (self.__class__.__name__, str(attach_list)))
+        if return_result:
+            return_data = []
         for each in attach_list:
             pparse = each.get('preparse', {}).get('parse', None)
             parse = {}
@@ -441,10 +443,15 @@ class BaseHandler(Component):
                 self.debug("%s attach parsed: %s" % (self.__class__.__name__, parsed))
             attachurl = utils.build_url_by_rule(urlrule, parsed)
             message = {'aid': each['aid'], 'url': attachurl, 'pid': self.task.get('pid'), 'rid': self.last_result_id}
-            self.debug("%s attach create task: %s" % (self.__class__.__name__, str(message)))
-            self.queue['newtask_queue'].put_nowait(message)
+            if not return_result:
+                self.debug("%s attach create task: %s" % (self.__class__.__name__, str(message)))
+                self.queue['newtask_queue'].put_nowait(message)
+            else:
+                return_data.append(message)
 
         self.debug("%s attach end" % (self.__class__.__name__))
+        if return_result:
+            return return_data
 
     def on_sync(self):
         """
