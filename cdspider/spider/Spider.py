@@ -135,7 +135,9 @@ class Spider(Component):
                     result = handler.parse(last_source, save.get("parent_url", final_url))
                     self.info('Spider parse end, result: %s' % str(result))
                     if return_result:
-                        return_data.append((result, broken_exc, last_source, final_url, save))
+                        attach_data = handler.on_attach(last_source, final_url, parent_url, return_result = return_result)
+                        return_data.append((result, broken_exc, last_source, final_url, save, attach_data))
+
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
                     else:
                         handler.on_result(result, broken_exc, last_source, final_url)
@@ -159,7 +161,7 @@ class Spider(Component):
                 task['last_source'] = last_source
                 handler.on_error(e)
             else:
-                return_data.append((None, traceback.format_exc(), None, None, None))
+                return_data.append((None, traceback.format_exc(), None, None, None, None))
             self.error(traceback.format_exc())
         finally:
             if not return_result:
