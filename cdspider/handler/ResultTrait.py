@@ -95,7 +95,7 @@ class ResultTrait(object):
         }
         self.queue['scheduler2spider'].put_nowait(message)
 
-    def channel_to_list(self, final_url, data, typeinfo, page_source, unique = True):
+    def channel_to_list(self, final_url, data, typeinfo, page_source, unique = True, return_result = False):
         """
         频道列表存储并生成任务
         """
@@ -106,6 +106,9 @@ class ResultTrait(object):
             self.crawl_info['crawl_count']['count'] += len(data)
             new_count = self.crawl_info['crawl_count']['new_count']
             formated = self.build_url_by_rule(data, final_url)
+            self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(formated)))
+            if return_result:
+                return formated
             for item in formated:
                 uid = None
                 #uid = self.db['urlsdn'].insert()
@@ -117,7 +120,7 @@ class ResultTrait(object):
                 self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
 
-    def list_to_item(self, final_url, data, typeinfo, page_source = None, unid = None):
+    def list_to_item(self, final_url, data, typeinfo, page_source = None, unid = None, return_result = False):
         """
         列表数据生成详情任务
         """
@@ -128,6 +131,9 @@ class ResultTrait(object):
             self.crawl_info['crawl_count']['count'] += len(data)
             new_count = self.crawl_info['crawl_count']['new_count']
             formated = self.build_url_by_rule(data, final_url)
+            self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(formated)))
+            if return_result:
+                return formated
             for item in formated:
                 inserted = False
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
@@ -149,7 +155,7 @@ class ResultTrait(object):
                 self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
 
-    def item_to_result(self, final_url, data, typeinfo, page_source=None, unid=None):
+    def item_to_result(self, final_url, data, typeinfo, page_source=None, unid=None, return_result = False):
         """
         详情存储
         """
@@ -172,15 +178,20 @@ class ResultTrait(object):
                 if 'isfirst' in item and not item['isfirst']:
                     isfirst = False
                     break
+        item = self.task.get('item', {})
+        crawlinfo = self._build_crawl_info(final_url)
+        if return_result:
+            formated = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ArticlesDB.STATUS_PARSED, update=update, rid=rid, src=item, unid = self.db['UniqueDB'].build(self.get_unique_setting(final_url, data)), ctime = ctime)
+            self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(formated)))
+            return formated
         if not unid:
             inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(final_url, data), ctime)
             self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
         if inserted:
             if isfirst:
                 self.crawl_info['crawl_count']['new_count'] += 1
-                crawlinfo = self._build_crawl_info(final_url)
-                item = self.task.get('item', {})
                 result = self._build_result_info(final_url=final_url, typeinfo=typeinfo, result=data, crawlinfo=crawlinfo, source=utils.decode(page_source), status=ArticlesDB.STATUS_PARSED, update=update, rid=rid, src=item, **unid)
+                self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
                 if rid:
                     self.db['ArticlesDB'].update(rid, result)
                     result_id = rid
@@ -215,9 +226,15 @@ class ResultTrait(object):
         result = self.result_prepare(result)
         return result
 
-    def attach_to_result(self, final_url, data, typeinfo, page_source, unid=None):
+    def attach_to_result(self, final_url, data, typeinfo, page_source, unid=None, return_result = False):
         attachment = self.task.get('attachment')
         rid = self.task.get('rid', None)
+        if return_result:
+            if attachment.get('type', AttachmentDB.TYPE_IMPACT) == AttachmentDB.TYPE_IMPACT:
+                return self._build_attach_data_info(data)
+            return [self._build_comments_info(item, rid) for item in data]
+        if not rid:
+            raise CDSpiderSettingError("rid not found")
         self.last_result_id = rid
         article = self.db['ArticlesDB'].get_detail(rid)
         if attachment.get('type', AttachmentDB.TYPE_IMPACT) == AttachmentDB.TYPE_IMPACT:
