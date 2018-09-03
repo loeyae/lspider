@@ -13,7 +13,7 @@ from cdspider.exceptions import *
 
 class ProjectBaseHandler(BaseHandler, ResultTrait):
 
-    def on_result(self, data, broken_exc, page_source, final_url):
+    def on_result(self, data, broken_exc, page_source, final_url, return_result = False):
         """
         on result
         """
@@ -25,18 +25,18 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
                 base_url=self.task.get('save', {}).get("base_url"), current_url=final_url)
         if self.mode == self.MODE_CHANNEL:
             typeinfo = self._typeinfo(final_url)
-            self.channel_to_list(final_url, data, typeinfo, page_source)
+            return self.channel_to_list(final_url, data, typeinfo, page_source, return_result = return_result)
         elif self.mode == self.MODE_LIST:
             typeinfo = self._typeinfo(final_url)
-            self.list_to_item(final_url, data, typeinfo, page_source)
+            return self.list_to_item(final_url, data, typeinfo, page_source, return_result = return_result)
         elif self.mode == self.MODE_ITEM:
             typeinfo = self.parse_domain(final_url)
             unique = False if not 'unid' in self.task else self.task['unid']
-            self.item_to_result(final_url, data, typeinfo, page_source, unique)
+            return self.item_to_result(final_url, data, typeinfo, page_source, unique, return_result = return_result)
         elif self.mode == self.MODE_ATT:
             typeinfo = self.parse_domain(final_url)
             unique = False if not 'unid' in self.task else self.task['unid']
-            self.attach_to_result(final_url, data, typeinfo, page_source, unique)
+            return self.attach_to_result(final_url, data, typeinfo, page_source, unique, return_result = return_result)
 
     def parse_domain(self, final_url):
         parent_url = self.task.get('save', {}).get('parent_url', None)
