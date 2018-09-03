@@ -510,7 +510,7 @@ class BaseHandler(Component):
 #            self.queue['excinfo_queue'].put_nowait(message)
 
     @abc.abstractmethod
-    def on_result(self, data, broken_exc, page_source, final_url):
+    def on_result(self, data, broken_exc, page_source, final_url, return_result = False):
         """
         数据处理
         """
