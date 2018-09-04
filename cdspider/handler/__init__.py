@@ -473,7 +473,7 @@ class BaseHandler(Component):
         """
         重复处理
         """
-        raise CDSpiderCrawlerNoNextPage()
+        raise CDSpiderCrawlerNoNextPage(base_url=self.task.get('save', {}).get("base_url", ''), current_url=self.task.get('save', {}).get("request_url", ''))
 
     def on_error(self, exc):
         """
