@@ -20,11 +20,11 @@ class Scheduler(object):
     """
     爬虫调度
     """
-    LOOP_INTERVAL = 0.1
     EXCEPTION_LIMIT = 3
     DEFAULT_RATE = [7200, "每2小时一次"]
+    DEFAULT_INTERVAL = 0.1
 
-    def __init__(self, db,queue,rate_map, log_level = logging.WARN):
+    def __init__(self, db,queue,rate_map, log_level = logging.WARN, interval = DEFAULT_INTERVAL):
         self.db=db
         self.queue=queue
         self.rate_map = rate_map
@@ -34,6 +34,7 @@ class Scheduler(object):
         self._exceptions = 0
         self._quit = False
         self.projects = set()
+        self.interval = int(interval)
 
     def _check_projects(self):
         self.logger.info("Schedule check_projects starting...")
@@ -151,9 +152,9 @@ class Scheduler(object):
 
         while not self._quit:
             try:
-                time.sleep(self.LOOP_INTERVAL)
                 self.run_once()
                 self._exceptions = 0
+                time.sleep(self.interval)
             except KeyboardInterrupt:
                 break
             except:
@@ -161,7 +162,7 @@ class Scheduler(object):
                 self._exceptions += 1
                 if self._exceptions > self.EXCEPTION_LIMIT:
                     break
-                time.sleep(1)
+                time.sleep(self.interval)
 
         self.logger.info("scheduler exit")
 
@@ -202,9 +203,9 @@ class Scheduler(object):
 
         while not self._quit:
             try:
-                time.sleep(self.LOOP_INTERVAL)
                 self.status_run_once()
                 self._exceptions = 0
+                time.sleep(self.interval)
             except KeyboardInterrupt:
                 break
             except:
@@ -212,6 +213,7 @@ class Scheduler(object):
                 self._exceptions += 1
                 if self._exceptions > self.EXCEPTION_LIMIT:
                     break
+                time.sleep(self.interval)
 
     def status_run_once(self):
         self.logger.info("status_schedule once starting...")
@@ -250,9 +252,9 @@ class Scheduler(object):
 
         while not self._quit:
             try:
-                time.sleep(self.LOOP_INTERVAL)
                 self.newTask_run_once()
                 self._exceptions = 0
+                time.sleep(self.interval)
             except KeyboardInterrupt:
                 break
             except:
@@ -260,6 +262,7 @@ class Scheduler(object):
                 self._exceptions += 1
                 if self._exceptions > self.EXCEPTION_LIMIT:
                     break
+                time.sleep(self.interval)
 
     def newTask_run_once(self):
         try:
