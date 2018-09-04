@@ -117,7 +117,7 @@ class Spider(Component):
                         continue
                     unid = utils.md5(last_source)
                     if last_source_unid == unid or last_url == final_url:
-                        raise CDSpiderCrawlerNoNextPage()
+                        raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=final_url)
                     last_source_unid = unid
                     last_url = final_url
                     if referer:
