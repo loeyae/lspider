@@ -27,7 +27,10 @@ class newtask_by_sid(Base):
         UrlsDB = self.g['db']['UrlsDB']
         while True:
             i = 0
-            for item in UrlsDB.get_new_list(uid, sid, where={'status': UrlsDB.STATUS_INIT}):
+            for item in UrlsDB.get_new_list(uid, sid, where={'status': {"$in": [UrlsDB.STATUS_INIT, UrlsDB.STATUS_ACTIVE]}}):
+                task = self.g['db']['TaskDB'].get_list(int(item['pid']) or 1, {"uid": item['uid'], "aid": 0})
+                if len(list(task)) > 0:
+                    continue
                 d={}
                 d['uid'] = item['uid']
                 self.logger.info("push newtask_queue data: %s" %  str(d))
