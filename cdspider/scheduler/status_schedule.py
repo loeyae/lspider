@@ -26,7 +26,7 @@ class StatusSchedule(object):
                 obj['rate']=int(rate)
             except:
                 pass
-             
+
         if 'status' in data:
             status=data['status']
             try:
@@ -64,14 +64,14 @@ class StatusSchedule(object):
                 self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type]})
             elif obj['status']==Base.STATUS_ACTIVE:
                 self.db['ProjectsDB'].update(data[id_type],obj)
-            
+
 
     def schedule_site(self, data,obj,db_name,id_type,pid):
         if 'status' in obj:
             self.db['SitesDB'].update(data[id_type],obj)
             if obj['status']==Base.STATUS_DELETED or obj['status']==Base.STATUS_INIT:
                 self.db['UrlsDB'].update_many(obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
-                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'aid': 0,'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
         else:
             self.db['SitesDB'].update(data[id_type],{'rate':obj['rate']})
             u_rate={}
@@ -80,15 +80,15 @@ class StatusSchedule(object):
             for k,v in u_rate.items():
                 if v>obj['rate']:
                     obj['rate']=v
-                where={id_type:data[id_type],'uid':int(k),'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
+                where={id_type:data[id_type],'uid':int(k),'aid': 0,'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
                 self.db['TaskDB'].update_many(pid,obj={'rate':obj['rate']},where=where)
 
     def schedule_urls(self,data,obj,db_name,id_type,pid):
         if 'status' in obj:
                 self.db['UrlsDB'].update(data[id_type],{'status':obj['status']})
-                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'aid': 0,'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
         else:
-            where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
+            where={id_type:data[id_type], 'aid': 0, 'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
             self.db['UrlsDB'].update(data[id_type],{'rate':obj['rate']})
             sid=self.db['UrlsDB'].get_detail(data[id_type])['sid']
             s_rate=self.db['SitesDB'].get_detail(sid)['rate']
