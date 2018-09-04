@@ -269,6 +269,8 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         indexes = collection.index_information()
         if not 'tid' in indexes:
             collection.create_index('tid', unique=True, name='tid')
+        if not 'p_s_u_kw_a' in indexes:
+            collection.create_index({"pid": 1, "sid": 1, "uid": 1, "kwid": 1, "aid": 1}, unique=True, name='p_s_u_kw_a')
         if not 'pid' in indexes:
             collection.create_index('pid', name='pid')
         if not 'sid' in indexes:
