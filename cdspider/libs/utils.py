@@ -395,10 +395,10 @@ def url_encode(params):
             _encode_params(params[key], key)
 
     t = sorted(g_encode_params.items(), key=lambda item: item[0])
-    query_str = ''
+    query_str = []
     for item in t:
-        query_str += "%s&%s" % (item[0], parse.quote_plus(item[1]))
-    return query_str
+        query_str.append("%s=%s" % (item[0], parse.quote_plus(item[1])))
+    return "&". join(query_str)
 
 def build_query(url, query):
     if not query:
