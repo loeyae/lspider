@@ -394,7 +394,7 @@ def url_encode(params):
         for key in params:
             _encode_params(params[key], key)
 
-    return parse.urlencode(g_encode_params)
+    return parse.urlencode(dict(sorted(g_encode_params.items(), key=lambda item: item[0])))
 
 def build_query(url, query):
     if not query:
