@@ -25,6 +25,7 @@ cpath = os.path.dirname(__file__)
 @click.option('--logging-config', default=os.path.join(cpath, "config", "logging.conf"),
               help="日志配置文件", show_default=True)
 @click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
+@click.option('--runtime-dir', default=None, help ='runtime文件夹', show_default=True)
 @click.option('--database', help='数据库设置, default: '
               '{protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: cdspider}')
 @click.option('--proxy', default=None, help='代理设置', show_default=True)
@@ -43,7 +44,10 @@ def cli(ctx, **kwargs):
     kwargs['logger'] = logging.getLogger("root")
     if kwargs['debug']:
         kwargs['logger'].setLevel(logging.DEBUG)
-
+    if kwargs['runtime_dir']:
+        if not os.path.exists(kwargs['runtime_dir']):
+            os.makedirs(kwargs['runtime_dir'])
+        
     app_config = utils.load_config(os.path.join(cpath, "config", "app.json"))
 
     db_setting = kwargs.get('database')
@@ -106,7 +110,7 @@ def schedule(ctx, scheduler_cls, interval, no_loop,  get_object=False):
         scheduler.run()
 
 @cli.command()
-@click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler-cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('--interval', default=0.1, help='循环间隔', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
@@ -131,7 +135,7 @@ def newtask_schedule(ctx,scheduler_cls, interval, no_loop,  get_object=False):
         Scheduler.newTask_run()
 
 @cli.command()
-@click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler-cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('--interval', default=0.1, help='循环间隔', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
@@ -156,7 +160,7 @@ def status_schedule(ctx,scheduler_cls, interval, no_loop, get_object=False):
         Scheduler.status_run()
 
 @cli.command()
-@click.option('--insert_kafka_worker_cls', default='cdspider.worker.insert_kafka_worker', callback=load_cls, help='worker name')
+@click.option('--insert-kafka-worker-cls', default='cdspider.worker.insert_kafka_worker', callback=load_cls, help='worker name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def insert_kafka_worker(ctx,insert_kafka_worker_cls,no_loop,  get_object=False):
@@ -279,7 +283,7 @@ def exc_work(ctx, worker_cls, mailer, sender, receiver, no_loop, get_object=Fals
         log_level = logging.DEBUG
     if mailer:
         mailer = utils.load_mailer(mailer, sender=sender, receiver=receiver)
-    worker = Worker(db = db, queue = queue, proxy=proxy, mailer=mailer,
+    worker = Worker(db = g.get('db'), queue = g.get('queue'), proxy=proxy, mailer=mailer,
             log_level=log_level)
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
@@ -300,6 +304,19 @@ def tool(ctx, name, arg, no_loop):
     cls = load_cls(ctx, None, cls_name)
     c = cls(g, no_loop)
     c.process(*arg)
+
+@cli.command()
+@click.option('--rebot-cls', default='cdspider.robots.WxchatRobots', callback=load_cls, help='schedule name')
+@click.option('-u', '--uuid', help='唯一标识')
+@click.pass_context
+def wechat(ctx, rebot_cls, uuid):
+    g = ctx.obj
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    rebot_cls = load_cls(ctx, None, rebot_cls)
+    robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), uuid=uuid, data_dir=g.get("data_dir", None), debug=g.get("debug", False), log_level=log_level)
+    robot.run()
 
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
