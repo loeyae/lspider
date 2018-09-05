@@ -151,14 +151,14 @@ class Parser(object):
         rule12 = '[\>\s;](?:(?:本文)?发布于|发表于|发布(?:时间|日期)|日期|时间)\s*(?:\:|：)?\s*'+ rule1
         rule13 = rule1 +'\s*发布'
         rule14 = '[\s\>;]((?:(?:(?:(?:20)?[012]\d)|(?:19)?[9]\d)-\d{1,2}-\d{1,2}(?:\D*\d{1,2}:\d{2}(?::\d{2})?)?)|(?:(?:(?:(?:20)?[012]\d)|(?:19)?[9]\d)\/\d{1,2}\/\d{1,2}(?:\D*\d{1,2}:\d{2}(?::\d{2})?)?))(?:\040|&nbsp;)+\<'
-        rule15 = '((?:(?:(?:(?:20)?[012]\d)|(?:19)?[98]\d)年\d{1,2}月\d{1,2}日\D*\d{2}:\d{2}(?::\d{2})?)|(?:(?:(?:(?:20)?[012]\d)|(?:19)?[9]\d)-\d{1,2}-\d{1,2}\D*\d{1,2}:\d{2}(?::\d{2})?)|(?:(?:(?:(?:20)?[012]\d)|(?:19)?[9]\d)\/\d{1,2}\/\d{1,2}\D*\d{1,2}:\d{2}(?::\d{2})?))'
+        rule15 = '((?:(?:(?:(?:20)?[012]\d)|(?:19)?[98]\d)年\d{1,2}月\d{1,2}日 \d{2}:\d{2}(?::\d{2})?)|(?:(?:(?:(?:20)?[012]\d)|(?:19)?[9]\d)-\d{1,2}-\d{1,2} \d{1,2}:\d{2}(?::\d{2})?)|(?:(?:(?:(?:20)?[012]\d)|(?:19)?[9]\d)\/\d{1,2}\/\d{1,2} \d{1,2}:\d{2}(?::\d{2})?))'
         if isinstance(html, bytes):
             try:
                 html = decode(html)
             except:
                 html = str(html)
         if html:
-            g1 = re.findall(rule12, html) or re.findall(rule13, html) or re.findall(rule11, html) or re.findall(rule15, html) or re.findall(rule14, html)
+            g1 = re.findall(rule12, html) or re.findall(rule13, html) or re.findall(rule15, html) or re.findall(rule11, html) or re.findall(rule14, html)
             if len(g1) == 1:
                 return g1[0]
             elif len(g1) > 1:
