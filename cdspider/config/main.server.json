@@ -1,5 +1,6 @@
 {
     "debug": true,
+    "runtime_dir": "/var/run/cdspider",
     "proxy": {
         "proxy_file": "/home/www/ip.txt",
         "user": "hongmai",
@@ -50,4 +51,3 @@
         ]
     }
 }
-
