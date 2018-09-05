@@ -162,12 +162,9 @@ class Parser(object):
             if len(g1) == 1:
                 return g1[0]
             elif len(g1) > 1:
-                if g1[0].startswith(g1[1]):
-                    return g1[0]
-                else:
-                    for item in g1:
-                        if item.find(':') > 0:
-                            return item
+                for item in g1:
+                    if item.find(':') > 0:
+                        return item
         if now:
             return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
         return None
