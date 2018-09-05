@@ -132,7 +132,7 @@ class Parser(object):
 
     @staticmethod
     def parser_time_from_url(url):
-        d = re.findall(r'20[012]-\d{1,2}-\d{1,2}', url)
+        d = re.findall(r'20[012]\d-\d{1,2}-\d{1,2}', url)
         if d:
             return int(time.mktime(time.strptime(d[0],'%Y-%m-%d')))
         d = re.findall(r'20[012]\d[01]\d[0123]\d', url)
@@ -163,6 +163,10 @@ class Parser(object):
             elif len(g1) > 1:
                 if g1[0].startswith(g1[1]):
                     return g1[0]
+                else:
+                    for item in g1:
+                        if item.find(':') > 0:
+                            return item
         if now:
             return time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
         return None
