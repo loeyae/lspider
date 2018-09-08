@@ -70,7 +70,7 @@ setup(
 
 #    include_package_data = True,
 
-#    exclude_package_data = { '': ['README.txt'] },
+#    exclude_package_data = { '': ['README.md'] },
     entry_points = {
         'console_scripts': [
             'cdspider = cdspider.run:main',
