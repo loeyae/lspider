@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+
+<aiml version="1.0">
+
+<category>
+        <pattern>你 快乐</pattern>
+        <template>
+                我很快乐
+        </template>
+</category>
+
+</aiml>
