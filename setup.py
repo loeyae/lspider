@@ -24,6 +24,7 @@ require_packages = [
         'pyquery>=1.3.0',
         'amqp>=2.2.2',
         'mysql-connector-python>=8.0.5',
+        'pymongo>=3.6.0',
         'pika>=0.11.2',
         'tornado>=3.2,<=4.5.3',
         'flask>=0.12.2',
@@ -36,6 +37,7 @@ require_packages = [
         'tld>=0.7.9',
         'pykafka>=2.7.0',
         'pycurl>=7.43.0.0',
+        'itchat>=1.3.10',
     ]
 if sys.platform != 'win32':
     require_packages.append('gssapi>=1.5.0')
@@ -59,6 +61,8 @@ setup(
             'config/logging.conf',
             'config/main.json',
             'config/app.json',
+            'config/aiml/*.aiml',
+            'config/aiml/*.xml',
             "parser/lib/goose3/resources/images/*.txt",
             "parser/lib/goose3/resources/text/*.txt",
         ],
@@ -75,6 +79,9 @@ setup(
             'tornado=cdspider.crawler:TornadoCrawler',
             'requests=cdspider.crawler:RequestsCrawler',
             'selenium=cdspider.crawler:SeleniumCrawler',
+        ],
+        'cdspider.robots': [
+            'wxchat=cdspider.robots:WxchatRobots',
         ],
         'cdspider.parser': [
             'list=cdspider.parser:ListParser',
