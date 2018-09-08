@@ -47,7 +47,7 @@ def cli(ctx, **kwargs):
     if kwargs['runtime_dir']:
         if not os.path.exists(kwargs['runtime_dir']):
             os.makedirs(kwargs['runtime_dir'])
-        
+
     app_config = utils.load_config(os.path.join(cpath, "config", "app.json"))
 
     db_setting = kwargs.get('database')
@@ -307,16 +307,52 @@ def tool(ctx, name, arg, no_loop):
 
 @cli.command()
 @click.option('--rebot-cls', default='cdspider.robots.WxchatRobots', callback=load_cls, help='schedule name')
+@click.option('--rebot-rpc', default='http://127.0.0.1:27777', help='robot rpc server')
 @click.option('-u', '--uuid', help='唯一标识')
 @click.pass_context
-def wechat(ctx, rebot_cls, uuid):
+def wechat(ctx, rebot_cls, rebot_rpc, uuid):
+    g = ctx.obj
+    rebot_rpc = connect_rpc(ctx, None, rebot_rpc)
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    rebot_cls = load_cls(ctx, None, rebot_cls)
+    robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), uuid=uuid, data_dir=g.get("runtime_dir", None), debug=g.get("debug", False), log_level=log_level)
+    reply = lambda m, s: rebot_rpc.reply(m, s)
+    robot.set_reply(reply)
+    robot.run()
+
+@cli.command()
+@click.option('--rebot-cls', default='cdspider.robots.AichatRobots', callback=load_cls, help='schedule name')
+@click.option('-u', '--uuid', default=None, help='唯一标识')
+@click.option('-b', '--bot-data', help='AI头脑文件目录')
+@click.option('-c', '--commands',  multiple=True, help='commands')
+@click.pass_context
+def aichat(ctx, rebot_cls, uuid, bot_data, commands):
     g = ctx.obj
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
     rebot_cls = load_cls(ctx, None, rebot_cls)
-    robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), uuid=uuid, data_dir=g.get("data_dir", None), debug=g.get("debug", False), log_level=log_level)
-    robot.run()
+    robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), commands = commands, bot_data = bot_data, data_dir=g.get("runtime_dir", None), debug=g.get("debug", False), log_level=log_level)
+    robot.run(uuid)
+
+@cli.command()
+@click.option('--rebot-cls', default='cdspider.robots.AichatRobots', callback=load_cls, help='rebot name')
+@click.option('-b', '--bot-data', help='AI头脑文件目录')
+@click.option('-c', '--commands', default=[], multiple=True, help='commands')
+@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host")
+@click.option('--xmlrpc-port', default=27777, help="xmlrpc bind port")
+@click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
+@click.pass_context
+def aichat_rpc(ctx, rebot_cls, bot_data, commands, xmlrpc_host, xmlrpc_port, debug):
+    g = ctx.obj
+    log_level = logging.WARN
+    if debug and g.get("debug", False):
+        log_level = logging.DEBUG
+    rebot_cls = load_cls(ctx, None, rebot_cls)
+    robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), commands = commands, bot_data = bot_data, data_dir=g.get("runtime_dir", None), debug= debug and g.get("debug", False), log_level=log_level)
+    robot.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
