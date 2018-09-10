@@ -102,7 +102,7 @@ class TitleExtractor(BaseExtractor):
 
         # rebuild the title
         title = " ".join(title_words).strip()
-        self.correction_result(title, self.custom_rule.get('title', {}))
+        title = self.correction_result(title, self.custom_rule.get('title', {}))
         return title
 
     def get_title(self):
