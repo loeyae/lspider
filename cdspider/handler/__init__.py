@@ -288,7 +288,7 @@ class BaseHandler(Component):
             subdomain, domain = self._domain_info(url)
             parserule = None
             if subdomain:
-                parserule_list = self.db['ParseRuleDB'].get_detail_by_subdomain(subdomain)
+                parserule_list = self.db['ParseRuleDB'].get_list_by_subdomain(subdomain)
                 for item in parserule_list:
                     if not parserule:
                         parserule = item
@@ -297,7 +297,7 @@ class BaseHandler(Component):
                         if u:
                             parserule = item
             if not parserule:
-                parserule_list = self.db['ParseRuleDB'].get_detail_by_domain(domain)
+                parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
                 for item in parserule_list:
                     if not parserule:
                         parserule = item
@@ -385,7 +385,7 @@ class BaseHandler(Component):
             for item in rule:
                 parser = ItemParser(source=source, ruleset=copy.deepcopy(item), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
                 parsed = parser.parse()
-                if 'verifi' in tem and 'verifi' in parsed and parsed['verifi']:
+                if 'verifi' in item and 'verifi' in parsed and parsed['verifi']:
                     return parsed
                 if not p:
                     p = parsed
