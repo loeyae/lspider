@@ -31,23 +31,6 @@
             </template>
     </category>
     <category>
-            <pattern>测试 *</pattern>
-            <template>
-                    star1: <star index="1" />
-                    star2: <star index="2" />
-                    star3: <star index="3" />
-                    input1: <input index="1" />
-                    input2: <input index="2" />
-                    input3: <input index="3" />
-            </template>
-    </category>
-    <category>
-            <pattern>EXIT</pattern>
-            <template>
-                    <srai>拜拜</srai>
-            </template>
-    </category>
-    <category>
             <pattern>拜拜</pattern>
             <template>
                     <random>
