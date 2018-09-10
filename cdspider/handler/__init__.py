@@ -200,8 +200,8 @@ class BaseHandler(Component):
         if attachment:
             identify = attachment.get('unique', None)
         else:
-            urls_unique = urls.get('unique') or {}
-            site_unique = site.get('unique') or {}
+            urls_unique = urls.get('unique', None) or {}
+            site_unique = site.get('unique', None) or {}
             identify = {
                 "url": urls_unique.get("url") or site_unique.get("url"),
                 "query": urls_unique.get("query") or site_unique.get("query"),
