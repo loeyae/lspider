@@ -42,7 +42,7 @@ class kx_build_kw_newtask(Base):
                 try:
                     u_sum=u_sum+1
                     t={}
-                    t['kwid']= len(self.g['db']['TaskDB'].get_list(1, where={'uid': u_item['uid'], 'aid': 0}))
+                    t['kwid']= self.g['db']['TaskDB'].get_count(1, where={'uid': u_item['uid'], 'aid': 0})
                     t['rid']=0
                     t['expire']=int(time.time()) + 2592000
                     if sid==3 or sid == 9:
@@ -60,7 +60,7 @@ class kx_build_kw_newtask(Base):
                     uid=u_item['uid']
                     self.g['logger'].info('insert data: %s',str(t))
                     self.g['db']['TaskDB'].insert(t)
-                except:
+                except Exception as err:
                     pass
             if u_sum==0:
                 break
