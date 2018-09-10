@@ -35,13 +35,16 @@ class WxchatRobots(Component):
         super(WxchatRobots, self).__init__(logger, log_level)
         self.__uid = uuid
         self.temp_dir = data_dir or tempfile.gettempdir()
-        self.auto_reply = None
+        self.auto_reply = lambda x: None
 
     def get_message(self, message, uuin):
-        s = self.auto_reply(message, uuin)
-        data = json.loads(s)
-        if data['status'] == 200:
-            return data['data']
+        try:
+            s = self.auto_reply(message, uuin)
+            data = json.loads(s)
+            if data['status'] == 200:
+                return data['data']
+        except:
+            self.error(traceback.format_exc())
         return "忙碌中..."
 
     def set_reply(self, fun):
