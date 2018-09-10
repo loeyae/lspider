@@ -68,3 +68,15 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
 
     def get_list(self, where = {}, select = None):
         return self.find(where=where, select=select)
+
+    def get_list_by_domain(self, domain, where = {}, select = None):
+        if not where:
+            where = {}
+        where.update({'domain': domain, 'subdomain': {"$in": ["", None]}})
+        return self.find(where=where, select=select)
+
+    def get_list_by_subdomain(self, subdomain, where = {}, select = None):
+        if not where:
+            where = {}
+        where.update({'subdomain': subdomain})
+        return self.find(where=where, select=select)
