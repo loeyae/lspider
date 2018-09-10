@@ -8,6 +8,7 @@ see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 		<pattern>LOAD WECHAT</pattern>
 		<template>
 			<learn>basic-chat.aiml</learn>
+			<learn>wechat-*.aiml</learn>
 			<learn>auto-gen.aiml</learn>
 		</template>
 	</category>
