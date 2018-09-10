@@ -85,6 +85,7 @@ aiml.AimlParser.AimlHandler._validationInfo101.update({
     "train": ( [], [], True ),
     "extract": ( [], ["index"], False ),
     "date": ( [], ["format"], False ),
+    "tool": ([], [], True),
     })
 
 class AichatRobots(cdspider.Component, aiml.Kernel):
@@ -93,7 +94,14 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
     """
     _extractHistory = '_extractHistory'
 
-    def __init__(self, db, queue, commands = [], learn_file = 'auto-gen.aiml', bot_data = None, data_dir = None, debug = False, log_level = logging.WARN):
+    settings = {
+        "name": "小B",
+        "sex": "男",
+        "age": 1,
+        "company": "博彦多彩",
+    }
+
+    def __init__(self, db, queue, commands = [], settings = None, learn_file = 'auto-gen.aiml', bot_data = None, data_dir = None, debug = False, log_level = logging.WARN):
         self.db = db
         self.queue = queue
         self.debug_mode = debug
@@ -121,8 +129,18 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
             "arg": self._processArg,
             "extract": self._processExtract,
             "train": self._processTrain,
+            "tool": self._processTool,
             })
         self._verboseMode = self.debug_mode
+        setting_keys = ['name', 'sex', 'age', 'company']
+        if isinstance(settings, (list, tuple)):
+            i = 0
+            for i in settings:
+                self.settings[setting_keys[i]] = settings[i]
+        elif isinstance(settings, dict):
+            self.settings.update(settings)
+        else:
+            self.settings['name'] = settings
         self.init_aiml()
 
     def init_aiml(self):
@@ -141,8 +159,8 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
             return
         #TODO 设置自定义变量
         self.setBotPredicate("bot-data", bot_data_dir)
-        self.setBotPredicate("name", "丽丽")
-        self.setBotPredicate("company", "博彦多彩")
+        for k,v in self.settings.items():
+            self.setBotPredicate(k, v)
         if os.path.isfile(self.brnfile) and not self.debug_mode:
             self.bootstrap(brainFile = self.brnfile)
         else:
@@ -209,6 +227,19 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
             with open(self.learn_file, "w") as fp:
                 fp.write(content)
                 fp.close()
+        except:
+            self.error(traceback.format_exc())
+        return ""
+
+    def _processTool(self, elem, sessionID):
+        args = []
+        for e in elem[2:]:
+            args.append(self._processElement(e, sessionID))
+        assert len(args) > 0, "train need more than one args"
+        mode = args[0]
+        try:
+            if mode == "":
+                pass
         except:
             self.error(traceback.format_exc())
         return ""
