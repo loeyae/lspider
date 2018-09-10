@@ -39,6 +39,10 @@ class Mongo(BaseDataBase):
         super(Mongo, self).__init__(connector, table = table, **kwargs)
         self._db = self.conn.cursor
 
+    def collection(self, table):
+        self.table = table
+        return self
+
     def find(self, where, table = None, select = None, sort = None, offset = 0, hits = 10):
         """
         多行查询

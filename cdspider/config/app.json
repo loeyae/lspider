@@ -25,7 +25,8 @@
         "result2kafka",
         "result2wechat",
         "result2newtask",
-        "result2toutiao"
+        "result2toutiao",
+        "wechat2reply"
     ],
     "media_type": {
         "1": "新闻",
