@@ -1,5 +1,5 @@
 {
-    "debug": true,
+    "debug": false,
     "runtime_dir": "/var/run/cdspider",
     "proxy": {
         "proxy_file": "/home/www/ip.txt",
