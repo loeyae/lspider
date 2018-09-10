@@ -45,11 +45,12 @@ stopwords_list = load_stopwords()
 def extract(msg):
     if punctuation_tbl:
         msg = msg.translate(punctuation_tbl)
-    word_list = [i.word for i in jieba.posseg.cut(msg) if i.flag in ('r', 'n', 'ns', 'a', 'vn', 'v')]
-    p = " ".join(word_list) if word_list else None
-    if not p:
-        word_list = jieba.analyse.textrank(msg, topK=20, withWeight=False, allowPOS=('ns', 'n', 'vn', 'v')) or jieba.analyse.extract_tags(msg, topK=20, withWeight=False, allowPOS=())
-        p = " ".join(word_list) if word_list else None
+    p = None
+#    word_list = [i.word for i in jieba.posseg.cut(msg) if i.flag in ('r', 'n', 'ns', 'a', 'vn', 'v')]
+#    p = " ".join(word_list) if word_list else None
+#    if not p:
+#        word_list = jieba.analyse.textrank(msg, topK=20, withWeight=False, allowPOS=('ns', 'n', 'vn', 'v')) or jieba.analyse.extract_tags(msg, topK=20, withWeight=False, allowPOS=())
+#        p = " ".join(word_list) if word_list else None
     if not p:
         word_list = [i for i in jieba.cut(msg) if not i in stopwords_list]
         p = " ".join(word_list) if word_list else None
