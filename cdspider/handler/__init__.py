@@ -288,9 +288,23 @@ class BaseHandler(Component):
             subdomain, domain = self._domain_info(url)
             parserule = None
             if subdomain:
-                parserule = self.db['ParseRuleDB'].get_detail_by_subdomain(subdomain)
+                parserule_list = self.db['ParseRuleDB'].get_detail_by_subdomain(subdomain)
+                for item in parserule_list:
+                    if not parserule:
+                        parserule = item
+                    if  'url_pattern' in item and item['url_pattern']:
+                        u = utils.preg(url, item['url_pattern'])
+                        if u:
+                            parserule = item
             if not parserule:
-                parserule = self.db['ParseRuleDB'].get_detail_by_domain(domain)
+                parserule_list = self.db['ParseRuleDB'].get_detail_by_domain(domain)
+                for item in parserule_list:
+                    if not parserule:
+                        parserule = item
+                    if  'url_pattern' in item and item['url_pattern']:
+                        u = utils.preg(url, item['url_pattern'])
+                        if u:
+                            parserule = item
             self.process = parserule or copy.deepcopy(self.DEFAULT_PROCESS)
         elif self.mode == self.MODE_ATT:
             self.process = self.task.get('attachment', {}).get('process', None) or copy.deepcopy(self.DEFAULT_PROCESS)
@@ -365,9 +379,20 @@ class BaseHandler(Component):
         if mode == self.MODE_ATT:
             parser = CustomParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
         elif mode == self.MODE_ITEM:
-#            if not isinstance(rule, list):
-#                rule = [rule]
-            parser = ItemParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
+            if not isinstance(rule, list):
+                rule = [rule]
+            p = None
+            for item in rule:
+                parser = ItemParser(source=source, ruleset=copy.deepcopy(item), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
+                parsed = parser.parse()
+                if 'verifi' in tem and 'verifi' in parsed and parsed['verifi']:
+                    return parsed
+                if not p:
+                    p = parsed
+                else:
+                    if len(p.keys()) < len(parsed.keys()):
+                        p = parsed
+            return p
         else:
 #            parser_name = 'list'
             parser = ListParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
