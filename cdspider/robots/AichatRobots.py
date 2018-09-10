@@ -157,8 +157,8 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
                 commands.add(item)
         if not commands:
             return
-        #TODO 设置自定义变量
         self.setBotPredicate("bot-data", bot_data_dir)
+        #TODO 设置自定义变量
         for k,v in self.settings.items():
             self.setBotPredicate(k, v)
         if os.path.isfile(self.brnfile) and not self.debug_mode:
