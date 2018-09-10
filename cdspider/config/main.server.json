@@ -1,0 +1,53 @@
+{
+    "debug": true,
+    "runtime_dir": "/var/run/cdspider",
+    "proxy": {
+        "proxy_file": "/home/www/ip.txt",
+        "user": "hongmai",
+        "password": "soften.cn",
+        "type": "socks",
+        "proxy_rate": "every"
+    },
+    "message_queue": {
+        "protocol": "amqp",
+        "host": "47.93.128.20",
+        "port": 5672,
+        "user": "guest",
+        "password": "guest",
+        "exchange": "cdspider",
+        "maxsize": 1000000,
+        "queue_prefix": ""
+    },
+    "database": {
+        "protocol": "mongo",
+        "host": "114.112.86.141",
+        "port": 27017,
+        "db": "mytest",
+        "user": "abcdef",
+        "password": "123321"
+    },
+    "kafka": {
+    "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
+    "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
+    "topic": "cddata",
+    "user": "guest",
+    "password": "guest"
+	},
+    "exc_work": {
+        "mailer": "smtp",
+        "sender": {
+            "host": "ismtp.beyondsoft.com",
+            "port": 25,
+            "user": "bdopener",
+            "pass": "bdopener20170510",
+            "from": "bdopener@beyondsoft.com",
+            "from_name": "bdopener service"
+        },
+        "receiver": [
+            {
+                "name": "Zhang Yi",
+                "mail": "zhangyi07@beyondsoft.com"
+            }
+        ]
+    }
+}
