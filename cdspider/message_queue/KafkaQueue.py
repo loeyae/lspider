@@ -96,7 +96,6 @@ class KafkaQueue(CDBaseQueue):
         return msg
 
     def put_nowait(self, obj):
-        print(obj)
         """
         直接发送
         （obj>>json格式）
