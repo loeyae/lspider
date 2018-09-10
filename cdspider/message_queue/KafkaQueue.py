@@ -102,7 +102,7 @@ class KafkaQueue(CDBaseQueue):
         （obj>>json格式）
         """
         self.logger.info('send kafka starting ....')
-        producer = self.connect.get_producer(linger_ms=1,sync=False)
+        producer = self.connect.get_producer(linger_ms=0.1,sync=False)
         obj=json.dumps(obj)
         obj=obj.encode(encoding='utf_8')
         producer.produce(obj)
