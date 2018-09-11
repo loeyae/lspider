@@ -12,7 +12,7 @@ import time
 import logging
 from six.moves import queue
 
-class insert_kafka_worker(object):
+class insert_kafka_worker(BaseWorker):
     def __init__(self,db,queue,conf,log_level):
         self.db=db
         self.queue=queue
