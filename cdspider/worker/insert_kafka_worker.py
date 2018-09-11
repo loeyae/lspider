@@ -5,7 +5,7 @@ Created on 2018年8月6日
 
 @author: Wang Fengwei
 '''
-
+import traceback
 from cdspider.worker import BaseWorker
 from cdspider.message_queue import KafkaQueue
 
@@ -22,13 +22,18 @@ class insert_kafka_worker(BaseWorker):
         self.kafka=KafkaQueue(self.conf['topic'],self.conf['zookeeper_hosts'],host=self.conf['host'])
 
     def on_result(self, message):
-        self.logger.info("got message: %s" % message)
-        res=self.db['ArticlesDB'].get_detail(message['rid'])
-        if 'on_sync' in message:
-            res['flag']=message['on_sync']
-        if '_id' in res:
-            res.pop('_id')
-        res.pop('rid')
-        res.pop('crawlinfo')
-        self.logger.info("message: %s " % res)
-        self.kafka.put_nowait(res)
+        res = None
+        try:
+            self.logger.info("got message: %s" % message)
+            res=self.db['ArticlesDB'].get_detail(message['rid'])
+            if 'on_sync' in message:
+                res['flag']=message['on_sync']
+            if '_id' in res:
+                res.pop('_id')
+            res.pop('rid')
+            res.pop('crawlinfo')
+            self.logger.info("message: %s " % res)
+            self.kafka.put_nowait(res)
+        except:
+            self.logger.error("message: %s" % res)
+            raise
