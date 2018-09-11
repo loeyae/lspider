@@ -29,4 +29,5 @@ class insert_kafka_worker(BaseWorker):
             res.pop('_id')
         res.pop('rid')
         res.pop('crawlinfo')
+        self.logger.info("message: " % res)
         self.kafka.put_nowait(res)
