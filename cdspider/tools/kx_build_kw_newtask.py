@@ -26,6 +26,7 @@ class kx_build_kw_newtask(Base):
             except queue.Empty:
                 time.sleep(0.5)
             except:
+                self.logger.error(traceback.format_exc())
                 time.sleep(2)
                 break
 
