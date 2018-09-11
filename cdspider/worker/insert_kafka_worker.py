@@ -14,7 +14,7 @@ class insert_kafka_worker(BaseWorker):
     inqueue_key = "result2kafka"
 
     def __init__(self,db,queue,conf,log_level):
-        super(insert_kafka_worker, self).__inti__(db, queue, proxy=None, log_level = log_level)
+        super(insert_kafka_worker, self).__init__(db, queue, proxy=None, log_level = log_level)
         self.conf=conf
         self.connection()
 
