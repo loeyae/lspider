@@ -22,6 +22,7 @@ class insert_kafka_worker(BaseWorker):
         self.kafka=KafkaQueue(self.conf['topic'],self.conf['zookeeper_hosts'],host=self.conf['host'])
 
     def on_result(self, message):
+        self.logger.info("got message: %s" % message)
         res=self.db['ArticlesDB'].get_detail(message['rid'])
         if 'on_sync' in message:
             res['flag']=message['on_sync']
@@ -29,5 +30,5 @@ class insert_kafka_worker(BaseWorker):
             res.pop('_id')
         res.pop('rid')
         res.pop('crawlinfo')
-        self.logger.info("message: " % res)
+        self.logger.info("message: %s " % res)
         self.kafka.put_nowait(res)
