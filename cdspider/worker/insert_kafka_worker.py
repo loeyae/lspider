@@ -8,19 +8,14 @@ Created on 2018年8月6日
 
 from cdspider.worker import BaseWorker
 from cdspider.message_queue import KafkaQueue
-import time
-import logging
-from six.moves import queue
 
 class insert_kafka_worker(BaseWorker):
+
+    inqueue_key = "result2kafka"
+
     def __init__(self,db,queue,conf,log_level):
-        self.db=db
-        self.queue=queue
-        self.inqueue = queue['result2kafka']
+        super(insert_kafka_worker, self).__inti__(db, queue, proxy=None, log_level = log_level)
         self.conf=conf
-        self.log_level=log_level
-        self.logger=logging.getLogger("worker")
-        self.logger.setLevel(log_level)
         self.connection()
 
     def connection(self):
