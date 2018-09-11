@@ -16,33 +16,22 @@ class insert_kafka_worker(object):
     def __init__(self,db,queue,conf,log_level):
         self.db=db
         self.queue=queue
+        self.inqueue = queue['result2kafka']
         self.conf=conf
         self.log_level=log_level
         self.logger=logging.getLogger("worker")
         self.logger.setLevel(log_level)
         self.connection()
-    
+
     def connection(self):
         self.kafka=KafkaQueue(self.conf['topic'],self.conf['zookeeper_hosts'],host=self.conf['host'])
-        self._is_loop=True
-        
-    def run(self):
-        while self._is_loop:
-            self.run_once()
-    
-    def run_once(self,flag=0):
-        try:
-            data=self.queue['result2kafka'].get_nowait()
-            res=self.db['ArticlesDB'].get_detail(data['rid'])
-            if 'on_sync' in data:
-                res['flag']=data['on_sync']
-            if '_id' in res:
-                res.pop('_id')
-            res.pop('rid')
-            res.pop('crawlinfo')
-            self.kafka.put_nowait(res)
-        except queue.Empty:
-            time.sleep(1)
-            return
-        except Exception as err:
-            self.logger.error("InsertKafkaWorker :%s" % err)
+
+    def on_result(self, message):
+        res=self.db['ArticlesDB'].get_detail(message['rid'])
+        if 'on_sync' in message:
+            res['flag']=message['on_sync']
+        if '_id' in res:
+            res.pop('_id')
+        res.pop('rid')
+        res.pop('crawlinfo')
+        self.kafka.put_nowait(res)
