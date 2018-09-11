@@ -7,6 +7,7 @@ Created on 2018年8月9日
 '''
 import re
 import time
+import traceback
 from six.moves import queue
 from cdspider.tools import Base
 
@@ -57,11 +58,12 @@ class kx_build_kw_newtask(Base):
                     t['url']=u_item['url'].replace('{keyword}',title)
                     t['status']=1
                     t['newTask_by_tools']=1
-                    uid=u_item['uid']
                     self.g['logger'].info('insert data: %s',str(t))
                     self.g['db']['TaskDB'].insert(t)
-                except Exception as err:
-                    pass
+                except:
+                     self.logger(traceback.format_exc())
+                finally:
+                    uid = u_item['uid']
             if u_sum==0:
                 break
             time.sleep(0.1)
