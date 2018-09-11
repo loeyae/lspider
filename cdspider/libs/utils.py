@@ -24,6 +24,16 @@ from chardet.universaldetector import UniversalDetector
 from urllib import parse
 from types import *
 
+def format_(data, params):
+    keylist = re.findall('\{(\w+)\}', url)
+    format_params = {}
+    for key in keylist:
+        if key in params:
+            format_params[key] = params[key]
+        else:
+            format_params[key] = '{%s}' % key
+    return data.format(**format_params)
+
 def build_url_by_rule(rule, params):
     url = rule.get('base')
     if rule.get('mode', 'get') == 'format':
