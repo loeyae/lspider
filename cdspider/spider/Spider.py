@@ -18,7 +18,7 @@ import json
 import tornado.ioloop
 from six.moves import queue
 
-from cdspider import Component
+from cdspider import Component, DEFAULT_ITEM_SCRIPTS
 from cdspider.handler import BaseHandler
 from cdspider.exceptions import *
 from cdspider.libs import utils
@@ -27,14 +27,6 @@ from cdspider.libs.tools import *
 from cdspider.database.base import *
 
 CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse, CDSpiderCrawlerForbidden)
-DEFAULT_ITEM_SCRIPTS = """
-from cdspider.handler.custom.{projectname} import {parenthandler}
-
-class TaskHandler({parenthandler}):
-
-    def newtask(self):
-        pass
-"""
 
 class Spider(Component):
     """
