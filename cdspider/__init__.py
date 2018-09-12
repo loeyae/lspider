@@ -4,6 +4,22 @@
 
 import logging
 
+DEFAULT_URLS_SCRIPTS = """
+from cdspider.handler.custom.{projectname} import SiteHandler
+
+class UrlHandler(SiteHandler):
+    pass
+"""
+
+DEFAULT_ITEM_SCRIPTS = """
+from cdspider.handler.custom.{projectname} import {parenthandler}
+
+class TaskHandler({parenthandler}):
+
+    def newtask(self):
+        pass
+"""
+
 class Component(object):
 
     def __init__(self, logger, log_level):
