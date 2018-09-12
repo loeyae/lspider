@@ -1,7 +1,8 @@
 {
     "debug": true,
+    "runtime_dir": "/var/run/cdspider",
     "proxy": {
-        "proxy_url": "http://114.112.86.46:8082/get_ips/own/30",
+        "proxy_url": "http://114.112.86.46:8086/get_ips/own/50",
         "user": "hongmai",
         "password": "soften.cn",
         "type": "socks",
@@ -26,11 +27,11 @@
         "password": "123321"
     },
     "kafka": {
-    "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
-    "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
-    "topic": "test",
-    "user": "guest",
-    "password": "guest"
+	    "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
+	    "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
+	    "topic": "test",
+	    "user": "guest",
+	    "password": "guest"
 	},
     "exc_work": {
         "mailer": "smtp",
