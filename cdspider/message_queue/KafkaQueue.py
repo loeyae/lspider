@@ -87,7 +87,6 @@ class KafkaQueue(CDBaseQueue):
         consumer = self.connect.get_simple_consumer(b'cdspider',auto_commit_enable=True,auto_commit_interval_ms=1)
 #         sum=self.connect.latest_available_offsets()[0][0][0]
         c=consumer.consume()
-        print(c.offset)
 #         self.qsize=sum-c.offset
         msg=c.value.decode('utf-8')
         msg=json.loads(msg)
@@ -120,7 +119,7 @@ class KafkaQueue(CDBaseQueue):
 
     def close(self):
         pass
-    
+
 if __name__=='__main__':
     k=KafkaQueue('test2_queue',host='114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667')
     for i in range(5):
