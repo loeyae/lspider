@@ -144,13 +144,13 @@ class ResultTrait(object):
                         typeinfo = self._typeinfo(item['url'])
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                     result_id = self.db['ArticlesDB'].insert(result)
-                    self.last_result_id = result_id
                     if not result_id:
                         raise CDSpiderDBError("Result insert failed")
                     self.crawl_info['crawl_count']['new_count'] += 1
                     self.build_item_task(result_id)
-#                elif unid:
-#                    self.db['ArticlesDB'].add_crwal_info(unid['unid'], unid['ctime'], crawlinfo=crawlinfo)
+                elif unid:
+                    article = self.db['ArticlesDB'].get_detail_by_unid(**unid)
+                    self.sync_result.add(article['rid'])
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
@@ -172,6 +172,7 @@ class ResultTrait(object):
         parentid = self.task.get('save', {}).get('parentid', '0')
         rid = self.task.get('rid', None)
         self.last_result_id = rid
+        self.sync_result.add(rid)
         update = True if rid else False
         if incr_data:
             for item in incr_data:
