@@ -150,7 +150,8 @@ class ResultTrait(object):
                     self.build_item_task(result_id)
                 elif unid:
                     article = self.db['ArticlesDB'].get_detail_by_unid(**unid)
-                    self.sync_result.add(article['rid'])
+                    if article.get('crawlinfo', {}).get("pid", self.task.get("pid")) != self.task.get("pid"):
+                        self.sync_result.add(article['rid'])
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
