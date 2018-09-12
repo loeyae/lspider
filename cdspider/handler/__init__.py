@@ -487,11 +487,11 @@ class BaseHandler(Component):
             return
         self.info("result2kafka  starting...")
         res={}
-        on_sync=self.task.get('project', {}).get('on_sync', None)
-        if on_sync!=None and on_sync!='':
-            res['on_sync']=on_sync
+        on_sync = self.task.get('project', {}).get('on_sync', None)
+        if on_sync != None and on_sync != '':
+            res['on_sync'] = on_sync
         for rid in self.sync_result:
-            res['rid']= rid
+            res['rid'] = rid
             self.queue['result2kafka'].put_nowait(res)
             self.info("result2kafka  end data: %s" % str(res))
 
