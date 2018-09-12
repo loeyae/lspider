@@ -304,15 +304,15 @@ class Spider(Component):
             if not 'sub_process' in urls or not urls['sub_process']:
                 urls['sub_process'] = {}
             task['urls'] = urls
-        if 'kwid' in task and task['kwid']:
-            keywords = task.get('keyword') or self.KeywordsDB.get_detail(int(task['kwid']))
-            if not keywords:
-                self.status_queue.put_nowait({"kwid": task['kwid'], 'status': KeywordsDB.STATUS_DELETED})
-                raise CDSpiderDBDataNotFound("Keyword: %s not found" % task['kwid'])
-            if not no_check_status and keywords.get('status', KeywordsDB.STATUS_INIT) != KeywordsDB.STATUS_ACTIVE:
-                self.debug("Keywords: %s" % keywords)
-                return None
-            task['save']['hard_code'] = [{'name': 'keyword', 'type': 'format', 'value': keywords['word']}]
+        if 'kwid' in task and task['kwid'] and task['url'].find('{keyword}') > 0:
+                keywords = task.get('keyword') or self.KeywordsDB.get_detail(int(task['kwid']))
+                if not keywords:
+                    self.status_queue.put_nowait({"kwid": task['kwid'], 'status': KeywordsDB.STATUS_DELETED})
+                    raise CDSpiderDBDataNotFound("Keyword: %s not found" % task['kwid'])
+                if not no_check_status and keywords.get('status', KeywordsDB.STATUS_INIT) != KeywordsDB.STATUS_ACTIVE:
+                    self.debug("Keywords: %s" % keywords)
+                    return None
+                task['save']['hard_code'] = [{'name': 'keyword', 'type': 'format', 'value': keywords['word']}]
         task['save'].setdefault('base_url', task['url'])
         task['save'].setdefault('referer', task['url'])
         return task
