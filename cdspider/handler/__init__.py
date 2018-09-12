@@ -85,6 +85,7 @@ class BaseHandler(Component):
         self.mode = self.task.get('save',{}).get('mode', self.MODE_DEFAULT)
         self.page = 1
         self.last_result_id = None
+        self.sync_result = set()
         self.no_sync = False
 
     def __del__(self):
@@ -482,16 +483,17 @@ class BaseHandler(Component):
         """
         同步大数据平台
         """
-        if not self.last_result_id or self.no_sync:
+        if self.no_sync and self.sync_result:
             return
         self.info("result2kafka  starting...")
         res={}
         on_sync=self.task.get('project', {}).get('on_sync', None)
         if on_sync!=None and on_sync!='':
             res['on_sync']=on_sync
-        res['rid']=self.last_result_id
-        self.queue['result2kafka'].put_nowait(res)
-        self.info("result2kafka  end data: %s" % str(res))
+        for rid in self.sync_result:
+            res['rid']= rid
+            self.queue['result2kafka'].put_nowait(res)
+            self.info("result2kafka  end data: %s" % str(res))
 
 
     def on_repetition(self):
