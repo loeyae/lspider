@@ -116,7 +116,7 @@ class ResultTrait(object):
                 item['pid'] = self.task.get("pid")
                 item['sub_process'] = None
                 item['unique'] = {"url": None, "query": None, "data": None}
-                item['scripts'] = DEFAULT_URLS_SCRIPTS
+                item['scripts'] = DEFAULT_URLS_SCRIPTS.format(projectname = "Project%s" % self.task.get("pid"))
                 item['ctime'] = int(time.time())
                 item['utime'] = int(time.time())
                 item['creator'] = 1
