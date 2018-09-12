@@ -12,8 +12,6 @@ from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
 import time
 import logging
-import socket
-import umsgpack
 import json
 
 connection_pool = {}
