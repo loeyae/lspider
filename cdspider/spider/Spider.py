@@ -441,7 +441,8 @@ class Spider(Component):
                     self.fetch(task)
                     time.sleep(0.1)
                 except queue.Empty:
-                    break
+                    time.sleep(0.1)
+                    continue
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
