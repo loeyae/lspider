@@ -148,8 +148,7 @@ class Spider(Component):
                     if not 'incr_data' in save:
                         break
             finally:
-                if mode == BaseHandler.MODE_ITEM:
-                    handler.on_sync()
+                handler.on_sync()
                 self.info("Spider process end")
         except Exception as e:
             if not return_result:
