@@ -16,7 +16,6 @@ import socket
 import umsgpack
 import json
 
-
 connection_pool = {}
 
 class KafkaQueue(CDBaseQueue):
