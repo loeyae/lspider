@@ -52,7 +52,7 @@ class WxchatRobots(Component):
 
     def run(self):
 
-        statusStorageDir = 'wechat%s.pkl' % self.__uid
+        statusStorageDir = os.path.realpath(os.path.join(self.temp_dir, "wechat", '%s.pkl' % self.__uid))
         itchat.set_logging(showOnCmd=self.debug_mode, loggingLevel = self.log_level)
         robot = itchat.new_instance()
 
