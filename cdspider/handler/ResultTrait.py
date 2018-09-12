@@ -9,6 +9,7 @@
 """
 import time
 import copy
+from cdspider import DEFAULT_URLS_SCRIPTS
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.parser.lib.time_parser import Parser as TimeParser
@@ -110,9 +111,17 @@ class ResultTrait(object):
             if return_result:
                 return formated
             for item in formated:
-                uid = None
-                #uid = self.db['urlsdn'].insert()
-                #TODO 结果写入url表
+                item['rate'] = self.task.get('site', {}).get('rate', 8)
+                item['sid'] = self.task.get("sid")
+                item['pid'] = self.task.get("pid")
+                item['sub_process'] = None
+                item['unique'] = {"url": None, "query": None, "data": None}
+                item['scripts'] = DEFAULT_URLS_SCRIPTS
+                item['ctime'] = int(time.time())
+                item['utime'] = int(time.time())
+                item['creator'] = 1
+                item['status'] = 1
+                uid = self.db['UrlsDB'].insert(item)
                 if uid:
                     self.queue['newtask_queue'].put_nowait({"uid": uid})
                     self.crawl_info['crawl_count']['new_count'] += 1
