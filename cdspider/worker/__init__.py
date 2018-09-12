@@ -65,8 +65,7 @@ class BaseWorker():
                 break
             except Exception as e:
                 self.on_error(e)
-                time.sleep(self.LOOP_INTERVAL)
-                continue
+                break
 
         self.logger.info("%s exiting..." % self.__class__.__name__)
 
