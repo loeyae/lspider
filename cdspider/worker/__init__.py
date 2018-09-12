@@ -43,7 +43,7 @@ class BaseWorker():
             }
             self.excqueue.put_nowait(message)
         else:
-            self.logger.exception(exc)
+            self.logger.error(exc)
 
     def run_once(self):
         self.logger.info("%s once starting..." % self.__class__.__name__)
