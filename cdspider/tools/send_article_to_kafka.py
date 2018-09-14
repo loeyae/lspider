@@ -35,7 +35,7 @@ class send_article_to_kafka(Base):
                 d={}
                 d['rid']=item['rid']
                 d['on_sync']='publicOpinionCustomeNS:publicOpinionCustomeTB001'
-                self.logger.info("import status_queue data: %s" %  str(d))
+                self.logger.info("import status_queue data: %s, last acid: %s" %  (str(d), item['acid']))
                 acid=item['acid']
                 self.g['queue']['result2kafka'].put_nowait(d)
             if n==0:
