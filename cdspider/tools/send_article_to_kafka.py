@@ -24,7 +24,6 @@ class send_article_to_kafka(Base):
         checked = True
         if len(args) > 3:
             checked = bool(int(args[3]))
-        print(checked)
         where['status'] = 1
         self.notice('Where Info:', where, checked = checked)
         while True:
