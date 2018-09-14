@@ -515,6 +515,7 @@ class BaseHandler(Component):
             "kwid": self.task.get("kwid", 0),
             "aid": self.task.get("aid", 0),
             "tid": self.task.get("tid", 0),
+            "crawlid": self.crawl_id,
         })
         self.error(str(exc))
         self.crawl_info['broken'] = str(exc)
