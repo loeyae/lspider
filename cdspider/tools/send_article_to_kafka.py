@@ -19,8 +19,13 @@ class send_article_to_kafka(Base):
             created = int(args[1])
         sum=0
         acid = '0'
+        if len(args) > 2:
+            acid = args[2]
+        checked = True
+        if len(args) > 3:
+            checked = bool(args[3])
         where['status'] = 1
-        self.notice('Where Info:', where)
+        self.notice('Where Info:', where, checked = checked)
         while True:
             n=0
             where['acid'] = {"$gt": acid}
