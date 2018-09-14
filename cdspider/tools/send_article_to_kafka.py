@@ -41,6 +41,7 @@ class send_article_to_kafka(Base):
                     self.g['queue']['result2kafka'].put_nowait(d)
                 if n==0:
                     break
+                time.sleep(0.5)
             except:
                 self.logger.error(traceback.format_exc())
                 if not checked:
