@@ -20,7 +20,7 @@
     },
     "database": {
         "protocol": "mongo",
-        "host": "114.112.86.141",
+        "host": "192.168.10.141",
         "port": 27017,
         "db": "mytest",
         "user": "abcdef",
