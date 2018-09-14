@@ -152,7 +152,7 @@ class Spider(Component):
                 handler.on_error(e)
             else:
                 return_data.append((None, traceback.format_exc(), None, None, None, None))
-            self.error(traceback.format_exc())
+                self.error(traceback.format_exc())
         finally:
             if not return_result:
                 handler.finish()
