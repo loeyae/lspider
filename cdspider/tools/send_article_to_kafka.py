@@ -30,7 +30,7 @@ class send_article_to_kafka(Base):
             try:
                 n=0
                 where['acid'] = {"$gt": acid}
-                for item in self.g['db']['ArticlesDB'].get_list(created, where=where, sort=[('acid', 1)]):
+                for item in self.g['db']['ArticlesDB'].get_list(created, where=where, sort=[('acid', 1)], hits = 200):
                     n=n+1
                     sum=sum+1
                     d={}
@@ -41,7 +41,7 @@ class send_article_to_kafka(Base):
                     self.g['queue']['result2kafka'].put_nowait(d)
                 if n==0:
                     break
-                time.sleep(0.5)
+                time.sleep(0.2)
             except:
                 self.logger.error(traceback.format_exc())
                 if not checked:
