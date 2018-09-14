@@ -23,7 +23,8 @@ class send_article_to_kafka(Base):
             acid = args[2]
         checked = True
         if len(args) > 3:
-            checked = bool(args[3])
+            checked = bool(int(args[3]))
+        print(checked)
         where['status'] = 1
         self.notice('Where Info:', where, checked = checked)
         while True:
