@@ -27,17 +27,24 @@ class send_article_to_kafka(Base):
         where['status'] = 1
         self.notice('Where Info:', where, checked = checked)
         while True:
-            n=0
-            where['acid'] = {"$gt": acid}
-            for item in self.g['db']['ArticlesDB'].get_list(created, where=where, sort=[('acid', 1)]):
-                n=n+1
-                sum=sum+1
-                d={}
-                d['rid']=item['rid']
-                d['on_sync']='publicOpinionCustomeNS:publicOpinionCustomeTB001'
-                self.logger.info("import status_queue data: %s, last acid: %s" %  (str(d), item['acid']))
-                acid=item['acid']
-                self.g['queue']['result2kafka'].put_nowait(d)
-            if n==0:
-                break
+            try:
+                n=0
+                where['acid'] = {"$gt": acid}
+                for item in self.g['db']['ArticlesDB'].get_list(created, where=where, sort=[('acid', 1)]):
+                    n=n+1
+                    sum=sum+1
+                    d={}
+                    d['rid']=item['rid']
+                    d['on_sync']='publicOpinionCustomeNS:publicOpinionCustomeTB001'
+                    self.logger.info("import status_queue data: %s, last acid: %s" %  (str(d), item['acid']))
+                    acid=item['acid']
+                    self.g['queue']['result2kafka'].put_nowait(d)
+                if n==0:
+                    break
+            except:
+                self.logger.error(traceback.format_exc())
+                if not checked:
+                    continue
+                else:
+                    break
         print(str(sum))
