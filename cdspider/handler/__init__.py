@@ -506,6 +506,17 @@ class BaseHandler(Component):
         """
         错误处理
         """
+        if not isinstance(exc, CDSpiderError):
+            exc = CDSpiderError(exc)
+        exc.params.update({
+            "pid": self.task.get("pid"),
+            "sid": self.task.get("sid"),
+            "uid": self.task.get("uid", 0),
+            "kwid": self.task.get("kwid", 0),
+            "aid": self.task.get("aid", 0),
+            "tid": self.task.get("tid", 0),
+        })
+        self.error(str(exc))
         self.crawl_info['broken'] = str(exc)
         if 'queue' in self.task and self.task['queue'] and 'queue_message' in self.task and self.task['queue_message']:
             if isinstance(exc, RETRY_EXCEPTIONS) or not isinstance(exc, CDSpiderError):
@@ -519,17 +530,6 @@ class BaseHandler(Component):
             self.db['ArticlesDB'].update(self.task['rid'], {"status": self.db['ArticlesDB'].STATUS_DELETED})
             return
         self.crawl_info['err_message'] = str(traceback.format_exc())
-        if not isinstance(exc, CDSpiderError):
-            exc = CDSpiderError(traceback.format_exc())
-        exc.params.update({
-            "pid": self.task.get("pid"),
-            "sid": self.task.get("sid"),
-            "uid": self.task.get("uid", 0),
-            "kwid": self.task.get("kwid", 0),
-            "aid": self.task.get("aid", 0),
-            "tid": self.task.get("tid", 0),
-        })
-        self.error(str(exc))
 #        if not isinstance(exc, IGNORE_EXCEPTIONS) and self.queue['excinfo_queue']:
 #            self.crawl_info['err_message'] = str(traceback.format_exc())
 #            message = {
