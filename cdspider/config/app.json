@@ -3,6 +3,7 @@
         "ArticlesDB",
         "AttachDataDB",
         "AttachmentDB",
+        "ChannelRulesDB",
         "CommentsDB",
         "CrawlLogDB",
         "KeywordsDB",
