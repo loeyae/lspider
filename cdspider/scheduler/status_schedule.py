@@ -18,7 +18,7 @@ class StatusSchedule(object):
         self.queue=queue
         self.rate=rate
 
-    def schedule(self, data,db_name,id_type,pid):
+    def schedule(self, data, id_type, pid):
         obj={}
         if 'rate' in data:
             rate=data['rate']
@@ -34,17 +34,19 @@ class StatusSchedule(object):
             except:
                 pass
         if 'kwid'==id_type:
-            self.schedule_keyword(data,obj,db_name,id_type,pid)
+            self.schedule_keyword(data,obj,id_type,pid)
         elif 'pid'==id_type:
-            self.schedule_project(data,obj,db_name,id_type,pid)
+            self.schedule_project(data,obj,id_type,pid)
         elif 'sid'==id_type:
-            self.schedule_site(data,obj,db_name,id_type,pid)
+            self.schedule_site(data,obj,id_type,pid)
         elif 'uid'==id_type:
-            self.schedule_urls(data,obj,db_name,id_type,pid)
+            self.schedule_urls(data,obj,id_type,pid)
         elif 'aid'==id_type:
-            self.schedule_attachment(data,obj,db_name,id_type,pid)
+            self.schedule_attachment(data,obj,id_type,pid)
+        elif 'crid'==id_type:
+            self.schedule_channel(data,obj,id_type,pid)
 
-    def schedule_keyword(self,data, obj,db_name,id_type,pid):
+    def schedule_keyword(self,data, obj,id_type,pid):
         if 'status' in obj:
             self.db['KeywordsDB'].update(data[id_type],obj)
             self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
@@ -53,7 +55,7 @@ class StatusSchedule(object):
             self.db['TaskDB'].update_many(pid,obj=obj,where=where)
             self.db['KeywordsDB'].update(data[id_type],{'rate':obj['rate']})
 
-    def schedule_project(self, data,obj,db_name,id_type,pid):
+    def schedule_project(self, data,obj,id_type,pid):
         if 'status' in obj:
             if obj['status']==Base.STATUS_DELETED or obj['status']==Base.STATUS_INIT:
                 self.db['ProjectsDB'].update(data[id_type],obj)
@@ -61,16 +63,17 @@ class StatusSchedule(object):
                 self.db['SitesDB'].update_many(obj,where={id_type:data[id_type]})
                 self.db['AttachmentDB'].update_many(obj,where={id_type:data[id_type]})
                 self.db['UrlsDB'].update_many(obj,where={id_type:data[id_type]})
+                self.db['ChannelRulesDB'].update_many(obj,where={id_type:data[id_type]})
                 self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type]})
             elif obj['status']==Base.STATUS_ACTIVE:
                 self.db['ProjectsDB'].update(data[id_type],obj)
 
-
-    def schedule_site(self, data,obj,db_name,id_type,pid):
+    def schedule_site(self, data,obj,id_type,pid):
         if 'status' in obj:
             self.db['SitesDB'].update(data[id_type],obj)
             if obj['status']==Base.STATUS_DELETED or obj['status']==Base.STATUS_INIT:
                 self.db['UrlsDB'].update_many(obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+                self.db['ChannelRulesDB'].update_many(obj,where={id_type:data[id_type],'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
                 self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'aid': 0,'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
         else:
             self.db['SitesDB'].update(data[id_type],{'rate':obj['rate']})
@@ -83,7 +86,7 @@ class StatusSchedule(object):
                 where={id_type:data[id_type],'uid':int(k),'aid': 0,'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
                 self.db['TaskDB'].update_many(pid,obj={'rate':obj['rate']},where=where)
 
-    def schedule_urls(self,data,obj,db_name,id_type,pid):
+    def schedule_urls(self,data,obj,id_type,pid):
         if 'status' in obj:
                 self.db['UrlsDB'].update(data[id_type],{'status':obj['status']})
                 self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'aid': 0,'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
@@ -96,7 +99,20 @@ class StatusSchedule(object):
                 obj['rate']=s_rate
             self.db['TaskDB'].update_many(pid,obj={'rate':obj['rate']},where=where)
 
-    def schedule_attachment(self, data,obj,db_name,id_type,pid):
+    def schedule_channel(self,data,obj,id_type,pid):
+        if 'status' in obj:
+                self.db['ChannelRulesDB'].update(data[id_type],{'status':obj['status']})
+                self.db['TaskDB'].update_many(pid,obj=obj,where={id_type:data[id_type],'aid': 0,'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}})
+        else:
+            where={id_type:data[id_type], 'aid': 0, 'status':{'$in':[Base.STATUS_ACTIVE,Base.STATUS_INIT]}}
+            self.db['ChannelRulesDB'].update(data[id_type],{'rate':obj['rate']})
+            sid=self.db['ChannelRulesDB'].get_detail(data[id_type])['sid']
+            s_rate=self.db['SitesDB'].get_detail(sid)['rate']
+            if s_rate>obj['rate']:
+                obj['rate']=s_rate
+            self.db['TaskDB'].update_many(pid,obj={'rate':obj['rate']},where=where)
+
+    def schedule_attachment(self, data,obj,id_type,pid):
         if 'status' in obj:
             self.db['AttachmentDB'].update(data[id_type],obj)
             p_status=self.db['ProjectsDB'].get_detail(pid)['status']
