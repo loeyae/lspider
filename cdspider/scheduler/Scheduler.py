@@ -239,7 +239,7 @@ class Scheduler(object):
             pid=(self.db['SitesDB'].get_detail(q_data['sid']) or {"pid": 0})['pid']
             if not pid:
                 return self.logger.warn("not pid: %s" % q_data)
-            statusSchedule.schedule(q_data, 'SitesDB','sid',pid)
+            statusSchedule.schedule(q_data,'sid',pid)
         elif 'uid' in q_data:
             sid=(self.db['UrlsDB'].get_detail(q_data['uid']) or {"sid": 0})['sid']
             if not sid:
@@ -247,19 +247,27 @@ class Scheduler(object):
             pid=(self.db['SitesDB'].get_detail(sid) or {"pid": 0})['pid']
             if not pid:
                 return self.logger.warn("not pid: %s" % q_data)
-            statusSchedule.schedule(q_data, 'UrlsDB','uid',pid)
+            statusSchedule.schedule(q_data,'uid',pid)
         elif 'kwid' in q_data:
             pid=(self.db['KeywordsDB'].get_detail(q_data['kwid']) or {"pid": 0})['pid']
             if not pid:
                 return self.logger.warn("not pid: %s" % q_data)
-            statusSchedule.schedule(q_data, 'KeywordsDB','kwid',pid)
+            statusSchedule.schedule(q_data,'kwid',pid)
         elif 'pid' in q_data:
-           statusSchedule.schedule(q_data, 'ProjectsDB','pid',q_data['pid'])
+           statusSchedule.schedule(q_data,'pid',q_data['pid'])
         elif 'aid' in q_data:
             pid=(self.db['AttachmentDB'].get_detail(q_data['aid']) or {"pid": 0})['pid']
             if not pid:
                 return self.logger.warn("not pid: %s" % q_data)
-            statusSchedule.schedule(q_data, 'AttachmentDB','aid',pid)
+            statusSchedule.schedule(q_data,'aid',pid)
+        elif 'crid' in q_data:
+            sid=(self.db['ChannelRulesDB'].get_detail(q_data['crid']) or {"sid": 0})['sid']
+            if not sid:
+                return self.logger.warn("not sid: %s" % q_data)
+            pid=(self.db['SitesDB'].get_detail(sid) or {"pid": 0})['pid']
+            if not pid:
+                return self.logger.warn("not pid: %s" % q_data)
+            statusSchedule.schedule(q_data, 'crid', pid)
         else:
             return self.logger.debug("Schedule status_task failed")
         self.logger.info("status_schedule once end")
