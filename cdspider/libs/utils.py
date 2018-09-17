@@ -23,6 +23,7 @@ from multiprocessing import Process
 from chardet.universaldetector import UniversalDetector
 from urllib import parse
 from types import *
+from lxml import etree as le
 
 def format_(data, params):
     keylist = re.findall('\{(\w+)\}', url)
@@ -751,3 +752,80 @@ class __redirection__:
 
     def reset(self):
         sys.stdout=self.__console__
+
+class xml_tool(object):
+
+    def __init__(self, x):
+        if os.path.isfile(x):
+            self.root = le.parse(x)
+        else:
+            self.root = le.fromstring(x)
+
+    def css_select(self, selector):
+        return self.root.cssselect(selector)
+
+    def get_elements_by_tags(self, tag):
+        return self.css_select(tag)
+
+    def add_children(self, element, parent = None):
+        if parent is None:
+            parent = self.root.getroot()
+        if isinstance(parent, list):
+            parent = parent[0]
+        parent.append(element)
+
+    def remove(self, node):
+        parent = node.getparent()
+        if parent is not None:
+            if node.tail:
+                prev = node.getprevious()
+                if prev is None:
+                    if not parent.text:
+                        parent.text = ''
+                    parent.text += ' ' + node.tail
+                else:
+                    if not prev.tail:
+                        prev.tail = ''
+                    prev.tail += ' ' + node.tail
+            node.clear()
+            parent.remove(node)
+
+    def create_element(self, tag, text = None, tail = '\n'):
+        e = le.Element(tag)
+        if text:
+            e.text =text
+        e.tail = tail
+        return e
+
+    def get_element(self, expression, index = 0, mode = 'xpath'):
+        if mode == 'css':
+            items = self.css_select(expression)
+        else:
+            items = self.xpath(expression)
+        if items:
+            return items[index]
+        raise Exception('not element found')
+
+    def xpath_re(self, expression):
+        regexp_namespace = "http://exslt.org/regular-expressions"
+        items = self.root.xpath(expression, namespaces={'re': regexp_namespace})
+        return items
+
+    def xpath(self, expression):
+        items = self.root.xpath(expression)
+        return items
+
+    def get_elements_by_tag(self, tag=None, attr=None, value=None, childs=False):
+        selector = 'descendant-or-self::%s' % (tag or '*')
+        if attr and value:
+            selector = '%s[re:test(@%s, "%s", "i")]' % (selector, attr, value)
+        elems = self.xpath_re(selector)
+        if self.root in elems and (tag or childs):
+            elems.remove(self.root)
+        return elems
+
+    def to_string(self):
+        return le.tostring(self.root)
+
+    def save_file(self, filename):
+        return self.root.write(filename, pretty_print=True)
