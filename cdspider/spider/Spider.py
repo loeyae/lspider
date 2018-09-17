@@ -41,6 +41,7 @@ class Spider(Component):
         self.ProjectsDB = db.get('ProjectsDB')
         self.SitesDB = db.get('SitesDB')
         self.UrlsDB = db.get('UrlsDB')
+        self.ChannelRulseDB = db.get('UrlsDB')
         self.AttachmentDB = db.get('AttachmentDB')
         self.KeywordsDB = db.get('KeywordsDB')
         self.TaskDB = db.get('TaskDB')
@@ -243,7 +244,7 @@ class Spider(Component):
         if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
             self.debug("Task: %s not active" % task)
             return None
-        attachment = task.get('attachment') or self.AttachmentDB.get_detail(int(task['aid']))
+        attachment = task.get('attachment', None) or self.AttachmentDB.get_detail(int(task['aid']))
         if not attachment:
             self.status_queue.put_nowait({"aid": task['aid'], 'status': AttachmentDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Attachment: %s not found" % task['aid'])
@@ -260,6 +261,43 @@ class Spider(Component):
         task['save']['base_url'] = task['url']
         return task
 
+    def _get_task_from_channel(self, message, task, project, no_check_status = False):
+        if not task:
+            raise CDSpiderDBDataNotFound("Task: %s not found" % message['tid'])
+        if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
+            self.debug("Task: %s not active" % task)
+            return None
+        if not 'save' in task or not task['save']:
+            task['save'] = {}
+        task['save']['mode'] = BaseHandler.MODE_CHANNEL;
+        task['project'] = project
+        site = task.get('site', None) or self.SitesDB.get_detail(int(task['sid']))
+        if not site:
+            self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
+            raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
+        if not no_check_status and site.get('status', SitesDB.STATUS_INIT) != SitesDB.STATUS_ACTIVE:
+            self.debug("Site: %s not active" % site)
+            return None
+        if not 'main_process' in site or not site['main_process']:
+            site['main_process'] = {}
+        if not 'sub_process' in site or not site['sub_process']:
+            site['sub_process'] = {}
+        task['site'] = site
+
+        channel = task.get('channel') or self.ChannelRulseDB.get_detail(int(task['crid']))
+        if not channel:
+            self.status_queue.put_nowait({"crid": task['aid'], 'status': ChannelRulseDB.STATUS_DELETED})
+            raise CDSpiderDBDataNotFound("ChannelRules: %s not found" % task['uid'])
+        if not no_check_status and channel.get('status', ChannelRulseDB.STATUS_INIT) != ChannelRulseDB.STATUS_ACTIVE:
+            self.debug("ChannelRule: %s" % channel)
+            return None
+        if not 'process' in channel or not urls['process']:
+            urls['process'] = {}
+        task['channel'] = channel
+        task['save'].setdefault('base_url', task['url'])
+        task['save'].setdefault('referer', task['url'])
+        return task
+
     def _get_task_from_project(self, message, task, project, no_check_status = False):
         if not task:
             raise CDSpiderDBDataNotFound("Task: %s not found" % message['tid'])
@@ -270,7 +308,7 @@ class Spider(Component):
             task['save'] = {}
         task['save']['mode'] = message.get('mode', BaseHandler.MODE_DEFAULT);
         task['project'] = project
-        site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
+        site = task.get('site', None) or self.SitesDB.get_detail(int(task['sid']))
         if not site:
             self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
             raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
@@ -283,9 +321,9 @@ class Spider(Component):
             site['sub_process'] = {}
         task['site'] = site
         if 'uid' in task and task['uid']:
-            urls = task.get('urls') or self.UrlsDB.get_detail(int(task['uid']))
+            urls = task.get('urls', None) or self.UrlsDB.get_detail(int(task['uid']))
             if not urls:
-                self.status_queue.put_nowait({"aid": task['aid'], 'status': UrlsDB.STATUS_DELETED})
+                self.status_queue.put_nowait({"uid": task['aid'], 'status': UrlsDB.STATUS_DELETED})
                 raise CDSpiderDBDataNotFound("Url: %s not found" % task['uid'])
             if not no_check_status and urls.get('status', UrlsDB.STATUS_INIT) != UrlsDB.STATUS_ACTIVE:
                 self.debug("Urls: %s" % urls)
@@ -361,8 +399,8 @@ class Spider(Component):
             self.debug("Site: %s not active" % site)
             return None
         task['site'] = site
-        if task['uid']:
-            urls = task.get('urls') or self.UrlsDB.get_detail(int(task['uid']))
+        if 'uid' in task and task['uid']:
+            urls = task.get('urls', None) or self.UrlsDB.get_detail(int(task['uid']))
             if urls:
                 task['urls'] = urls
                 format_params["parenthandler"] = "UrlHandler"
@@ -394,6 +432,8 @@ class Spider(Component):
             task = self._get_task_from_attachment(message, task, project, no_check_status)
         elif mode == BaseHandler.MODE_ITEM:
             task = self._get_task_from_item(message, task, project, no_check_status)
+        elif mode == BaseHandler.MODE_CHANNEL:
+            task = self._get_task_from_channel(message, task, project, no_check_status)
         else:
             task = self._get_task_from_project(message, task, project, no_check_status)
         if not task:
