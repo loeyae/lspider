@@ -87,6 +87,16 @@ class Scheduler(object):
             task['site'] = {"sid": 0}
             task['site']['scripts'] = attachment['scripts']
             task['save']={}
+        elif 'crid' in task and task['crid']:
+            channel=self.db['ChannelRulesDB'].get_detail(task['crid'])
+            site = self.db['SitesDB'].get_detail(channel['sid'])
+            project=self.db['ProjectsDB'].get_detail(site['pid'])
+            task['channel'] = attachment
+            task['site'] = site
+            task['project'] = project
+            task['site'] = {"sid": 0}
+            task['site']['scripts'] = attachment['scripts']
+            task['save']={}
         else:
             return self.logger.debug("Schedule NewTask failed")
         handler=load_handler(task, db=self.db,queue=self.queue)
