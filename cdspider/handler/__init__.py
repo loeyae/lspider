@@ -307,6 +307,8 @@ class BaseHandler(Component):
                         if u:
                             parserule = item
             self.process = parserule or copy.deepcopy(self.DEFAULT_PROCESS)
+        elif self.mode == self.MODE_CHANNEL:
+            self.process = self.task.get('channel', {}).get('process', None) or copy.deepcopy(self.DEFAULT_PROCESS)
         elif self.mode == self.MODE_ATT:
             self.process = self.task.get('attachment', {}).get('process', None) or copy.deepcopy(self.DEFAULT_PROCESS)
 
@@ -314,19 +316,14 @@ class BaseHandler(Component):
         """
         获取请求配置
         """
-        if self.mode == self.MODE_ITEM or self.mode == self.MODE_ATT:
+        if self.mode in (self.MODE_ITEM, self.MODE_ATT, self.MODE_CHANNEL):
             if not self.process:
                 self._init_process(url);
             request = utils.dictjoin(self.process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
         else:
-            if self.mode == self.MODE_CHANNEL:
-                url_process = self.task.get('urls', {}).get('main_process', {}) or {}
-                site_process = self.task.get('site', {}).get('main_process', {}) or {}
-                request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
-            elif self.mode == self.MODE_LIST:
-                url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
-                site_process = self.task.get('site', {}).get('sub_process', {}) or {}
-                request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
+            url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
+            site_process = self.task.get('site', {}).get('sub_process', {}) or {}
+            request = utils.dictjoin(url_process.get('request', {}) or site_process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
         if 'cookie' in request and request['cookie']:
             cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
             if len(cookie_list) > 1:
@@ -351,19 +348,14 @@ class BaseHandler(Component):
         return request
 
     def _get_paging(self, url = None):
-        if self.mode in (self.MODE_ITEM, self.MODE_ATT):
+        if self.mode in (self.MODE_ITEM, self.MODE_ATT, self.MODE_CHANNEL):
             if not self.process:
                 self._init_process(url);
             paging = self.process.get('paging', None)
         else:
-            if self.mode == self.MODE_CHANNEL:
-                url_process = self.task.get('urls', {}).get('main_process', {}) or {}
-                site_process = self.task.get('site', {}).get('main_process', {}) or {}
-                paging = url_process.get('paging', {}) or site_process.get('paging', {})
-            elif self.mode == self.MODE_LIST:
-                url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
-                site_process = self.task.get('site', {}).get('sub_process', {}) or {}
-                paging = url_process.get('paging', {}) or site_process.get('paging', {})
+            url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
+            site_process = self.task.get('site', {}).get('sub_process', {}) or {}
+            paging = url_process.get('paging', {}) or site_process.get('paging', {})
         if paging:
             if "name" in paging and paging['name']:
                 return paging
@@ -407,19 +399,14 @@ class BaseHandler(Component):
         """
         获取解析规则
         """
-        if self.mode in (self.MODE_ITEM, self.MODE_ATT):
+        if self.mode in (self.MODE_ITEM, self.MODE_ATT, self.MODE_CHANNEL):
             if not self.process:
                 self._init_process(url);
             parse = self.process.get('parse', {})
         else:
-            if self.mode == self.MODE_CHANNEL:
-                url_process = self.task.get('urls', {}).get('main_process', {}) or {}
-                site_process = self.task.get('site', {}).get('main_process', {}) or {}
-                parse = url_process.get('parse', {}) or site_process.get('parse', {})
-            elif self.mode == self.MODE_LIST:
-                url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
-                site_process = self.task.get('site', {}).get('sub_process', {}) or {}
-                parse = url_process.get('parse', {}) or site_process.get('parse', {})
+            url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
+            site_process = self.task.get('site', {}).get('sub_process', {}) or {}
+            parse = url_process.get('parse', {}) or site_process.get('parse', {})
 
         if self.mode == self.MODE_ATT:
             if not 'item' in  parse:
