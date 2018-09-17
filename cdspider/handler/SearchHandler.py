@@ -28,6 +28,8 @@ class SearchHandler(BaseHandler, NewTaskTrait):
         """
         生成新任务
         """
+        if 'channel' in self.task:
+            return self.build_newtask_by_channel()
         self.build_newtask_by_keywords()
 
     def url_prepare(self, url):
