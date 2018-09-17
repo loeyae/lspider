@@ -269,8 +269,8 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         indexes = collection.index_information()
         if not 'tid' in indexes:
             collection.create_index('tid', unique=True, name='tid')
-        if not 'p_s_u_kw_a' in indexes:
-            collection.create_index({"pid": 1, "sid": 1, "uid": 1, "kwid": 1, "aid": 1}, unique=True, name='p_s_u_kw_a')
+        if not 'p_s_u_kw_a_cr' in indexes:
+            collection.create_index({"pid": 1, "sid": 1, "uid": 1, "kwid": 1, "aid": 1, "crid": 1}, unique=True, name='p_s_u_kw_a')
         if not 'pid' in indexes:
             collection.create_index('pid', name='pid')
         if not 'sid' in indexes:
@@ -281,6 +281,8 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             collection.create_index('kwid', name='kwid')
         if not 'aid' in indexes:
             collection.create_index('aid', name='aid')
+        if not 'crid' in indexes:
+            collection.create_index('crid', name='crid')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
         if not 'expire' in indexes:
