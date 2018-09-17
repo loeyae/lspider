@@ -15,24 +15,26 @@ from cdspider.database.base import *
 
 class NewTaskTrait(object):
 
-    def _new_task(self, pid, sid, url, rate, uid=0, aid=0, kwid=0, status=0, save=None, expire = 0,rid=0):
-        task = {
-            'rid': rid,
-            'pid': pid,                            # project id
-            'sid': sid,                            # site id
-            'kwid': kwid,                          # keyword id, if exists, default: 0
-            'uid': uid,                            # url id, if exists, default: 0
-            'aid': aid,                            # url id, if exists, default: 0
-            'url': url,                            # base url
-            'rate': rate,                          # 频率
-            'status': status,                      # status, default: 0
-            'expire': expire,                      # 有效期
-            'save': save,                          # 保留的参数
+    def _new_task(self, *args, **kwargs):
+        kwargs['pid'] = args[0] if len(args) > 0 else kwargs['pid']
+        kwargs['sid'] = args[1] if len(args) > 1 else kwargs['sid']
+        kwargs['url'] = args[2] if len(args) > 2 else kwargs['url']
+        kwargs['rate'] = args[3] if len(args) > 3 else kwargs['rate']
+        kwargs['uid'] = args[4] if len(args) > 4 else kwargs.get('uid', 0)
+        kwargs['aid'] = args[5] if len(args) > 5 else kwargs.get('kwid', 0)
+        kwargs['kwid'] = args[6] if len(args) > 6 else kwargs.get('uid', 0)
+        kwargs['status'] = args[7] if len(args) > 7 else kwargs.get('status', 0)
+        kwargs['save'] = args[8] if len(args) > 8 else kwargs.get('save', None)
+        kwargs['expire'] = args[9] if len(args) > 9 else kwargs.get('expire', 0)
+        kwargs['rid'] = args[10] if len(args) > 10 else kwargs.get('rid', 0)
+        kwargs['crid'] = args[11] if len(args) > 11 else kwargs.get('crid', 0)
+        task = copy.deepcopy(kwargs)
+        task.update({
             'queuetime': 0,                        # 入队时间
             'crawltime': 0,                        # 最近一次抓取时间
             'crawlinfo': None,                     # 最近十次抓取信息
             'plantime': 0,                         # 下一次入队时间
-        }
+        })
         return self.db['TaskDB'].insert(task)
 
     def build_newtask_by_attachment(self):
@@ -94,4 +96,22 @@ class NewTaskTrait(object):
         expire = int(urls.get('expire', 0)) or 0
         if expire > 0:
             expire = int(time.time()) + expire * self.EXPIRE_STEP
-        self._new_task(project['pid'], site['sid'], urls['url'], rate, urls['uid'], 0, 0, status, expire = expire)
+        self._new_task(project['pid'], site['sid'], urls['url'], rate, urls['uid'], status=status, expire=expire)
+
+    def build_newtask_by_channel(self):
+        project = self.task.get("project")
+        if not project:
+            raise CDSpiderHandlerError('No project')
+        site = self.task.get("site")
+        if not site:
+            raise CDSpiderHandlerError('No site')
+        channel = self.task.get('channel')
+        if not channel:
+            raise CDSpiderHandlerError('No channel')
+        self.debug("%s build_newtask_by_channel channel: %s" % (self.__class__.__name__, channel))
+        rate = channel['rate']
+        status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and channel['status'] == ChannelRulesDB.STATUS_ACTIVE else 0
+        expire = int(channel.get('expire', 0)) or 0
+        if expire > 0:
+            expire = int(time.time()) + expire * self.EXPIRE_STEP
+        self._new_task(project['pid'], site['sid'], channel['url'], rate, 0, status=status, expire=expire, crid=channel['crid'])
