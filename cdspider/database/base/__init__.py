@@ -11,6 +11,7 @@ class Base(object):
 from .Articlesdb import ArticlesDB
 from .AttachDatadb import AttachDataDB
 from .Attachmentdb import AttachmentDB
+from .ChannelRulesdb import ChannelRulesDB
 from .Commentsdb import CommentsDB
 from .CrawlLogdb import CrawlLogDB
 from .Keywordsdb import KeywordsDB
