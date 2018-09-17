@@ -17,6 +17,7 @@ from . import Base
         'kwid': int,       # keyword id, if exists, default: 0
         'uid': int,        # url id, if exists, default: 0
         'aid': int,        # attachment id, if exists, default: 0
+        'crid': int,       # channel rule id
         'url': str,        # base url
         'rate': int,       # 抓取频率
         'status': int,     # status, default: 0
