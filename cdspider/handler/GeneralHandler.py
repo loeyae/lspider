@@ -27,4 +27,6 @@ class GeneralHandler(BaseHandler, NewTaskTrait):
         """
         生成新任务
         """
-        self.build_newtask_by_urls()
+        if 'channel' in self.task:
+            return self.build_newtask_by_channel()
+        return self.build_newtask_by_urls()
