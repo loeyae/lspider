@@ -114,10 +114,12 @@ class Scheduler(object):
                 for task in newtask_list:
                     self.logger.debug("Schedule check_tasks task@%s: %s " % (projectid, str(task)))
                     obj={}
-                    if task['aid']==0:
-                        obj['mode']='list'
-                    else:
+                    if task['aid'] > 0:
                         obj['mode']='att'
+                    elif 'crid' in task and task['crid'] > 0:
+                        obj['mode'] = 'channel'
+                    else:
+                        obj['mode']='list'
                     obj['pid']=task['pid']
                     obj['tid']=task['tid']
                     self.queue['scheduler2spider'].put_nowait(obj)
