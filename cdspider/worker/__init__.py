@@ -58,6 +58,7 @@ class BaseWorker():
             try:
                 message = self.inqueue.get_nowait()
                 self.on_result(message)
+                time.sleep(0.01)
             except queue.Empty:
                 time.sleep(self.LOOP_INTERVAL)
                 continue
