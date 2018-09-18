@@ -361,9 +361,6 @@ def aichat_rpc(ctx, rebot_cls, bot_data, commands, settings, xmlrpc_host, xmlrpc
 def aichat_rpc_hello(ctx, aichat_rpc):
     g = ctx.obj
     aichat_rpc = connect_rpc(ctx, None, aichat_rpc)
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
     print(aichat_rpc.hello())
 
 @cli.command()
