@@ -52,7 +52,7 @@ def extract(msg):
 #        word_list = jieba.analyse.textrank(msg, topK=20, withWeight=False, allowPOS=('ns', 'n', 'vn', 'v')) or jieba.analyse.extract_tags(msg, topK=20, withWeight=False, allowPOS=())
 #        p = " ".join(word_list) if word_list else None
     if not p:
-        word_list = [i for i in jieba.cut(msg) if not i in stopwords_list]
+        word_list = [i for i in jieba.cut(msg) if i and i != " "] #[i for i in jieba.cut(msg) if not i in stopwords_list]
         p = " ".join(word_list) if word_list else None
     if not p:
         p = msg
@@ -81,12 +81,23 @@ srai_template = """
 </category>
 """
 
+li_template = """
+<category>
+        <pattern>{pattern}</pattern>
+        <template>
+                <random>
+                </random>
+        </template>
+</category>
+"""
+
 aiml.AimlParser.AimlHandler._validationInfo101.update({
     "arg": ( [], [], True ),
     "train": ( [], [], True ),
     "extract": ( [], ["index"], False ),
     "date": ( [], ["format"], False ),
     "tool": ([], [], True),
+    "operate": ([], [], True),
     })
 
 class AichatRobots(cdspider.Component, aiml.Kernel):
@@ -94,9 +105,10 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
     put you comment
     """
     _extractHistory = '_extractHistory'
+    _matchedHistory = '_matchedHistory'
 
     settings = {
-        "name": "小B",
+        "name": "小Q",
         "sex": "男",
         "age": 1,
         "company": "博彦多彩",
@@ -129,8 +141,10 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
         self._elementProcessors.update({
             "arg": self._processArg,
             "extract": self._processExtract,
+            "matched": self._processMatched,
             "train": self._processTrain,
             "tool": self._processTool,
+            "operate": self._processOperate,
             })
         self._verboseMode = self.debug_mode
         setting_keys = ['name', 'sex', 'age', 'company']
@@ -140,7 +154,7 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
                 self.settings[setting_keys[i]] = settings[i]
         elif isinstance(settings, dict):
             self.settings.update(settings)
-        else:
+        elif settings:
             self.settings['name'] = settings
         self.init_aiml()
 
@@ -160,7 +174,9 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
             return
         self.setBotPredicate("bot-data", bot_data_dir)
         #TODO 设置自定义变量
+        print("sssssssssssss", self.settings)
         for k,v in self.settings.items():
+            print(k, v)
             self.setBotPredicate(k, v)
         if os.path.isfile(self.brnfile) and not self.debug_mode:
             self.bootstrap(brainFile = self.brnfile)
@@ -179,7 +195,8 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
             self._inputHistory: [],
             self._outputHistory: [],
             self._inputStack: [],
-            self._extractHistory: []
+            self._extractHistory: [],
+            self._matchedHistory: [],
         }
 
     def _processDate(self, elem, sessionID):
@@ -207,6 +224,17 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
                 sys.stderr.write(err)
             return ""
 
+    def _processMatched(self, elem, sessionID):
+        matchedHistory = self.getPredicate(self._matchedHistory, sessionID)
+        try: index = int(elem[1]['index'])
+        except: index = 1
+        try: return matchedHistory[-index]
+        except IndexError:
+            if self._verboseMode:
+                err = "No such extract %d while processing <matched> element.\n" % index
+                sys.stderr.write(err)
+            return ""
+
     def _processTrain(self, elem, sessionID):
         args = []
         for e in elem[2:]:
@@ -214,20 +242,25 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
         assert len(args) > 0, "train need more than one args"
         rule = args[0]
         temp = args[1] if len(args) > 1 else None
+        append = args[2] if len(args) > 2 else None
         try:
             p = extract(rule)
             db = shelve.open(self.cache_db, "c", writeback=True)
             if not temp:
                 temp = '我不明白你的意思，如果你要教我学习，请回复：说错了'
-            db[p] = temp
+            if append:
+                value = db[p]
+                if not value:
+                    value = []
+                if not isinstance(value, (list, tuple)):
+                    value = [value]
+                value = set(value)
+                value.add(temp)
+            else:
+                value = temp
+            db[p] = value
             db.sync()
-            rules = []
-            for r in db:
-                rules.append(category_template.format(pattern=r, answer=db[r]))
-            content = template.format(rules="\n".join(rules))
-            with open(self.learn_file, "w") as fp:
-                fp.write(content)
-                fp.close()
+            self.sync_aiml()
         except:
             self.error(traceback.format_exc())
         return ""
@@ -236,7 +269,59 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
         args = []
         for e in elem[2:]:
             args.append(self._processElement(e, sessionID))
-        assert len(args) > 0, "train need more than one args"
+        assert len(args) > 0, "tool need more than one args"
+        mode = args[0]
+        try:
+            if mode == "cut":
+                assert len(args) > 2, "tool:cut need more than three args"
+                m = "left"
+                if len(args) > 3:
+                    m = args[3]
+                src = args[1]
+                sub = args[2]
+                if m == 'right+':
+                    return src[:(src.find(sub)+len(sub))]
+                elif m == 'right':
+                    return src[:src.find(sub)]
+                elif m == 'left+':
+                    return src[src.find(sub):]
+                return src[(src.find(sub)+len(sub)):]
+            elif mode == "strip":
+                assert len(args) > 1, "tool:strip need more than two args"
+                m = None
+                if len(args) > 2:
+                    m = args[2]
+                src = args[1]
+                if m:
+                    return src.strip(m)
+                return src.strip()
+            elif mode == "lstrip":
+                assert len(args) > 1, "tool:lstrip need more than two args"
+                m = None
+                if len(args) > 2:
+                    m = args[2]
+                src = args[1]
+                if m:
+                    return src.lstrip(m)
+                return src.lstrip()
+            elif mode == "rstrip":
+                assert len(args) > 1, "tool:rstrip need more than two args"
+                m = None
+                if len(args) > 2:
+                    m = args[2]
+                src = args[1]
+                if m:
+                    return src.rstrip(m)
+                return src.rstrip()
+        except:
+            self.error(traceback.format_exc())
+        return ""
+
+    def _processOperate(self, elem, sessionID):
+        args = []
+        for e in elem[2:]:
+            args.append(self._processElement(e, sessionID))
+        assert len(args) > 0, "operate need more than one args"
         mode = args[0]
         try:
             if mode == "":
@@ -253,6 +338,53 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
             filename = self.learn_file
         self.learn(filename)
         return ""
+
+    def _respond(self, input_, sessionID):
+        if len(input_) == 0:
+            return u""
+
+        inputStack = self.getPredicate(self._inputStack, sessionID)
+        if len(inputStack) > self._maxRecursionDepth:
+            if self._verboseMode:
+                err = u"WARNING: maximum recursion depth exceeded (input='%s')" % self._cod.enc(input_)
+                sys.stderr.write(err)
+            return u""
+
+        inputStack = self.getPredicate(self._inputStack, sessionID)
+        inputStack.append(input_)
+        self.setPredicate(self._inputStack, inputStack, sessionID)
+
+        subbedInput = self._subbers['normal'].sub(input_)
+
+        outputHistory = self.getPredicate(self._outputHistory, sessionID)
+        try: that = outputHistory[-1]
+        except IndexError: that = ""
+        subbedThat = self._subbers['normal'].sub(that)
+
+        topic = self.getPredicate("topic", sessionID)
+        subbedTopic = self._subbers['normal'].sub(topic)
+
+        response = u""
+        elem = self._brain.match(subbedInput, subbedThat, subbedTopic)
+        matchedHistory = self.getPredicate(self._matchedHistory, sessionID)
+        matchedHistory.append(s)
+        while len(matchedHistory) > self._maxHistorySize:
+            matchedHistory.pop(0)
+        self.setPredicate(self._matchedHistory, matchedHistory, sessionID)
+        if elem is None:
+            if self._verboseMode:
+                err = "WARNING: No match found for input: %s\n" % self._cod.enc(input_)
+                sys.stderr.write(err)
+        else:
+            response += self._processElement(elem, sessionID).strip()
+            response += u" "
+        response = response.strip()
+
+        inputStack = self.getPredicate(self._inputStack, sessionID)
+        inputStack.pop()
+        self.setPredicate(self._inputStack, inputStack, sessionID)
+
+        return response
 
     def chinese_respond(self, input_, sessionID = None):
         """Return the Kernel's response to the input string."""
@@ -322,12 +454,25 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
     def has_change(self):
         return self.mt_time != os.stat(self.brnfile).st_mtime
 
-    def load_brain(self):
-        kernel.loadBrain(self.brnfile)
+    def sync_aiml(self):
+        db = shelve.open(self.cache_db, "c", writeback=True)
+        rules = []
+        for r in db:
+            if isinstance(db[r], (list, tuple)):
+                ll = utils.xml_tool(li_template.format(pattern=r))
+                for item in db[r]:
+                    ll.add_children(ll.create_element('li', item), ll.get_element('random'))
+                rules.appen(ll.to_string())
+            else:
+                rules.append(category_template.format(pattern=r, answer=db[r]))
+        content = template.format(rules="\n".join(rules))
+        with open(self.learn_file, "w") as fp:
+            fp.write(content)
+            fp.close()
 
     def refresh_brain(self):
         if self.has_change:
-            self.load_brain()
+            self.loadBrain(self.brnfile)
 
     def clear_cache(self):
         if os.path.isfile(self.cache_db):
