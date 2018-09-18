@@ -368,7 +368,7 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
         response = u""
         elem = self._brain.match(subbedInput, subbedThat, subbedTopic)
         matchedHistory = self.getPredicate(self._matchedHistory, sessionID)
-        matchedHistory.append(s)
+        matchedHistory.append(elem)
         while len(matchedHistory) > self._maxHistorySize:
             matchedHistory.pop(0)
         self.setPredicate(self._matchedHistory, matchedHistory, sessionID)
