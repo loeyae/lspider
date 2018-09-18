@@ -150,8 +150,9 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
         setting_keys = ['name', 'sex', 'age', 'company']
         if isinstance(settings, (list, tuple)):
             i = 0
-            for i in settings:
-                self.settings[setting_keys[i]] = settings[i]
+            for item in settings:
+                self.settings[setting_keys[i]] = item
+                i += 1
         elif isinstance(settings, dict):
             self.settings.update(settings)
         elif settings:
