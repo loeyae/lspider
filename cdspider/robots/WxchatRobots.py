@@ -34,6 +34,7 @@ class WxchatRobots(Component):
         logger = logging.getLogger('robots')
         super(WxchatRobots, self).__init__(logger, log_level)
         self.__uid = uuid
+        self.uin = None
         self.temp_dir = data_dir or tempfile.gettempdir()
         self.auto_reply = lambda x: None
         self.login_post_fn = {
@@ -78,47 +79,49 @@ class WxchatRobots(Component):
                 os.remove(self.qrfile)
                 self.qrfile = None
             myself = robot.search_friends()
+            self.uin = myself['Uin']
             if self.login_post_fn['myself']:
                 for fn in self.login_post_fn['myself']:
-                    fn(myself, self.__uid)
+                    fn(myself, self.uin)
             friends = robot.get_friends()
             if self.login_post_fn['friends']:
                 for fn in self.login_post_fn['friends']:
-                    fn(friends, self.__uid)
+                    fn(friends, self.uin)
             chatrooms = robot.get_chatrooms()
             if self.login_post_fn['chatrooms']:
                 for fn in self.login_post_fn['chatrooms']:
-                    fn(chatrooms, self.__uid)
+                    fn(chatrooms, self.uin)
             mps = robot.get_mps()
             if self.login_post_fn['mps']:
                 for fn in self.login_post_fn['mps']:
-                    fn(mps, self.__uid)
+                    fn(mps, self.uin)
             #获取联系人，并保存
             if self.db:
-                db = self.db['base']
-                if myself:
-                    try:
-                        db.insert(myself, table = "wechat_robot_info")
-                    except:
-                        pass
+                try:
+                    self.db["WechatRobotInfoDB"].insert(myself)
+                except:
+                    pass
                 for item in friends:
                     try:
-                        db.insert(item, table = "wechat_robot_friends")
+                        item['IUin'] = self.uin
+                        self.db["WechatRobotFriendsDB"].insert(item)
                     except:
                         pass
                 for item in chatrooms:
                     try:
-                        db.insert(item, table = "wechat_robot_chatrooms")
+                        item['IUin'] = self.uin
+                        self.db["WechatRobotChatRoomsDB"].insert(item)
                     except:
                         pass
                 for item in mps:
                     try:
-                        db.insert(item, table = "wechat_robot_mps")
+                        item['IUin'] = self.uin
+                        self.db["WechatRobotMpsDB"].insert(item)
                     except:
                         pass
             if self.login_post_fn['all']:
                 for fn in self.login_post_fn['all']:
-                    fn(robot, self.__uid)
+                    fn(robot, self.uin)
 
         def logout():
             self.info("The Wechat was logout @ Process of No.%s " % (self.__uid))
@@ -141,7 +144,8 @@ class WxchatRobots(Component):
         @robot.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
         def text_reply(msg):
             if self.db:
-                self.db['base'].insert(msg, table = "wechat_robot_chat")
+                msg["IUin"] = self.uin
+                self.db['WechatRobotChatInfoDB'].insert(msg)
 #            reply = self.get_message(msg.text, msg.user.userName)
 #            msg.user.send('%s' % reply)
             if self.message_queue:
@@ -151,7 +155,8 @@ class WxchatRobots(Component):
         def text_replay(msg):
             if self.db:
                 try:
-                    self.db['base'].insert(msg, table = "wechat_robot_mp_chat")
+                    msg["IUin"] = self.uin
+                    self.db['WechatRobotMpsChatDB'].insert(msg)
                 except:
                     pass
 
@@ -159,7 +164,8 @@ class WxchatRobots(Component):
         def text_replay(msg):
             if self.db:
                 try:
-                    self.db['base'].insert(msg, table = "wechat_robot_mp_sharing")
+                    msg["IUin"] = self.uin
+                    self.db['WechatRobotMpsSharingDB'].insert(msg)
                 except:
                     pass
 
@@ -176,12 +182,13 @@ class WxchatRobots(Component):
         def add_friend(msg):
             msg.user.verify()
             if self.db:
-                self.db['base'].insert(msg, table = "wechat_robot_new_friend")
+                msg["IUin"] = self.uin
+                self.db['wechat_robot_new_friend'].insert(msg)
 
         @robot.msg_register(TEXT, isGroupChat=True)
         def text_reply(msg):
             if self.db:
-                self.db['base'].insert(msg, table = "wechat_robot_group_chat")
+                self.db['WechatRobotGroupChatDB'].insert(msg)
             if msg.isAt:
                 if self.message_queue:
                     self.message_queue.put_nowait({"user": msg.user.userName, "msg": msg.text.split(u'\u2005')[1], "nick": msg.actualNickName, "auser": msg.actualUserName})
