@@ -75,16 +75,16 @@ class Mongo(BaseDataBase):
         cursor = collection.insert_one(document=setting)
         return cursor.inserted_id
 
-    def update(self, setting, where, table = None, multi = False):
+    def update(self, setting, where, table = None, multi = False, upsert = False):
         """
         修改数据
         """
         collection = self._db.get_collection(table or self.table)
         self.logger.debug('update %s to %s with %s by multi %s' % (table or self.table, setting, where, multi))
         if multi:
-            cursor = collection.update_many(filter = self._build_where(where), update = {"$set": setting})
+            cursor = collection.update_many(filter = self._build_where(where), update = {"$set": setting}, upsert = upsert)
         else:
-            cursor = collection.update_one(filter = self._build_where(where), update = {"$set": setting})
+            cursor = collection.update_one(filter = self._build_where(where), update = {"$set": setting}, upsert = upsert)
         return cursor.modified_count
 
 
