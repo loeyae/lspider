@@ -77,9 +77,9 @@
             <pattern>你 是 谁</pattern>
             <template>
                     <random>
-                            <li>我是<bot name="name"/></li>
+                            <li>我是<get name="name"/></li>
                             <li>我是来自<bot name="company"/>的<bot name="name"/>呀~</li>
-                            <li>才多久你就不记得我了吗T_T，我是<bot name="name"/>呀！！</li>
+                            <li>才多久你就不记得我了吗T_T，我是<get name="name"/>呀！！</li>
                     </random>
             </template>
     </category>
