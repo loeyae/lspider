@@ -32,7 +32,7 @@ class WechatRobotInfoDB(Mongo, BaseWechatRobotInfoDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj = {}):
-        uin = obj.pop('uid')
+        uin = obj.pop('Uin')
         where = {"Uin": uin}
         obj.setdefault('ctime', int(time.time()))
         super(WechatRobotInfoDB, self).update(setting=obj, where=where, upsert=True)
