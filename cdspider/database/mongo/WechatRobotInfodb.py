@@ -36,7 +36,7 @@ class WechatRobotInfoDB(Mongo, BaseWechatRobotInfoDB):
         where = {"Uin": uin}
         obj.setdefault('ctime', int(time.time()))
         super(WechatRobotInfoDB, self).update(setting=obj, where=where, upsert=True)
-        return obj['Uin']
+        return uin
 
     def delete(self, id):
         where = {"Uin": uin}
