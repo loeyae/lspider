@@ -36,6 +36,7 @@ class WxchatRobots(Component):
         self.__uid = uuid
         self.uin = None
         self.temp_dir = data_dir or tempfile.gettempdir()
+        self.info("temp dir: %s" % self.temp_dir)
         self.auto_reply = lambda x: None
         self.login_post_fn = {
             'all': set(),
@@ -199,6 +200,7 @@ class WxchatRobots(Component):
         try:
             self.info("wechat will running")
             f = None if self.debug_mode else qr_callback
+            self.info("login temp dir: %s" % self.temp_dir)
             statusStorageDir = os.path.realpath(os.path.join(self.temp_dir, "wechat", '%s.pkl' % self.__uid))
             robot.auto_login(hotReload=True, statusStorageDir=statusStorageDir, loginCallback=login, exitCallback=logout, qrCallback=f, enableCmdQR=2 if self.debug_mode else False)
             #自动回复
