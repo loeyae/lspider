@@ -97,29 +97,28 @@ class WxchatRobots(Component):
                 for fn in self.login_post_fn['mps']:
                     fn(mps, self.uin)
             #获取联系人，并保存
-            if self.db:
+            try:
+                self.db["WechatRobotInfoDB"].insert(myself)
+            except:
+                self.error(traceback.format_exc())
+            for item in friends:
                 try:
-                    self.db["WechatRobotInfoDB"].insert(myself)
+                    item['IUin'] = self.uin
+                    self.db["WechatRobotFriendsDB"].insert(item)
                 except:
-                    self.error(tracback.format_exc())
-                for item in friends:
-                    try:
-                        item['IUin'] = self.uin
-                        self.db["WechatRobotFriendsDB"].insert(item)
-                    except:
-                        self.error(tracback.format_exc())
-                for item in chatrooms:
-                    try:
-                        item['IUin'] = self.uin
-                        self.db["WechatRobotChatRoomsDB"].insert(item)
-                    except:
-                        self.error(tracback.format_exc())
-                for item in mps:
-                    try:
-                        item['IUin'] = self.uin
-                        self.db["WechatRobotMpsDB"].insert(item)
-                    except:
-                        self.error(tracback.format_exc())
+                    self.error(traceback.format_exc())
+            for item in chatrooms:
+                try:
+                    item['IUin'] = self.uin
+                    self.db["WechatRobotChatRoomsDB"].insert(item)
+                except:
+                    self.error(traceback.format_exc())
+            for item in mps:
+                try:
+                    item['IUin'] = self.uin
+                    self.db["WechatRobotMpsDB"].insert(item)
+                except:
+                    self.error(traceback.format_exc())
             if self.login_post_fn['all']:
                 for fn in self.login_post_fn['all']:
                     fn(robot, self.uin)
@@ -205,7 +204,7 @@ class WxchatRobots(Component):
             if os.path.exists(statusStorageDir) == False:
                 os.makedirs(statusStorageDir)
             statusStorage = os.path.join(statusStorageDir, "%s.pkl" % self.__uid)
-            robot.auto_login(hotReload=True, statusStorageDir=statusStorage, loginCallback=login, exitCallback=logout, qrCallback=f, enableCmdQR=2 if self.debug_mode else False)
+            robot.auto_login(hotReload=True, statusStorageDir=statusStorage, loginCallback=login, exitCallback=logout, qrCallback=f, enableCmdQR=1 if self.debug_mode else False)
             #自动回复
             t = utils.run_in_thread(self.reply_fn, robot)
             robot.run(self.debug_mode)
