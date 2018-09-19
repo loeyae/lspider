@@ -2,6 +2,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import sys
+import copy
 import imp
 import inspect
 import linecache
@@ -10,6 +11,7 @@ import click
 import json
 import logging
 import redis
+import collections
 
 from cdspider.exceptions import *
 from cdspider.libs import utils
@@ -66,6 +68,53 @@ class Redis():
             return getattr(self._conn, name)
         except Exception as e:
             raise CDSpiderRedisError(e)
+
+class db_wrapper(collections.UserDict):
+    """
+    db wrapper
+    """
+    connector = None
+    protocol = None
+    def __init__(self, connector, protocol):
+        self.connector = connector
+        self.protocol = protocol
+        super(db_wrapper, self).__init__()
+
+    def __getitem__(self, key):
+        if key in self.data:
+            return super(db_wrapper, self).__getitem__(key)
+        try:
+            db = 'cdspider.database.{protocol}.{db}'.format(protocol=self.protocol, db=key)
+            cls = load_cls(None, None, db)(self.connector)
+            self.data[key] = cls
+            return cls
+        except ImportError:
+            db = 'cdspider.database.{protocol}.{db}'.format(protocol=self.protocol, db='Base')
+            cls = load_cls(None, None, db)(self.connector, table=key)
+            self.data[key] = cls
+            return cls
+
+
+class queue_wrapper(collections.UserDict):
+    """
+    db wrapper
+    """
+    context = None
+    queue_setting = None
+    def __init__(self, context, queue_setting):
+        self.context = context
+        self.queue_setting = queue_setting
+        super(queue_wrapper, self).__init__()
+
+    def __getitem__(self, key):
+        if key in self.data:
+            return super(queue_wrapper, self).__getitem__(key)
+        queue_setting = copy.deepcopy(self.queue_setting)
+        if key == 'spider2scheduler' or key == 'excinfo_queue':
+            queue_setting['maxsize'] = 0
+        cls = connect_message_queue(self.context, key, queue_setting)
+        self.data[key] = cls
+        return cls
 
 def read_config(ctx, param, value):
     """
