@@ -81,10 +81,6 @@ class WxchatRobots(Component):
             if self.login_post_fn['myself']:
                 for fn in self.login_post_fn['myself']:
                     fn(myself, self.__uid)
-            contact = robot.get_contact()
-            if self.login_post_fn['contact']:
-                for fn in self.login_post_fn['contact']:
-                    fn(contact, self.__uid)
             friends = robot.get_friends()
             if self.login_post_fn['friends']:
                 for fn in self.login_post_fn['friends']:
@@ -103,11 +99,6 @@ class WxchatRobots(Component):
                 if myself:
                     try:
                         db.insert(myself, table = "wechat_robot_info")
-                    except:
-                        pass
-                for item in contact:
-                    try:
-                        db.insert(item, table = "wechat_robot_contact")
                     except:
                         pass
                 for item in friends:
