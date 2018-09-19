@@ -101,25 +101,25 @@ class WxchatRobots(Component):
                 try:
                     self.db["WechatRobotInfoDB"].insert(myself)
                 except:
-                    pass
+                    self.error(tracback.format_exc())
                 for item in friends:
                     try:
                         item['IUin'] = self.uin
                         self.db["WechatRobotFriendsDB"].insert(item)
                     except:
-                        pass
+                        self.error(tracback.format_exc())
                 for item in chatrooms:
                     try:
                         item['IUin'] = self.uin
                         self.db["WechatRobotChatRoomsDB"].insert(item)
                     except:
-                        pass
+                        self.error(tracback.format_exc())
                 for item in mps:
                     try:
                         item['IUin'] = self.uin
                         self.db["WechatRobotMpsDB"].insert(item)
                     except:
-                        pass
+                        self.error(tracback.format_exc())
             if self.login_post_fn['all']:
                 for fn in self.login_post_fn['all']:
                     fn(robot, self.uin)
