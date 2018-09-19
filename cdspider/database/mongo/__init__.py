@@ -18,3 +18,11 @@ from .Sitesdb import SitesDB
 from .Taskdb import TaskDB
 from .Uniquedb import UniqueDB
 from .Urlsdb import UrlsDB
+from .WechatRobotChatInfodb import WechatRobotChatInfoDB
+from .WechatRobotChatRoomsdb import WechatRobotChatRoomsDB
+from .WechatRobotFriendsdb import WechatRobotFriendsDB
+from .WechatRobotGroupChatdb import WechatRobotGroupChatDB
+from .WechatRobotInfodb import WechatRobotInfoDB
+from .WechatRobotMpsChatdb import WechatRobotMpsChatDB
+from .WechatRobotMpsSharingdb import WechatRobotMpsSharingDB
+from .WechatRobotMpsdb import WechatRobotMpsDB
