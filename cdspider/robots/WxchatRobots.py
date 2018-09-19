@@ -200,7 +200,7 @@ class WxchatRobots(Component):
             self.info("wechat will running")
             f = None if self.debug_mode else qr_callback
             statusStorageDir = os.path.realpath(os.path.join(self.temp_dir, "wechat", '%s.pkl' % self.__uid))
-            robot.auto_login(hotReload=True, statusStorageDir=statusStorageDir, loginCallback=login, exitCallback=logout, qrCallback=f, enableCmdQR=self.debug_mode)
+            robot.auto_login(hotReload=True, statusStorageDir=statusStorageDir, loginCallback=login, exitCallback=logout, qrCallback=f, enableCmdQR=2 if self.debug_mode else False)
             #自动回复
             t = utils.run_in_thread(self.reply_fn, robot)
             robot.run(self.debug_mode)
