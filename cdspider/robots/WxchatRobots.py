@@ -202,6 +202,8 @@ class WxchatRobots(Component):
             f = None if self.debug_mode else qr_callback
             self.info("login temp dir: %s" % self.temp_dir)
             statusStorageDir = os.path.realpath(os.path.join(self.temp_dir, "wechat", '%s.pkl' % self.__uid))
+            if os.path.exists(statusStorageDir) == False:
+                os.makedirs(statusStorageDir)
             robot.auto_login(hotReload=True, statusStorageDir=statusStorageDir, loginCallback=login, exitCallback=logout, qrCallback=f, enableCmdQR=2 if self.debug_mode else False)
             #自动回复
             t = utils.run_in_thread(self.reply_fn, robot)
