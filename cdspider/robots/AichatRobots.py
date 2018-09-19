@@ -471,6 +471,10 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
             fp.write(content)
             fp.close()
 
+    def init_bot_info(self, sessionid = None, **kwargs):
+        for k,v in kwargs.items():
+            self.setPredicate(k, v, sessionid)
+
     def refresh_brain(self):
         if self.has_change:
             self.loadBrain(self.brnfile)
@@ -530,6 +534,22 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
 
             return json.dumps(result)
         application.register_function(reply, 'reply')
+
+        def init(kwargs, sessionID):
+#            r_obj = utils.__redirection__()
+#            sys.stdout = r_obj
+            data = broken_exc = output = status = None
+            try:
+                data = self.init_bot_info(sessionID=sessionID, **kwargs)
+                status = 200
+            except :
+                broken_exc = traceback.format_exc()
+                status = 500
+#            output = sys.stdout.read()
+            result = {"status": status, "broken_exc": broken_exc, "stdout": output, 'data': data}
+
+            return json.dumps(result)
+        application.register_function(init, 'init')
 
         import tornado.wsgi
         import tornado.ioloop
