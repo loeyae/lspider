@@ -131,7 +131,7 @@ class WxchatRobots(Component):
             try:
                 qrcode = kwargs.get('qrcode')
                 if qrcode:
-                    dirname = os.path.realpath(os.path.join(self.temp_dir, "qr", "service"))
+                    dirname = os.path.join(self.temp_dir, "qr", "service")
                     qrfile = "wxqr_%s.png" % (self.__uid)
                     if os.path.exists(dirname) == False:
                         os.makedirs(dirname)
@@ -200,7 +200,7 @@ class WxchatRobots(Component):
         try:
             self.info("wechat will running")
             f = None if self.debug_mode else qr_callback
-            statusStorageDir = os.path.realpath(os.path.join(self.temp_dir, "wechat", self.__uid))
+            statusStorageDir = os.path.join(self.temp_dir, "wechat", self.__uid)
             self.info("login temp dir: %s" % statusStorageDir)
             if os.path.exists(statusStorageDir) == False:
                 os.makedirs(statusStorageDir)
