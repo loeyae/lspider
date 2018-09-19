@@ -61,7 +61,7 @@ from . import Base
             "RemarkPYQuanPin" : str,
             "MemberStatus" : int,
             "DisplayName" : str,
-            "KeyWord" : strs
+            "KeyWord" : str
         }
     }
 }
