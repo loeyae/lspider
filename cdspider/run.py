@@ -328,7 +328,7 @@ def wechat(ctx, rebot_cls, aichat_rpc, uuid):
         aichat_rpc.init(k, s)
     init = lambda m, s: init_aichat(m, s)
     robot.set_reply(reply)
-    robot.add_login_post(init)
+    robot.add_login_post(init, 'myself')
     robot.run()
 
 @cli.command()
