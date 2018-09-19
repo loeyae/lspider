@@ -54,10 +54,7 @@ def cli(ctx, **kwargs):
     db_object = {}
     if db_setting:
         connector = connect_db(ctx, None, db_setting)
-        db_object['base'] = load_cls(ctx, None, 'cdspider.database.{protocol}.Base'.format(protocol = db_setting.get('protocol')))(connector)
-        for d in app_config.get("database", {}):
-            db = 'cdspider.database.{protocol}.{db}'.format(protocol = db_setting.get('protocol'), db= d)
-            db_object[d] = load_cls(ctx, None, db)(connector)
+        db_object = db_wrapper(connector, db_setting.get('protocol'))
     kwargs['db'] = db_object
 
     queue_object = {}
@@ -65,13 +62,7 @@ def cli(ctx, **kwargs):
     if queue_setting:
         queue_setting.setdefault('maxsize', kwargs.get('queue_maxsize'))
         queue_setting.setdefault('queue_prefix', kwargs.get('queue_prefix', ''))
-        for q in app_config.get("queues", {}):
-            _maxsize = queue_setting['maxsize']
-            if q == 'spider2scheduler' or q == 'excinfo_queue':
-                queue_setting['maxsize'] = 0
-            queue_object[q] = connect_message_queue(ctx, q, queue_setting)
-            if _maxsize != queue_setting['maxsize']:
-                queue_setting['maxsize'] = _maxsize
+        queue_object = queue_wrapper(ctx, queue_setting)
 
     kwargs['queue'] = queue_object
 
