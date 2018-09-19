@@ -35,7 +35,7 @@ from . import Base
         "ImgHeight" : int,
         "ImgWidth" : int,
         "SubMsgType" : int,
-        "NewMsgId" : long,
+        "NewMsgId" : int,
         "OriContent" : str,
         "EncryFileName" : str,
         "User" : {
