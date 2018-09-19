@@ -36,6 +36,14 @@ class WxchatRobots(Component):
         self.__uid = uuid
         self.temp_dir = data_dir or tempfile.gettempdir()
         self.auto_reply = lambda x: None
+        self.login_post_fn = {
+            'all': set(),
+            'myself': set(),
+            'contact': set(),
+            'friends': set(),
+            'chatrooms': set(),
+            'mps': set(),
+        }
 
     def get_message(self, message, uuin):
         try:
@@ -47,8 +55,17 @@ class WxchatRobots(Component):
             self.error(traceback.format_exc())
         return "忙碌中..."
 
-    def set_reply(self, fun):
-        self.auto_reply = fun
+    def set_reply(self, fn):
+        if not callable(fn):
+            raise TypeError('reply fn expects a callable')
+        self.auto_reply = fn
+
+    def add_login_post(self, fn, t = None):
+        if callable(fn):
+            if not t:
+                t = 'all'
+            if t in self.login_post_fn:
+                self.login_post_fn[t].add(fn)
 
     def run(self):
 
@@ -60,35 +77,57 @@ class WxchatRobots(Component):
             if self.qrfile and os.path.isfile(self.qrfile):
                 os.remove(self.qrfile)
                 self.qrfile = None
+            myself = robot.search_friends()
+            if self.login_post_fn['myself']:
+                for fn in self.login_post_fn['myself']:
+                    fn(myself, self.__uid)
+            contact = robot.get_contact()
+            if self.login_post_fn['contact']:
+                for fn in self.login_post_fn['contact']:
+                    fn(contact, self.__uid)
+            friends = robot.get_friends()
+            if self.login_post_fn['friends']:
+                for fn in self.login_post_fn['friends']:
+                    fn(friends, self.__uid)
+            chatrooms = robot.get_chatrooms()
+            if self.login_post_fn['chatrooms']:
+                for fn in self.login_post_fn['chatrooms']:
+                    fn(chatrooms, self.__uid)
+            mps = robot.get_mps()
+            if self.login_post_fn['mps']:
+                for fn in self.login_post_fn['mps']:
+                    fn(mps, self.__uid)
             #获取联系人，并保存
             if self.db:
                 db = self.db['base']
-                myself = robot.search_friends()
                 if myself:
                     try:
                         db.insert(myself, table = "wechat_robot_info")
                     except:
                         pass
-                for item in robot.get_contact():
+                for item in contact:
                     try:
                         db.insert(item, table = "wechat_robot_contact")
                     except:
                         pass
-                for item in robot.get_friends():
+                for item in friends:
                     try:
                         db.insert(item, table = "wechat_robot_friends")
                     except:
                         pass
-                for item in robot.get_chatrooms():
+                for item in chatrooms:
                     try:
                         db.insert(item, table = "wechat_robot_chatrooms")
                     except:
                         pass
-                for item in robot.get_mps():
+                for item in mps:
                     try:
                         db.insert(item, table = "wechat_robot_mps")
                     except:
                         pass
+            if self.login_post_fn['all']:
+                for fn in self.login_post_fn['all']:
+                    fn(robot, self.__uid)
 
         def logout():
             self.info("The Wechat was logout @ Process of No.%s " % (self.__uid))
