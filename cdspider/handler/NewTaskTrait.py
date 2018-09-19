@@ -8,6 +8,7 @@
 :date:    2018-8-5 23:25:38
 """
 import time
+import copy
 from cdspider.libs import utils
 from cdspider.exceptions import *
 from cdspider.database.base import *
