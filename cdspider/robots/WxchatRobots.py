@@ -141,12 +141,15 @@ class WxchatRobots(Component):
 
         @robot.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
         def text_reply(msg):
-            msg["IUin"] = self.uin
-            self.db['WechatRobotChatInfoDB'].insert(msg)
-#            reply = self.get_message(msg.text, msg.user.userName)
-#            msg.user.send('%s' % reply)
-            if self.message_queue:
-                self.message_queue.put_nowait({"user": msg.user.userName, "msg": msg.text, "nick": "", "auser": ""})
+            try:
+                msg["IUin"] = self.uin
+                self.db['WechatRobotChatInfoDB'].insert(msg)
+    #            reply = self.get_message(msg.text, msg.user.userName)
+    #            msg.user.send('%s' % reply)
+                if self.message_queue:
+                    self.message_queue.put_nowait({"user": msg.user.userName, "msg": msg.text, "nick": "", "auser": ""})
+            except:
+                self.error(traceback.format_exc())
 
         @robot.msg_register([TEXT, MAP, CARD, NOTE, PICTURE, RECORDING, VOICE, ATTACHMENT, VIDEO], isMpChat=True)
         def text_replay(msg):
@@ -154,7 +157,7 @@ class WxchatRobots(Component):
                 msg["IUin"] = self.uin
                 self.db['WechatRobotMpsChatDB'].insert(msg)
             except:
-                pass
+                self.error(traceback.format_exc())
 
         @robot.msg_register(SHARING, isMpChat=True)
         def text_replay(msg):
@@ -162,32 +165,42 @@ class WxchatRobots(Component):
                 msg["IUin"] = self.uin
                 self.db['WechatRobotMpsSharingDB'].insert(msg)
             except:
-                pass
+                self.error(traceback.format_exc())
 
         @robot.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
         def download_files(msg):
-            msg.download(msg.fileName)
-            typeSymbol = {
-                PICTURE: 'img',
-                VIDEO: 'vid', }.get(msg.type, 'fil')
-            self.info('@%s@%s' % (typeSymbol, msg.fileName))
-            return '@%s@%s' % (typeSymbol, msg.fileName)
+            try:
+                msg.download(msg.fileName)
+                typeSymbol = {
+                    PICTURE: 'img',
+                    VIDEO: 'vid', }.get(msg.type, 'fil')
+                self.info('@%s@%s' % (typeSymbol, msg.fileName))
+                return '@%s@%s' % (typeSymbol, msg.fileName)
+            except:
+                self.error(traceback.format_exc())
 
         @robot.msg_register(FRIENDS)
         def add_friend(msg):
-            msg.user.verify()
-            msg["IUin"] = self.uin
-            self.db['wechat_robot_new_friend'].insert(msg)
+            try:
+                msg.user.verify()
+                msg["IUin"] = self.uin
+                self.db['wechat_robot_new_friend'].insert(msg)
+            except:
+                self.error(traceback.format_exc())
+
 
         @robot.msg_register(TEXT, isGroupChat=True)
         def text_reply(msg):
-            self.db['WechatRobotGroupChatDB'].insert(msg)
-            if msg.isAt:
-                if self.message_queue:
-                    self.message_queue.put_nowait({"user": msg.user.userName, "msg": msg.text.split(u'\u2005')[1], "nick": msg.actualNickName, "auser": msg.actualUserName})
-#                reply = self.get_message(msg.text, msg.user.userName)
-#                msg.user.send(u'@%s\u2005 %s' % (
-#                    msg.actualNickName, reply))
+            try:
+                self.db['WechatRobotGroupChatDB'].insert(msg)
+                if msg.isAt:
+                    if self.message_queue:
+                        self.message_queue.put_nowait({"user": msg.user.userName, "msg": msg.text.split(u'\u2005')[1], "nick": msg.actualNickName, "auser": msg.actualUserName})
+    #                reply = self.get_message(msg.text, msg.user.userName)
+    #                msg.user.send(u'@%s\u2005 %s' % (
+    #                    msg.actualNickName, reply))
+            except:
+                self.error(traceback.format_exc())
 
         try:
             self.info("wechat will running")
