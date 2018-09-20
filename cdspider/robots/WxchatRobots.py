@@ -143,9 +143,8 @@ class WxchatRobots(Component):
 
         @robot.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
         def text_reply(msg):
-            if self.db:
-                msg["IUin"] = self.uin
-                self.db['WechatRobotChatInfoDB'].insert(msg)
+            msg["IUin"] = self.uin
+            self.db['WechatRobotChatInfoDB'].insert(msg)
 #            reply = self.get_message(msg.text, msg.user.userName)
 #            msg.user.send('%s' % reply)
             if self.message_queue:
@@ -153,21 +152,19 @@ class WxchatRobots(Component):
 
         @robot.msg_register([TEXT, MAP, CARD, NOTE, PICTURE, RECORDING, VOICE, ATTACHMENT, VIDEO], isMpChat=True)
         def text_replay(msg):
-            if self.db:
-                try:
-                    msg["IUin"] = self.uin
-                    self.db['WechatRobotMpsChatDB'].insert(msg)
-                except:
-                    pass
+            try:
+                msg["IUin"] = self.uin
+                self.db['WechatRobotMpsChatDB'].insert(msg)
+            except:
+                pass
 
         @robot.msg_register(SHARING, isMpChat=True)
         def text_replay(msg):
-            if self.db:
-                try:
-                    msg["IUin"] = self.uin
-                    self.db['WechatRobotMpsSharingDB'].insert(msg)
-                except:
-                    pass
+            try:
+                msg["IUin"] = self.uin
+                self.db['WechatRobotMpsSharingDB'].insert(msg)
+            except:
+                pass
 
         @robot.msg_register([PICTURE, RECORDING, ATTACHMENT, VIDEO])
         def download_files(msg):
@@ -181,14 +178,12 @@ class WxchatRobots(Component):
         @robot.msg_register(FRIENDS)
         def add_friend(msg):
             msg.user.verify()
-            if self.db:
-                msg["IUin"] = self.uin
-                self.db['wechat_robot_new_friend'].insert(msg)
+            msg["IUin"] = self.uin
+            self.db['wechat_robot_new_friend'].insert(msg)
 
         @robot.msg_register(TEXT, isGroupChat=True)
         def text_reply(msg):
-            if self.db:
-                self.db['WechatRobotGroupChatDB'].insert(msg)
+            self.db['WechatRobotGroupChatDB'].insert(msg)
             if msg.isAt:
                 if self.message_queue:
                     self.message_queue.put_nowait({"user": msg.user.userName, "msg": msg.text.split(u'\u2005')[1], "nick": msg.actualNickName, "auser": msg.actualUserName})
