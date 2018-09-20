@@ -94,7 +94,6 @@ class db_wrapper(collections.UserDict):
             self.data[key] = cls
             return cls
 
-
 class queue_wrapper(collections.UserDict):
     """
     db wrapper
