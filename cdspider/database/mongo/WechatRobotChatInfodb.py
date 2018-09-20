@@ -15,9 +15,9 @@ from .Mongo import Mongo
 
 class WechatRobotChatInfoDB(Mongo, BaseWechatRobotChatInfoDB):
     """
-    wechat_robot_info data object
+    wechat_robot_chat_info data object
     """
-    __tablename__ = 'wechat_robot_info'
+    __tablename__ = 'wechat_robot_chat_info'
 
     def __init__(self, connector, table=None, **kwargs):
         super(WechatRobotChatInfoDB, self).__init__(connector, table = table, **kwargs)
