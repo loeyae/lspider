@@ -11,7 +11,7 @@
 from . import Base
 
 {
-    "attachment": {
+    "attachments": {
         'aid': int,           # 附加任务I
         'domain': str,        # 一级域名
         'subdomain': str,     # 二级域名
@@ -43,7 +43,7 @@ class AttachmentDB(Base):
 
     def update_many(self, id, obj = {}):
         raise NotImplementedError
-    
+
     def delete(self, id, where):
         raise NotImplementedError
 
