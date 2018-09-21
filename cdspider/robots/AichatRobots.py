@@ -175,7 +175,6 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
             return
         self.setBotPredicate("bot-data", bot_data_dir)
         #TODO 设置自定义变量
-        print("sssssssssssss", self.settings)
         for k,v in self.settings.items():
             print(k, v)
             self.setBotPredicate(k, v)
