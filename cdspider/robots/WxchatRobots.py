@@ -25,7 +25,8 @@ class WxchatRobots(Component):
     def __init__(self, db, queue, uuid, data_dir = None, debug = False, log_level = logging.WARN):
         self.db = db
         self.queue = queue
-        self.message_queue = queue['wechat2reply']
+        qname = 'wechat2reply4%s' % uuid
+        self.message_queue = queue[qname]
         self.debug_mode = debug
         self.log_level = log_level
         self.qrfile = None
