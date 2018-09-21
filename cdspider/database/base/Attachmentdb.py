@@ -41,6 +41,9 @@ class AttachmentDB(Base):
     def update(self, id, obj = {}):
         raise NotImplementedError
 
+    def update_many(self, id, obj = {}):
+        raise NotImplementedError
+    
     def delete(self, id, where):
         raise NotImplementedError
 
@@ -60,4 +63,7 @@ class AttachmentDB(Base):
         raise NotImplementedError
 
     def get_list_by_subdomain(self, pid, subdomain, where = {}, select=None, **kwargs):
+        raise NotImplementedError
+
+    def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
         raise NotImplementedError

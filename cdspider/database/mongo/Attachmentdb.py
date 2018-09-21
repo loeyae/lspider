@@ -104,3 +104,11 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         where['pid'] = pid
         where['subdomain'] = subdomain
         return self.find(where=where, select=select, **kwargs)
+
+    def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
+        kwargs.setdefault('sort', [('aid', 1)])
+        if not where:
+            where = {}
+        where['aid'] = {'$gt': int(id)}
+        where['pid'] = pid
+        return self.find(where = where, select=select, **kwargs)

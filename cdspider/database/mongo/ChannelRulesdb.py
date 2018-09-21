@@ -94,3 +94,11 @@ class ChannelRulesDB(Mongo, BaseChannelRulesDB):
             where = {}
         where['sid'] = sid
         return self.find(where=where, select=select, **kwargs)
+
+    def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
+        kwargs.setdefault('sort', [('crid', 1)])
+        if not where:
+            where = {}
+        where['crid'] = {'$gt': int(id)}
+        where['pid'] = pid
+        return self.find(where = where, select=select, **kwargs)

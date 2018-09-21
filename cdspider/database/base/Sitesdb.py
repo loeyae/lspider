@@ -52,6 +52,9 @@ class SitesDB(Base):
     def update(self, id, obj = {}):
         raise NotImplementedError
 
+    def update_many(self, id, obj = {}):
+        raise NotImplementedError
+    
     def delete(self, id, where):
         raise NotImplementedError
 

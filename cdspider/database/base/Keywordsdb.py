@@ -37,6 +37,9 @@ class KeywordsDB(Base):
     def update(self, id, obj={}):
         raise NotImplementedError
 
+    def update_many(self, id, obj = {}):
+        raise NotImplementedError
+    
     def active(self, id, where = {}):
         raise NotImplementedError
 

@@ -73,6 +73,9 @@ class TaskDB(Base):
     def update(self, id, pid, obj={}):
         raise NotImplementedError
 
+    def update_many(self, id, obj = {}):
+        raise NotImplementedError
+    
     def delete(self, id, pid, where):
         raise NotImplementedError
 

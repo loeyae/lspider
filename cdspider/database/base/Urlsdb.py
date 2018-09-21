@@ -36,6 +36,9 @@ class UrlsDB(Base):
     def update(self, id, obj = {}):
         raise NotImplementedError
 
+    def update_many(self, id, obj = {}):
+        raise NotImplementedError
+
     def enable(self, id, where):
         raise NotImplementedError
 
@@ -73,4 +76,7 @@ class UrlsDB(Base):
         raise NotImplementedError
 
     def get_new_list(self, id, sid, where = {}, select=None, **kwargs):
+        raise NotImplementedError
+
+    def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
         raise NotImplementedError

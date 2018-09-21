@@ -251,12 +251,17 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         kwargs.setdefault('sort', [('tid', 1)])
         return self.find(where=where, table=table, select=select, **kwargs)
 
-    def get_plan_list(self, pid, plantime, where = {}, select=None, **kwargs):
+    def get_plan_list(self, pid, plantime = None, where = {}, select=None, **kwargs):
         table = self._table_name(pid)
-        where['status'] = TaskDB.STATUS_ACTIVE
-        where['plantime'] = {"$lte": plantime}
+        now = int(time.time())
+        if not plantime:
+            plantime = now
+        where = self._build_where(where)
+        _where = {'$and':[{'status':self.STATUS_ACTIVE},{'plantime':{'$lte': plantime}},{'$or':[{'expire':0},{'expire':{'$gt': now}}]}]}
+        for k, v in where.items():
+            _where['$and'].extend([{k: v}])
         kwargs.setdefault('sort', [('tid', 1)])
-        return self.find(where=where, table=table, select=select, **kwargs)
+        return self.find(where=_where, table=table, select=select, **kwargs)
 
     def _table_name(self, pid):
         table = super(TaskDB, self)._collection_name(pid)
