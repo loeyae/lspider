@@ -37,6 +37,8 @@ class WxchatRobots(Component):
         self.temp_dir = data_dir or tempfile.gettempdir()
         self.info("temp dir: %s" % self.temp_dir)
         self.auto_reply = lambda x: None
+        self.prepare_reply = set()
+        self.prepared_session = set()
         self.login_post_fn = {
             'all': set(),
             'myself': set(),
@@ -67,6 +69,9 @@ class WxchatRobots(Component):
                 t = 'all'
             if t in self.login_post_fn:
                 self.login_post_fn[t].add(fn)
+    def set_prepare_reply(self):
+        if callable(fn):
+            self.prepare_reply.add(fn)
 
     def run(self):
 
@@ -225,7 +230,11 @@ class WxchatRobots(Component):
         while True:
             try:
                 message = self.message_queue.get_nowait()
-                uuid = "%s%s" % (message['user'], message['auser'])
+                uuid = utils.md5("%s%s" % (message['user'], message['auser']))
+                if not uuid in self.prepared_session:
+                    for fn in self.prepare_reply:
+                        fn(robot, uuid)
+                    self.prepared_session.add(uuid)
                 nick = message['nick']
                 reply = self.get_message(message['msg'], uuid)
                 if reply:
