@@ -19,7 +19,7 @@
                     <random>
                             <li>你好呀</li>
                             <li>么么哒，今天心情好不好呀？</li>
-                            <li>你好, 我是<bot name="name" />!</li>
+                            <li>你好, 我是<get name="name" />!</li>
                     </random>
             </template>
     </category>
@@ -78,7 +78,7 @@
             <template>
                     <random>
                             <li>我是<get name="name"/></li>
-                            <li>我是来自<bot name="company"/>的<bot name="name"/>呀~</li>
+                            <li>我是来自<bot name="company"/>的<get name="name"/>呀~</li>
                             <li>才多久你就不记得我了吗T_T，我是<get name="name"/>呀！！</li>
                     </random>
             </template>
