@@ -69,7 +69,7 @@ class WxchatRobots(Component):
                 t = 'all'
             if t in self.login_post_fn:
                 self.login_post_fn[t].add(fn)
-    def set_prepare_reply(self):
+    def add_prepare_reply(self, fn):
         if callable(fn):
             self.prepare_reply.add(fn)
 
