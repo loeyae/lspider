@@ -311,15 +311,16 @@ def wechat(ctx, rebot_cls, aichat_rpc, uuid):
     robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), uuid=uuid, data_dir=g.get("runtime_dir", None), debug=g.get("debug", False), log_level=log_level)
     reply = lambda m, s: aichat_rpc.reply(m, s)
     def init_aichat(m, s):
+        info = m.search_friends()
         k = {
-            'name': m['NickName'],
+            'name': info['NickName'],
             'age': 18,
-            'sex': '男' if m['Sex'] != 1 else '女'
+            'sex': '男' if info['Sex'] != 1 else '女'
         }
         aichat_rpc.init(k, s)
     init = lambda m, s: init_aichat(m, s)
+    robot.add_prepare_reply(init)
     robot.set_reply(reply)
-    robot.add_login_post(init, 'myself')
     robot.run()
 
 @cli.command()
