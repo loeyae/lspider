@@ -128,7 +128,7 @@ class Scheduler(object):
                 if i == 0:
                     self.logger.debug("Schedule check_tasks no newtask@%s" % projectid)
                     break
-                time.sleep(1)
+                time.sleep(0.1)
         self.logger.info("Schedule check_tasks end")
 
     def plan_task(self, task, init = False, replan = False):
@@ -144,8 +144,6 @@ class Scheduler(object):
     def send_task(self, task):
         if self.queue['scheduler2spider']:
             self.queue['scheduler2spider'].put_nowait({"id": task['tid'], 'pid': task['projectid']})
-
-
 
     def run_once(self):
         """
@@ -179,33 +177,8 @@ class Scheduler(object):
         self.logger.info("scheduler exit")
 
     def quit(self):
-        self.logger.debug("scheduler quit")
+        self.logger.info("scheduler quit")
         self._quit = True
-
-
-
-        def newtask(task):
-            ret = self.newtask(task)
-            return Binary(ret)
-        application.register_function(newtask, 'newtask')
-
-
-        def search_work(task):
-            ret = self.search_work(task)
-            return Binary(ret)
-        application.register_function(search_work, 'search_work')
-
-        import tornado.wsgi
-        import tornado.ioloop
-        import tornado.httpserver
-
-        container = tornado.wsgi.WSGIContainer(application)
-        self.xmlrpc_ioloop = tornado.ioloop.IOLoop()
-        self.xmlrpc_server = tornado.httpserver.HTTPServer(container, io_loop=self.xmlrpc_ioloop)
-        self.xmlrpc_server.listen(port=port, address=bind)
-        self.logger.info('schedule.xmlrpc listening on %s:%s', bind, port)
-        self.xmlrpc_ioloop.start()
-
 
     def status_run(self):
         """
