@@ -76,6 +76,7 @@ class BaseHandler(Component):
             "broken": None,
             "traceback": None
         }
+        self.no_sync = kwargs.pop('no_sync', False)
         self._settings = kwargs or {}
         self.mycrawler = True
         self.crawler = None
@@ -86,7 +87,6 @@ class BaseHandler(Component):
         self.page = 1
         self.last_result_id = None
         self.sync_result = set()
-        self.no_sync = False
 
     def __del__(self):
         if self.mycrawler and isinstance(self.crawler, BaseCrawler):
