@@ -76,31 +76,6 @@ def cli(ctx, **kwargs):
     return ctx
 
 @cli.command()
-@click.option('--scheduler_cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
-@click.option('--interval', default=0.1, help='循环间隔', show_default=True)
-@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.pass_context
-def schedule(ctx, scheduler_cls, interval, no_loop,  get_object=False):
-    """
-    Schedule: 根据TaskDB往queue:scheduler2spider 里塞任务
-    """
-    g=ctx.obj
-    Scheduler = load_cls(ctx, None, scheduler_cls)
-    rate_map = g.get('rate_map')
-
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level, interval = interval)
-    g['instances'].append(scheduler)
-    if g.get('testing_mode') or get_object:
-        return scheduler
-    if no_loop:
-        scheduler.run_once()
-    else:
-        scheduler.run()
-
-@cli.command()
 @click.option('--scheduler_cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
 @click.option('--mode', default='project', type=click.Choice(['project', 'site', 'item']), help="分发模式", show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
@@ -130,10 +105,10 @@ def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, g
         scheduler.run()
 
 @cli.command()
-@click.option('--scheduler_cls', default='cdspider.scheduler.TaskScheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler_cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def plan(ctx, scheduler_cls, no_loop,  get_object=False):
+def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
     Schedule: 根据TaskDB往queue:scheduler2spider 里塞任务
     """
@@ -154,10 +129,10 @@ def plan(ctx, scheduler_cls, no_loop,  get_object=False):
         scheduler.run()
 
 @cli.command()
-@click.option('--scheduler_cls', default='cdspider.scheduler.SyncScheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler_cls', default='cdspider.scheduler.SynctaskScheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def sync(ctx, scheduler_cls, no_loop,  get_object=False):
+def synctask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
     Schedule: 同步数据库中task的plantime
     """
@@ -178,7 +153,7 @@ def sync(ctx, scheduler_cls, no_loop,  get_object=False):
         scheduler.run()
 
 @cli.command()
-@click.option('--scheduler-cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler-cls', default='cdspider.scheduler.NewtaskScheduler', callback=load_cls, help='schedule name')
 @click.option('--interval', default=0.1, help='循环间隔', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
@@ -193,7 +168,7 @@ def newtask_schedule(ctx,scheduler_cls, interval, no_loop,  get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level, interval = interval)
+    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level, interval = interval)
     g['instances'].append(Scheduler)
     if g.get('testing_mode') or get_object:
         return Scheduler
@@ -203,7 +178,7 @@ def newtask_schedule(ctx,scheduler_cls, interval, no_loop,  get_object=False):
         Scheduler.newTask_run()
 
 @cli.command()
-@click.option('--scheduler-cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler-cls', default='cdspider.scheduler.StatusScheduler', callback=load_cls, help='schedule name')
 @click.option('--interval', default=0.1, help='循环间隔', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
@@ -218,7 +193,7 @@ def status_schedule(ctx,scheduler_cls, interval, no_loop, get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level, interval = interval)
+    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level, interval = interval)
     g['instances'].append(status_schedule)
     if g.get('testing_mode') or get_object:
         return Scheduler
