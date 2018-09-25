@@ -33,7 +33,7 @@ class Spider(Component):
     爬虫流程实现
     """
 
-    def __init__(self, db, queue, attach_storage = None, handler=None, proxy=None, log_level=logging.WARN):
+    def __init__(self, db, queue, no_sync = False, attach_storage = None, handler=None, proxy=None, log_level=logging.WARN):
         self._quit = False
         self._running = False
         self.inqueue = queue.get('scheduler2spider')
@@ -48,6 +48,7 @@ class Spider(Component):
         self.db = db
         self.queue = queue
         self.proxy = proxy
+        self.no_sync = no_sync
         self.attach_storage = attach_storage
         self.ioloop = tornado.ioloop.IOLoop()
         self.set_handler(handler)
@@ -236,7 +237,7 @@ class Spider(Component):
         if hasattr(self, 'handler'):
             return self.handler
         task['project'].setdefault("name", "Project%s" % task.get("pid"))
-        return load_handler(task = task, crawler = self.crawler, spider = self, db = self.db, queue = self.queue, log_level=self.log_level, attach_storage = self.attach_storage)
+        return load_handler(task = task, crawler = self.crawler, spider = self, db = self.db, queue = self.queue, log_level=self.log_level, no_sync = self.no_sync, attach_storage = self.attach_storage)
 
     def _get_task_from_attachment(self, message, task, project, no_check_status = False):
         if not task:
