@@ -101,6 +101,83 @@ def schedule(ctx, scheduler_cls, interval, no_loop,  get_object=False):
         scheduler.run()
 
 @cli.command()
+@click.option('--scheduler_cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
+@click.option('--mode', default='project', type=click.Choice(['project', 'site', 'item']), help="分发模式", show_default=True)
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.option('--xmlrpc', default=False, is_flag=True, help='开启xmlrpc', show_default=True)
+@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host")
+@click.option('--xmlrpc-port', default=23333, help="xmlrpc bind port")
+@click.pass_context
+def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=False):
+    """
+    Schedule: 根据TaskDB往queue:scheduler2spider 里塞任务
+    """
+    g=ctx.obj
+    Scheduler = load_cls(ctx, None, scheduler_cls)
+
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    scheduler = Scheduler(db=g.get('db'), queue=g.get('queue'), mode=mode, log_level=log_level)
+    g['instances'].append(scheduler)
+    if g.get('testing_mode') or get_object:
+        return scheduler
+    if no_loop:
+        scheduler.run_once()
+    else:
+        if xmlrpc:
+            utils.run_in_thread(scheduler.xmlrpc_run, port=xmlrpc_port, bind=xmlrpc_host)
+        scheduler.run()
+
+@cli.command()
+@click.option('--scheduler_cls', default='cdspider.scheduler.TaskScheduler', callback=load_cls, help='schedule name')
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def plan(ctx, scheduler_cls, no_loop,  get_object=False):
+    """
+    Schedule: 根据TaskDB往queue:scheduler2spider 里塞任务
+    """
+    g=ctx.obj
+    Scheduler = load_cls(ctx, None, scheduler_cls)
+    rate_map = g.get('rate_map')
+
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+    g['instances'].append(scheduler)
+    if g.get('testing_mode') or get_object:
+        return scheduler
+    if no_loop:
+        scheduler.run_once()
+    else:
+        scheduler.run()
+
+@cli.command()
+@click.option('--scheduler_cls', default='cdspider.scheduler.SyncScheduler', callback=load_cls, help='schedule name')
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def sync(ctx, scheduler_cls, no_loop,  get_object=False):
+    """
+    Schedule: 同步数据库中task的plantime
+    """
+    g=ctx.obj
+    Scheduler = load_cls(ctx, None, scheduler_cls)
+    rate_map = g.get('rate_map')
+
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
+    g['instances'].append(scheduler)
+    if g.get('testing_mode') or get_object:
+        return scheduler
+    if no_loop:
+        scheduler.run_once()
+    else:
+        scheduler.run()
+
+@cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('--interval', default=0.1, help='循环间隔', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
@@ -176,8 +253,9 @@ def insert_kafka_worker(ctx,insert_kafka_worker_cls,no_loop,  get_object=False):
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.option('--no-sync', default=False, is_flag=True, help='不同步数据给kafka', show_default=True)
 @click.pass_context
-def fetch(ctx, fetch_cls, no_loop, get_object=False, no_input=False):
+def fetch(ctx, fetch_cls, no_loop, no_sync, get_object=False, no_input=False):
     """
     Fetch: 监听任务并执行抓取
     """
@@ -196,7 +274,7 @@ def fetch(ctx, fetch_cls, no_loop, get_object=False, no_input=False):
     if g.get("debug", False):
         log_level = logging.DEBUG
 
-    spider = Spider(db = db, queue = queue, proxy=proxy, log_level=log_level, attach_storage = attach_storage)
+    spider = Spider(db = db, queue = queue, proxy=proxy, no_sync=no_sync, log_level=log_level, attach_storage = attach_storage)
     g['instances'].append(spider)
     if g.get('testing_mode') or get_object:
         return spider
