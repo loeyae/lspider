@@ -85,7 +85,7 @@ def cli(ctx, **kwargs):
 @click.pass_context
 def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=False):
     """
-    Schedule: 根据TaskDB往queue:scheduler2spider 里塞任务
+    路由: 按project、site、item其中一种模式分发计划任务
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -110,7 +110,7 @@ def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, g
 @click.pass_context
 def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
-    Schedule: 根据TaskDB往queue:scheduler2spider 里塞任务
+    按任务的plantime进行抓取队列入队
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -134,7 +134,7 @@ def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
 @click.pass_context
 def synctask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
-    Schedule: 同步数据库中task的plantime
+    plantask_schedule之后同步任务的plantime时间
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -158,7 +158,7 @@ def synctask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
 @click.pass_context
 def newtask_schedule(ctx,scheduler_cls, no_loop,  get_object=False):
     """
-    newTask_schedle: 根据queue:newTask2scheduler往TaskDB 里存入新的任务数据
+    根据管理平台添加的url、关键词等生成任务
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -183,7 +183,7 @@ def newtask_schedule(ctx,scheduler_cls, no_loop,  get_object=False):
 @click.pass_context
 def status_schedule(ctx,scheduler_cls, interval, no_loop, get_object=False):
     """
-    newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
+    根据管理平台对project、site、url、keywords等的状态改变，调整相应任务状态
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -207,7 +207,7 @@ def status_schedule(ctx,scheduler_cls, interval, no_loop, get_object=False):
 @click.pass_context
 def search_schedule(ctx,scheduler_cls, no_loop, get_object=False):
     """
-    newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
+    根据type为search的站点或关键词组合新的任务
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -322,7 +322,7 @@ def exc_work(ctx, worker_cls, mailer, sender, receiver, no_loop, get_object=Fals
 @click.pass_context
 def sync_kafka_work(ctx, worker_cls, kafka_cfg, no_loop,  get_object=False):
     """
-    newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
+    同步数据到kafka
     """
     g=ctx.obj
     Worker = load_cls(ctx, None, worker_cls)
@@ -344,6 +344,9 @@ def sync_kafka_work(ctx, worker_cls, kafka_cfg, no_loop,  get_object=False):
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def tool(ctx, name, arg, no_loop):
+    """
+    工具
+    """
     g = ctx.obj
     cls_name = 'cdspider.tools.%s.%s' % (name, name)
     cls = load_cls(ctx, None, cls_name)
@@ -356,6 +359,9 @@ def tool(ctx, name, arg, no_loop):
 @click.option('-u', '--uuid', help='唯一标识')
 @click.pass_context
 def wechat(ctx, rebot_cls, aichat_rpc, uuid):
+    """
+    web wechat
+    """
     g = ctx.obj
     aichat_rpc = connect_rpc(ctx, None, aichat_rpc)
     log_level = logging.WARN
@@ -384,6 +390,9 @@ def wechat(ctx, rebot_cls, aichat_rpc, uuid):
 @click.option('-c', '--commands',  multiple=True, help='commands')
 @click.pass_context
 def aichat(ctx, rebot_cls, uuid, bot_data, commands):
+    """
+    Aiml bot
+    """
     g = ctx.obj
     log_level = logging.WARN
     if g.get("debug", False):
@@ -402,6 +411,9 @@ def aichat(ctx, rebot_cls, uuid, bot_data, commands):
 @click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
 @click.pass_context
 def aichat_rpc(ctx, rebot_cls, bot_data, commands, settings, xmlrpc_host, xmlrpc_port, debug):
+    """
+    Aiml bot rpc
+    """
     g = ctx.obj
     log_level = logging.WARN
     if debug and g.get("debug", False):
@@ -414,6 +426,9 @@ def aichat_rpc(ctx, rebot_cls, bot_data, commands, settings, xmlrpc_host, xmlrpc
 @click.option('--aichat-rpc', default='http://127.0.0.1:27777', help='robot rpc server')
 @click.pass_context
 def aichat_rpc_hello(ctx, aichat_rpc):
+    """
+    测试Aiml bot rpc
+    """
     g = ctx.obj
     aichat_rpc = connect_rpc(ctx, None, aichat_rpc)
     print(aichat_rpc.hello())
