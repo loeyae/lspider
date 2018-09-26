@@ -21,7 +21,7 @@ class ExcWorker(BaseWorker):
                 subject = "CDSpider Error Notification"
                 self.mailer.send(subject=subject, message=message)
             except:
-                self.logger.error("got message: %s" % message)
-                self.logger.exception(message, exc_info=traceback.format_exc())
+                self.error("got message: %s" % message)
+                self.exception(message, exc_info=traceback.format_exc())
         else:
-            self.logger.error(message)
+            self.error(message)

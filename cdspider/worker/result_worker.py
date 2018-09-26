@@ -46,7 +46,7 @@ class ResultWorker(BaseWorker):
         return task
 
     def on_result(self, message):
-        self.logger.debug("got message: %s" % message)
+        self.debug("got message: %s" % message)
         result = self.get_result(message)
         if not result or result['status'] != self.resultdb.RESULT_STATUS_INIT:
             return
@@ -70,10 +70,7 @@ class ResultWorker(BaseWorker):
             KeywordsDB=self.KeywordsDB
             customdb=self.customdb
             resultdb=self.resultdb
-            spider = Spider(inqueue=inqueue, outqueue=outqueue, status_queue=status_queue, requeue=requeue,
-            excqueue=excqueue, ProjectsDB=ProjectsDB, sitetypedb=sitetypedb, TaskDB=TaskDB, SitesDB=SitesDB,
-            resultdb=resultdb, customdb=customdb, UniqueDB=UniqueDB, UrlsDB=UrlsDB, KeywordsDB=KeywordsDB,
-            AttachmentDB=AttachmentDB, handler=None, proxy=self.proxy, log_level=self.log_level)
+            spider = Spider(db=self.db, queue=self.queue, handler=None, proxy=self.proxy, log_level=self.log_level)
             task = spider.get_task({'pid': result.get('projectid')}, task)
             spider.fetch(task)
         else:

@@ -5,9 +5,10 @@
 import time
 import logging
 import traceback
+from cdspider import Component
 from six.moves import queue
 
-class BaseWorker():
+class BaseWorker(Component):
 
     LOOP_INTERVAL = 0.1
 
@@ -19,9 +20,6 @@ class BaseWorker():
         self.queue=queue
         self.mailer=mailer
         self.proxy=proxy
-        self.log_level=log_level
-        self.logger=logging.getLogger("worker")
-        self.logger.setLevel(log_level)
         self._quit=False
         self.inqueue = None
         self.excqueue = None
@@ -29,6 +27,9 @@ class BaseWorker():
             self.inqueue = self.queue[self.inqueue_key]
         if self.excqueue_key:
             self.excqueue = self.queue[self.excqueue_key]
+        self.log_level = log_level
+        logger = logging.getLogger('worker')
+        super(BaseWorker, self).__init__(logger, log_level)
 
     def on_result(self, message):
         raise NotImplementedError
@@ -43,16 +44,16 @@ class BaseWorker():
             }
             self.excqueue.put_nowait(message)
         else:
-            self.logger.error(traceback.format_exc())
+            self.error(traceback.format_exc())
 
     def run_once(self):
-        self.logger.info("%s once starting..." % self.__class__.__name__)
+        self.info("%s once starting..." % self.__class__.__name__)
         message = self.inqueue.get_nowait()
         self.on_result(message)
         self.logger.info("%s once end" % self.__class__.__name__)
 
     def run(self):
-        self.logger.info("%s starting..." % self.__class__.__name__)
+        self.info("%s starting..." % self.__class__.__name__)
 
         while not self._quit:
             try:
@@ -68,7 +69,7 @@ class BaseWorker():
                 self.on_error(e)
                 break
 
-        self.logger.info("%s exiting..." % self.__class__.__name__)
+        self.info("%s exiting..." % self.__class__.__name__)
 
     def quit(self):
         self._quit = True
