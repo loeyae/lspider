@@ -14,25 +14,60 @@
 >* cdspider [command]
 >* cdspider --help 获取command
 
->## apache wsgi部署
->* <VirtualHost *:80>
->*     DocumentRoot "{rootdir}"
->*     ServerName {ServerName}
->*     ServerAlias {ServerName}
->*
->*     WSGIScriptAlias / "{rootdir}/wsgi.py"
->*
->*     <Directory "{rootdir}">
->*         Options Indexes FollowSymLinks MultiViews
->*         AllowOverride all
->*         <IfDefine APACHE24>
->*             Require local
->*         </IfDefine>
->*         <IfDefine !APACHE24>
->*             Order Deny,Allow
->*             Deny from all
->*             Allow from localhost ::1 127.0.0.1
->*         </IfDefine>
->*         WSGIScriptReloading On
->*     </Directory>
->* </VirtualHost>
+>## supervisor 配置
+> 以下配置的${rootpath}为具体安装路径，也可将配置文件整体换到单独的配置文件。配置文件中的数据库、队列等配置，需根据实际部署环境进行调整
+> numprocs：可根据实际情况，增加进程个数。route只能单进程运行，否则会造成分发混乱
+>
+> ;route
+> [program:cdspider_route]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json route
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
+> ;newtask_schedule
+> [program:cdspider_newtask_schedule]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json newtask_schedule
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
+> ;plantask_schedule
+> [program:cdspider_plantask_schedule]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json plantask_schedule
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
+> ;synctask_schedule
+> [program:cdspider_synctask_schedule]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json synctask_schedule
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
+> ;status_schedule
+> [program:cdspider_status_schedule]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json status_schedule
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
+> ;fetch
+> [program:cdspider_fetch]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json fetch
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
+> ;spider_rpc
+> [program:cdspider_spider_rpc]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json spider_rpc
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
+> ;search_work
+> [program:cdspider_search_work]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json search_work
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
+> ;exc_work
+> [program:cdspider_spider_rpc]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json exc_work
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
