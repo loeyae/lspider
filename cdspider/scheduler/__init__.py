@@ -22,7 +22,7 @@ class BaseScheduler(Component):
         self.queue = queue
         self.ioloop = tornado.ioloop.IOLoop()
         self.log_level = log_level
-        logger = logging.getLogger('spider')
+        logger = logging.getLogger('scheduler')
         super(BaseScheduler, self).__init__(logger, log_level)
 
     def schedule(self, message):
