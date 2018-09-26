@@ -30,6 +30,7 @@
 >## supervisor 配置
 > 以下配置的${rootpath}为具体安装路径，也可将配置文件整体换到单独的配置文件。配置文件中的数据库、队列等配置，需根据实际部署环境进行调整
 > numprocs：可根据实际情况，增加进程个数。route只能单进程运行，否则会造成分发混乱
+> /usr/local/bin/cdspider命令的位置会根据python的安装方式而不同，有可能存在于python自身的bin目录，window系统则是在Scripts目录
 >
 > ;route
 > [program:cdspider_route]
