@@ -48,6 +48,12 @@
 > process_name=%(program_name)s_$(process_num)02d
 > numprocs=1
 
+> ;search_work
+> [program:cdspider_search_schedule]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json search_schedule
+> process_name=%(program_name)s_$(process_num)02d
+> numprocs=1
+
 > ;fetch
 > [program:cdspider_fetch]
 > command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json fetch
@@ -57,12 +63,6 @@
 > ;spider_rpc
 > [program:cdspider_spider_rpc]
 > command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json spider_rpc
-> process_name=%(program_name)s_$(process_num)02d
-> numprocs=1
-
-> ;search_work
-> [program:cdspider_search_work]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json search_work
 > process_name=%(program_name)s_$(process_num)02d
 > numprocs=1
 
