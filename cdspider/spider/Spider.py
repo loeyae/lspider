@@ -418,7 +418,7 @@ class Spider(Component):
         获取任务详细信息
         """
         mode = message.get('mode', BaseHandler.MODE_DEFAULT)
-        pid = message.get('pid')
+        pid = int(message.get('pid'))
         taskid = message.get('tid')
         if not task and taskid:
             task = self.TaskDB.get_detail(taskid, pid, True)
