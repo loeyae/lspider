@@ -85,3 +85,10 @@
 > command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json exc-work
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
+
+> ;sync_kafka_work
+> ;同步数据到kafka，此为与大数据平台对接的出口，如不需要，可不开启
+> [program:cdspider_sync_kafka_work]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json sync-kafka-work
+> process_name=%(program_name)s_%(process_num)02d
+> numprocs=1
