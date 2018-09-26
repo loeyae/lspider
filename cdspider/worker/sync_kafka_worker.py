@@ -15,7 +15,7 @@ class SyncKafkaWorker(BaseWorker):
     inqueue_key = "result2kafka"
 
     def __init__(self, db, queue, kafka_cfg, log_level):
-        super(sync_kafka_worker, self).__init__(db, queue, proxy=None, log_level = log_level)
+        super(SyncKafkaWorker, self).__init__(db, queue, proxy=None, log_level = log_level)
         self.conf = kafka_cfg
         self.connection()
 
