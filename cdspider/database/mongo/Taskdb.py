@@ -9,6 +9,7 @@
 :version: SVN: $Id: Taskdb.py 2141 2018-07-04 06:43:11Z zhangyi $
 """
 import time
+import pymongo
 from cdspider.database.base import TaskDB as BaseTaskDB
 from .Mongo import Mongo, SplitTableMixin
 
@@ -275,7 +276,7 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         if not 'tid' in indexes:
             collection.create_index('tid', unique=True, name='tid')
         if not 'p_s_u_kw_a_cr' in indexes:
-            collection.create_index({"pid": 1, "sid": 1, "uid": 1, "kwid": 1, "aid": 1, "crid": 1}, unique=True, name='p_s_u_kw_a_cr')
+            collection.create_index([("pid", pymongo.ASCENDING), ("sid", pymongo.ASCENDING), ("uid", pymongo.ASCENDING), ("kwid", pymongo.ASCENDING), ("aid", pymongo.ASCENDING), ("crid", pymongo.ASCENDING)], unique=True, name='p_s_u_kw_a_cr')
         if not 'pid' in indexes:
             collection.create_index('pid', name='pid')
         if not 'sid' in indexes:

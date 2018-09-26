@@ -25,6 +25,8 @@ class ProjectsDB(Mongo, BaseProjectsDB):
         indexes = collection.index_information()
         if not 'pid' in indexes:
             collection.create_index('pid', unique=True, name='pid')
+        if not 'status' in indexes:
+            collection.create_index('status', name='status')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
 
