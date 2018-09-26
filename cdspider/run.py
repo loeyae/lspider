@@ -226,29 +226,6 @@ def search_schedule(ctx,scheduler_cls, no_loop, get_object=False):
         Scheduler.run()
 
 @cli.command()
-@click.option('--insert-kafka-worker-cls', default='cdspider.worker.insert_kafka_worker', callback=load_cls, help='worker name')
-@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.pass_context
-def insert_kafka_worker(ctx,insert_kafka_worker_cls,no_loop,  get_object=False):
-    """
-    newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
-    """
-    g=ctx.obj
-    Worker = load_cls(ctx, None, insert_kafka_worker_cls)
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    worker = Worker(g.get('db'),g.get('queue'),g['config']['kafka'] ,log_level)
-    g['instances'].append(worker)
-    if g.get('testing_mode') or get_object:
-        return worker
-    if no_loop:
-        worker.run_once()
-    else:
-        worker.run()
-
-
-@cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.option('--no-sync', default=False, is_flag=True, help='不同步数据给kafka', show_default=True)
@@ -309,7 +286,7 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
 @cli.command()
 @click.option('--worker-cls', default='cdspider.worker.ExcWorker', callback=load_cls, help='worker name')
 @click.option('--mailer', default=None, help='mailer name', show_default=True)
-@click.option('--sender', default=None, show_default=True, help='发件人人设置'
+@click.option('--sender', default=None, show_default=True, help='发件人设置'
               ' default: {host: host, port: 27017, user: guest, password: guest, from: admin@localhost.com}')
 @click.option('--receiver', default=None, show_default=True, help='收件人设置'
               ' default: [{name: name, mail: a@b.com},...]')
@@ -329,6 +306,30 @@ def exc_work(ctx, worker_cls, mailer, sender, receiver, no_loop, get_object=Fals
         mailer = utils.load_mailer(mailer, sender=sender, receiver=receiver)
     worker = Worker(db = g.get('db'), queue = g.get('queue'), proxy=proxy, mailer=mailer,
             log_level=log_level)
+    g['instances'].append(worker)
+    if g.get('testing_mode') or get_object:
+        return worker
+    if no_loop:
+        worker.run_once()
+    else:
+        worker.run()
+
+@cli.command()
+@click.option('--worker-cls', default='cdspider.worker.SyncKafkaWorker', callback=load_cls, help='worker name')
+@click.option('--kafka-cfg', default=None, show_default=True, help='Kafka配置'
+              ' default: {host: host, zookeeper_hosts: 27017, topic: topic name, user: guest, password: guest}')
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def sync_kafka_work(ctx, worker_cls, kafka_cfg, no_loop,  get_object=False):
+    """
+    newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
+    """
+    g=ctx.obj
+    Worker = load_cls(ctx, None, worker_cls)
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    worker = Worker(g.get('db'),g.get('queue'), kafka_cfg, log_level)
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
         return worker
@@ -419,12 +420,11 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
-@click.option('--result-work-num', default=1, help='result worker实例个数')
 @click.option('--exc-work-num', default=1, help='exc worker实例个数')
 @click.option('--run-in', default='subprocess', type=click.Choice(['subprocess', 'thread']),
               help='运行模式:subprocess or thread')
 @click.pass_context
-def all(ctx, fetch_num, result_work_num, exc_work_num, run_in):
+def all(ctx, fetch_num, exc_work_num, run_in):
     """
     集成运行整个系统
     """
@@ -438,27 +438,45 @@ def all(ctx, fetch_num, result_work_num, exc_work_num, run_in):
     threads = []
 
     try:
+        #route
+        route_config = g['config'].get('route', {})
+        route_config.setdefault('xmlrpc_host', '127.0.0.1')
+        threads.append(run_in(ctx.invoke, route, **route_config))
 
-        #result worker
-        result_worker_config = g['config'].get('result_work', {})
-        for i in range(result_work_num):
-            threads.append(run_in(ctx.invoke, result_work, **result_worker_config))
+        #newtask_schedule
+        newtask_schedule_config = g['config'].get('newtask_schedule', {})
+        threads.append(run_in(ctx.invoke, newtask_schedule, **newtask_schedule_config))
+
+        #plantask_schedule
+        plantask_schedule_config = g['config'].get('plantask_schedule', {})
+        threads.append(run_in(ctx.invoke, plantask_schedule, **plantask_schedule_config))
+
+        #synctask_schedule
+        synctask_schedule_config = g['config'].get('synctask_schedule', {})
+        threads.append(run_in(ctx.invoke, synctask_schedule, **synctask_schedule_config))
+
+        #status_schedule
+        status_schedule_config = g['config'].get('status_schedule', {})
+        threads.append(run_in(ctx.invoke, status_schedule, **status_schedule_config))
+
+        #search_schedule
+        search_schedule_config = g['config'].get('search_schedule', {})
+        threads.append(run_in(ctx.invoke, search_schedule, **search_schedule_config))
+
+        #spider_rpc
+        spider_rpc_config = g['config'].get('spider_rpc', {})
+        spider_rpc_config.setdefault('xmlrpc_host', '127.0.0.1')
+        threads.append(run_in(ctx.invoke, spider_rpc, **spider_rpc_config))
+
+        #fetch
+        fetcher_config = g['config'].get('fetche', {})
+        for i in range(fetch_num):
+            threads.append(run_in(ctx.invoke, fetch, **fetcher_config))
 
         #exc worker
         exc_worker_config = g['config'].get('exc_work', {})
         for i in range(exc_work_num):
             threads.append(run_in(ctx.invoke, exc_work, **exc_worker_config))
-
-        #fetch
-        fetcher_config = g['config'].get('fetche', {})
-#        fetcher_config.setdefault('xmlrpc_host', '127.0.0.1')
-        for i in range(fetch_num):
-            threads.append(run_in(ctx.invoke, fetch, **fetcher_config))
-
-        #schedule
-        scheduler_config = g['config'].get('schedule', {})
-#        scheduler_config.setdefault('xmlrpc_host', '127.0.0.1')
-        threads.append(run_in(ctx.invoke, schedule, **scheduler_config))
 
     except:
         g['logger'].error(traceback.format_exc())
