@@ -32,13 +32,13 @@ class NewtaskScheduler(BaseScheduler):
             task['project']=project
             task['keyword'] = keyword
         elif 'kwid' in task and task['kwid']:
-            self.queue['search_work'].put_nowait({'kwid':task['kwid']})
+            self.queue['newtask4search'].put_nowait({'kwid':task['kwid']})
             return
         elif 'uid' in task and task['uid']:
             url=self.db['UrlsDB'].get_detail(task['uid'])
             site=self.db['SitesDB'].get_detail(url['sid'])
             if site['type']=='2':
-                self.queue['search_work'].put_nowait({'uid':task['uid']})
+                self.queue['newtask4search'].put_nowait({'uid':task['uid']})
                 return
             project=self.db['ProjectsDB'].get_detail(site['pid'])
             task['urls']=url
