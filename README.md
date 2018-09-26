@@ -4,6 +4,7 @@
 >* python>=3.5
 
 >## 安装方法
+>* cd ${rootpath}
 >* python3 setup.py sdist
 >* pip3 install dist/cdspider-0.1.tar.gz
 
@@ -11,8 +12,20 @@
 >* pip3 uninstall cdspider
 
 >## 运行方法
->* /usr/local/bin/cdspider [command]
->* /usr/local/bin/cdspider --help 获取command
+>直接运行cdspider
+>* /usr/local/bin/cdspider [options] [command] [options]
+>* /usr/local/bin/cdspider --help                      获取帮助
+>* /usr/local/bin/cdspider [command] --help            获取帮助
+>
+>通过python module方式
+>* python3 -m cdspider.run [options] [command] [options]
+>* python3 -m cdspider.run --help                      获取帮助
+>* python3 -m cdspider.run [command] --help            获取帮助
+>
+>通过run.py, cd到相应目录
+>* python3 run.py [options] [command] [options]
+>* python3 run.py --help                    获取帮助
+>* python3 run.py [command] --help          获取帮助
 
 >## supervisor 配置
 > 以下配置的${rootpath}为具体安装路径，也可将配置文件整体换到单独的配置文件。配置文件中的数据库、队列等配置，需根据实际部署环境进行调整
