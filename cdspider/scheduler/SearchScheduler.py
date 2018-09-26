@@ -9,6 +9,7 @@
 import logging
 from . import BaseScheduler
 from cdspider.exceptions import *
+from cdspider.database.base import *
 
 class SearchScheduler(BaseScheduler):
     """
