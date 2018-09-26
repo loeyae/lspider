@@ -154,10 +154,9 @@ def synctask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.NewtaskScheduler', callback=load_cls, help='schedule name')
-@click.option('--interval', default=0.1, help='循环间隔', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def newtask_schedule(ctx,scheduler_cls, interval, no_loop,  get_object=False):
+def newtask_schedule(ctx,scheduler_cls, no_loop,  get_object=False):
     """
     newTask_schedle: 根据queue:newTask2scheduler往TaskDB 里存入新的任务数据
     """
@@ -168,14 +167,14 @@ def newtask_schedule(ctx,scheduler_cls, interval, no_loop,  get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level, interval = interval)
+    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
     g['instances'].append(Scheduler)
     if g.get('testing_mode') or get_object:
         return Scheduler
     if no_loop:
-        Scheduler.newTask_run_once()
+        Scheduler.run_once()
     else:
-        Scheduler.newTask_run()
+        Scheduler.run()
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.StatusScheduler', callback=load_cls, help='schedule name')
@@ -193,14 +192,38 @@ def status_schedule(ctx,scheduler_cls, interval, no_loop, get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level, interval = interval)
+    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
     g['instances'].append(status_schedule)
     if g.get('testing_mode') or get_object:
         return Scheduler
     if no_loop:
-        Scheduler.status_run_once()
+        Scheduler.run_once()
     else:
-        Scheduler.status_run()
+        Scheduler.run()
+
+@cli.command()
+@click.option('--scheduler-cls', default='cdspider.scheduler.SearchScheduler', callback=load_cls, help='schedule name')
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def search_schedule(ctx,scheduler_cls, no_loop, get_object=False):
+    """
+    newTask_schedle: 根据queue:status2scheduler往TaskDB 里更新数据状态
+    """
+    g=ctx.obj
+    Scheduler = load_cls(ctx, None, scheduler_cls)
+    rate_map = g.get('rate_map')
+
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
+    g['instances'].append(status_schedule)
+    if g.get('testing_mode') or get_object:
+        return Scheduler
+    if no_loop:
+        Scheduler.run_once()
+    else:
+        Scheduler.run()
 
 @cli.command()
 @click.option('--insert-kafka-worker-cls', default='cdspider.worker.insert_kafka_worker', callback=load_cls, help='worker name')
@@ -282,29 +305,6 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     spider = Spider(db = db, queue = queue, proxy=proxy, log_level=log_level, attach_storage = attach_storage)
     g['instances'].append(spider)
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
-
-@cli.command()
-@click.option('--worker-cls', default='cdspider.worker.SearchWorker', callback=load_cls, help='worker name')
-@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.pass_context
-def search_work(ctx, worker_cls, no_loop, get_object=False):
-    """
-    Result Wroker: 抓取结果处理
-    """
-    g = ctx.obj
-    Worker = load_cls(ctx, None, worker_cls)
-    proxy = g.get('proxy', None)
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    worker = Worker(db = g.get('db'), queue = g.get('queue'), proxy=proxy, log_level=log_level)
-    g['instances'].append(worker)
-    if g.get('testing_mode') or get_object:
-        return worker
-    if no_loop:
-        worker.run_once()
-    else:
-        worker.run()
 
 @cli.command()
 @click.option('--worker-cls', default='cdspider.worker.ExcWorker', callback=load_cls, help='worker name')
