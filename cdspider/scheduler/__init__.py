@@ -37,6 +37,7 @@ class BaseScheduler(Component):
         message = None
         if self.inqueue:
             message = self.inqueue.get_nowait()
+            self.debug("%s got message: %s" % (self.__class__.__name__, message))
         self.schedule(message)
         self.info("%s once end" % self.__class__.__name__)
 
@@ -52,6 +53,7 @@ class BaseScheduler(Component):
                     message = None
                     if self.inqueue:
                         message = self.inqueue.get_nowait()
+                        self.debug("%s got message: %s" % (self.__class__.__name__, message))
                     self.schedule(message)
                     time.sleep(self.interval)
                 except queue.Empty:
