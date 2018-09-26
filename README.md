@@ -21,53 +21,53 @@
 > ;route
 > [program:cdspider_route]
 > command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json route
-> process_name=%(program_name)s_$(process_num)02d
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 
 > ;newtask_schedule
 > [program:cdspider_newtask_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json newtask_schedule
-> process_name=%(program_name)s_$(process_num)02d
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json newtask-schedule
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 
 > ;plantask_schedule
 > [program:cdspider_plantask_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json plantask_schedule
-> process_name=%(program_name)s_$(process_num)02d
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json plantask-schedule
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 
 > ;synctask_schedule
 > [program:cdspider_synctask_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json synctask_schedule
-> process_name=%(program_name)s_$(process_num)02d
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json synctask-schedule
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 
 > ;status_schedule
 > [program:cdspider_status_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json status_schedule
-> process_name=%(program_name)s_$(process_num)02d
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json status-schedule
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 
 > ;search_work
 > [program:cdspider_search_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json search_schedule
-> process_name=%(program_name)s_$(process_num)02d
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json search-schedule
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 
 > ;fetch
 > [program:cdspider_fetch]
 > command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json fetch
-> process_name=%(program_name)s_$(process_num)02d
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 
 > ;spider_rpc
 > [program:cdspider_spider_rpc]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json spider_rpc
-> process_name=%(program_name)s_$(process_num)02d
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json spider-rpc
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 
 > ;exc_work
-> [program:cdspider_spider_rpc]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json exc_work
-> process_name=%(program_name)s_$(process_num)02d
+> [program:cdspider_exc_work]
+> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json exc-work
+> process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
