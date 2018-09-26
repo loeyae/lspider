@@ -23,7 +23,7 @@ class StatusScheduler(BaseScheduler):
 
     def schedule(self, message):
         obj={"utime": int(time.time())}
-        if 'rate' in data:
+        if 'rate' in message:
             rate=message['rate']
             try:
                 obj['rate']=int(rate)
