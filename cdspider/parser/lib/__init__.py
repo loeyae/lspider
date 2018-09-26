@@ -59,4 +59,5 @@ class BaseParser(object):
 from .JsonParser import JsonParser
 from .PyqueryParser import PyqueryParser
 from .XpathParser import XpathParser
+from .RegularParser import RegularParser
 from .goose3 import Goose
