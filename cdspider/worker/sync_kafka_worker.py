@@ -8,18 +8,21 @@ Created on 2018年8月6日
 import traceback
 from cdspider.worker import BaseWorker
 from cdspider.message_queue import KafkaQueue
+from cdspider.exceptions import *
 
-class sync_kafka_worker(BaseWorker):
+class SyncKafkaWorker(BaseWorker):
 
     inqueue_key = "result2kafka"
 
-    def __init__(self,db,queue,conf,log_level):
+    def __init__(self, db, queue, kafka_cfg, log_level):
         super(sync_kafka_worker, self).__init__(db, queue, proxy=None, log_level = log_level)
-        self.conf=conf
+        self.conf = kafka_cfg
         self.connection()
 
     def connection(self):
-        self.kafka=KafkaQueue(self.conf['topic'],self.conf['zookeeper_hosts'],host=self.conf['host'])
+        if not self.conf:
+            raise CDSpiderSettingError("Invalid Kafka Setting")
+        self.kafka=KafkaQueue(self.conf['topic'], self.conf['zookeeper_hosts'], host=self.conf['host'])
 
     def on_result(self, message):
         self.info("got message: %s" % message)

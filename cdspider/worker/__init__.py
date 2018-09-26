@@ -77,5 +77,4 @@ class BaseWorker(Component):
 
 from .result_worker import ResultWorker
 from .exc_worker import ExcWorker
-from .search_worker import SearchWorker
-from .insert_kafka_worker import insert_kafka_worker
+from .insert_kafka_worker import SyncKafkaWorker
