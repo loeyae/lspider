@@ -26,13 +26,15 @@
         "user": "abcdef",
         "password": "123321"
     },
-    "kafka": {
-    "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
-    "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
-    "topic": "cddata",
-    "user": "guest",
-    "password": "guest"
-	},
+    "sync_kafka_work": {
+        "kafka": {
+            "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
+            "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
+            "topic": "cddata",
+            "user": "guest",
+            "password": "guest"
+        }
+    },
     "exc_work": {
         "mailer": "smtp",
         "sender": {
