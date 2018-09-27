@@ -558,7 +558,7 @@ class BaseHandler(Component):
             data = {"addr": self.crawler.proxy_str, 'ctime': int(time.time())}
             typeinfo = self._typeinfo(self.task['url'])
             data.update(typeinfo)
-            self.db['base'].insert(data, 'proxy_log')
+            self.db['proxy_log'].insert(data)
         else:
             self.auto_proxy = True
         if save['retry'] < self.MAX_RETRY:
