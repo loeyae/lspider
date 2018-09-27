@@ -88,7 +88,7 @@ class db_wrapper(collections.UserDict):
             cls = load_cls(None, None, db)(self.connector)
             self.data[key] = cls
             return cls
-        except ImportError:
+        except (ImportError, AttributeError):
             db = 'cdspider.database.{protocol}.{db}'.format(protocol=self.protocol, db='Base')
             cls = load_cls(None, None, db)(self.connector, table=key)
             self.data[key] = cls
