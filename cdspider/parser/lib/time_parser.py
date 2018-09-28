@@ -117,12 +117,21 @@ class Parser(object):
             d = (datetime.date.today() - datetime.timedelta(weeks = w)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'今天',timestring):
+            if re.findall('\d{1,2}:\d{1,2}(?:\:\d{1,2})?', timestring):
+                a = re.sub('今天', datetime.date.today().strftime("%Y-%m-%d "), timestring)
+                return Parser.get_timestamp(timestring, 'global1')
             t = time.localtime(time.time())
             return int(time.mktime(time.strptime(time.strftime('%Y-%m-%d 00:00:00', t),'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'昨天',timestring):
+            if re.findall('\d{1,2}:\d{1,2}(?:\:\d{1,2})?', timestring):
+                a = re.sub('昨天', (datetime.date.today() - datetime.timedelta(days = 1)).strftime("%Y-%m-%d "), timestring)
+                return Parser.get_timestamp(timestring, 'global1')
             d = (datetime.date.today() - datetime.timedelta(days = 1)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'前天',timestring):
+            if re.findall('\d{1,2}:\d{1,2}(?:\:\d{1,2})?', timestring):
+                a = re.sub('前天', (datetime.date.today() - datetime.timedelta(days = 2)).strftime("%Y-%m-%d "), timestring)
+                return Parser.get_timestamp(timestring, 'global1')
             d = (datetime.date.today() - datetime.timedelta(days = 2)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         else:
