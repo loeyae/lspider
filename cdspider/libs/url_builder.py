@@ -263,19 +263,27 @@ class UrlBuilder(Component):
             if not isinstance(incr_data, list):
                 incr_data = [incr_data]
             if not "incr_data" in save or not save['incr_data']:
-                for i in range(len(incr_data)):
-                    assert 'name' in incr_data[i] and incr_data[i]['name'], "invalid setting name of incr_data"
-                    assert 'value' in incr_data[i], "invalid setting value of incr_data"
-                    if incr_data[i]['value'] is None or incr_data[i]['value'] == "":
-                        incr_data[i]['value'] = 1
-                    if not 'step' in incr_data[i] or not incr_data[i]['step']:
-                        incr_data[i]['step'] = 1
-                    if not 'base_page' in incr_data[i]:
-                        incr_data[i]['base_page'] = int(incr_data[i]['value'])
-                    if int(incr_data[i]['value']) > incr_data[i]['base_page']:
-                        incr_data[i]['value'] = int(incr_data[i].get('value', 0)) - int(incr_data[i].get('step', 1))
-                    incr_data[i].setdefault('type', 'url')
-                save['incr_data'] = incr_data
+                save['incr_data'] = []
+            for i in range(len(incr_data)):
+                assert 'name' in incr_data[i] and incr_data[i]['name'], "invalid setting name of incr_data"
+                assert 'value' in incr_data[i], "invalid setting value of incr_data"
+                saved = copy.deepcopy(save['incr_data'][i]) if len(save['incr_data']) > i else {}
+                if "value" in saved:
+                    incr_data[i]['value'] = saved['value']
+                elif not 'value' in  incr_data[i] or incr_data[i]['value'] is None or incr_data[i]['value'] == "":
+                    incr_data[i]['value'] = 1
+                if not 'step' in incr_data[i] or not incr_data[i]['step']:
+                    incr_data[i]['step'] = 1
+                if 'base_page' in saved:
+                    incr_data[i]['base_page'] = saved['base_page']
+                elif not 'base_page' in incr_data[i]:
+                    incr_data[i]['base_page'] = int(incr_data[i]['value'])
+                if int(incr_data[i]['value']) > incr_data[i]['base_page']:
+                    incr_data[i]['value'] = int(incr_data[i].get('value', 0)) - int(incr_data[i].get('step', 1))
+                incr_data[i].setdefault('type', 'url')
+                incr_data[i].setdefault('isfirst', saved.get('isfirst', True))
+                incr_data[i].setdefault('first', saved.get('first', False))
+            save['incr_data'] = incr_data
             for i in range(len(save['incr_data'])):
                 item = copy.deepcopy(save['incr_data'][i])
                 if not 'max' in item or not item['max']:
