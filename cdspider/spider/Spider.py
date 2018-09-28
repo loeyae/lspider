@@ -377,9 +377,23 @@ class Spider(Component):
         subdomain, domain = utils.parse_domain(task['url'])
         parse_rule = task.get("parse_rule", {})
         if not parse_rule and subdomain:
-            parse_rule = self.db['ParseRuleDB'].get_detail_by_subdomain("%s.%s" % (subdomain, domain))
+            parserule_list = self.db['ParseRuleDB'].get_list_by_subdomain(subdomain)
+            for item in parserule_list:
+                if not parse_rule:
+                    parse_rule = item
+                if  'url_pattern' in item and item['url_pattern']:
+                    u = utils.preg(url, item['url_pattern'])
+                    if u:
+                        parse_rule = item
         if not parse_rule:
-            self.db['ParseRuleDB'].get_detail_by_domain(domain)
+            parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
+            for item in parserule_list:
+                if not parse_rule:
+                    parse_rule = item
+                if  'url_pattern' in item and item['url_pattern']:
+                    u = utils.preg(url, item['url_pattern'])
+                    if u:
+                        parse_rule = item
         format_params = {"projectname": "Project%s" % message['pid'], "parenthandler": "SiteHandler"}
         if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
             keylist = re.findall('\{(\w+)\}', parse_rule['scripts'])
