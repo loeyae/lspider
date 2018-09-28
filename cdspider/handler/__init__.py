@@ -311,6 +311,7 @@ class BaseHandler(Component):
             self.process = self.task.get('channel', {}).get('process', None) or copy.deepcopy(self.DEFAULT_PROCESS)
         elif self.mode == self.MODE_ATT:
             self.process = self.task.get('attachment', {}).get('process', None) or copy.deepcopy(self.DEFAULT_PROCESS)
+        self.debug("matched process: %s" % self.process)
 
     def _get_request(self, url):
         """
