@@ -26,6 +26,7 @@ class BaseWorker(Component):
         self._quit=False
         self.inqueue = None
         self.excqueue = None
+        self.ioloop = tornado.ioloop.IOLoop()
         if self.inqueue_key:
             self.inqueue = self.queue[self.inqueue_key]
         if self.excqueue_key:
