@@ -5,12 +5,15 @@
 import time
 import logging
 import traceback
-from cdspider import Component
+import copy
+import json
+import tornado.ioloop
 from six.moves import queue
+from cdspider import Component
 
 class BaseWorker(Component):
 
-    LOOP_INTERVAL = 0.1
+    interval = 0.1
 
     inqueue_key = None
     excqueue_key = None
@@ -48,26 +51,45 @@ class BaseWorker(Component):
 
     def run_once(self):
         self.info("%s once starting..." % self.__class__.__name__)
-        message = self.inqueue.get_nowait()
+        message = None
+        if self.inqueue:
+            message = self.inqueue.get_nowait()
+            self.debug("%s got message: %s" % (self.__class__.__name__, message))
         self.on_result(message)
-        self.logger.info("%s once end" % self.__class__.__name__)
+        self.info("%s once end" % self.__class__.__name__)
 
     def run(self):
+        """
+        scheduler运行方法
+        """
         self.info("%s starting..." % self.__class__.__name__)
 
-        while not self._quit:
-            try:
-                message = self.inqueue.get_nowait()
-                self.on_result(message)
-                time.sleep(0.01)
-            except queue.Empty:
-                time.sleep(self.LOOP_INTERVAL)
-                continue
-            except KeyboardInterrupt:
-                break
-            except Exception as e:
-                self.on_error(e)
-                break
+        def queue_loop():
+            while not self._quit:
+                try:
+                    message = None
+                    if self.inqueue:
+                        message = self.inqueue.get_nowait()
+                        self.debug("%s got message: %s" % (self.__class__.__name__, message))
+                    self.on_result(message)
+                    time.sleep(self.interval)
+                except queue.Empty:
+                    self.debug("empty queue")
+                    time.sleep(5)
+                    continue
+                except KeyboardInterrupt:
+                    break
+                except Exception as e:
+                    self.exception(e)
+                    break
+
+        tornado.ioloop.PeriodicCallback(queue_loop, 1000, io_loop=self.ioloop).start()
+        self._running = True
+
+        try:
+            self.ioloop.start()
+        except KeyboardInterrupt:
+            pass
 
         self.info("%s exiting..." % self.__class__.__name__)
 
