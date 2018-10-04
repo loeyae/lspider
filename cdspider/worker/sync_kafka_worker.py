@@ -32,6 +32,6 @@ class SyncKafkaWorker(BaseWorker):
         if '_id' in res:
             res.pop('_id')
         res.pop('rid', None)
-        res.pop('crawlinfo', none)
+        res.pop('crawlinfo', None)
         self.info("message: %s " % res)
         self.kafka.put_nowait(res)
