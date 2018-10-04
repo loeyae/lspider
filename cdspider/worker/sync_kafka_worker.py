@@ -26,7 +26,7 @@ class SyncKafkaWorker(BaseWorker):
 
     def on_result(self, message):
         self.info("got message: %s" % message)
-        res=self.db['ArticlesDB'].get_detail(message['rid'])
+        res=self.db['ArticlesDB'].get_detail(message['rid'], select = ["subdomain", "domain", "ctime", "channel", "acid", "url", "pubtime", "title", "status", "author", "content", "media_type", "result", "utime"])
         if 'on_sync' in message:
             res['flag']=message['on_sync']
         if '_id' in res:
