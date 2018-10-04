@@ -339,6 +339,28 @@ def sync_kafka_work(ctx, worker_cls, kafka_cfg, no_loop,  get_object=False):
         worker.run()
 
 @cli.command()
+@click.option('--worker-cls', default='cdspider.worker.TestWorker', callback=load_cls, help='worker name')
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def work(ctx, worker_cls, no_loop,  get_object=False):
+    """
+    同步数据到kafka
+    """
+    g=ctx.obj
+    Worker = load_cls(ctx, None, worker_cls)
+    log_level = logging.WARN
+    if g.get("debug", False):
+        log_level = logging.DEBUG
+    worker = Worker(g.get('db'), g.get('queue'), log_level)
+    g['instances'].append(worker)
+    if g.get('testing_mode') or get_object:
+        return worker
+    if no_loop:
+        worker.run_once()
+    else:
+        worker.run()
+
+@cli.command()
 @click.option('-n', '--name', help='tool名')
 @click.option('-a', '--arg', multiple=True, help='tool参数')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
