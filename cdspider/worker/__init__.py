@@ -67,8 +67,8 @@ class BaseWorker(Component):
 
         def queue_loop():
             while not self._quit:
+                message = None
                 try:
-                    message = None
                     if self.inqueue:
                         message = self.inqueue.get_nowait()
                         self.debug("%s got message: %s" % (self.__class__.__name__, message))
@@ -81,7 +81,7 @@ class BaseWorker(Component):
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
-                    self.on_error(e)
+                    self.on_error(e, message)
                     break
 
         tornado.ioloop.PeriodicCallback(queue_loop, 1000, io_loop=self.ioloop).start()
