@@ -81,7 +81,7 @@ class BaseWorker(Component):
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
-                    self.exception(e)
+                    self.on_error(e)
                     break
 
         tornado.ioloop.PeriodicCallback(queue_loop, 1000, io_loop=self.ioloop).start()
