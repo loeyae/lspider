@@ -101,3 +101,4 @@ class BaseWorker(Component):
 from .result_worker import ResultWorker
 from .exc_worker import ExcWorker
 from .sync_kafka_worker import SyncKafkaWorker
+from .test_worker import TestWorker
