@@ -119,7 +119,7 @@ class Mongo(BaseDataBase):
 
     def _build_projection(self, select):
         if isinstance(select, list) or isinstance(select, tuple) or select is None:
-            return dict((k, True) for k in select) if select else None
+            return dict.fromkeys(select, True) if select else None
         elif isinstance(select, dict):
             return select
         raise CDSpiderDBError("Projection setting error: %s" % select)
