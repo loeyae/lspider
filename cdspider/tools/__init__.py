@@ -13,7 +13,7 @@ class Base(Component):
 
     def __init__(self, g, deamon = False):
         self.g = g
-        super(BaseWorker, self).__init__(g['logger'], logging.DEBUG if g['debug'] else logging.WARN)
+        super(Base, self).__init__(g['logger'], logging.DEBUG if g['debug'] else logging.WARN)
         self.deamon = deamon
 
     @abc.abstractmethod
