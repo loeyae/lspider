@@ -363,17 +363,20 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
 @cli.command()
 @click.option('-n', '--name', help='tool名')
 @click.option('-a', '--arg', multiple=True, help='tool参数')
-@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.option('--daemon', default=False, is_flag=True, help='是否作为守护进程', show_default=True)
 @click.pass_context
-def tool(ctx, name, arg, no_loop):
+def tool(ctx, name, arg, daemon):
     """
     工具
     """
     g = ctx.obj
     cls_name = 'cdspider.tools.%s.%s' % (name, name)
     cls = load_cls(ctx, None, cls_name)
-    c = cls(g, no_loop)
-    c.process(*arg)
+    c = cls(g, daemon)
+    if daemon:
+        c.run(*arg)
+    else:
+        c.run_once(*arg)
 
 @cli.command()
 @click.option('--rebot-cls', default='cdspider.robots.WxchatRobots', callback=load_cls, help='schedule name')
