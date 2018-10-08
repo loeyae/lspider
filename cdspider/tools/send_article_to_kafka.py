@@ -13,8 +13,7 @@ import time
 class send_article_to_kafka(Base):
 
     def process(self, *args, **kwargs):
-        assert len(args) > 0, 'Please input where'
-        where = json.loads(args[0])
+        where = json.loads(self.get_arg(args, 0, 'Pleas input where'))
         created = int(time.time())
         if len(args) > 1:
             created = int(args[1])
@@ -37,14 +36,14 @@ class send_article_to_kafka(Base):
                     d={}
                     d['rid']=item['rid']
                     d['on_sync']='publicOpinionCustomeNS:publicOpinionCustomeTB001'
-                    self.logger.info("import status_queue data: %s, last acid: %s" %  (str(d), item['acid']))
+                    self.info("import status_queue data: %s, last acid: %s" %  (str(d), item['acid']))
                     acid=item['acid']
                     self.g['queue']['result2kafka'].put_nowait(d)
                 if n==0:
                     break
                 time.sleep(0.2)
             except:
-                self.logger.error(traceback.format_exc())
+                self.error(traceback.format_exc())
                 if not checked:
                     continue
                 else:

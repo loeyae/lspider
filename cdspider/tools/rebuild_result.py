@@ -28,11 +28,11 @@ class rebuild_result(Base):
         sum = 0
         acid = '0'
         while True:
-            self.g['logger'].debug("current createtime: %s" % createtime)
+            self.debug("current createtime: %s" % createtime)
             where = {"status": ArticlesDB.STATUS_INIT, "acid": {"$gt": acid}}
             data = ArticlesDB.get_list(created, where = where, select={"rid": 1, "url": 1, "ctime": 1, "acid": 1, "ctime": 1, "crawlinfo": 1}, sort=[('acid', 1)], hits=100)
             data = list(data)
-            self.g['logger'].debug("got result: %s" % str(data))
+            self.debug("got result: %s" % str(data))
             i = 0
             for item in data:
                 if item['url'].startswith('javascript'):
@@ -43,12 +43,12 @@ class rebuild_result(Base):
                     'pid': item['crawlinfo']['pid'],
                     'rid': item['rid']
                 }
-                self.g['logger'].info("message: %s" % message)
+                self.info("message: %s" % message)
                 outqueue.put_nowait(message)
                 acid = item['acid']
                 i += 1
             if i == 0:
-                self.g['logger'].info("no rebuid result")
+                self.info("no rebuid result")
                 if no_loop:
                     break
             print("totle: %s" % sum)

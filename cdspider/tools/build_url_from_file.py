@@ -19,13 +19,11 @@ class build_url_from_file(Base):
     """
 
     def process(self, *args, **kwargs):
-        assert len(args) > 0, 'Please input sid'
-        assert len(args) > 1, 'Please input file path'
+        sid = int(self.get_arg(args, 0, 'Pleas input sid'))
+        fpath = self.get_arg(args, 1, 'Pleas input file path')
         encode = 'utf8'
         if len(args) > 2:
             encode = args[2]
-        sid = int(args[0])
-        fpath = args[1]
         self.broken('Sitenot exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
@@ -59,16 +57,16 @@ class UrlHandler(SiteHandler):
             line = f.readline()
             i = 1
             while line:
-                self.g['logger'].info('current line: %s', i)
+                self.info('current line: %s', i)
                 title, url = re.split(r'\t', line)
                 item = copy.deepcopy(urls)
                 item['name'] = title.strip()
                 item['url'] = url.strip()
                 uid = UrlsDB.insert(item)
-                self.g['logger'].info('inserted urls: %s', uid)
+                self.info('inserted urls: %s', uid)
                 d={}
                 d['uid'] = uid
-                self.logger.info("push newtask_queue data: %s" %  str(d))
+                self.info("push newtask_queue data: %s" %  str(d))
                 self.g['queue']['newtask_queue'].put_nowait(d)
                 i += 1
                 line = f.readline()

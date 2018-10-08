@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+了#-*- coding: utf-8 -*-
 
 '''
 Created on 2018年6月20日
@@ -10,8 +10,7 @@ from cdspider.tools import Base
 class active_urls_by_sid(Base):
 
     def process(self, *args):
-        assert len(args) > 0, 'Please input sid'
-        sid = int(args[0])
+        sid = int(self.get_arg(args, 0, 'Pleas input sid'))
         self.broken('Site not exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
@@ -26,7 +25,7 @@ class active_urls_by_sid(Base):
                 d={}
                 d['status'] = UrlsDB.STATUS_ACTIVE
                 d['uid'] = item['uid']
-                self.logger.info("push status_queue data: %s" %  str(d))
+                self.info("push status_queue data: %s" %  str(d))
                 self.g['queue']['status_queue'].put_nowait(d)
                 i += 1
                 if item['uid'] > uid:

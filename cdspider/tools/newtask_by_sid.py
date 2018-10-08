@@ -13,13 +13,11 @@ class newtask_by_sid(Base):
     newtask by site
     """
     def process(self, *args):
-        assert len(args) > 0, 'Please input sid'
-        assert len(args) > 1, 'Please input start uid'
+        sid = int(self.get_arg(args, 0, 'Pleas input sid'))
+        uid = int(self.get_arg(args, 1, 'Pleas input start uid'))
         maxuid = 0
         if len(args) > 2:
             maxuid = int(args[2])
-        sid = int(args[0])
-        uid = int(args[1])
         self.broken('Site not exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
@@ -33,7 +31,7 @@ class newtask_by_sid(Base):
                     continue
                 d={}
                 d['uid'] = item['uid']
-                self.logger.info("push newtask_queue data: %s" %  str(d))
+                self.info("push newtask_queue data: %s" %  str(d))
                 self.g['queue']['newtask_queue'].put_nowait(d)
                 i += 1
                 if item['uid'] > uid:

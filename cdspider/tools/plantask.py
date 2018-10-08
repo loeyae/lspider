@@ -15,12 +15,9 @@ class plantask(Base):
     put you comment
     """
     def process(self, *args):
-        assert len(args) > 0, 'Please project id'
-        assert len(args) > 1, 'Please site id'
-        assert len(args) > 2, 'Please random max'
-        pid = int(args[0])
-        sid = int(args[1])
-        maxn = int(args[2])
+        pid = int(self.get_arg(args, 0, 'Pleas input project sid'))
+        sid = int(self.get_arg(args, 1, 'Pleas input site id'))
+        maxn = int(self.get_arg(args, 2, 'Pleas input random max'))
 
         self.broken('Site not exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
@@ -33,7 +30,7 @@ class plantask(Base):
             for item in task_db.get_list(pid, where={'sid': sid, 'tid': {"$gt": id}}):
                 d={}
                 d['plantime']=int(time.time())+random.randint(1, maxn)
-                self.logger.info("update plantime from %s to: %s" % (item['plantime'], d['plantime']))
+                self.info("update plantime from %s to: %s" % (item['plantime'], d['plantime']))
                 task_db.update(item['tid'], pid, d)
                 i += 1
                 if item['tid'] > id:

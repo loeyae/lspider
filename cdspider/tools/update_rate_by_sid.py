@@ -14,10 +14,8 @@ class update_rate_by_sid(Base):
     update rate by sid
     """
     def process(self, *args):
-        assert len(args) > 0, 'Please input sid'
-        assert len(args) > 1, 'Please input rate'
-        sid = int(args[0])
-        rate = args[1]
+        sid = int(self.get_arg(args, 0, 'Pleas input sid'))
+        rate = self.get_arg(args, 1, 'Pleas input rate')
         self.broken('Site not exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
