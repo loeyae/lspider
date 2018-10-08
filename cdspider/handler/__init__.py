@@ -366,8 +366,8 @@ class BaseHandler(Component):
                 return paging
         return None
 
-    def preparse(self, **kwargs):
-        return kwargs
+    def preparse(self, rule):
+        return rule
 
     def parse(self, source, url, rule = None, mode = None):
         """
