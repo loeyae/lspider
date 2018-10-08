@@ -6,15 +6,24 @@ import sys
 import abc
 import six
 import logging
+import time
+import traceback
+import tornado.ioloop
 from cdspider import Component
 
 @six.add_metaclass(abc.ABCMeta)
 class Base(Component):
+    interval = 0.1
 
     def __init__(self, g, deamon = False):
         self.g = g
         super(Base, self).__init__(g['logger'], logging.DEBUG if g['debug'] else logging.WARN)
         self.deamon = deamon
+        self.ioloop = None
+        self._quit = False
+        self._running = False
+        if deamon:
+            self.ioloop = tornado.ioloop.IOLoop()
 
     @abc.abstractmethod
     def process(self, *args, **kwargs):
@@ -24,9 +33,31 @@ class Base(Component):
         self.process(*args, **kwargs)
 
     def run(self, *args, **kwargs):
-        while True:
-            self.process(*args, **kwargs)
-            time.sleep()
+        """
+        Deamon 运行
+        """
+        self.info("%s starting..." % self.__class__.__name__)
+
+        def process_loop():
+            while not self._quit:
+                try:
+                    self.process(*args, **kwargs)
+                    time.sleep(self.interval)
+                except KeyboardInterrupt:
+                    break
+                except:
+                    self.error(traceback.format_exc())
+                    break
+
+        tornado.ioloop.PeriodicCallback(process_loop, 1000, io_loop=self.ioloop).start()
+        self._running = True
+
+        try:
+            self.ioloop.start()
+        except KeyboardInterrupt:
+            pass
+
+        self.info("%s exiting..." % self.__class__.__name__)
 
     def broken(self, message, condition):
         if not condition:
