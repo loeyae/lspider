@@ -116,7 +116,6 @@ class Spider(Component):
                     last_url = final_url
                     if referer:
                         save['referer'] = final_url
-                        crawler.set_header("Referer", final_url)
                     if refresh_base:
                         save['base_url'] = final_url
                     save['request_url'] = final_url
