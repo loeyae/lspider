@@ -15,6 +15,7 @@ class kx_build_kw_newtask(Base):
     def process(self):
         try:
             data=self.g['queue']['result2newtask'].get_nowait()
+            self.debug("%s got message: %s" % (self.__class__.__name__, data))
             title=data['title']
 #         for item in self.g['db']['ArticlesDB'].get_list(ctime=int(time.time()),where={'$and':[{'crawlinfo.title_to_task':{'$exists':False}},{'crawlinfo.sid':1}]}):
 #             title=item['title']
@@ -23,6 +24,7 @@ class kx_build_kw_newtask(Base):
             self._insert_task(title, 9)
 #             self.g['db']['ArticlesDB'].update(item['rid'],obj={'crawlinfo.title_to_task':1})
         except queue.Empty:
+            self.debug("%s not got message, result2newtask is empty" % (self.__class__.__name__))
             time.sleep(0.5)
         except:
             self.error(traceback.format_exc())
