@@ -242,6 +242,9 @@ class BaseHandler(Component):
         """
         pass
 
+    def precrawl(self, **kwargs):
+        return kwargs
+
     def crawl(self, save, crawler = None):
         """
         数据抓取
@@ -275,6 +278,7 @@ class BaseHandler(Component):
                 params['proxy'] = copy.deepcopy(save['proxy'])
             else:
                 params['proxy'] = None
+            params = self.precrawl(**params)
             self.crawler.crawl(**params)
             if self.page == 1:
                 final_url = save['request_url'] = self.crawler.final_url
@@ -362,12 +366,16 @@ class BaseHandler(Component):
                 return paging
         return None
 
+    def preparse(self, **kwargs):
+        return kwargs
+
     def parse(self, source, url, rule = None, mode = None):
         """
         页面解析
         """
         if not rule:
             rule = self._get_parse(url)
+        rule = self.preparse(**rule)
         if not mode:
             mode = self.mode
         if mode == self.MODE_ATT:
