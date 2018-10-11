@@ -42,25 +42,29 @@ class Redis():
     redis连接库
     """
     def __init__(self, *args, **kwargs):
-        if len(args) > 0:
+        if len(args) == 1:
+            kwargs['url'] = args[0]
+        else:
             kwargs['host'] = args[0]
-        if len(args) > 1:
             kwargs['port'] = args[1]
-        if len(args) > 2:
-            kwargs['pass'] = args[2]
-        if len(args) > 3:
-            kwargs['db'] = args[3]
+            if len(args) > 2:
+                kwargs['pass'] = args[2]
+            if len(args) > 3:
+                kwargs['db'] = args[3]
 
-        assert 'host' in kwargs and kwargs['host'], "invalid host"
-        kwargs.setdefault('port', 6379)
-        kwargs.setdefault('pass', None)
+            assert 'host' in kwargs and kwargs['host'], "invalid host"
+            kwargs.setdefault('port', 6379)
+            kwargs.setdefault('pass', None)
         kwargs.setdefault('db', 0)
         self.setting = kwargs
         self.connect()
 
     def connect(self):
         if not 'pool' in self.setting:
-            self.setting['pool'] = redis.ConnectionPool(host=self.setting['host'], port=self.setting['port'], db=self.setting['db'], password=self.setting['pass'])
+            if 'url' in self.setting:
+                self.setting['pool'] = redis.ConnectionPool.from_url(url=self.settings['url'], db=self.settings['db'])
+            else:
+                self.setting['pool'] = redis.ConnectionPool(host=self.setting['host'], port=self.setting['port'], db=self.setting['db'], password=self.setting['pass'])
         self._conn = redis.Redis(connection_pool=self.setting['pool'])
 
     def __getattr__(self, name):
