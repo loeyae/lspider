@@ -375,7 +375,7 @@ class BaseHandler(Component):
         """
         if not rule:
             rule = self._get_parse(url)
-        rule = self.preparse(**rule)
+        rule = self.preparse(rule)
         if not mode:
             mode = self.mode
         if mode == self.MODE_ATT:
