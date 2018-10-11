@@ -120,7 +120,7 @@ class ResultTrait(object):
                 item['ctime'] = int(time.time())
                 item['utime'] = int(time.time())
                 item['creator'] = 1
-                item['status'] = 1
+                item['status'] = 0
                 uid = self.db['UrlsDB'].insert(item)
                 if uid:
                     self.queue['newtask_queue'].put_nowait({"uid": uid})
