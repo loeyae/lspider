@@ -43,7 +43,7 @@ class PlantaskScheduler(BaseScheduler):
             where["sid"] = message['sid']
             where["aid"] = 0
         tid = 0
-        projection = ["tid", "pid", "sid", "uid", "crid", "aid", "kwid", "rate"]
+        projection = ["tid", "pid", "sid", "uid", "crid", "aid", "kwid", "rate", "plantime"]
         while True:
             where['tid'] = {"$gt": tid}
             task_list = self.db["TaskDB"].get_plan_list(pid=projectid, where=where, select=projection, sort=[("tid", 1)])
@@ -60,8 +60,8 @@ class PlantaskScheduler(BaseScheduler):
                 obj['pid']=task['pid']
                 obj['tid']=task['tid']
                 tid = task['tid']
-                plantime = now + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0])
-                self.send_task(task, now, plantime)
+                plantime = now if task['plantime'] <= 0 else now + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0])
+                self.send_task(obj, now, plantime)
                 i += 1
             if i == 0:
                 self.debug("%s check_tasks no newtask@%s" % (self.__class__.__name__, projectid))
