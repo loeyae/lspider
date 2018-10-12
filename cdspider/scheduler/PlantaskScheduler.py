@@ -59,7 +59,6 @@ class PlantaskScheduler(BaseScheduler):
                     obj['mode']='list'
                 obj['pid']=task['pid']
                 obj['tid']=task['tid']
-                tid = task['tid']
                 plantime = now if task['plantime'] <= 0 else now + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0])
                 self.send_task(obj, now, plantime)
                 i += 1
