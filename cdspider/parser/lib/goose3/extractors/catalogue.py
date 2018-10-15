@@ -13,6 +13,7 @@ import copy
 import traceback
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.libs import utils
+from cdspider.parser import KNOWN_DETAIL_URLS_PATTERN
 
 class CatalogueExtractor(BaseExtractor):
     """
@@ -38,13 +39,7 @@ class CatalogueExtractor(BaseExtractor):
 
     }
 
-    KNOWN_URLS_PATTERN = [
-        '(20[012][0-9]|19[789][0-9]).?([1-9]|0[1-9]|1[012]).?([1-9]|[12][0-9]|3[01]).*?\.[a-z]{3,5}',
-        '(mod=viewthread.*?tid=|viewnews-|blog-id-|do=blog&id=)',
-        '\d{2}/\d{4}/\d{2}/[\_\-\d\w]{10,}\.[a-z]{3,5}',
-        '\d{8}/[\_\-\d\w]{10,}\.[a-z]{3,5}',
-        'article/details/\d{6,}',
-    ]
+    KNOWN_URLS_PATTERN = KNOWN_DETAIL_URLS_PATTERN
 
     KNOWN_URLS_PATTERN_BY_DOMAIN = {
     }
