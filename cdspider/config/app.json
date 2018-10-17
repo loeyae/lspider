@@ -72,5 +72,6 @@
         "1": "激活",
         "9": "删除"
     },
-    "attach_storage": "data/attach"
+    "attach_storage": "data/attach",
+    "bloomfilter_redis_url": "redis://:DOvrpoEe@127.0.0.1:6379"
 }
