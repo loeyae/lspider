@@ -432,9 +432,13 @@ class Spider(Component):
         """
         mode = message.get('mode', BaseHandler.MODE_DEFAULT)
         pid = int(message.get('pid'))
-        taskid = message.get('tid')
+        taskid = int(message.get('tid', 0))
         if not task and taskid:
             task = self.TaskDB.get_detail(taskid, pid, True)
+            if not task:
+                raise CDSpiderDBDataNotFound("Task: %s not found" % taskid)
+        if 'url' in message:
+            task['url'] = message
         project = (task.get('project', None) if task else None) or self.ProjectsDB.get_detail(pid)
         if not project:
             self.status_queue.put_nowait({"pid": pid, 'status': ProjectsDB.STATUS_DELETED})
