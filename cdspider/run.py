@@ -21,9 +21,11 @@ cpath = os.path.dirname(__file__)
 @click.group(invoke_without_command=True)
 @click.option('-c', '--config', default=os.path.join(cpath, "config", "main.json"),
               callback=read_config, type=click.File(mode='r', encoding='utf-8'),
-              help='json配置文件. {"webui": {"port":5001}}', show_default=True)
+              help='命令行配置文件. {"webui": {"port":5001}}', show_default=True)
 @click.option('--logging-config', default=os.path.join(cpath, "config", "logging.conf"),
               help="日志配置文件", show_default=True)
+@click.option('--app-config', default=os.path.join(cpath, "config", "app.json"),
+              help="配置文件", show_default=True)
 @click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
 @click.option('--runtime-dir', default=None, help ='runtime文件夹', show_default=True)
 @click.option('--database', help='数据库设置, default: '
@@ -48,7 +50,7 @@ def cli(ctx, **kwargs):
         if not os.path.exists(kwargs['runtime_dir']):
             os.makedirs(kwargs['runtime_dir'])
 
-    app_config = utils.load_config(os.path.join(cpath, "config", "app.json"))
+    app_config = utils.load_config(kwargs['app_config'])
 
     db_setting = kwargs.get('database')
     db_object = {}
@@ -94,6 +96,7 @@ def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, g
     if g.get("debug", False):
         log_level = logging.DEBUG
     scheduler = Scheduler(db=g.get('db'), queue=g.get('queue'), mode=mode, log_level=log_level)
+    scheduler.ctx = ctx
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -120,6 +123,7 @@ def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     if g.get("debug", False):
         log_level = logging.DEBUG
     scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
+    scheduler.ctx = ctx
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -144,6 +148,7 @@ def synctask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     if g.get("debug", False):
         log_level = logging.DEBUG
     scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
+    scheduler.ctx = ctx
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -167,14 +172,15 @@ def newtask_schedule(ctx,scheduler_cls, no_loop,  get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
-    g['instances'].append(Scheduler)
+    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
+    scheduler.ctx = ctx
+    g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
-        return Scheduler
+        return scheduler
     if no_loop:
-        Scheduler.run_once()
+        scheduler.run_once()
     else:
-        Scheduler.run()
+        scheduler.run()
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.StatusScheduler', callback=load_cls, help='schedule name')
@@ -192,14 +198,15 @@ def status_schedule(ctx,scheduler_cls, interval, no_loop, get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
-    g['instances'].append(status_schedule)
+    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
+    scheduler.ctx = ctx
+    g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
-        return Scheduler
+        return scheduler
     if no_loop:
-        Scheduler.run_once()
+        scheduler.run_once()
     else:
-        Scheduler.run()
+        scheduler.run()
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.SearchScheduler', callback=load_cls, help='schedule name')
@@ -216,14 +223,15 @@ def search_schedule(ctx,scheduler_cls, no_loop, get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    Scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
-    g['instances'].append(status_schedule)
+    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
+    scheduler.ctx = ctx
+    g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
-        return Scheduler
+        return scheduler
     if no_loop:
-        Scheduler.run_once()
+        scheduler.run_once()
     else:
-        Scheduler.run()
+        scheduler.run()
 
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
@@ -250,6 +258,7 @@ def fetch(ctx, fetch_cls, no_loop, no_sync, get_object=False, no_input=False):
         log_level = logging.DEBUG
 
     spider = Spider(db = db, queue = queue, proxy=proxy, no_sync=no_sync, log_level=log_level, attach_storage = attach_storage)
+    spider.ctx = ctx
     g['instances'].append(spider)
     if g.get('testing_mode') or get_object:
         return spider
@@ -280,6 +289,7 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
         log_level = logging.DEBUG
 
     spider = Spider(db = db, queue = queue, proxy=proxy, log_level=log_level, attach_storage = attach_storage)
+    spider.ctx = ctx
     g['instances'].append(spider)
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
@@ -306,6 +316,7 @@ def exc_work(ctx, worker_cls, mailer, sender, receiver, no_loop, get_object=Fals
         mailer = utils.load_mailer(mailer, sender=sender, receiver=receiver)
     worker = Worker(db = g.get('db'), queue = g.get('queue'), proxy=proxy, mailer=mailer,
             log_level=log_level)
+    worker.ctx = ctx
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
         return worker
@@ -330,6 +341,7 @@ def sync_kafka_work(ctx, worker_cls, kafka_cfg, no_loop,  get_object=False):
     if g.get("debug", False):
         log_level = logging.DEBUG
     worker = Worker(g.get('db'),g.get('queue'), kafka_cfg, log_level)
+    worker.ctx = ctx
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
         return worker
@@ -352,6 +364,7 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
     if g.get("debug", False):
         log_level = logging.DEBUG
     worker = Worker(g.get('db'), g.get('queue'), log_level)
+    worker.ctx = ctx
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
         return worker
@@ -372,6 +385,7 @@ def tool(ctx, name, arg, daemon):
     g = ctx.obj
     cls_name = 'cdspider.tools.%s.%s' % (name, name)
     cls = load_cls(ctx, None, cls_name)
+    cls.ctx = ctx
     c = cls(g, daemon)
     if daemon:
         c.run(*arg)
