@@ -12,7 +12,7 @@ import copy
 from cdspider import DEFAULT_URLS_SCRIPTS
 from cdspider.database.base import *
 from cdspider.libs import utils
-from cdspider.parser.lib.time_parser import Parser as TimeParser
+from cdspider.parser.lib import TimeParser, TopLinkDetector, LinkCleaner
 
 class ResultTrait(object):
 
@@ -90,16 +90,35 @@ class ResultTrait(object):
         生成详情抓取任务并入队
         """
         message = {
-            'mode': 'item',
+            'mode': self.MODE_ITEM,
             'pid': self.task.get('pid'),
+            'tid': 0,
             'rid': rid,
         }
         self.queue['scheduler2spider'].put_nowait(message)
+
+    def channel_recursion(self, final_url, data, typeinfo, page_source, unique=True, return_result=False):
+        bf = self.get_bloomfilter(self.task.get("pid"))
+        bf.insert(final_url)
+        links_db = self.db['site_links']
+        task_queue = self.queue['scheduler2spider']
+        lc = LinkCleaner()
+        tld = TopLinkDetector()
+        for link in data['subdomain']:
+            if bf.seen(lc.clean(link['url'])):
+                link['sid'] = self.task.get("sid")
+                link['pid'] = self.task.get("pid")
+                link['crid'] = self.task.get("crid")
+                link['score'] = tld.feed(link['url'])
+                links_db.insert(link)
+                task = {'mode': self.MODE_CHANNEL, 'tid': self.task['tid'], 'url': link['url']}
+                task_queue.put_nowait(task)
 
     def channel_to_list(self, final_url, data, typeinfo, page_source, unique = True, return_result = False):
         """
         频道列表存储并生成任务
         """
+        data = data['subdomain']
         if not data:
             #TODO 与管理平台互动 提醒修改解析规则
             raise CDSpiderParserNoContent()
