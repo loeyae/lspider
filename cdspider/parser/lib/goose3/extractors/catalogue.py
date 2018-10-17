@@ -112,7 +112,7 @@ class CatalogueExtractor(BaseExtractor):
             for tags in known_context_patterns:
                 data = self.get_message_by_tag(tags)
                 if data:
-                    return utils.table2kvlist({'url': data})
+                    return data
 
         data = self.auto_match()
         if data:
@@ -121,7 +121,7 @@ class CatalogueExtractor(BaseExtractor):
         for tags in copy.deepcopy(self.KNOWN_URLS_TAGS):
             data = self.get_message_by_tag(tags)
             if data:
-                return utils.table2kvlist({'url': data})
+                return data
         return []
 
     def auto_match(self):
