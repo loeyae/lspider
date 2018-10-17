@@ -25,6 +25,8 @@ class ProjectBaseHandler(BaseHandler, ResultTrait):
                 base_url=self.task.get('save', {}).get("base_url"), current_url=final_url)
         if self.mode == self.MODE_CHANNEL:
             typeinfo = self._typeinfo(final_url)
+            if self.task.get('channel', {}).get('recursion', False):
+                return self.channel_recursion(final_url, data, typeinfo, page_source, return_result = return_result)
             return self.channel_to_list(final_url, data, typeinfo, page_source, return_result = return_result)
         elif self.mode == self.MODE_LIST:
             typeinfo = self._typeinfo(final_url)
