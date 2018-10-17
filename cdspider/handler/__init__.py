@@ -18,6 +18,8 @@ from cdspider.exceptions import *
 from cdspider.libs.tools import *
 from cdspider.parser import *
 from cdspider.libs.url_builder import UrlBuilder
+from cdspider.libs.bloomfilter import BloomFilter, BLOOMFILTER_HASH_NUMBER, BLOOMFILTER_BIT
+from cdspider.parser.lib import LinksExtractor
 
 IGNORE_EXCEPTIONS = (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerProxyExpired, CDSpiderCrawlerNoExists, CDSpiderCrawlerNoSource)
 RETRY_EXCEPTIONS = (CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout)
@@ -36,6 +38,7 @@ class BaseHandler(Component):
     PROXY_TYPE_AUTO = 'auto'
     PROXY_TYPE_EVER = 'ever'
     PROXY_TYPE_NEVER = 'never'
+    BLOOMFILTER_KEY = 'cdspider_%(prefix)s_%(key)s'
     CRAWL_INFO_LIMIT_COUNT = 10
     EXPIRE_STEP = 1
     CONTINUE_EXCEPTIONS = ()
@@ -60,8 +63,8 @@ class BaseHandler(Component):
         self.task = kwargs.pop('task')
         self.crawler_list = kwargs.pop('crawler', [])
         self.attach_storage = kwargs.pop('attach_storage', None)
-        self.db = kwargs.pop('db',None)
-        self.queue = kwargs.pop('queue',None)
+        self.db = kwargs.pop('db', None)
+        self.queue = kwargs.pop('queue', None)
         self.crawl_id = int(time.time())
         self.crawl_info  = {
             "crawl_start": self.crawl_id,
@@ -77,7 +80,12 @@ class BaseHandler(Component):
             "traceback": None
         }
         self.no_sync = kwargs.pop('no_sync', False)
+        self.spider = None
+        self.ctx = None
         self._settings = kwargs or {}
+        if "spider" in self._settings:
+            self.spider = self._settings['spider']
+            self.ctx = self.spider.ctx
         self.mycrawler = True
         self.crawler = None
         self.process = None
@@ -102,6 +110,22 @@ class BaseHandler(Component):
         subdomain, domain = self._domain_info(url)
         return {"domain": domain, "subdomain": subdomain}
 
+    def get_bloomfilter(self, key, prefix = 'project'):
+        if self.ctx:
+            g = ctx.obj
+            app_config = g.get('app_config', {})
+            bfkey = self.BLOOMFILTER_KEY % {"prefix": prefix, "key": key}
+            bit = app_config.get('bloomfilter_redis_url', BLOOMFILTER_BIT)
+            hash_number = app_config.get('bloomfilter_redis_url', BLOOMFILTER_HASH_NUMBER)
+            bloomfilter_redis_url = app_config.get('bloomfilter_redis_url', None)
+            if bloomfilter_redis_url:
+                server = Redis(url=bloomfilter_redis_url)
+                return BloomFilter(server=server, key=bfkey, bit=bit, hash_number=hash_number)
+            bloomfilter_redis = app_config.get('bloomfilter_redis', {})
+            if bloomfilter_redis:
+                server = Redis(**bloomfilter_redis)
+                return BloomFilter(server=server, key=bfkey, bit=bit, hash_number=hash_number)
+        return None
 
     def result_prepare(self, data):
         """
@@ -395,6 +419,13 @@ class BaseHandler(Component):
                     if len(p.keys()) < len(parsed.keys()):
                         p = parsed
             return p
+        elif mode == self.self.MODE_CHANNEL:
+            if rule:
+                parser = ListParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
+                parsed = parser.parse()
+                return LinksExtractor(url=url, links = parsed).infos
+            else:
+                return LinksExtractor(url=url, source = source).infos
         else:
 #            parser_name = 'list'
             parser = ListParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
