@@ -62,10 +62,13 @@ class BaseExtractor(object):
                     if item:
                         data.extend(item)
                 elif content:
-                    if content == 'text':
-                        data.append(self.parser.getText(matched_tag))
+                    if tags['tag'] == 'a' and content == 'href':
+                        data.append({"url": self.parser.getAttribute(matched_tag, content), "title": self.parser.getText(matched_tag)})
                     else:
-                        data.append(self.parser.getAttribute(matched_tag, content))
+                        if content == 'text':
+                            data.append(self.parser.getText(matched_tag))
+                        else:
+                            data.append(self.parser.getAttribute(matched_tag, content))
         return data
 
     def custom_match_elements(self, custom_rule, onlyOne = True, doc = None):
