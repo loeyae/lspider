@@ -61,3 +61,5 @@ from .PyqueryParser import PyqueryParser
 from .XpathParser import XpathParser
 from .RegularParser import RegularParser
 from .goose3 import Goose
+from .LinksExtractor import LinksExtractor, TopLinkDetector, LinkCleaner
+from .time_parser import Parser as TimeParser
