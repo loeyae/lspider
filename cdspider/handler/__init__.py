@@ -419,7 +419,7 @@ class BaseHandler(Component):
                     if len(p.keys()) < len(parsed.keys()):
                         p = parsed
             return p
-        elif mode == self.self.MODE_CHANNEL:
+        elif mode == self.MODE_CHANNEL:
             if rule:
                 parser = ListParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
                 parsed = parser.parse()
