@@ -38,7 +38,7 @@ class BaseHandler(Component):
     PROXY_TYPE_AUTO = 'auto'
     PROXY_TYPE_EVER = 'ever'
     PROXY_TYPE_NEVER = 'never'
-    BLOOMFILTER_KEY = 'cdspider_%(prefix)s_%(key)s'
+    BLOOMFILTER_KEY = '%(prefix)s_cdspider_$(project)s_%(key)s'
     CRAWL_INFO_LIMIT_COUNT = 10
     EXPIRE_STEP = 1
     CONTINUE_EXCEPTIONS = ()
@@ -110,11 +110,11 @@ class BaseHandler(Component):
         subdomain, domain = self._domain_info(url)
         return {"domain": domain, "subdomain": subdomain}
 
-    def get_bloomfilter(self, key, prefix = 'project'):
+    def get_bloomfilter(self, key, prefix = 'bf', project = 'project'):
         if self.ctx:
             g = ctx.obj
             app_config = g.get('app_config', {})
-            bfkey = self.BLOOMFILTER_KEY % {"prefix": prefix, "key": key}
+            bfkey = self.BLOOMFILTER_KEY % {"prefix": prefix, "project": project, "key": key}
             bit = app_config.get('bloomfilter_redis_url', BLOOMFILTER_BIT)
             hash_number = app_config.get('bloomfilter_redis_url', BLOOMFILTER_HASH_NUMBER)
             bloomfilter_redis_url = app_config.get('bloomfilter_redis_url', None)
