@@ -25,6 +25,14 @@ from urllib import parse
 from types import *
 from lxml import etree as le
 
+def url_is_from_any_domain(url, domains):
+    """Return True if the url belongs to any of the given domains"""
+    host = parse.urlparse(url).netloc.lower()
+    if not host:
+        return False
+    domains = [d.lower() for d in domains]
+    return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
+
 def format_(data, params):
     keylist = re.findall('\{(\w+)\}', url)
     format_params = {}
@@ -432,19 +440,27 @@ def build_query(url, query):
     querystr = url_encode(query2)
     return parse.urlunparse((arr.scheme, arr.netloc, arr.path, arr.params, querystr, arr.fragment))
 
-def build_filter_query(url, query):
+def build_filter_query(url, query = [], exclude = []):
     arr = parse.urlparse(url)
     if arr.query:
         query1 = parse.parse_qs(arr.query)
     else:
         query1 = {}
     query2 = {}
-    for i,v in query1.items():
-        if i in query and v:
-            if isinstance(v, (list, tuple)):
-               query2[i] = v[0] or ""
-            else:
-                query2[i] = str(v)  or ""
+    if query:
+        for i,v in query1.items():
+            if i in query and v:
+                if isinstance(v, (list, tuple)):
+                   query2[i] = v[0] or ""
+                else:
+                    query2[i] = str(v)  or ""
+    elif exclude:
+        for i,v in query1.items():
+            if not i in exclude and v:
+                if isinstance(v, (list, tuple)):
+                   query2[i] = v[0] or ""
+                else:
+                    query2[i] = str(v)  or ""
     querystr = url_encode(query2)
     return parse.urlunparse((arr.scheme, arr.netloc, arr.path, arr.params, querystr, arr.fragment))
 
