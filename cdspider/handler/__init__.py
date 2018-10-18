@@ -511,6 +511,7 @@ class BaseHandler(Component):
         同步大数据平台
         """
         if self.no_sync:
+            self.sync_result = set()
             return
         self.info("result2kafka  starting...")
         res={}
