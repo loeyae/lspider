@@ -56,7 +56,7 @@ class NewtaskScheduler(BaseScheduler):
             channel=self.db['ChannelRulesDB'].get_detail(task['crid'])
             site = self.db['SitesDB'].get_detail(channel['sid'])
             project=self.db['ProjectsDB'].get_detail(site['pid'])
-            task['channel'] = attachment
+            task['channel'] = channel
             task['site'] = site
             task['project'] = project
             task['site'] = {"sid": 0}
