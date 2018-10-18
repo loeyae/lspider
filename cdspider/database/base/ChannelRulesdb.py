@@ -43,7 +43,7 @@ class ChannelRulesDB(Base):
 
     def update_many(self, id, obj = {}):
         raise NotImplementedError
-    
+
     def delete(self, id, where):
         raise NotImplementedError
 
@@ -62,5 +62,8 @@ class ChannelRulesDB(Base):
     def get_list_sid(self, sid, where = {}, select=None, **kwargs):
         raise NotImplementedError
 
+    def get_new_list(self, sid, where = {}, select=None, **kwargs):
+        raise NotImplementedError
+    
     def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
         raise NotImplementedError
