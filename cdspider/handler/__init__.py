@@ -345,10 +345,15 @@ class BaseHandler(Component):
         """
         获取请求配置
         """
-        if self.mode in (self.MODE_ITEM, self.MODE_ATT, self.MODE_CHANNEL):
+        if self.mode in (self.MODE_ITEM, self.MODE_ATT):
             if not self.process:
                 self._init_process(url);
-            request = utils.dictjoin(self.process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
+            request = utils.dictjoin(self.process.get('request', {}) or {}, copy.deepcopy(self.DEFAULT_PROCESS['request']))
+        elif self.mode == self.MODE_CHANNEL:
+            if not self.process:
+                self._init_process(url);
+            site_process = self.task.get('site', {}).get('sub_process', {}) or {}
+            request = utils.dictjoin(self.process.get('request', {}) or site_process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
         else:
             url_process = self.task.get('urls', {}).get('sub_process', {}) or {}
             site_process = self.task.get('site', {}).get('sub_process', {}) or {}
