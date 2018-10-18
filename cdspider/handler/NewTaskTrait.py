@@ -22,8 +22,8 @@ class NewTaskTrait(object):
         kwargs['url'] = args[2] if len(args) > 2 else kwargs['url']
         kwargs['rate'] = args[3] if len(args) > 3 else kwargs['rate']
         kwargs['uid'] = args[4] if len(args) > 4 else kwargs.get('uid', 0)
-        kwargs['aid'] = args[5] if len(args) > 5 else kwargs.get('kwid', 0)
-        kwargs['kwid'] = args[6] if len(args) > 6 else kwargs.get('uid', 0)
+        kwargs['aid'] = args[5] if len(args) > 5 else kwargs.get('aid', 0)
+        kwargs['kwid'] = args[6] if len(args) > 6 else kwargs.get('kwid', 0)
         kwargs['status'] = args[7] if len(args) > 7 else kwargs.get('status', 0)
         kwargs['save'] = args[8] if len(args) > 8 else kwargs.get('save', None)
         kwargs['expire'] = args[9] if len(args) > 9 else kwargs.get('expire', 0)
