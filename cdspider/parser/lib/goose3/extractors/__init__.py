@@ -44,7 +44,7 @@ class BaseExtractor(object):
 
         self.custom_rule = config.custom_rule or {}
 
-    def get_message_by_tag(self, tags, doc = None):
+    def get_message_by_tag(self, tags, doc = None, link=False):
         if doc is None:
             doc = self.article._raw_doc
         if isinstance(doc, list) and doc:
@@ -62,7 +62,7 @@ class BaseExtractor(object):
                     if item:
                         data.extend(item)
                 elif content:
-                    if tags['tag'] == 'a' and content == 'href':
+                    if tags['tag'] == 'a' and link == True:
                         data.append({"url": self.parser.getAttribute(matched_tag, content), "title": self.parser.getText(matched_tag)})
                     else:
                         if content == 'text':
