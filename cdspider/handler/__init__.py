@@ -510,7 +510,7 @@ class BaseHandler(Component):
         """
         同步大数据平台
         """
-        if self.no_sync and self.sync_result:
+        if self.no_sync:
             return
         self.info("result2kafka  starting...")
         res={}
