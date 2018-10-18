@@ -59,7 +59,6 @@ class NewtaskScheduler(BaseScheduler):
             task['channel'] = channel
             task['site'] = site
             task['project'] = project
-            task['save']={}
         else:
             return self.debug("NewtaskScheduler NewTask failed")
         handler=load_handler(task, db=self.db,queue=self.queue)
