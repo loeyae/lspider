@@ -66,7 +66,7 @@ class CatalogueExtractor(BaseExtractor):
                         urls = self.correction_result(urls, urls_pattern)
                     else:
                         urls = self.get_message_by_tag({'tag': 'a', 'attr': 'href', 'value': rule, 'content': 'href'}, doc=doc)
-                        urls = self.correction_result([item['url'] for item in urls], urls_pattern)
+                        urls = self.correction_result(urls, urls_pattern)
                 else:
                     urls = self.custom_match(urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'), target=urls_pattern.get('target', 'href'), doc=doc)
                     urls = self.correction_result(urls, urls_pattern)
@@ -110,7 +110,7 @@ class CatalogueExtractor(BaseExtractor):
             known_context_patterns.extend(copy.deepcopy(self.KNOWN_URLS_TAGS_BY_DOMAIN[self.domain]))
         if known_context_patterns:
             for tags in known_context_patterns:
-                data = self.get_message_by_tag(tags)
+                data = self.get_message_by_tag(tags, link=True)
                 if data:
                     return data
 
@@ -119,7 +119,7 @@ class CatalogueExtractor(BaseExtractor):
             return data
 
         for tags in copy.deepcopy(self.KNOWN_URLS_TAGS):
-            data = self.get_message_by_tag(tags)
+            data = self.get_message_by_tag(tags, link=True)
             if data:
                 return data
         return []
