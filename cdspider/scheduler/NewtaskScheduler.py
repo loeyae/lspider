@@ -59,8 +59,6 @@ class NewtaskScheduler(BaseScheduler):
             task['channel'] = channel
             task['site'] = site
             task['project'] = project
-            task['site'] = {"sid": 0}
-            task['site']['scripts'] = attachment['scripts']
             task['save']={}
         else:
             return self.debug("NewtaskScheduler NewTask failed")
