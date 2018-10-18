@@ -41,7 +41,7 @@ class Spider(Component):
         self.ProjectsDB = db.get('ProjectsDB')
         self.SitesDB = db.get('SitesDB')
         self.UrlsDB = db.get('UrlsDB')
-        self.ChannelRulseDB = db.get('UrlsDB')
+        self.ChannelRulseDB = db.get('ChannelRulesDB')
         self.AttachmentDB = db.get('AttachmentDB')
         self.KeywordsDB = db.get('KeywordsDB')
         self.TaskDB = db.get('TaskDB')
@@ -291,9 +291,10 @@ class Spider(Component):
         if not no_check_status and channel.get('status', ChannelRulseDB.STATUS_INIT) != ChannelRulseDB.STATUS_ACTIVE:
             self.debug("ChannelRule: %s" % channel)
             return None
-        if not 'process' in channel or not urls['process']:
-            urls['process'] = {}
+        if not 'process' in channel or not channel['process']:
+            channel['process'] = {}
         task['channel'] = channel
+        task['save']['mode'] = BaseHandler.MODE_CHANNEL
         task['save'].setdefault('base_url', task['url'])
         task['save'].setdefault('referer', task['url'])
         return task
