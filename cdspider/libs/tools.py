@@ -283,6 +283,7 @@ def load_handler(task, **kwargs):
     project = task.get("project", None)
     site = task.get("site", None)
     urls = task.get("urls", None)
+    channel = task.get("channel", None)
     if 'pid' in project and project['pid']:
         project['name'] = 'Project%s' % project['pid']
     if project and "scripts" in project and project['scripts']:
@@ -293,6 +294,9 @@ def load_handler(task, **kwargs):
     if urls and "scripts" in urls and urls['scripts']:
         urls['project'] = {"name": project['name']}
         mod = TaskLoader(urls, mod).load_module()
+    if channel and "scripts" in channel and channel['scripts']:
+        channel['project'] = {"name": project['name']}
+        mod = TaskLoader(channel, mod).load_module()
     if 'scripts' in task and task['scripts']:
         t = {}
         t['project'] = {"name": project['name']}
