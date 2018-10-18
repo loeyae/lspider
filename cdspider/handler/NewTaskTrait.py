@@ -73,7 +73,7 @@ class NewTaskTrait(object):
         rate = urate if urate > srate else srate
         rate =  krate if krate > rate else rate
         status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE and keyword['status'] == KeywordsDB.STATUS_ACTIVE else 0
-        expire = int(keyword.get('expire', 0)) or 0
+        expire = int(keyword.get('expire', 0) or 0)
         if expire > 0:
             expire = int(time.time()) + expire * self.EXPIRE_STEP
 #        url = utils.build_url_by_rule({"mode": 'format', "base": urls['url']}, {"keyword": keyword['word']})
@@ -94,7 +94,7 @@ class NewTaskTrait(object):
         urate = int(urls.get('rate', 0))
         rate = urate if urate > srate else srate
         status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and urls['status'] == UrlsDB.STATUS_ACTIVE else 0
-        expire = int(urls.get('expire', 0)) or 0
+        expire = int(urls.get('expire', 0) or 0)
         if expire > 0:
             expire = int(time.time()) + expire * self.EXPIRE_STEP
         self._new_task(project['pid'], site['sid'], urls['url'], rate, urls['uid'], status=status, expire=expire)
@@ -112,7 +112,7 @@ class NewTaskTrait(object):
         self.debug("%s build_newtask_by_channel channel: %s" % (self.__class__.__name__, channel))
         rate = channel['rate']
         status = 1 if project['status'] == ProjectsDB.STATUS_ACTIVE and site['status'] == SitesDB.STATUS_ACTIVE and channel['status'] == ChannelRulesDB.STATUS_ACTIVE else 0
-        expire = int(channel.get('expire', 0)) or 0
+        expire = int(channel.get('expire', 0) or 0)
         if expire > 0:
             expire = int(time.time()) + expire * self.EXPIRE_STEP
         self._new_task(project['pid'], site['sid'], channel['url'], rate, 0, status=status, expire=expire, crid=channel['crid'])
