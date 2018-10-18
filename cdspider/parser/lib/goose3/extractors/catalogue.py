@@ -66,7 +66,7 @@ class CatalogueExtractor(BaseExtractor):
                         urls = self.correction_result(urls, urls_pattern)
                     else:
                         urls = self.get_message_by_tag({'tag': 'a', 'attr': 'href', 'value': rule, 'content': 'href'}, doc=doc)
-                        urls = self.correction_result(urls, urls_pattern)
+                        urls = self.correction_result([item['url'] for item in urls], urls_pattern)
                 else:
                     urls = self.custom_match(urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'), target=urls_pattern.get('target', 'href'), doc=doc)
                     urls = self.correction_result(urls, urls_pattern)
