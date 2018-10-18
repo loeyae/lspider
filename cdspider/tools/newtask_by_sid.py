@@ -14,29 +14,48 @@ class newtask_by_sid(Base):
     """
     def process(self, *args):
         sid = int(self.get_arg(args, 0, 'Pleas input sid'))
-        uid = int(self.get_arg(args, 1, 'Pleas input start uid'))
-        maxuid = 0
+        id = int(self.get_arg(args, 1, 'Pleas input start id'))
+        maxid = 0
         if len(args) > 2:
-            maxuid = int(args[2])
+            maxid = int(args[2])
+        mode = 'url'
+        if len(args) > 3:
+            mode = args[3]
         self.broken('Site not exists', sid)
         site = self.g['db']['SitesDB'].get_detail(sid)
         self.broken('Site: %s not exists' % sid, site)
         self.notice('Selected Site Info:', site)
         UrlsDB = self.g['db']['UrlsDB']
+        ChannelDB = self.g['db']['ChannelRulesDB']
         while True:
             i = 0
-            for item in UrlsDB.get_new_list(uid, sid, where={'status': {"$in": [UrlsDB.STATUS_INIT, UrlsDB.STATUS_ACTIVE]}}):
-                task = self.g['db']['TaskDB'].get_list(int(item['pid']) or 1, {"uid": item['uid'], "aid": 0})
-                if len(list(task)) > 0:
-                    continue
-                d={}
-                d['uid'] = item['uid']
-                self.info("push newtask_queue data: %s" %  str(d))
-                self.g['queue']['newtask_queue'].put_nowait(d)
-                i += 1
-                if item['uid'] > uid:
-                    uid = item['uid']
-                if maxuid > 0 and maxuid <= uid:
-                    return
+            if mode == 'url':
+                for item in UrlsDB.get_new_list(id, sid, where={'status': {"$in": [UrlsDB.STATUS_INIT, UrlsDB.STATUS_ACTIVE]}}):
+                    task = self.g['db']['TaskDB'].get_list(int(item['pid']) or 1, {"uid": item['uid'], "aid": 0})
+                    if len(list(task)) > 0:
+                        continue
+                    d={}
+                    d['uid'] = item['uid']
+                    self.info("push newtask_queue data: %s" %  str(d))
+                    self.g['queue']['newtask_queue'].put_nowait(d)
+                    i += 1
+                    if item['uid'] > id:
+                        id = item['uid']
+                    if maxid > 0 and maxid <= id:
+                        return
+            elif mode == 'channel':
+                for item in ChannelDB.get_new_list(id, sid, where={'status': {"$in": [ChannelDB.STATUS_INIT, ChannelDB.STATUS_ACTIVE]}}):
+                    task = self.g['db']['TaskDB'].get_list(int(item['pid']) or 1, {"crid": item['crid'], "aid": 0})
+                    if len(list(task)) > 0:
+                        continue
+                    d={}
+                    d['crid'] = item['crid']
+                    self.info("push newtask_queue data: %s" %  str(d))
+                    self.g['queue']['newtask_queue'].put_nowait(d)
+                    i += 1
+                    if item['crid'] > id:
+                        id = item['crid']
+                    if maxid > 0 and maxid <= id:
+                        return
             if i < 1:
                 return
