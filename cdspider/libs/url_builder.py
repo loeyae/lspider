@@ -280,7 +280,12 @@ class UrlBuilder(Component):
                     incr_data[i]['base_page'] = int(incr_data[i]['value'])
                 if int(incr_data[i]['value']) > incr_data[i]['base_page']:
                     incr_data[i]['value'] = int(incr_data[i].get('value', 0)) - int(incr_data[i].get('step', 1))
-                incr_data[i].setdefault('type', 'url')
+                if incr_data[i]['mode'] == 'get':
+                    incr_data[i].setdefault('type', 'url')
+                elif incr_data[i]['mode'] == 'post':
+                    incr_data[i].setdefault('type', 'data')
+                else:
+                    incr_data[i].setdefault('type', incr_data[i]['mode'])
                 incr_data[i].setdefault('isfirst', saved.get('isfirst', True))
                 incr_data[i].setdefault('first', saved.get('first', False))
             save['incr_data'] = incr_data
