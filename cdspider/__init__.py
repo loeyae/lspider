@@ -11,6 +11,13 @@ class UrlHandler(SiteHandler):
     pass
 """
 
+DEFAULT_CHANNEL_SCRIPTS = """
+from cdspider.handler.custom.{projectname} import SiteHandler
+
+class ChannelHandler(SiteHandler):
+    pass
+"""
+
 DEFAULT_ITEM_SCRIPTS = """
 from cdspider.handler.custom.{projectname} import {parenthandler}
 
@@ -21,6 +28,8 @@ class TaskHandler({parenthandler}):
 """
 
 class Component(object):
+
+    ctx = None
 
     def __init__(self, logger, log_level):
         self.logger = logger or logging.getLogger('root')
