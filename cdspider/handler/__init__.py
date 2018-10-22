@@ -125,7 +125,7 @@ class BaseHandler(Component):
             if bloomfilter_redis:
                 server = Redis(**bloomfilter_redis)
                 return BloomFilter(server=server, key=bfkey, bit=bit, hash_number=hash_number)
-        return None
+        raise CDSpiderSettingError("bloomfilter redis setting not exists")
 
     def result_prepare(self, data):
         """
@@ -428,6 +428,7 @@ class BaseHandler(Component):
             if rule:
                 parser = ListParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
                 parsed = parser.parse()
+                print("ppppppppppppppppppppppppppp", parsed)
                 return LinksExtractor(url=url, links = parsed).infos
             else:
                 return LinksExtractor(url=url, source = source).infos
