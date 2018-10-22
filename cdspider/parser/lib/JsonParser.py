@@ -111,7 +111,8 @@ class JsonParser(BaseParser):
             rst = []
             for d in data:
                 rest = self._item_filter(d, rule, onlyOne, noLeaf = True)
-                rst.extend(rest)
+                if rest:
+                    rst.extend(rest)
                 if onlyOne:
                     return rst
             return rst
@@ -127,13 +128,15 @@ class JsonParser(BaseParser):
             ruleset = rule['item']['url'] if 'url' in rule['item'] else list(rule['item'].values())[0]
             if 'filter' in ruleset and ruleset['filter'].startswith('@css:'):
                 for k, v in rule['item'].items():
-                    v['filter'] = v['filter'][5:]
+                    if v['filter']:
+                        v['filter'] = v['filter'][5:]
                 parser = PyqueryParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
                 parsed = parser.parse()
                 return parsed.get('json', []) if parsed else None
             elif 'filter' in ruleset and ruleset['filter'].startswith('@xpath:'):
                 for k, v in rule['item'].items():
-                    v['filter'] = v['filter'][7:]
+                    if v['filter']:
+                        v['filter'] = v['filter'][7:]
                 parser = XpathParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
                 parsed = parser.parse()
                 return parsed.get('json', []) if parsed else None
