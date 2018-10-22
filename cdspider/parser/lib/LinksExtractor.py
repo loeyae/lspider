@@ -26,7 +26,6 @@ class LinksExtractor(object):
     links4other = list()
 
     def __init__(self, url, source = None, links = None):
-        self.pagesource = pagesource
         subdomain, domain = utils.parse_domain(url)
         self.subdomain = None
         if subdomain and subdomain != 'www':
@@ -36,7 +35,7 @@ class LinksExtractor(object):
         if links:
             self.extend(links)
         if source:
-            self.extract(source)
+            self.exctract(source)
 
     def exctract(self, source):
         doc = Parser.fromstring(source)
