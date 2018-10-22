@@ -101,7 +101,8 @@ class JsonParser(BaseParser):
             rst = []
             for item in rule:
                 rest = self._filter(copy.deepcopy(data), item)
-                rst.append(rest)
+                if rest:
+                    rst.append(rest)
             return rst
         else:
             return self._filter(data, {"filter": rule})
@@ -113,16 +114,17 @@ class JsonParser(BaseParser):
                 rest = self._item_filter(d, rule, onlyOne, noLeaf = True)
                 if rest:
                     rst.extend(rest)
-                if onlyOne:
-                    return rst
+                    if onlyOne:
+                        return rst
             return rst
         elif not noLeaf and isinstance(data, dict):
             rst = []
             for idx in data:
                 rest = self._item_filter(data[idx], rule, onlyOne, noLeaf = True)
-                rst.extend(rest)
-                if onlyOne:
-                    return rst
+                if rest:
+                    rst.extend(rest)
+                    if onlyOne:
+                        return rst
             return rst
         else:
             ruleset = rule['item']['url'] if 'url' in rule['item'] else list(rule['item'].values())[0]
