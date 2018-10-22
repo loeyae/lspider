@@ -123,6 +123,8 @@ class ResultTrait(object):
             #TODO 与管理平台互动 提醒修改解析规则
             raise CDSpiderParserNoContent()
         else:
+            bf = self.get_bloomfilter(self.task.get("pid"))
+            bf.insert(final_url)
             self.crawl_info['crawl_count']['count'] += len(data)
             new_count = self.crawl_info['crawl_count']['new_count']
             formated = self.build_url_by_rule(data, final_url)
@@ -130,20 +132,23 @@ class ResultTrait(object):
             if return_result:
                 return formated
             for item in formated:
-                item['rate'] = self.task.get('site', {}).get('rate', 8)
-                item['sid'] = self.task.get("sid")
-                item['pid'] = self.task.get("pid")
-                item['sub_process'] = None
-                item['unique'] = {"url": None, "query": None, "data": None}
-                item['scripts'] = DEFAULT_URLS_SCRIPTS.format(projectname = "Project%s" % self.task.get("pid"))
-                item['ctime'] = int(time.time())
-                item['utime'] = int(time.time())
-                item['creator'] = 1
-                item['status'] = 0
-                uid = self.db['UrlsDB'].insert(item)
-                if uid:
-                    self.queue['newtask_queue'].put_nowait({"uid": uid})
-                    self.crawl_info['crawl_count']['new_count'] += 1
+                if bf.seen(lc.clean(item['url'])):
+                    item['rate'] = self.task.get('site', {}).get('rate', 8)
+                    item['sid'] = self.task.get("sid")
+                    item['pid'] = self.task.get("pid")
+                    item['sub_process'] = None
+                    item['unique'] = {"url": None, "query": None, "data": None}
+                    item['scripts'] = DEFAULT_URLS_SCRIPTS.format(projectname = "Project%s" % self.task.get("pid"))
+                    item['ctime'] = int(time.time())
+                    item['utime'] = int(time.time())
+                    item['creator'] = 1
+                    item['status'] = 0
+                    item['name'] = item['title']
+                    del item['title']
+                    uid = self.db['UrlsDB'].insert(copy.deepcopy(item))
+                    if uid:
+                        self.queue['newtask_queue'].put_nowait({"uid": uid})
+                        self.crawl_info['crawl_count']['new_count'] += 1
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
