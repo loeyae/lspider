@@ -73,5 +73,26 @@
         "9": "删除"
     },
     "attach_storage": "data/attach",
-    "bloomfilter_redis_url": "redis://:DOvrpoEe@127.0.0.1:6379"
+    "bloomfilter_redis_url": "redis://:DOvrpoEe@127.0.0.1:6379",
+    "mail": {
+        "mailer": "smtp",
+        "sender": {
+            "host": "ismtp.beyondsoft.com",
+            "port": 25,
+            "user": "bdopener",
+            "pass": "bdopener20170510",
+            "from": "bdopener@beyondsoft.com",
+            "from_name": "bdopener service"
+        }
+    },
+    "statistics_receiver":  [
+        {
+            "name": "Zhang Yi",
+            "mail": "zhangyi07@beyondsoft.com"
+        },
+        {
+            "name": "Zhu Hong",
+            "mail": "zhuhong@beyondsoft.com"
+        }
+    ]
 }
