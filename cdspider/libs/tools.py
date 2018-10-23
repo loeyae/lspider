@@ -62,7 +62,7 @@ class Redis():
     def connect(self):
         if not 'pool' in self.setting:
             if 'url' in self.setting:
-                self.setting['pool'] = redis.ConnectionPool.from_url(url=self.settings['url'], db=self.settings['db'])
+                self.setting['pool'] = redis.ConnectionPool.from_url(url=self.setting['url'], db=self.setting['db'])
             else:
                 self.setting['pool'] = redis.ConnectionPool(host=self.setting['host'], port=self.setting['port'], db=self.setting['db'], password=self.setting['pass'])
         self._conn = redis.Redis(connection_pool=self.setting['pool'])
@@ -71,7 +71,7 @@ class Redis():
         try:
             return getattr(self._conn, name)
         except Exception as e:
-            raise CDSpiderRedisError(e)
+            raise CDSpiderRedisError(str(e))
 
 class db_wrapper(collections.UserDict):
     """
