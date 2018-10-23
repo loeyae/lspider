@@ -115,8 +115,8 @@ class BaseHandler(Component):
             g = self.ctx.obj
             app_config = g.get('app_config', {})
             bfkey = self.BLOOMFILTER_KEY % {"prefix": prefix, "project": project, "key": key}
-            bit = app_config.get('bloomfilter_redis_url', BLOOMFILTER_BIT)
-            hash_number = app_config.get('bloomfilter_redis_url', BLOOMFILTER_HASH_NUMBER)
+            bit = int(app_config.get('bloomfilter_bit', None) or BLOOMFILTER_BIT)
+            hash_number = int(app_config.get('bloomfilter_hash_number', None) or BLOOMFILTER_HASH_NUMBER)
             bloomfilter_redis_url = app_config.get('bloomfilter_redis_url', None)
             if bloomfilter_redis_url:
                 server = Redis(url=bloomfilter_redis_url)
