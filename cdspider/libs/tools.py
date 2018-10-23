@@ -44,7 +44,7 @@ class Redis():
     def __init__(self, *args, **kwargs):
         if len(args) == 1:
             kwargs['url'] = args[0]
-        else:
+        elif len(args) > 1:
             kwargs['host'] = args[0]
             kwargs['port'] = args[1]
             if len(args) > 2:
