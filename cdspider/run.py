@@ -294,63 +294,6 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
 @cli.command()
-@click.option('--worker-cls', default='cdspider.worker.ExcWorker', callback=load_cls, help='worker name')
-@click.option('--mailer', default=None, help='mailer name', show_default=True)
-@click.option('--sender', default=None, show_default=True, help='发件人设置'
-              ' default: {host: host, port: 27017, user: guest, password: guest, from: admin@localhost.com}')
-@click.option('--receiver', default=None, show_default=True, help='收件人设置'
-              ' default: [{name: name, mail: a@b.com},...]')
-@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.pass_context
-def exc_work(ctx, worker_cls, mailer, sender, receiver, no_loop, get_object=False):
-    """
-    Error Wroker: 抓取异常处理
-    """
-    g = ctx.obj
-    Worker = load_cls(ctx, None, worker_cls)
-    proxy = g.get('proxy', None)
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    if mailer:
-        mailer = utils.load_mailer(mailer, sender=sender, receiver=receiver)
-    worker = Worker(db = g.get('db'), queue = g.get('queue'), proxy=proxy, mailer=mailer,
-            log_level=log_level)
-    worker.ctx = ctx
-    g['instances'].append(worker)
-    if g.get('testing_mode') or get_object:
-        return worker
-    if no_loop:
-        worker.run_once()
-    else:
-        worker.run()
-
-@cli.command()
-@click.option('--worker-cls', default='cdspider.worker.SyncKafkaWorker', callback=load_cls, help='worker name')
-@click.option('--kafka-cfg', default=None, show_default=True, help='Kafka配置'
-              ' default: {host: host, zookeeper_hosts: 27017, topic: topic name, user: guest, password: guest}')
-@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.pass_context
-def sync_kafka_work(ctx, worker_cls, kafka_cfg, no_loop,  get_object=False):
-    """
-    同步数据到kafka
-    """
-    g=ctx.obj
-    Worker = load_cls(ctx, None, worker_cls)
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    worker = Worker(g.get('db'),g.get('queue'), kafka_cfg, log_level)
-    worker.ctx = ctx
-    g['instances'].append(worker)
-    if g.get('testing_mode') or get_object:
-        return worker
-    if no_loop:
-        worker.run_once()
-    else:
-        worker.run()
-
-@cli.command()
 @click.option('--worker-cls', default='cdspider.worker.TestWorker', callback=load_cls, help='worker name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
@@ -363,7 +306,7 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
     log_level = logging.WARN
     if g.get("debug", False):
         log_level = logging.DEBUG
-    worker = Worker(g.get('db'), g.get('queue'), log_level)
+    worker = Worker(g, log_level)
     worker.ctx = ctx
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
