@@ -15,14 +15,14 @@ from cdspider import Component
 class Base(Component):
     interval = 0.1
 
-    def __init__(self, g, deamon = False):
+    def __init__(self, g, daemon = False):
         self.g = g
         super(Base, self).__init__(g['logger'], logging.DEBUG if g['debug'] else logging.WARN)
-        self.deamon = deamon
+        self.daemon = daemon
         self.ioloop = None
         self._quit = False
         self._running = False
-        if deamon:
+        if daemon:
             self.ioloop = tornado.ioloop.IOLoop()
 
     @abc.abstractmethod
@@ -62,7 +62,7 @@ class Base(Component):
     def broken(self, message, condition):
         if not condition:
             self.show_message(message)
-            if not self.deamon:
+            if not self.daemon:
                 sys.exit(0)
             else:
                 raise Exception(message)
@@ -76,7 +76,7 @@ class Base(Component):
         notice
         """
         self.show_message(message, data)
-        if checked and not self.deamon:
+        if checked and not self.daemon:
             x = None
             while x not in ('y', 'Y', 'n', 'N'):
                 x = input('Proceed (y[Y]/n[N]):')
