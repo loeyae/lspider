@@ -7,6 +7,7 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-14 21:06:24
 """
+import logging
 import traceback
 from cdspider.mailer import BaseSender
 from cdspider.worker import BaseWorker
