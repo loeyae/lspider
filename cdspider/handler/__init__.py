@@ -112,7 +112,7 @@ class BaseHandler(Component):
 
     def get_bloomfilter(self, key, prefix = 'bf', project = 'project'):
         if self.ctx:
-            g = ctx.obj
+            g = self.ctx.obj
             app_config = g.get('app_config', {})
             bfkey = self.BLOOMFILTER_KEY % {"prefix": prefix, "project": project, "key": key}
             bit = app_config.get('bloomfilter_redis_url', BLOOMFILTER_BIT)
