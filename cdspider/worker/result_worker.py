@@ -46,6 +46,7 @@ class ResultWorker(BaseWorker):
         return task
 
     def on_result(self, message):
+        self.proxy = self.g['proxy']
         self.debug("got message: %s" % message)
         result = self.get_result(message)
         if not result or result['status'] != self.resultdb.RESULT_STATUS_INIT:

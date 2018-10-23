@@ -18,11 +18,10 @@ class BaseWorker(Component):
     inqueue_key = None
     excqueue_key = None
 
-    def __init__(self, db, queue, proxy, mailer = None, log_level=logging.WARN):
-        self.db = db
-        self.queue=queue
-        self.mailer=mailer
-        self.proxy=proxy
+    def __init__(self, g, log_level=logging.WARN):
+        self.g = g
+        self.db = g['db']
+        self.queue = g['queue']
         self._quit=False
         self.inqueue = None
         self.excqueue = None
