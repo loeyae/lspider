@@ -431,13 +431,20 @@ class Spider(Component):
         """
         获取任务详细信息
         """
-        mode = message.get('mode', BaseHandler.MODE_DEFAULT)
+        mode = message.get('mode', None)
         pid = int(message.get('pid'))
         taskid = int(message.get('tid', 0))
         if not task and taskid:
             task = self.TaskDB.get_detail(taskid, pid, True)
             if not task:
                 raise CDSpiderDBDataNotFound("Task: %s not found" % taskid)
+            if mode == None:
+                if 'crid' in task and task['crid']:
+                    mode = BaseHandler.MODE_CHANNEL
+                elif 'aid' in task and task['aid']:
+                    mode = BaseHandler.MODE_ATT
+                else:
+                    mode = BaseHandler.MODE_DEFAULT
         if 'url' in message:
             task['url'] = message
         project = (task.get('project', None) if task else None) or self.ProjectsDB.get_detail(pid)
