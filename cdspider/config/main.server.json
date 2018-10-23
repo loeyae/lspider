@@ -20,36 +20,10 @@
     },
     "database": {
         "protocol": "mongo",
-        "host": "192.168.10.141",
+        "host": "114.112.86.141",
         "port": 27017,
         "db": "mytest",
         "user": "abcdef",
         "password": "123321"
-    },
-    "sync_kafka_work": {
-        "kafka_cfg": {
-            "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
-            "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
-            "topic": "cddata",
-            "user": "guest",
-            "password": "guest"
-        }
-    },
-    "exc_work": {
-        "mailer": "smtp",
-        "sender": {
-            "host": "ismtp.beyondsoft.com",
-            "port": 25,
-            "user": "bdopener",
-            "pass": "bdopener20170510",
-            "from": "bdopener@beyondsoft.com",
-            "from_name": "bdopener service"
-        },
-        "receiver": [
-            {
-                "name": "Zhang Yi",
-                "mail": "zhangyi07@beyondsoft.com"
-            }
-        ]
     }
 }

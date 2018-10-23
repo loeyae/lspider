@@ -74,6 +74,13 @@
     },
     "attach_storage": "data/attach",
     "bloomfilter_redis_url": "redis://:DOvrpoEe@127.0.0.1:6379",
+    "sync_kafka": {
+        "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
+        "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
+        "topic": "cddata",
+        "user": "guest",
+        "password": "guest"
+    },
     "mail": {
         "mailer": "smtp",
         "sender": {
@@ -85,6 +92,12 @@
             "from_name": "bdopener service"
         }
     },
+    "exc_work_receiver":  [
+        {
+            "name": "Zhang Yi",
+            "mail": "zhangyi07@beyondsoft.com"
+        }
+    ],
     "statistics_receiver":  [
         {
             "name": "Zhang Yi",
