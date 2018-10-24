@@ -103,7 +103,7 @@ class TopLinkDetector(object):
             return 0
         if self.is_top_link(url):
             return 0.99
-        score = self.get_path_score(path)
+        score = self.get_path_score(parsed.path)
         return score
 
     def is_root(self, tldextracted, urlparsed):
