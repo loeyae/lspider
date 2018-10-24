@@ -112,6 +112,7 @@ class ResultTrait(object):
                 link['score'] = tld.feed(link['url'])
                 links_db.insert(link)
                 task = {'mode': self.MODE_CHANNEL, 'tid': self.task['tid'], 'url': link['url']}
+                self.debug("%s channel_recursion: %s @ %s" % (self.__class__.__name__, str(task), str(final_url)))
                 task_queue.put_nowait(task)
 
     def channel_to_list(self, final_url, data, typeinfo, page_source, unique = True, return_result = False):
