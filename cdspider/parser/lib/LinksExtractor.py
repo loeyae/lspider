@@ -147,7 +147,7 @@ class TopLinkDetector(object):
         if not basename:
             score -= l * 0.2
             return score
-        if re.findll('^(?:index|list)\..+$', basename, re.I):
+        if re.findall('^(?:index|list)\..+$', basename, re.I):
             score -= 0.01
             return score
 
