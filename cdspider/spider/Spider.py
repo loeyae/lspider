@@ -307,7 +307,7 @@ class Spider(Component):
             return None
         if not 'save' in task or not task['save']:
             task['save'] = {}
-        task['save']['mode'] = message.get('mode', BaseHandler.MODE_DEFAULT);
+        task['save']['mode'] = BaseHandler.MODE_DEFAULT;
         task['project'] = project
         site = task.get('site', None) or self.SitesDB.get_detail(int(task['sid']))
         if not site:
