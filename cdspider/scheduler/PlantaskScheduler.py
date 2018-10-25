@@ -49,7 +49,7 @@ class PlantaskScheduler(BaseScheduler):
             task_list = self.db["TaskDB"].get_plan_list(pid=projectid, where=where, select=projection, sort=[("tid", 1)])
             i = 0
             for task in task_list:
-                self.debug("%s check_tasks task@%s: %s " % (self.__class__.__name__, projectid, str(task)))
+                self.debug("%s schedule task@%s: %s " % (self.__class__.__name__, projectid, str(task)))
                 obj={}
                 if task['aid'] > 0:
                     obj['mode']='att'
@@ -60,6 +60,7 @@ class PlantaskScheduler(BaseScheduler):
                 obj['pid']=task['pid']
                 obj['tid']=task['tid']
                 plantime = now if task['plantime'] <= 0 else now + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0])
+                self.debug("%s schedule task %s plantime: %s old plantime: %s rate: %s" % (self.__class__.__name__, task['tid'], plantime, task['plantime'], task['rate']))
                 self.send_task(obj, now, plantime)
                 i += 1
             if i == 0:
