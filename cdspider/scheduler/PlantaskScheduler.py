@@ -26,7 +26,6 @@ class PlantaskScheduler(BaseScheduler):
         if not 'pid' in message or not message['pid']:
             raise CDSpiderError("pid is missing")
         projectid = message['pid']
-        now = int(time.time())
         where = {}
         if "uid" in message and message['uid']:
             where["uid"] = message['uid']
@@ -48,6 +47,7 @@ class PlantaskScheduler(BaseScheduler):
             where['tid'] = {"$gt": tid}
             task_list = self.db["TaskDB"].get_plan_list(pid=projectid, where=where, select=projection, sort=[("tid", 1)])
             i = 0
+            now = int(time.time())
             for task in task_list:
                 self.debug("%s schedule task@%s: %s " % (self.__class__.__name__, projectid, str(task)))
                 obj={}
