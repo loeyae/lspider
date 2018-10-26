@@ -31,7 +31,12 @@ class BaseCrawler(Component):
     _proxy = None
     __proxy_str = None
 
-    user_agent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36"
+    user_agent = [
+                "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:62.0) Gecko/20100101 Firefox/62.0",
+                "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134",
+                "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; LCTE; rv:11.0) like Gecko"
+    ]
 
     proxies_setting = {
         'proxy_rate': None,
@@ -59,7 +64,7 @@ class BaseCrawler(Component):
         基础设置
         """
         headers = {}
-        headers['User-Agent'] = self.user_agent
+        headers['User-Agent'] = random.choice(self.user_agent)
         if 'headers' in kwargs and kwargs['headers']:
             headers.update(kwargs['headers'])
 
