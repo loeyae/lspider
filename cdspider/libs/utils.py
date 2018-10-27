@@ -775,7 +775,10 @@ class xml_tool(object):
         if os.path.isfile(x):
             self.root = le.parse(x)
         else:
-            self.root = le.fromstring(x)
+            if isinstance(x, bytes):
+                self.root = le.fromstring(x)
+            else:
+                self.root = le.fromstring(x.encode())
 
     def css_select(self, selector):
         return self.root.cssselect(selector)
