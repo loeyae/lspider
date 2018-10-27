@@ -107,7 +107,7 @@ class TopLinkDetector(object):
         return score
 
     def is_root(self, tldextracted, urlparsed):
-        if urlparsed.path == '/':
+        if urlparsed.path == '/' or not urlparsed.path:
             if tldextracted.subdomain == 'www':
                 return True
             if not tldextracted.subdomain:
@@ -115,7 +115,7 @@ class TopLinkDetector(object):
         return False
 
     def is_sub(self, tldextracted, urlparsed):
-        if urlparsed.path == '/':
+        if urlparsed.path == '/' or not urlparsed.path:
             if tldextracted.subdomain:
                 return True
         return False
