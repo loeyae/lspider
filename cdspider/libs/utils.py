@@ -773,7 +773,7 @@ class xml_tool(object):
 
     def __init__(self, x):
         if os.path.isfile(x):
-            self.root = le.parse(x)
+            self.root = le.parse(x).getroot()
         else:
             if isinstance(x, bytes):
                 self.root = le.fromstring(x)
@@ -788,7 +788,7 @@ class xml_tool(object):
 
     def add_children(self, element, parent = None):
         if parent is None:
-            parent = self.root.getroot()
+            parent = self.root
         if isinstance(parent, list):
             parent = parent[0]
         parent.append(element)
@@ -847,4 +847,4 @@ class xml_tool(object):
         return le.tostring(self.root)
 
     def save_file(self, filename):
-        return self.root.write(filename, pretty_print=True)
+        return le.ElementTree(self.root).write(filename, pretty_print=True, xml_declaration=True, encoding='utf-8')
