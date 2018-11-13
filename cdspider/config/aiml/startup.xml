@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed under the Apache License, Version 2.0 (the "License"),
+see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
+-->
+<aiml version="2.0">
+    	<category>
+		<pattern>LOAD WECHAT</pattern>
+		<template>
+			<learn>basic-chat.aiml</learn>
+			<learn>wechat-*.aiml</learn>
+			<learn>auto-gen.aiml</learn>
+		</template>
+	</category>
+</aiml>

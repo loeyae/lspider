@@ -1,0 +1,111 @@
+{
+    "database": [
+        "ArticlesDB",
+        "AttachDataDB",
+        "AttachmentDB",
+        "ChannelRulesDB",
+        "CommentsDB",
+        "CrawlLogDB",
+        "KeywordsDB",
+        "ParseRuleDB",
+        "ProjectsDB",
+        "SitesDB",
+        "TaskDB",
+        "UniqueDB",
+        "UrlsDB",
+        "MediaTypesDB",
+        "WechatRobotChatInfoDB",
+        "WechatRobotChatRoomsDB",
+        "WechatRobotFriendsDB",
+        "WechatRobotGroupChatDB",
+        "WechatRobotInfoDB",
+        "WechatRobotMpsChatDB",
+        "WechatRobotMpsSharingDB",
+        "WechatRobotMpsDB"
+    ],
+    "queues": [
+        "newtask_queue",
+        "status_queue",
+        "scheduler2spider",
+        "spider2result",
+        "spider2scheduler",
+        "excinfo_queue",
+        "search_work",
+        "result2kafka",
+        "result2wechat",
+        "result2newtask",
+        "result2toutiao",
+        "wechat2reply"
+    ],
+    "media_type": {
+        "1": "新闻",
+        "2": "平媒",
+        "3": "论坛",
+        "4": "微信",
+        "5": "头条",
+        "6": "APP",
+        "7": "问答",
+        "8": "贴吧",
+        "99": "其他"
+    },
+    "ratemap": {
+        "1": [2592000, "每月一次"],
+        "2": [604800, "每周一次"],
+        "3": [172800, "每两天一次"],
+        "4": [86400, "每天一次"],
+        "5": [28800, "每8小时一次"],
+        "6": [14400, "每4小时一次"],
+        "7": [7200, "每2小时一次"],
+        "8": [3600, "每1小时一次"],
+        "9": [1800, "每半小时一次"],
+        "10": [900, "每15分钟一次"],
+        "11": [600, "每10分钟一次"],
+        "12": [300, "每5分钟一次"]
+    },
+    "sitetype": {
+        "1": "普通站点型",
+        "2": "搜索型",
+        "3": "论坛型"
+    },
+    "status": {
+        "0": "初始化",
+        "1": "激活",
+        "9": "删除"
+    },
+    "attach_storage": "data/attach",
+    "bloomfilter_redis_url": "redis://:DOvrpoEe@127.0.0.1:6379",
+    "sync_kafka": {
+        "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
+        "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
+        "topic": "cddata",
+        "user": "guest",
+        "password": "guest"
+    },
+    "mail": {
+        "mailer": "smtp",
+        "sender": {
+            "host": "ismtp.beyondsoft.com",
+            "port": 25,
+            "user": "bdopener",
+            "pass": "bdopener20170510",
+            "from": "bdopener@beyondsoft.com",
+            "from_name": "bdopener service"
+        }
+    },
+    "exc_work_receiver":  [
+        {
+            "name": "Zhang Yi",
+            "mail": "zhangyi07@beyondsoft.com"
+        }
+    ],
+    "statistics_receiver":  [
+        {
+            "name": "Zhang Yi",
+            "mail": "zhangyi07@beyondsoft.com"
+        },
+        {
+            "name": "Zhu Hong",
+            "mail": "zhuhong@beyondsoft.com"
+        }
+    ]
+}

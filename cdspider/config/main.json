@@ -1,0 +1,29 @@
+{
+    "debug": true,
+    "runtime_dir": "/var/run/cdspider",
+    "proxy": {
+        "proxy_url": "http://114.112.86.46:8086/get_ips/own/50",
+        "user": "hongmai",
+        "password": "soften.cn",
+        "type": "socks",
+        "proxy_rate": "every"
+    },
+    "message_queue": {
+        "protocol": "amqp",
+        "host": "47.93.128.20",
+        "port": 5672,
+        "user": "guest",
+        "password": "guest",
+        "exchange": "cdspider",
+        "maxsize": 1000000,
+        "queue_prefix": ""
+    },
+    "database": {
+        "protocol": "mongo",
+        "host": "114.112.86.141",
+        "port": 27017,
+        "db": "mytest",
+        "user": "abcdef",
+        "password": "123321"
+    }
+}
