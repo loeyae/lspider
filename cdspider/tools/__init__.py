@@ -15,7 +15,8 @@ from cdspider import Component
 class Base(Component):
     interval = 0.1
 
-    def __init__(self, g, daemon = False):
+    def __init__(self, context, daemon = False):
+        self.ctx = context
         self.g = g
         super(Base, self).__init__(g['logger'], logging.DEBUG if g['debug'] else logging.WARN)
         self.daemon = daemon

@@ -20,9 +20,9 @@ class statistics_by_day(Base):
     """
     inqueue_key = None
 
-    def __init__(self, g, daemon = False):
-        super(statistics_by_day, self).__init__(g, daemon)
-        self.db = g['db']
+    def __init__(self, context, daemon = False):
+        super(statistics_by_day, self).__init__(context, daemon)
+        self.db = self.g['db']
         self.config = g['app_config']
         self.running = False
         self.run_once = False
