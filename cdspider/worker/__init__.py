@@ -18,8 +18,9 @@ class BaseWorker(Component):
     inqueue_key = None
     excqueue_key = None
 
-    def __init__(self, g, log_level=logging.WARN):
-        self.g = g
+    def __init__(self, context):
+        self.ctx = context
+        self.g = context.obj
         self.db = g['db']
         self.queue = g['queue']
         self._quit=False
@@ -30,6 +31,10 @@ class BaseWorker(Component):
             self.inqueue = self.queue[self.inqueue_key]
         if self.excqueue_key:
             self.excqueue = self.queue[self.excqueue_key]
+
+        log_level = logging.WARN
+        if self.g.get("debug", False):
+            log_level = logging.DEBUG
         self.log_level = log_level
         logger = logging.getLogger('worker')
         super(BaseWorker, self).__init__(logger, log_level)

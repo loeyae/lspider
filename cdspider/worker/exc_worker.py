@@ -18,8 +18,8 @@ class ExcWorker(BaseWorker):
     inqueue_key = 'excinfo_queue'
 
 
-    def __init__(self, g, log_level=logging.WARN):
-        super(ExcWorker, self).__init__(g, log_level)
+    def __init__(self, context):
+        super(ExcWorker, self).__init__(context)
         self.mailer = None
         try:
             config = self.g['app_config']['mail']
