@@ -15,9 +15,9 @@ class SearchScheduler(BaseScheduler):
     """
     关键词搜索任务
     """
-    def __init__(self, db, queue, log_level = logging.WARN):
-        super(SearchScheduler, self).__init__(db, queue, log_level)
-        self.inqueue = queue["newtask4search"]
+    def __init__(self, context):
+        super(SearchScheduler, self).__init__(context)
+        self.inqueue = self.queue["newtask4search"]
 
     def schedule(self, message):
         if 'uid' in message:

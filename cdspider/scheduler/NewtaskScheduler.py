@@ -16,9 +16,9 @@ class NewtaskScheduler(BaseScheduler):
     """
     new task scheduler
     """
-    def __init__(self, db, queue, log_level = logging.WARN):
-        super(NewtaskScheduler, self).__init__(db, queue, log_level)
-        self.inqueue = queue["newtask_queue"]
+    def __init__(self, context):
+        super(NewtaskScheduler, self).__init__(context)
+        self.inqueue = self.queue["newtask_queue"]
 
     def schedule(self, task):
         self.info("NewtaskScheduler schedule task: %s starting..." % str(task))

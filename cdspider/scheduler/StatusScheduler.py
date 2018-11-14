@@ -17,9 +17,9 @@ class StatusScheduler(BaseScheduler):
     """
     status change scheduler
     """
-    def __init__(self, db, queue, log_level = logging.WARN):
-        super(StatusScheduler, self).__init__(db, queue, log_level)
-        self.inqueue = queue["status_queue"]
+    def __init__(self, context):
+        super(StatusScheduler, self).__init__(context)
+        self.inqueue = self.queue["status_queue"]
 
     def schedule(self, message):
         obj={"utime": int(time.time())}

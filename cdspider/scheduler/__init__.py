@@ -15,12 +15,17 @@ class BaseScheduler(Component):
     inqueue = None
     interval = 0.05
 
-    def __init__(self, db, queue, log_level = logging.WARN):
+    def __init__(self, context):
         self._running = False
         self._quit = False
-        self.db = db
-        self.queue = queue
+        self.ctx = context
+        g = context.obj
+        self.db = g.get('db')
+        self.queue = g.get('queue')
         self.ioloop = tornado.ioloop.IOLoop()
+        log_level = logging.WARN
+        if g.get("debug", False):
+            log_level = logging.DEBUG
         self.log_level = log_level
         logger = logging.getLogger('scheduler')
         super(BaseScheduler, self).__init__(logger, log_level)

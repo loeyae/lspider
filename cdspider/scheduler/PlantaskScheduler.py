@@ -17,9 +17,10 @@ class PlantaskScheduler(BaseScheduler):
     """
     DEFAULT_RATE = [7200, "每2小时一次"]
 
-    def __init__(self, db, queue, rate_map, log_level = logging.WARN):
-        super(PlantaskScheduler, self).__init__(db, queue, log_level)
-        self.inqueue = queue["scheduler2task"]
+    def __init__(self, context):
+        super(PlantaskScheduler, self).__init__(context)
+        self.inqueue = self.queue["scheduler2task"]
+        rate_map = context.obj.get('rate_map')
         self.rate_map = rate_map
 
     def schedule(self, message):

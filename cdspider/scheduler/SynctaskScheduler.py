@@ -15,9 +15,9 @@ class SynctaskScheduler(BaseScheduler):
     """
     同步数据
     """
-    def __init__(self, db, queue, log_level = logging.WARN):
-        super(SynctaskScheduler, self).__init__(db, queue, log_level)
-        self.inqueue = queue["scheduler2plan"]
+    def __init__(self, context):
+        super(SynctaskScheduler, self).__init__(context)
+        self.inqueue = self.queue["scheduler2plan"]
 
     def schedule(self, message):
         obj = {

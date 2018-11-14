@@ -19,9 +19,9 @@ class Router(BaseScheduler):
     MODE_SITE = 'site'
     MODE_ITEM = 'item'
 
-    def __init__(self, db, queue, mode, log_level = logging.WARN):
-        super(Router, self).__init__(db, queue, log_level)
-        self.outqueue = queue["scheduler2task"]
+    def __init__(self, context, mode):
+        super(Router, self).__init__(context)
+        self.outqueue = self.queue["scheduler2task"]
         self.mode = mode
         self.interval = 5
         self.projects = set()
