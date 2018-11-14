@@ -33,18 +33,22 @@ class Spider(Component):
     爬虫流程实现
     """
 
-    def __init__(self, db, queue, no_sync = False, attach_storage = None, handler=None, proxy=None, log_level=logging.WARN):
+    def __init__(self, context, no_sync = False, handler=None, no_input=False):
         self._quit = False
         self._running = False
+        self.ctx = context
+        g = context.obj
+        if no_input:
+            queue = {}
+        else:
+            queue = g.get('queue')
+
+        proxy = g.get('proxy', None)
+        attach_storage = g.get('app_config', {}).get('attach_storage', None)
+        if attach_storage:
+            attach_storage = os.path.realpath(os.path.join(g.get('app_path'), attach_storage))
         self.inqueue = queue.get('scheduler2spider')
         self.status_queue = queue.get('status_queue')
-        self.ProjectsDB = db.get('ProjectsDB')
-        self.SitesDB = db.get('SitesDB')
-        self.UrlsDB = db.get('UrlsDB')
-        self.ChannelRulseDB = db.get('ChannelRulesDB')
-        self.AttachmentDB = db.get('AttachmentDB')
-        self.KeywordsDB = db.get('KeywordsDB')
-        self.TaskDB = db.get('TaskDB')
         self.db = db
         self.queue = queue
         self.proxy = proxy
@@ -52,6 +56,10 @@ class Spider(Component):
         self.attach_storage = attach_storage
         self.ioloop = tornado.ioloop.IOLoop()
         self.set_handler(handler)
+
+        log_level = logging.WARN
+        if g.get("debug", False):
+            log_level = logging.DEBUG
         self.log_level = log_level
         logger = logging.getLogger('spider')
         self.url_builder = UrlBuilder(logger, log_level)
