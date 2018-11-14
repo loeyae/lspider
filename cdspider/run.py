@@ -71,6 +71,7 @@ def cli(ctx, **kwargs):
     ctx.obj = {}
     ctx.obj.update(kwargs)
     ctx.obj['app_config'] = app_config
+    ctx.obj['app_path'] = cpath
     ctx.obj.setdefault('rate_map', ctx.obj['app_config'].get('ratemap', {}))
     ctx.obj['instances'] = []
     if ctx.invoked_subcommand is None and not ctx.obj.get('testing_mode'):
@@ -91,12 +92,7 @@ def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, g
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    scheduler = Scheduler(db=g.get('db'), queue=g.get('queue'), mode=mode, log_level=log_level)
-    scheduler.ctx = ctx
+    scheduler = Scheduler(ctx, mode=mode)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -117,13 +113,7 @@ def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    rate_map = g.get('rate_map')
-
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), rate_map=rate_map, log_level=log_level)
-    scheduler.ctx = ctx
+    scheduler = Scheduler(ctx)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -142,13 +132,7 @@ def synctask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    rate_map = g.get('rate_map')
-
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
-    scheduler.ctx = ctx
+    scheduler = Scheduler(ctx)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -161,19 +145,13 @@ def synctask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
 @click.option('--scheduler-cls', default='cdspider.scheduler.NewtaskScheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def newtask_schedule(ctx,scheduler_cls, no_loop,  get_object=False):
+def newtask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     """
     根据管理平台添加的url、关键词等生成任务
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    rate_map = g.get('rate_map')
-
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
-    scheduler.ctx = ctx
+    scheduler = Scheduler(ctx)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -187,19 +165,14 @@ def newtask_schedule(ctx,scheduler_cls, no_loop,  get_object=False):
 @click.option('--interval', default=0.1, help='循环间隔', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def status_schedule(ctx,scheduler_cls, interval, no_loop, get_object=False):
+def status_schedule(ctx, scheduler_cls, interval, no_loop, get_object=False):
     """
     根据管理平台对project、site、url、keywords等的状态改变，调整相应任务状态
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    rate_map = g.get('rate_map')
-
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
-    scheduler.ctx = ctx
+    scheduler = Scheduler(ctx)
+    scheduler.interval = interval
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -218,13 +191,7 @@ def search_schedule(ctx,scheduler_cls, no_loop, get_object=False):
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    rate_map = g.get('rate_map')
-
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    scheduler = Scheduler(db = g.get('db'), queue = g.get('queue'), log_level=log_level)
-    scheduler.ctx = ctx
+    scheduler = Scheduler(ctx)
     g['instances'].append(scheduler)
     if g.get('testing_mode') or get_object:
         return scheduler
@@ -244,21 +211,7 @@ def fetch(ctx, fetch_cls, no_loop, no_sync, get_object=False, no_input=False):
     """
     g = ctx.obj
     Spider = load_cls(ctx, None, fetch_cls)
-    db = g.get('db')
-    queue = g.get('queue')
-    if no_input:
-        queue = {}
-        db['TaskDB'] = None
-    proxy = g.get('proxy', None)
-    log_level = logging.WARN
-    attach_storage = g.get('app_config', {}).get('attach_storage', None)
-    if attach_storage:
-        attach_storage = os.path.realpath(os.path.join(cpath, attach_storage))
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-
-    spider = Spider(db = db, queue = queue, proxy=proxy, no_sync=no_sync, log_level=log_level, attach_storage = attach_storage)
-    spider.ctx = ctx
+    spider = Spider(ctx, no_sync=no_sync, no_input = no_input)
     g['instances'].append(spider)
     if g.get('testing_mode') or get_object:
         return spider
@@ -278,18 +231,8 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     """
     g = ctx.obj
     Spider = load_cls(ctx, None, spider_cls)
-    db = g.get('db')
-    queue = g.get('queue')
-    proxy = g.get('proxy', None)
-    log_level = logging.WARN
-    attach_storage = g.get('app_config', {}).get('attach_storage', None)
-    if attach_storage:
-        attach_storage = os.path.realpath(os.path.join(cpath, attach_storage))
-    if g.get("debug", False):
-        log_level = logging.DEBUG
 
-    spider = Spider(db = db, queue = queue, proxy=proxy, log_level=log_level, attach_storage = attach_storage)
-    spider.ctx = ctx
+    spider = Spider(ctx, no_input = True)
     g['instances'].append(spider)
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
@@ -301,13 +244,8 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
     """
     同步数据到kafka
     """
-    g=ctx.obj
     Worker = load_cls(ctx, None, worker_cls)
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
-    worker = Worker(g, log_level)
-    worker.ctx = ctx
+    worker = Worker(ctx)
     g['instances'].append(worker)
     if g.get('testing_mode') or get_object:
         return worker
@@ -325,11 +263,9 @@ def tool(ctx, name, arg, daemon):
     """
     工具
     """
-    g = ctx.obj
     cls_name = 'cdspider.tools.%s.%s' % (name, name)
     cls = load_cls(ctx, None, cls_name)
-    cls.ctx = ctx
-    c = cls(g, daemon)
+    c = cls(ctx, daemon)
     if daemon:
         c.run(*arg)
     else:
@@ -344,13 +280,9 @@ def wechat(ctx, rebot_cls, aichat_rpc, uuid):
     """
     web wechat
     """
-    g = ctx.obj
     aichat_rpc = connect_rpc(ctx, None, aichat_rpc)
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
     rebot_cls = load_cls(ctx, None, rebot_cls)
-    robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), uuid=uuid, data_dir=g.get("runtime_dir", None), debug=g.get("debug", False), log_level=log_level)
+    robot = rebot_cls(ctx, uuid=uuid)
     reply = lambda m, s: aichat_rpc.reply(m, s)
     def init_aichat(m, s):
         info = m.search_friends()
@@ -375,12 +307,8 @@ def aichat(ctx, rebot_cls, uuid, bot_data, commands):
     """
     Aiml bot
     """
-    g = ctx.obj
-    log_level = logging.WARN
-    if g.get("debug", False):
-        log_level = logging.DEBUG
     rebot_cls = load_cls(ctx, None, rebot_cls)
-    robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), commands = commands, bot_data = bot_data, data_dir=g.get("runtime_dir", None), debug=g.get("debug", False), log_level=log_level)
+    robot = rebot_cls(ctx, commands = commands, bot_data = bot_data)
     robot.run(uuid)
 
 @cli.command()
@@ -396,12 +324,8 @@ def aichat_rpc(ctx, rebot_cls, bot_data, commands, settings, xmlrpc_host, xmlrpc
     """
     Aiml bot rpc
     """
-    g = ctx.obj
-    log_level = logging.WARN
-    if debug and g.get("debug", False):
-        log_level = logging.DEBUG
     rebot_cls = load_cls(ctx, None, rebot_cls)
-    robot = rebot_cls(db=g.get('db'), queue=g.get('queue'), commands = commands, bot_data = bot_data, settings = settings, data_dir=g.get("runtime_dir", None), debug= debug and g.get("debug", False), log_level=log_level)
+    robot = rebot_cls(ctx, commands = commands, bot_data = bot_data, settings = settings)
     robot.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
 @cli.command()
