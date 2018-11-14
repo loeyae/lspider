@@ -114,10 +114,18 @@ class AichatRobots(cdspider.Component, aiml.Kernel):
         "company": "博彦多彩",
     }
 
-    def __init__(self, db, queue, commands = [], settings = None, learn_file = 'auto-gen.aiml', bot_data = None, data_dir = None, debug = False, log_level = logging.WARN):
-        self.db = db
-        self.queue = queue
+    def __init__(self, context, commands = [], settings = None, learn_file = 'auto-gen.aiml', bot_data = None):
+        self.ctx = context
+        g = context.obj
+        self.g = g
+        self.db = g.get('db')
+        self.queue = g.get('queue')
+        data_dir=g.get("runtime_dir", None)
+        debug=g.get("debug", False)
         self.debug_mode = debug
+        log_level = logging.WARN
+        if debug:
+            log_level = logging.DEBUG
         self.log_level = log_level
         logger = logging.getLogger('robots')
         cdspider.Component.__init__(self, logger, log_level)

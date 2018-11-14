@@ -22,12 +22,20 @@ class WxchatRobots(Component):
     """
     WEB微信机器人
     """
-    def __init__(self, db, queue, uuid, data_dir = None, debug = False, log_level = logging.WARN):
-        self.db = db
-        self.queue = queue
+    def __init__(self, context, uuid):
+        self.ctx = context
+        g = context.obj
+        self.g = g
+        data_dir=g.get("runtime_dir", None)
+        debug=g.get("debug", False)
+        self.db = g.get('db')
+        self.queue = g.get('queue')
         qname = 'wechat2reply4%s' % uuid
         self.message_queue = queue[qname]
         self.debug_mode = debug
+        log_level = logging.WARN
+        if debug:
+            log_level = logging.DEBUG
         self.log_level = log_level
         self.qrfile = None
         logger = logging.getLogger('robots')
