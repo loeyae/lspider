@@ -16,27 +16,6 @@ import collections
 from cdspider.exceptions import *
 from cdspider.libs import utils
 
-BROKEN_EXCEPTIONS = {
-    'base': CDSpiderCrawlerBroken,
-    'exists': CDSpiderCrawlerNoExists,
-    'login': CDSpiderCrawlerDoLogin,
-    'source': CDSpiderCrawlerNoSource,
-    'page': CDSpiderCrawlerNoNextPage,
-    'max': CDSpiderCrawlerMoreThanMaximum,
-}
-
-TIMEOUT_EXCEPTIONS = {
-    'base': CDSpiderCrawlerTimeout,
-    'connect': CDSpiderCrawlerConnectTimeout,
-    'read': CDSpiderCrawlerReadTimeout,
-}
-
-PROXY_EXCEPTIONS = {
-    'base': CDSpiderCrawlerProxyError,
-    'expired': CDSpiderCrawlerProxyExpired,
-}
-
-
 class Redis():
     """
     redis连接库
@@ -253,23 +232,6 @@ class ModulerLoader(object):
         if isinstance(script, six.text_type):
             return script.encode('utf8')
         return script
-
-class ProjectLoader(ModulerLoader):
-    """
-    项目
-    """
-    def __init__(self, project, mod=None):
-        super(ProjectLoader, self).__init__(project, mod)
-        self.name = 'cdspider.handler.custom.%s' % project['name']
-
-class TaskLoader(ModulerLoader):
-    """
-    任务
-    """
-    def __init__(self, task, mod=None):
-        task['name'] = task['project']['name']
-        super(TaskLoader, self).__init__(task, mod)
-        self.name = 'cdspider.handler.custom.%s' % task['name']
 
 def load_handler(task, **kwargs):
     """

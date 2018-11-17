@@ -262,56 +262,24 @@ class UrlBuilder(Component):
             incr_data = copy.deepcopy(kwargs['incr_data'])
             if not isinstance(incr_data, list):
                 incr_data = [incr_data]
-            if not "incr_data" in save or not save['incr_data']:
-                save['incr_data'] = []
+            page = int(save['page'])
             for i in range(len(incr_data)):
                 assert 'name' in incr_data[i] and incr_data[i]['name'], "invalid setting name of incr_data"
                 assert 'value' in incr_data[i], "invalid setting value of incr_data"
-                saved = copy.deepcopy(save['incr_data'][i]) if len(save['incr_data']) > i else {}
-                if "value" in saved:
-                    incr_data[i]['value'] = saved['value']
-                elif not 'value' in  incr_data[i] or incr_data[i]['value'] is None or incr_data[i]['value'] == "":
-                    incr_data[i]['value'] = 1
-                if not 'step' in incr_data[i] or not incr_data[i]['step']:
-                    incr_data[i]['step'] = 1
-                if 'base_page' in saved:
-                    incr_data[i]['base_page'] = saved['base_page']
-                elif not 'base_page' in incr_data[i]:
-                    incr_data[i]['base_page'] = int(incr_data[i]['value'])
-                if int(incr_data[i]['value']) > incr_data[i]['base_page']:
-                    incr_data[i]['value'] = int(incr_data[i].get('value', 0)) - int(incr_data[i].get('step', 1))
-                if incr_data[i]['mode'] == 'get':
-                    incr_data[i].setdefault('type', 'url')
-                elif incr_data[i]['mode'] == 'post':
-                    incr_data[i].setdefault('type', 'data')
-                else:
-                    incr_data[i].setdefault('type', incr_data[i]['mode'])
-                incr_data[i].setdefault('isfirst', saved.get('isfirst', True))
-                incr_data[i].setdefault('first', saved.get('first', False))
-            save['incr_data'] = incr_data
-            for i in range(len(save['incr_data'])):
-                item = copy.deepcopy(save['incr_data'][i])
+                item = copy.deepcopy(incr_data[i])
                 if not 'max' in item or not item['max']:
                     item['max'] = 0
                 step = int(item.get('step', 1))
-                if not item.get('isfirst', True):
-                    item['value'] = int(item['value']) + step
-                if not item.get('isfirst', True) and "max" in item and int(item["max"]) > 0:
-                    page = (int(item['value']) - int(item['base_page'])) / step + 1
+                if int(item["max"]) > 0:
                     if page > int(item['max']):
                         raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % item['max'],
                                 base_url = save['base_url'], incr_data = item)
-                value = str(item['value'])
+                value = str(item['value'] + (page - 1) * step)
                 if 'prefix' in item and item['prefix']:
                     value = item['prefix'] + value
                 if 'suffix' in item and item['suffix']:
                     value += item['suffix']
-                save['incr_data'][i]['value'] = item['value']
-                if not item.get('isfirst', True):
-                    self._append_kwargs_data(kwargs, item['type'], item['name'], value)
-                elif item.get('first', False):
-                    self._append_kwargs_data(kwargs, item['type'], item['name'], item['base_page'])
-                save['incr_data'][i]['isfirst'] = False
+                self._append_kwargs_data(kwargs, item['type'], item['name'], value)
 
     def _append_kwargs_data(self, kwargs, type, name, value):
         """
