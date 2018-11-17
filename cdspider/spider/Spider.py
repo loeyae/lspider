@@ -18,15 +18,14 @@ import json
 import tornado.ioloop
 from six.moves import queue
 
-from cdspider import Component, DEFAULT_ITEM_SCRIPTS
-from cdspider.handler import BaseHandler
+from cdspider import Component
+from cdspider.handler import BaseHandler, Loader
 from cdspider.exceptions import *
 from cdspider.libs import utils
 from cdspider.libs import UrlBuilder
 from cdspider.libs.tools import *
 from cdspider.database.base import *
-
-CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse, CDSpiderCrawlerForbidden)
+from cdspider.libs.constants import *
 
 class Spider(Component):
     """
@@ -43,17 +42,10 @@ class Spider(Component):
         else:
             queue = g.get('queue')
 
-        proxy = g.get('proxy', None)
-        attach_storage = g.get('app_config', {}).get('attach_storage', None)
-        if attach_storage:
-            attach_storage = os.path.realpath(os.path.join(g.get('app_path'), attach_storage))
         self.inqueue = queue.get('scheduler2spider')
         self.status_queue = queue.get('status_queue')
-        self.db = db
         self.queue = queue
-        self.proxy = proxy
         self.no_sync = no_sync
-        self.attach_storage = attach_storage
         self.ioloop = tornado.ioloop.IOLoop()
         self.set_handler(handler)
 
@@ -62,10 +54,7 @@ class Spider(Component):
             log_level = logging.DEBUG
         self.log_level = log_level
         logger = logging.getLogger('spider')
-        self.url_builder = UrlBuilder(logger, log_level)
         super(Spider, self).__init__(logger, log_level)
-        self.crawler = {}
-#        self.crawler = {"requests": utils.load_crawler("requests", log_level=self.log_level)}
 
     def set_handler(self, handler):
         if handler and isinstance(handler, BaseHandler):
@@ -80,26 +69,18 @@ class Spider(Component):
             return
         self.info("Spider fetch start, task: %s" % task)
         last_source = None
-        if not "save" in task or not task['save']:
-            task['save'] = {}
-        save = task['save']
-        mode = save.get('mode', BaseHandler.MODE_DEFAULT)
+        save = {}
         handler = self.get_handler(task)
         if return_result:
             return_data = []
         try:
             self.info("Spider loaded handler: %s" % handler)
-            save.setdefault('base_url', task['url'])
-            save.setdefault('referer', task['url'])
-            save.setdefault('continue_exceptions', handler.continue_exceptions)
-            save['proxy'] = copy.deepcopy(self.proxy)
-            referer = save.get('flush_referer', False)
-            refresh_base = save.get('rebase', False)
             last_source_unid = None
             last_url = None
             self.info("Spider process start")
             try:
                 self.info("Spider fetch prepare start")
+                handler.init()
                 save['retry'] = 0
                 while True:
                     try:
@@ -113,51 +94,35 @@ class Spider(Component):
                 while True:
                     self.info('Spider crawl start')
                     save['proxy'] = copy.deepcopy(self.proxy)
-                    last_source, broken_exc, final_url = handler.crawl(save)
+                    handler.crawl(save)
                     if isinstance(broken_exc, CONTINUE_EXCEPTIONS):
                         handler.on_continue(broken_exc, save)
                         continue
-                    unid = utils.md5(last_source)
-                    if last_source_unid == unid or last_url == final_url:
+                    else:
+                        raise broken_exc
+                    if not last_source:
+                        raise CDSpiderCrawlerError('Spider crawl failed')
+                    unid = utils.md5(handler.response['last_source'])
+                    if last_source_unid == unid or last_url == handler.response['last_url']:
                         raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=final_url)
                     last_source_unid = unid
-                    last_url = final_url
-                    if referer:
-                        save['referer'] = final_url
-                    if refresh_base:
-                        save['base_url'] = final_url
-                    save['request_url'] = final_url
-                    self.info("Spider crawl end, result: %s" % str((last_source, broken_exc, final_url)))
-                    self.info('Spider parse start')
-                    if not last_source:
-                        if broken_exc:
-                            raise broken_exc
-                        raise CDSpiderCrawlerError('Spider crawl failed')
-                    result = handler.parse(last_source, save.get("parent_url", final_url))
-                    self.info('Spider parse end, result: %s' % str(result))
-                    result = handler.on_result(result, broken_exc, last_source, final_url, return_result)
-                    attach_data = None
-                    if mode == BaseHandler.MODE_ITEM and handler.current_page == 1:
-                        parent_url = save.get("parent_url", None)
-                        attach_data = handler.on_attach(last_source, final_url, parent_url, return_result)
+                    last_url = handler.response['last_url']
+                    self.info("Spider crawl end")
+                    self.info("Spider parse start")
+                    handler.parse()
+                    self.info("Spider parse end")
                     if return_result:
-                        return_data.append((result, broken_exc, last_source, final_url, save, attach_data))
+                        return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url']))
 
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
-                    if broken_exc:
-                        raise broken_exc
-                    if not 'incr_data' in save:
-                        break
+                    self.info("Spider result start")
+                    handler.on_result(save)
+                    self.info("Spider result end, result: %s" % str(handler.response))
+                    handler.on_next(save)
             finally:
-                handler.on_sync()
                 self.info("Spider process end")
         except Exception as e:
             if not return_result:
-                if 'incr_data' in save and isinstance(save['incr_data'], list) and save['incr_data']:
-                    for item in save['incr_data']:
-                        if int(item.get('base_page', 1)) >= int(item.get('value', 1)):
-                            item['isfirst'] = True
-                task['last_source'] = last_source
                 handler.on_error(e)
             else:
                 return_data.append((None, traceback.format_exc(), None, None, None, None))
@@ -165,6 +130,7 @@ class Spider(Component):
         finally:
             if not return_result:
                 handler.finish()
+            handler.close()
             self.info("Spider fetch end" )
             if return_result:
                 return return_data
@@ -243,240 +209,14 @@ class Spider(Component):
     def get_handler(self, task):
         if hasattr(self, 'handler'):
             return self.handler
-        task['project'].setdefault("name", "Project%s" % task.get("pid"))
-        return load_handler(task = task, crawler = self.crawler, spider = self, db = self.db, queue = self.queue, log_level=self.log_level, no_sync = self.no_sync, attach_storage = self.attach_storage)
+        return Loader(self.ctx, task = task, spider = self, no_sync = self.no_sync)
 
-    def _get_task_from_attachment(self, message, task, project, no_check_status = False):
-        if not task:
-            raise CDSpiderDBDataNotFound("Task: %s not found" % message['tid'])
-        if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
-            self.debug("Task: %s not active" % task)
-            return None
-        attachment = task.get('attachment', None) or self.AttachmentDB.get_detail(int(task['aid']))
-        if not attachment:
-            self.status_queue.put_nowait({"aid": task['aid'], 'status': AttachmentDB.STATUS_DELETED})
-            raise CDSpiderDBDataNotFound("Attachment: %s not found" % task['aid'])
-        if not no_check_status and attachment.get('status', AttachmentDB.STATUS_INIT) != AttachmentDB.STATUS_ACTIVE:
-            self.debug("Attachment: %s" % attachment)
-            return None
-        task['project'] = project
-        task['site'] = {"sid": 0}
-        task['attachment'] = attachment
-        task['site']['scripts'] = attachment['scripts']
-        if not 'save' in task or not task['save']:
-            task['save'] = {}
-        task['save']['mode'] = BaseHandler.MODE_ATT
-        task['save']['base_url'] = task['url']
-        return task
-
-    def _get_task_from_channel(self, message, task, project, no_check_status = False):
-        if not task:
-            raise CDSpiderDBDataNotFound("Task: %s not found" % message['tid'])
-        if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
-            self.debug("Task: %s not active" % task)
-            return None
-        if not 'save' in task or not task['save']:
-            task['save'] = {}
-        task['save']['mode'] = BaseHandler.MODE_CHANNEL;
-        task['project'] = project
-        site = task.get('site', None) or self.SitesDB.get_detail(int(task['sid']))
-        if not site:
-            self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
-            raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
-        if not no_check_status and site.get('status', SitesDB.STATUS_INIT) != SitesDB.STATUS_ACTIVE:
-            self.debug("Site: %s not active" % site)
-            return None
-        if not 'main_process' in site or not site['main_process']:
-            site['main_process'] = {}
-        if not 'sub_process' in site or not site['sub_process']:
-            site['sub_process'] = {}
-        task['site'] = site
-
-        channel = task.get('channel') or self.ChannelRulseDB.get_detail(int(task['crid']))
-        if not channel:
-            self.status_queue.put_nowait({"crid": task['aid'], 'status': ChannelRulseDB.STATUS_DELETED})
-            raise CDSpiderDBDataNotFound("ChannelRules: %s not found" % task['uid'])
-        if not no_check_status and channel.get('status', ChannelRulseDB.STATUS_INIT) != ChannelRulseDB.STATUS_ACTIVE:
-            self.debug("ChannelRule: %s" % channel)
-            return None
-        if not 'process' in channel or not channel['process']:
-            channel['process'] = {}
-        task['channel'] = channel
-        task['save']['mode'] = BaseHandler.MODE_CHANNEL
-        task['save'].setdefault('base_url', task['url'])
-        task['save'].setdefault('referer', task['url'])
-        return task
-
-    def _get_task_from_project(self, message, task, project, no_check_status = False):
-        if not task:
-            raise CDSpiderDBDataNotFound("Task: %s not found" % message['tid'])
-        if not no_check_status and task.get('status', TaskDB.STATUS_INIT) != TaskDB.STATUS_ACTIVE:
-            self.debug("Task: %s not active" % task)
-            return None
-        if not 'save' in task or not task['save']:
-            task['save'] = {}
-        task['save']['mode'] = BaseHandler.MODE_DEFAULT;
-        task['project'] = project
-        site = task.get('site', None) or self.SitesDB.get_detail(int(task['sid']))
-        if not site:
-            self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
-            raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
-        if not no_check_status and site.get('status', SitesDB.STATUS_INIT) != SitesDB.STATUS_ACTIVE:
-            self.debug("Site: %s not active" % site)
-            return None
-        if not 'main_process' in site or not site['main_process']:
-            site['main_process'] = {}
-        if not 'sub_process' in site or not site['sub_process']:
-            site['sub_process'] = {}
-        task['site'] = site
-        if 'uid' in task and task['uid']:
-            urls = task.get('urls', None) or self.UrlsDB.get_detail(int(task['uid']))
-            if not urls:
-                self.status_queue.put_nowait({"uid": task['aid'], 'status': UrlsDB.STATUS_DELETED})
-                raise CDSpiderDBDataNotFound("Url: %s not found" % task['uid'])
-            if not no_check_status and urls.get('status', UrlsDB.STATUS_INIT) != UrlsDB.STATUS_ACTIVE:
-                self.debug("Urls: %s" % urls)
-                return None
-            if not 'main_process' in urls or not urls['main_process']:
-                urls['main_process'] = {}
-            if not 'sub_process' in urls or not urls['sub_process']:
-                urls['sub_process'] = {}
-            task['urls'] = urls
-        if 'kwid' in task and task['kwid'] and task['url'].find('{keyword}') > 0:
-                keywords = task.get('keyword') or self.KeywordsDB.get_detail(int(task['kwid']))
-                if not keywords:
-                    self.status_queue.put_nowait({"kwid": task['kwid'], 'status': KeywordsDB.STATUS_DELETED})
-                    raise CDSpiderDBDataNotFound("Keyword: %s not found" % task['kwid'])
-                if not no_check_status and keywords.get('status', KeywordsDB.STATUS_INIT) != KeywordsDB.STATUS_ACTIVE:
-                    self.debug("Keywords: %s" % keywords)
-                    return None
-                task['save']['hard_code'] = [{'name': 'keyword', 'type': 'format', 'value': keywords['word']}]
-        task['save'].setdefault('base_url', task['url'])
-        task['save'].setdefault('referer', task['url'])
-        return task
-
-    def _get_task_from_item(self, message, task, project, no_check_status = False):
-        if not task:
-            task = {}
-        task.update({
-            'tid': 0,
-            'pid': message['pid'],
-            'project': project,
-        })
-        if not "save" in task or not task['save']:
-            task['save'] = {}
-        if 'rid' in message and message['rid']:
-            task['queue'] = self.queue['scheduler2spider']
-            task['queue_message'] = copy.deepcopy(message)
-            task['rid'] = message['rid']
-            article = self.db['ArticlesDB'].get_detail(message['rid'])
-            task['unid'] = {"unid": article['acid'], "ctime": article['ctime']}
-            task.update({
-                'sid': article['crawlinfo']['sid'],
-                'uid': article['crawlinfo'].get('uid', 0),
-                'kwid': article['crawlinfo'].get('kwid', 0),
-                'rid': article['rid'],
-                'url': article['url'],
-            })
-            task['save']['parent_url'] = article['crawlinfo'].get('url');
-            task['save']['base_url'] = article['url']
-            task['item'] = article
-
-        subdomain, domain = utils.parse_domain(task['url'])
-        parse_rule = task.get("parse_rule", {})
-        if not parse_rule and subdomain:
-            parserule_list = self.db['ParseRuleDB'].get_list_by_subdomain(subdomain)
-            for item in parserule_list:
-                if not parse_rule:
-                    parse_rule = item
-                if  'url_pattern' in item and item['url_pattern']:
-                    u = utils.preg(url, item['url_pattern'])
-                    if u:
-                        parse_rule = item
-        if not parse_rule:
-            parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
-            for item in parserule_list:
-                if not parse_rule:
-                    parse_rule = item
-                if  'url_pattern' in item and item['url_pattern']:
-                    u = utils.preg(url, item['url_pattern'])
-                    if u:
-                        parse_rule = item
-        format_params = {"projectname": "Project%s" % message['pid'], "parenthandler": "SiteHandler"}
-        if parse_rule and 'scripts' in parse_rule and parse_rule['scripts']:
-            keylist = re.findall('\{(\w+)\}', parse_rule['scripts'])
-            for key in keylist:
-                if key in ('projectname', 'parenthandler'):
-                    continue
-                else:
-                    format_params[key] = '{%s}' % key
-            itemscript = parse_rule['scripts']
-        else:
-            itemscript = DEFAULT_ITEM_SCRIPTS
-        task['scripts']= itemscript
-        site = task.get('site') or self.SitesDB.get_detail(int(task['sid']))
-        if not site:
-            self.status_queue.put_nowait({"sid": task['sid'], 'status': SitesDB.STATUS_DELETED})
-            raise CDSpiderDBDataNotFound("Site: %s not found" % task['sid'])
-        if not no_check_status and site.get('status', SitesDB.STATUS_INIT) != SitesDB.STATUS_ACTIVE:
-            self.debug("Site: %s not active" % site)
-            return None
-        task['site'] = site
-        if 'uid' in task and task['uid']:
-            urls = task.get('urls', None) or self.UrlsDB.get_detail(int(task['uid']))
-            if urls:
-                task['urls'] = urls
-                format_params["parenthandler"] = "UrlHandler"
-        if not 'save' in task or not task['save']:
-            task['save'] = {}
-        task['save'].setdefault('base_url', task['url'])
-        task['save']['mode'] = message['mode'];
-        task['save']['retry'] = message.get('retry', 0)
-        task['scripts'] = task['scripts'].format(**format_params)
-        return task
-
-    def get_task(self, message, task=None, no_check_status = False):
+    def get_task(self, message, no_check_status = False):
         """
         获取任务详细信息
         """
-        mode = message.get('mode', None)
-        pid = int(message.get('pid'))
-        taskid = int(message.get('tid', 0))
-        if not task and taskid:
-            task = self.TaskDB.get_detail(taskid, pid, True)
-            if not task:
-                raise CDSpiderDBDataNotFound("Task: %s not found" % taskid)
-            if mode == None:
-                if 'crid' in task and task['crid']:
-                    mode = BaseHandler.MODE_CHANNEL
-                elif 'aid' in task and task['aid']:
-                    mode = BaseHandler.MODE_ATT
-                else:
-                    mode = BaseHandler.MODE_DEFAULT
-        if 'url' in message:
-            task['url'] = message
-        project = (task.get('project', None) if task else None) or self.ProjectsDB.get_detail(pid)
-        if not project:
-            self.status_queue.put_nowait({"pid": pid, 'status': ProjectsDB.STATUS_DELETED})
-            raise CDSpiderDBDataNotFound("Project: %s not found" % pid)
-        if not no_check_status and project.get('status', ProjectsDB.STATUS_INIT) != ProjectsDB.STATUS_ACTIVE:
-            self.debug("Project: %s not active" % project)
-            return None
-        if mode == BaseHandler.MODE_ATT:
-            task = self._get_task_from_attachment(message, task, project, no_check_status)
-        elif mode == BaseHandler.MODE_ITEM:
-            task = self._get_task_from_item(message, task, project, no_check_status)
-        elif mode == BaseHandler.MODE_CHANNEL:
-            task = self._get_task_from_channel(message, task, project, no_check_status)
-        else:
-            task = self._get_task_from_project(message, task, project, no_check_status)
-        if not task:
-            return None
-        if "incr_data" in task['save'] and task['save']['incr_data']:
-            for i in range(len(task['save']['incr_data'])):
-                task['save']['incr_data'][i]['value'] = task['save']['incr_data'][i].get('base_page', 1)
-        task['save'].setdefault('retry', 0)
-        return task
+
+        return message
 
 
     def run_once(self):
