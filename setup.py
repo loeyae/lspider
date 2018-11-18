@@ -82,11 +82,16 @@ setup(
         ],
         'cdspider.robots': [
             'wxchat=cdspider.robots:WxchatRobots',
+            'aichat=cdspider.robots:AichatRobots',
         ],
         'cdspider.parser': [
             'list=cdspider.parser:ListParser',
             'item=cdspider.parser:ItemParser',
             'custom=cdspider.parser:CustomParser',
+            'json=cdspider.parser.lib:JsonParser',
+            'pyqyery=cdspider.parser.lib:PyqueryParser',
+            'xpath=cdspider.parser.lib:XpathParser',
+            'regular=cdspider.parser.lib:RegularParser',
         ],
         'cdspider.queue': [
             'amqp=cdspider.message_queue:AmqpQueue',
@@ -96,11 +101,6 @@ setup(
         ],
         'cdspider.db': [
             'mongo=cdspider.connector:Mongo',
-        ],
-        'cdspider.handler': [
-            'search=cdspider.handler:SearchHandler',
-            'general=cdspider.handler:GeneralHandler',
-            'attach=cdspider.handler:AttachHandler',
         ],
         'cdspider.mailer': [
             'smtp=cdspider.mailer:SmtpSender'
