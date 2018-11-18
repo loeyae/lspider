@@ -99,6 +99,11 @@ class BaseHandler(Component):
         self.close()
 
     def handler_register(self, handle_type, priority = 1000):
+        """
+        handler register
+        :param handle_type any of cdspider.libs.constants.(HANDLER_FUN_INIT, HANDLER_FUN_PROCESS, HANDLER_FUN_PREPARE, HANDLER_FUN_PRECRAWL, HANDLER_FUN_CRAWL, HANDLER_FUN_POSTCRAWL, HANDLER_FUN_PREPARSE, HANDLER_FUN_PARSE, HANDLER_FUN_POSTPARSE, HANDLER_FUN_RESULT, HANDLER_FUN_NEXT, HANDLER_FUN_CONTINUE, HANDLER_FUN_REPETITION, HANDLER_FUN_ERROR, HANDLER_FUN_FINISH)
+        :param priority 数值越大，优先级越高
+        """
         if not (isinstance(handle_type, list) or isinstance(handle_type, tuple)):
             handle_type = [handle_type]
         def _handler_register(fn):
@@ -123,6 +128,9 @@ class BaseHandler(Component):
         return self.page
 
     def get_crawler(self, rule):
+        """
+        load crawler
+        """
         crawler = rule.get('crawler', '') or 'requests'
         if self.crawler_list and isinstance(self.crawler_list, (list, tuple)) and crawler in self.crawler_list:
             self.mycrawler = False
@@ -130,6 +138,9 @@ class BaseHandler(Component):
         return utils.load_crawler(crawler, headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
 
     def init(self, save):
+        """
+        初始化爬虫
+        """
         self.request = self._get_request()
         self.proxy_mode = self.request.pop('proxy', 'never')
         if not self.crawler:
@@ -273,8 +284,12 @@ class BaseHandler(Component):
         """
         下一页解析
         """
+        self.page += 1
         rule = self.process.get("page")
+        if not rule:
+            raise CDSpiderCrawlerNoNextPage(base_url=self.request.get("url", ''), current_url=self.response.get('final_url'))
         builder = UrlBuilder(self.logger, self.log_level)
+        save['page'] = self.page
         self.request_params = builder.build(rule, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
 
