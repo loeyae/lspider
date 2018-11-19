@@ -340,6 +340,24 @@ def aichat_rpc_hello(ctx, aichat_rpc):
     print(aichat_rpc.hello())
 
 @cli.command()
+@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
+@click.option('-U', '--url', default='http://2018.ip138.com/ic.asp', help='url')
+@click.option('-M', '--mode', default="list", help="mode")
+@click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
+@click.pass_context
+def test(ctx, spider_cls, url, mode, no_input):
+    Spider = load_cls(ctx, None, spider_cls)
+    spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
+    task = {
+        "url": url,
+        "mode": mode,
+    }
+#    task = None
+    task = spider.get_task(message = task, no_check_status = True)
+    spider.fetch(task=task, return_result = False)
+
+
+@cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
 @click.option('--exc-work-num', default=1, help='exc worker实例个数')
 @click.option('--run-in', default='subprocess', type=click.Choice(['subprocess', 'thread']),
