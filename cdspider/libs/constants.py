@@ -6,15 +6,15 @@ __author__="Zhang Yi <loeyae@gmail.com>"
 __date__ ="$2018-11-17 9:22:03$"
 
 #proxy mode
-PROXY_MODE_NEVER = 'never'
-PROXY_MODE_EVER = 'ever'
-PROXY_MODE_AUTO = 'auto'
+PROXY_TYPE_NEVER = 'never'
+PROXY_TYPE_EVER = 'ever'
+PROXY_TYPE_AUTO = 'auto'
 
 #scripts default
 DEFAULT_HANDLER_SCRIPTS = """
 from cdspider.handler import %(handler)s
 
-hander = %(handler)s(__moduler__['ctx'], __moduler__['task'], spider=__moduler__.get('spider', None), no_sync=__moduler__.get('no_sync', False))
+handler = %(handler)s(__moduler__['ctx'], __moduler__['task'], spider=__moduler__.get('spider', None), no_sync=__moduler__.get('no_sync', False))
 """
 
 #exception set
