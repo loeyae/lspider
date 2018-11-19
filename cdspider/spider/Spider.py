@@ -98,7 +98,7 @@ class Spider(Component):
                         handler.on_continue(handler.response['broken_exc'], save)
                         continue
                     elif handler.response['broken_exc']:
-                        raise broken_exc
+                        raise handler.response['broken_exc']
                     if not handler.response['last_source']:
                         raise CDSpiderCrawlerError('Spider crawl failed')
                     unid = utils.md5(handler.response['last_source'])
