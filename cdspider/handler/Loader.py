@@ -17,7 +17,7 @@ class Loader(Component):
     """
     handler loader
     """
-    def __init__(self, context, task, spider, no_sync = False, mod=None):
+    def __init__(self, context, task, spider, no_sync = False):
         self.ctx = context
         self.task = task
         self.params = {"spider": spider, "no_sync": no_sync}
