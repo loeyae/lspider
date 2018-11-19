@@ -77,3 +77,32 @@ HANDLER_FUN_CONTINUE = '11'
 HANDLER_FUN_REPETITION = '12'
 HANDLER_FUN_ERROR = '13'
 HANDLER_FUN_FINISH = '14'
+
+
+#handler mode
+HANDLER_MODE_DEFAULT = 'default'
+HANDLER_MODE_DEFAULT_LIST = 'list'
+HANDLER_MODE_WECHAT_LIST = 'wechat-list'
+HANDLER_MODE_TOUTIAO_LIST = 'toutiao-list'
+HANDLER_MODE_BBS_LIST = 'bbs-list'
+HANDLER_MODE_WEMEDIA_LIST = 'wemedia-list'
+HANDLER_MODE_DEFAULT_ITEM = 'item'
+HANDLER_MODE_WECHAT_ITEM = 'wechat-item'
+HANDLER_MODE_TOUTIAO_ITEM = 'toutiao-item'
+HANDLER_MODE_BBS_ITEM = 'bbs-item'
+HANDLER_MODE_WEMEDIA_ITEM = 'wemedia-item'
+
+#handler mode mapping
+HANDLER_MODE_MAPPING = {
+    HANDLER_MODE_DEFAULT: 'GeneralHandler',
+    HANDLER_MODE_DEFAULT_LIST: 'GeneralListHandler',
+    HANDLER_MODE_WECHAT_LIST: 'WechatListHandler',
+    HANDLER_MODE_TOUTIAO_LIST: 'ToutiaoListHandler',
+    HANDLER_MODE_BBS_LIST: 'BbsListHandler',
+    HANDLER_MODE_WEMEDIA_LIST: 'WemediaListHandler',
+    HANDLER_MODE_DEFAULT_ITEM: 'GeneralItemHandler',
+    HANDLER_MODE_WECHAT_ITEM: 'WechatItemHandler',
+    HANDLER_MODE_TOUTIAO_ITEM: 'ToutiaoItemHandler',
+    HANDLER_MODE_BBS_ITEM: 'BbsItemHandler',
+    HANDLER_MODE_WEMEDIA_ITEM: 'WemediaItemHandler',
+}
