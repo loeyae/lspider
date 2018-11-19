@@ -103,7 +103,7 @@ class Spider(Component):
                         raise CDSpiderCrawlerError('Spider crawl failed')
                     unid = utils.md5(handler.response['last_source'])
                     if last_source_unid == unid or last_url == handler.response['last_url']:
-                        raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=final_url)
+                        raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['last_url'])
                     last_source_unid = unid
                     last_url = handler.response['last_url']
                     self.info("Spider crawl end")
