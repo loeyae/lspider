@@ -342,7 +342,7 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 @cli.command()
 @click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('-U', '--url', default='http://2018.ip138.com/ic.asp', help='url')
-@click.option('-M', '--mode', default="list", help="mode")
+@click.option('-M', '--mode', default="default", help="mode")
 @click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
 @click.pass_context
 def test(ctx, spider_cls, url, mode, no_input):
