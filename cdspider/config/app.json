@@ -35,13 +35,8 @@
         "9": "删除"
     },
     "attach_storage": "data/attach",
-    "bloomfilter_redis_url": "redis://:DOvrpoEe@127.0.0.1:6379",
+    "bloomfilter_redis_url": "redis://:08BcCWLe5Lmc7Rqp@117.79.146.156:6379",
     "sync_kafka": {
-        "host": "114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667",
-        "zookeeper_hosts":"114.112.86.130:2181,114.112.86.131:2181,114.112.86.132:2181/kafka",
-        "topic": "cddata",
-        "user": "guest",
-        "password": "guest"
     },
     "mail": {
         "mailer": "smtp",
