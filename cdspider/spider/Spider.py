@@ -69,7 +69,7 @@ class Spider(Component):
             return
         self.info("Spider fetch start, task: %s" % task)
         last_source = None
-        save = {}
+        save = {"base_url": task['url']}
         handler = self.get_handler(task)
         if return_result:
             return_data = []
@@ -80,7 +80,7 @@ class Spider(Component):
             self.info("Spider process start")
             try:
                 self.info("Spider fetch prepare start")
-                handler.init()
+                handler.init(save)
                 save['retry'] = 0
                 while True:
                     try:
@@ -93,14 +93,13 @@ class Spider(Component):
                 save['retry'] = 0
                 while True:
                     self.info('Spider crawl start')
-                    save['proxy'] = copy.deepcopy(self.proxy)
                     handler.crawl(save)
-                    if isinstance(broken_exc, CONTINUE_EXCEPTIONS):
-                        handler.on_continue(broken_exc, save)
+                    if isinstance(handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
+                        handler.on_continue(handler.response['broken_exc'], save)
                         continue
-                    else:
+                    elif handler.response['broken_exc']:
                         raise broken_exc
-                    if not last_source:
+                    if not handler.response['last_source']:
                         raise CDSpiderCrawlerError('Spider crawl failed')
                     unid = utils.md5(handler.response['last_source'])
                     if last_source_unid == unid or last_url == handler.response['last_url']:
@@ -209,7 +208,7 @@ class Spider(Component):
     def get_handler(self, task):
         if hasattr(self, 'handler'):
             return self.handler
-        return Loader(self.ctx, task = task, spider = self, no_sync = self.no_sync)
+        return Loader(self.ctx, task = task, spider = self, no_sync = self.no_sync).load()
 
     def get_task(self, message, no_check_status = False):
         """
