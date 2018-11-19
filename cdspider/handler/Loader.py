@@ -11,7 +11,7 @@ from cdspider.handler import *
 from cdspider.libs.tools import ModulerLoader
 from cdspider.libs.constants import *
 
-class Loader(Object):
+class Loader(object):
     """
     put you comment
     """

@@ -132,9 +132,6 @@ class BaseHandler(Component):
         load crawler
         """
         crawler = rule.get('crawler', '') or 'requests'
-        if self.crawler_list and isinstance(self.crawler_list, (list, tuple)) and crawler in self.crawler_list:
-            self.mycrawler = False
-            return self.crawler_list[crawler]
         return utils.load_crawler(crawler, headers=rule.get('header', None), cookies=rule.get('cookie', None), proxy=rule.get('proxy'), log_level=self.log_level)
 
     def init(self, save):
@@ -157,22 +154,22 @@ class BaseHandler(Component):
     def init_process(self):
         pass
 
-    def prepare(self):
+    def prepare(self, save):
         """
         预处理
         """
-        self.handler_run(HANDLER_FUN_PREPARE, self.request)
+        self.handler_run(HANDLER_FUN_PREPARE, {"request": self.request, "request_params": self.request_params, "save": save})
 
     def precrawl(self):
         if isinstance(self.crawler, SeleniumCrawler) and self.request_params['method'].upper() == 'GET':
             self.request_params['method'] = 'open'
-        if (self.proxy_mode == self.PROXY_TYPE_EVER or self.force_proxy or (self.proxy_mode == self.PROXY_TYPE_AUTO and self.auto_proxy)) and self.proxy:
+        if (self.proxy_mode == PROXY_TYPE_EVER or self.force_proxy or (self.proxy_mode == PROXY_TYPE_AUTO and self.auto_proxy)) and self.proxy:
             self.request_params['proxy'] = copy.deepcopy(self.proxy)
         else:
             self.request_params['proxy'] = None
         self.handler_run(HANDLER_FUN_PRECRAWL, self.request_params)
 
-    def crawl(self):
+    def crawl(self, save):
         """
         数据抓取
         :param: save 保持的上下文
@@ -182,7 +179,7 @@ class BaseHandler(Component):
             self.precrawl()
             params = copy.deepcopy(self.request_params)
             if HANDLER_FUN_CRAWL in self.handle:
-                self.handler_run(HANDLER_FUN_CRAWL, {"params": params, "response": self.response})
+                self.handler_run(HANDLER_FUN_CRAWL, {"params": params, "response": self.response, "save": save})
             else:
                 self.crawler.crawl(**params)
                 self.response['last_source'] = self.crawler.page_source
@@ -193,14 +190,14 @@ class BaseHandler(Component):
         except Exception as exc:
             self.response['broken_exc'] = exc
         finally:
-            self.handler_run(HANDLER_FUN_POSTCRAWL, self.response)
+            self.handler_run(HANDLER_FUN_POSTCRAWL, {"reponse": self.response, "save": save})
 
     def _get_request(self):
         """
         获取请求配置
         """
 
-        request = utils.dictjoin(self.process.get('request', None), copy.deepcopy(self.DEFAULT_PROCESS['request']))
+        request = utils.dictjoin(self.process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
         if 'cookie' in request and request['cookie']:
             cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
             if len(cookie_list) > 1:
@@ -267,6 +264,7 @@ class BaseHandler(Component):
         """
         错误处理
         """
+        self.exception(exc)
         self.crawl_info['err_message'] = str(traceback.format_exc())
         self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info})
 
@@ -324,3 +322,4 @@ class BaseHandler(Component):
             self.crawler = None
 
 from .Loader import Loader
+from .GeneralHandler import GeneralHandler
