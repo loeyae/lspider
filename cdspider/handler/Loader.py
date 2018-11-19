@@ -22,7 +22,7 @@ class Loader(Component):
         self.task = task
         self.params = {"spider": spider, "no_sync": no_sync}
         logger = logging.getLogger('handler')
-        self.log_level = logging.WARN
+        log_level = logging.WARN
         if context.obj.get('debug', False):
             log_level = logging.DEBUG
         super(Loader, self).__init__(logger, log_level)
