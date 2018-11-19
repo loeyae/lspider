@@ -11,7 +11,7 @@
     "message_queue": {
         "protocol": "amqp",
         "host": "117.79.146.156",
-        "port": 5672,
+        "port": 25672,
         "user": "guest",
         "password": "guest",
         "exchange": "cdspider",
@@ -21,7 +21,7 @@
     "database": {
         "protocol": "mongo",
         "host": "117.79.146.156",
-        "port": 27017,
+        "port": 3717,
         "db": "cdspider",
         "user": "root",
         "password": "8ZfFlwwxK8K5juxr"
