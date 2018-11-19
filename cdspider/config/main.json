@@ -10,8 +10,8 @@
     },
     "message_queue": {
         "protocol": "amqp",
-        "host": "47.93.128.20",
-        "port": 5672,
+        "host": "117.79.146.156",
+        "port": 25672,
         "user": "guest",
         "password": "guest",
         "exchange": "cdspider",
@@ -20,10 +20,10 @@
     },
     "database": {
         "protocol": "mongo",
-        "host": "114.112.86.141",
-        "port": 27017,
-        "db": "mytest",
-        "user": "abcdef",
-        "password": "123321"
+        "host": "117.79.146.156",
+        "port": 3717,
+        "db": "cdspider",
+        "user": "root",
+        "password": "8ZfFlwwxK8K5juxr"
     }
 }
