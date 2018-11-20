@@ -277,9 +277,10 @@ class Spider(Component):
             return json.dumps(result)
         application.register_function(hello, 'hello')
 
-        def fetch(task, return_result = False):
+        def fetch(task):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
+            return_result = task.get('return_result', False)
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
