@@ -22,6 +22,7 @@ from .Sitesdb import SitesDB
 from .Taskdb import TaskDB
 from .Uniquedb import UniqueDB
 from .Urlsdb import UrlsDB
+from .UrlsUniquedb import UrlsUniqueDB
 from .WechatRobotChatInfodb import WechatRobotChatInfoDB
 from .WechatRobotChatRoomsdb import WechatRobotChatRoomsDB
 from .WechatRobotFriendsdb import WechatRobotFriendsDB
