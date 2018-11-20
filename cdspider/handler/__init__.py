@@ -98,6 +98,12 @@ class BaseHandler(Component):
     def __del__(self):
         self.close()
 
+    def route(self, mode):
+        pass
+
+    def schedule(self, message):
+        pass
+
     def handler_register(self, handle_type, priority = 1000):
         """
         handler register
