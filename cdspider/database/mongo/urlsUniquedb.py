@@ -10,60 +10,37 @@
 """
 import time
 import pymongo
-from cdspider.database.base import UrlsDB as BaseUrlsDB
+from cdspider.database.base import UrlsUniqueDB as BaseUrlsUniqueDB
 from .Mongo import Mongo
 
-class UrlsDB(Mongo, BaseUrlsDB):
+class UrlsUniqueDB(Mongo, BaseUrlsUniqueDB):
 
-    __tablename__ = 'urls'
+    __tablename__ = 'urlsUnique'
 
-    incr_key = 'url'
+    incr_key = ''
 
     def __init__(self, connector, table=None, **kwargs):
-        super(UrlsDB, self).__init__(connector, table = table, **kwargs)
+        super(UrlsUniqueDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'uuid' in indexes:
-            collection.create_index('uuid', unique=True, name='uuid')
-        if not 'pid' in indexes:
-            collection.create_index('pid', name='pid')
-        if not 'sid' in indexes:
-            collection.create_index('sid', name='sid')
-        if not 'typeChannel' in indexes:
-            collection.create_index('typeChannel', name='typeChannel')
-        if not 'typeList' in indexes:
-            collection.create_index('typeList', name='typeList')
-        if not 'typeDetail' in indexes:
-            collection.create_index('typeDetail', name='typeDetail')
-        if not 'typeOther' in indexes:
-            collection.create_index('typeOther', name='typeOther')
-        if not 'linkText' in indexes:
-            collection.create_index('linkText', name='linkText')
+        if not 'urlmd5' in indexes:
+            collection.create_index('urlmd5', unique=True, name='urlmd5')
         if not 'url' in indexes:
-            collection.create_index([('url', pymongo.TEXT)], name='url')
-        if not 'dataNum' in indexes:
-            collection.create_index('dataNum', name='dataNum')
-        if not 'addAuthor' in indexes:
-            collection.create_index('addAuthor', name='addAuthor')
-        if not 'status' in indexes:
-            collection.create_index('status', name='status')
+            collection.create_index('url', name='url')
 
     def insert(self, obj = {}):
-        obj['uuid'] = self._get_increment(self.incr_key)
-        obj.setdefault('status', self.STATUS_INIT)
-        obj.setdefault('dataNum', int(time.time()))
-        _id = super(UrlsDB, self).insert(setting=obj)
-        return obj['uuid']
+        _id = super(UrlsUniqueDB, self).insert(setting=obj)
+        return obj['urlmd5']
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(UrlsDB, self).update(setting=obj, where={'uid': int(id)}, multi=False)
+        return super(UrlsUniqueDB, self).update(setting=obj, where={'uid': int(id)}, multi=False)
 
     def update_many(self, obj = {},where=None):
         if where=={} or where==None:
             return
         obj['utime'] = int(time.time())
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
+        return super(UrlsUniqueDB, self).update(setting=obj, where=where, multi=True)
 
     def delete(self, id, where = {}):
         obj = {"status": self.STATUS_DELETED}
@@ -72,7 +49,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where = {'uid': int(id)}
         else:
             where.update({'uid': int(id)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
+        return super(UrlsUniqueDB, self).update(setting=obj, where=where, multi=False)
 
     def delete_by_site(self, sid, where = {}):
         obj = {"status": self.STATUS_DELETED}
@@ -81,7 +58,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where = {"sid": int(sid)}
         else:
             where.update({"sid": int(sid)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
+        return super(UrlsUniqueDB, self).update(setting=obj, where=where, multi=True)
 
     def delete_by_project(self, pid, where = {}):
         obj = {"status": self.STATUS_DELETED}
@@ -90,7 +67,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where = {'pid': int(pid)}
         else:
             where.update({'pid': int(pid)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
+        return super(UrlsUniqueDB, self).update(setting=obj, where=where, multi=True)
 
     def active(self, id, where = {}):
         obj = {"status": self.STATUS_ACTIVE}
@@ -99,7 +76,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where = {'uid': int(id)}
         else:
             where.update({'uid': int(id)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
+        return super(UrlsUniqueDB, self).update(setting=obj, where=where, multi=False)
 
     def disable(self, id, where = {}):
         obj = {"status": self.STATUS_INIT}
@@ -108,7 +85,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where = {'uid': int(id)}
         else:
             where.update({'uid': int(id)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
+        return super(UrlsUniqueDB, self).update(setting=obj, where=where, multi=False)
 
     def disable_by_site(self, sid, where = {}):
         obj = {"status": self.STATUS_INIT}
@@ -117,7 +94,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where = {"sid": int(sid)}
         else:
             where.update({"sid": int(sid)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
+        return super(UrlsUniqueDB, self).update(setting=obj, where=where, multi=True)
 
     def disable_by_project(self, pid, where = {}):
         obj = {"status": self.STATUS_INIT}
@@ -126,7 +103,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where = {'pid': int(pid)}
         else:
             where.update({'pid': int(pid)})
-        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
+        return super(UrlsUniqueDB, self).update(setting=obj, where=where, multi=True)
 
     def get_detail(self, id):
         return self.get(where={'uid': int(id)})

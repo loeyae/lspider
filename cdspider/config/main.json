@@ -1,5 +1,5 @@
 {
-    "debug": true,
+    "debug": false,
     "runtime_dir": "/var/run/cdspider",
     "proxy": {
         "proxy_url": "http://114.112.86.46:8086/get_ips/own/50",
