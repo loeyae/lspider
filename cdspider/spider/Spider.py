@@ -277,19 +277,22 @@ class Spider(Component):
             return json.dumps(result)
         application.register_function(hello, 'hello')
 
-        def fetch(task):
+        def fetch(task, return_result = False):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
-                ret = self.fetch(task, True)
-                if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
-                    parsed, broken_exc, last_source, final_url = ret[0]
+                ret = self.fetch(task, return_result)
+                if return_result:
+                    if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
+                        parsed, broken_exc, last_source, final_url = ret[0]
+                    else:
+                        self.error(ret)
+                    if last_source:
+                        last_source = utils.decode(last_source)
                 else:
-                    self.error(ret)
-                if last_source:
-                    last_source = utils.decode(last_source)
+                    parsed = True
             except :
                 broken_exc = traceback.format_exc()
             output = sys.stdout.read()
