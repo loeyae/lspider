@@ -102,14 +102,10 @@ class LinksClusterHandler(BaseHandler):
             for item in sortArr:
                 for it in item:
                     urlmd5 = hashlib.md5(it[0].encode(encoding='UTF-8')).hexdigest()
-                    print(urlmd5)
-                    urlsUniquedb.insert({"urlmd5": urlmd5, "url": it[0]})
-                    exit()
                     try:
                         urlsUniquedb.insert({"urlmd5": urlmd5, "url": it[0]})
                         print('write success!')
-                        exit()
-                        # urlsdb.insert({"url": it[0], "title": arrTitle[it[0]]})
+                        urlsdb.insert({"url": it[0], "title": arrTitle[it[0]]})
                     except Exception as e:
                         print('url is exist!')
 
