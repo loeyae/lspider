@@ -42,13 +42,14 @@ class Router(BaseScheduler):
             while True:
                 has_item = False
                 for item in handler.route(self.mode, save):
-                    has_item = True
-                    message = {
-                        "mode": self.mode,
-                        "h-mode": key,
-                        "item": item,
-                    }
-                    self.outqueue.put_nowait(message)
+                    if item:
+                        has_item = True
+                        message = {
+                            "mode": self.mode,
+                            "h-mode": key,
+                            "item": item,
+                        }
+                        self.outqueue.put_nowait(message)
                 if not has_item:
                     break
         self.info("%s route end" % self.__class__.__name__)
