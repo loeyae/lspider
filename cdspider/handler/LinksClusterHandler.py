@@ -105,7 +105,7 @@ class LinksClusterHandler(BaseHandler):
                     try:
                         urlsUniquedb.insert({"urlmd5": urlmd5, "url": it[0]})
                         print('write success!')
-                        urlsdb.insert({"url": it[0], "title": arrTitle[it[0]]})
+                        urlsdb.insert({"url": it[0], "title": arrTitle[it[0]], "cluster": it[1]})
                     except Exception as e:
                         print('url is exist!')
 

@@ -41,6 +41,8 @@ class UrlsDB(Mongo, BaseUrlsDB):
             collection.create_index('linkText', name='linkText')
         if not 'url' in indexes:
             collection.create_index([('url', pymongo.TEXT)], name='url')
+        if not 'cluster' in indexes:
+            collection.create_index('cluster', name='cluster')
         if not 'dataNum' in indexes:
             collection.create_index('dataNum', name='dataNum')
         if not 'addAuthor' in indexes:
