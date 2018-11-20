@@ -343,14 +343,20 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 @click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('-U', '--url', default='http://2018.ip138.com/ic.asp', help='url')
 @click.option('-M', '--mode', default="default", help="mode")
+@click.option('-P', '--pid', default="0", help="pid")
+@click.option('-S', '--sid', default="0", help="sid")
+@click.option('-T', '--tid', default="0", help="tid")
 @click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
 @click.pass_context
-def test(ctx, spider_cls, url, mode, no_input):
+def test(ctx, spider_cls, url, mode, pid, sid, tid, no_input):
     Spider = load_cls(ctx, None, spider_cls)
     spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
     task = {
         "url": url,
         "mode": mode,
+        "pid": pid,
+        "sid": sid,
+        "tid": tid,
     }
 #    task = None
     task = spider.get_task(message = task, no_check_status = True)

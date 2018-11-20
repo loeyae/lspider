@@ -53,7 +53,8 @@ class UrlsDB(Mongo, BaseUrlsDB):
     def insert(self, obj = {}):
         obj['uuid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
-        obj.setdefault('dataNum', int(time.time()))
+        obj.setdefault('ctime', int(time.time()))
+        obj.setdefault('dataNum', 0)
         _id = super(UrlsDB, self).insert(setting=obj)
         return obj['uuid']
 
