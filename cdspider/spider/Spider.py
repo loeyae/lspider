@@ -61,8 +61,6 @@ class Spider(Component):
             self.handler = handler
 
     def fetch(self, task, return_result = False):
-        print(task['url'])
-        exit()
         """
         抓取操作
         """
