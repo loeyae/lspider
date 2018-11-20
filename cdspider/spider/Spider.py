@@ -109,7 +109,7 @@ class Spider(Component):
                     self.info("Spider crawl end")
                     self.info("Spider parse start")
                     handler.parse()
-                    self.info("Spider parse end")
+                    self.info("Spider parse end, result: %s" % str(handler.response))
                     self.info("Spider result start")
                     handler.on_result(save)
                     self.info("Spider result end, result: %s" % str(handler.response))
