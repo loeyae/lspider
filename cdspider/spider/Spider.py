@@ -110,13 +110,13 @@ class Spider(Component):
                     self.info("Spider parse start")
                     handler.parse()
                     self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
-                    self.info("Spider result start")
-                    handler.on_result(save)
-                    self.info("Spider result end")
                     if return_result:
                         return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
 
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
+                    self.info("Spider result start")
+                    handler.on_result(save)
+                    self.info("Spider result end")
                     handler.on_next(save)
             finally:
                 self.info("Spider process end")
@@ -277,13 +277,13 @@ class Spider(Component):
             return json.dumps(result)
         application.register_function(hello, 'hello')
 
-        def fetch(task):
+        def fetch(task, return_result = False):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
-                ret = self.fetch(task)
+                ret = self.fetch(task, return_result)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
                     parsed, broken_exc, last_source, final_url = ret[0]
                 else:
