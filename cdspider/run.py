@@ -433,6 +433,5 @@ def all(ctx, fetch_num, exc_work_num, run_in):
 def main():
     cli()
 
-
 if __name__ == "__main__":
     main()

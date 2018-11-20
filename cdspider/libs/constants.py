@@ -91,6 +91,7 @@ HANDLER_MODE_WECHAT_ITEM = 'wechat-item'
 HANDLER_MODE_TOUTIAO_ITEM = 'toutiao-item'
 HANDLER_MODE_BBS_ITEM = 'bbs-item'
 HANDLER_MODE_WEMEDIA_ITEM = 'wemedia-item'
+HANDLER_MODE_LINKS_CLUSTER = 'links-cluster'
 
 #handler mode mapping HANDLER
 HANDLER_MODE_HANDLER_MAPPING = {
@@ -105,6 +106,7 @@ HANDLER_MODE_HANDLER_MAPPING = {
     HANDLER_MODE_TOUTIAO_ITEM: 'ToutiaoItemHandler',
     HANDLER_MODE_BBS_ITEM: 'BbsItemHandler',
     HANDLER_MODE_WEMEDIA_ITEM: 'WemediaItemHandler',
+    HANDLER_MODE_LINKS_CLUSTER: 'LinksClusterHandler',
 }
 
 #handler mode mapping db

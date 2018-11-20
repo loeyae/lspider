@@ -323,3 +323,4 @@ class BaseHandler(Component):
 
 from .Loader import Loader
 from .GeneralHandler import GeneralHandler
+from .LinksClusterHandler import LinksClusterHandler
