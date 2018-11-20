@@ -112,13 +112,13 @@ class Spider(Component):
                     self.info("Spider parse start")
                     handler.parse()
                     self.info("Spider parse end")
+                    self.info("Spider result start")
+                    handler.on_result(save)
+                    self.info("Spider result end, result: %s" % str(handler.response))
                     if return_result:
                         return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
 
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
-                    self.info("Spider result start")
-                    handler.on_result(save)
-                    self.info("Spider result end, result: %s" % str(handler.response))
                     handler.on_next(save)
             finally:
                 self.info("Spider process end")
@@ -279,21 +279,20 @@ class Spider(Component):
             return json.dumps(result)
         application.register_function(hello, 'hello')
 
-        def fetch(task, return_result = False):
+        def fetch(task):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
-                ret = self.fetch(task, return_result)
-                if return_result:
-                    if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
-                        parsed, broken_exc, last_source, final_url = ret[0]
-                    else:
-                        self.error(ret)
-                    if last_source:
-                        last_source = utils.decode(last_source)
+                ret = self.fetch(task)
+                if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
+                    parsed, broken_exc, last_source, final_url = ret[0]
                 else:
+                    self.error(ret)
+                if last_source:
+                    last_source = utils.decode(last_source)
+                if parsed:
                     parsed = True
             except :
                 broken_exc = traceback.format_exc()
@@ -306,10 +305,10 @@ class Spider(Component):
         def get_task(data):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
-            message = task = broken_exc = None
+            task = broken_exc = None
             try:
-                message, task = json.loads(data)
-                task = self.get_task(message, task, no_check_status = True)
+                task = json.loads(data)
+                task = self.get_task(task, no_check_status = True)
             except :
                 broken_exc = traceback.format_exc()
             output = sys.stdout.read()
