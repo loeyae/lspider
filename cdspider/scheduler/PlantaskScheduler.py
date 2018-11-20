@@ -36,9 +36,10 @@ class PlantaskScheduler(BaseScheduler):
         while True:
             has_item = False
             for item in handler.schedule(message, save):
-                item['mode'] = handler_mode
-                self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
-                has_item = True
+                if item:
+                    item['mode'] = handler_mode
+                    self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
+                    has_item = True
             if not has_item:
                 break
         self.info("%s schedule end" % self.__class__.__name__)
