@@ -21,8 +21,8 @@ class BaseWorker(Component):
     def __init__(self, context):
         self.ctx = context
         self.g = context.obj
-        self.db = g['db']
-        self.queue = g['queue']
+        self.db = self.g['db']
+        self.queue = self.g['queue']
         self._quit=False
         self.inqueue = None
         self.excqueue = None
