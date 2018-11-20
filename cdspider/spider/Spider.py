@@ -111,7 +111,7 @@ class Spider(Component):
                     handler.parse()
                     self.info("Spider parse end")
                     if return_result:
-                        return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url']))
+                        return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
 
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
                     self.info("Spider result start")
@@ -124,7 +124,7 @@ class Spider(Component):
             if not return_result:
                 handler.on_error(e)
             else:
-                return_data.append((None, traceback.format_exc(), None, None, None, None))
+                return_data.append((None, traceback.format_exc(), None, None, save))
                 self.error(traceback.format_exc())
         finally:
             if not return_result:
@@ -280,12 +280,12 @@ class Spider(Component):
         def fetch(task):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
-            parsed = broken_exc = last_source = final_url = save = attach_task = None
+            parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
                 ret = self.fetch(task, True)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
-                    parsed, broken_exc, last_source, final_url, save, attach_task = ret[0]
+                    parsed, broken_exc, last_source, final_url = ret[0]
                 else:
                     self.error(ret)
                 if last_source:
@@ -293,7 +293,7 @@ class Spider(Component):
             except :
                 broken_exc = traceback.format_exc()
             output = sys.stdout.read()
-            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, 'attach_task': attach_task}
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
 
             return json.dumps(result)
         application.register_function(fetch, 'fetch')
