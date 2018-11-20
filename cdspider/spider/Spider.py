@@ -304,10 +304,10 @@ class Spider(Component):
         def get_task(data):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
-            message = task = broken_exc = None
+            task = broken_exc = None
             try:
-                message, task = json.loads(data)
-                task = self.get_task(message, task, no_check_status = True)
+                task = json.loads(data)
+                task = self.get_task(task, no_check_status = True)
             except :
                 broken_exc = traceback.format_exc()
             output = sys.stdout.read()
