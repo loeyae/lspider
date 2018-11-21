@@ -43,11 +43,11 @@ class ProjectsDB(Base):
     def delete(self, id):
         raise NotImplementedError
 
-    def get_list(self, where = {}, select = None):
+    def get_list(self, where = {}, select = None, **kwargs):
         raise NotImplementedError
 
-    def get_count(self, where = {}, select = None):
+    def get_count(self, where = {}, select = None, **kwargs):
         raise NotImplementedError
 
-    def get_list_c(self, where = {}, select = None):
+    def get_new_list(self, where = {}, select = None, **kwargs):
         raise NotImplementedError
