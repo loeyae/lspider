@@ -11,7 +11,7 @@ import logging
 from . import BaseScheduler
 from cdspider.exceptions import *
 from cdspider.libs.constants import *
-from cdspider.libs.utils import get_object
+from cdspider.libs.utils import get_object, run_in_thread
 
 class Router(BaseScheduler):
     """
@@ -36,79 +36,31 @@ class Router(BaseScheduler):
 
     def schedule(self, message = None):
         self.info("%s route starting..." % self.__class__.__name__)
-        for key, name in HANDLER_MODE_HANDLER_MAPPING.items():
-            handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
+        def handler_schedule(key, name, mode, ctx):
+            handler = get_object("cdspider.handler.%s" % name)(ctx, None)
             save = {}
             while True:
                 has_item = False
-                for item in handler.route(self.mode, save):
+                for item in handler.route(mode, save):
                     if item:
                         has_item = True
                         message = {
-                            "mode": self.mode,
+                            "mode": mode,
                             "h-mode": key,
                             "item": item,
                         }
                         self.outqueue.put_nowait(message)
                 if not has_item:
                     break
+        threads = []
+        for key, name in HANDLER_MODE_HANDLER_MAPPING.items():
+            threads.append(run_in_thread(handler_schedule, key, name, self.mode, self.ctx))
+
+        for each in threads:
+            if not each.is_alive():
+                continue
+            if hasattr(each, 'terminate'):
+                each.terminate()
+            each.join()
+
         self.info("%s route end" % self.__class__.__name__)
-
-    def xmlrpc_run(self, port=23333, bind='127.0.0.1'):
-        import umsgpack
-        from cdspider.libs import WSGIXMLRPCApplication
-        from xmlrpc.client import Binary
-
-        application = WSGIXMLRPCApplication()
-
-        application.register_function(self.quit, '_quit')
-
-        def hello():
-            result = {"message": "xmlrpc is running"}
-            return json.dumps(result)
-        application.register_function(hello, 'hello')
-
-        def add_project(pid):
-            r_obj = utils.__redirection__()
-            sys.stdout = r_obj
-            broken_exc = None
-            try:
-                self.projects.add(pid)
-                status = 200
-            except :
-                broken_exc = traceback.format_exc()
-                status = 500
-            output = sys.stdout.read()
-            result = {"broken_exc": broken_exc, "stdout": output, 'status': status}
-
-            return json.dumps(result)
-        application.register_function(add_project, 'new_project')
-
-        def remove_project(pid):
-            r_obj = utils.__redirection__()
-            sys.stdout = r_obj
-            broken_exc = None
-            try:
-                self.projects.remove(pid)
-                status = 200
-            except KeyError:
-                status = 200
-            except :
-                broken_exc = traceback.format_exc()
-                status = 500
-            output = sys.stdout.read()
-            result = {"broken_exc": broken_exc, "stdout": output, 'status': status}
-
-            return json.dumps(result)
-        application.register_function(remove_project, 'remove_project')
-
-        import tornado.wsgi
-        import tornado.ioloop
-        import tornado.httpserver
-
-        container = tornado.wsgi.WSGIContainer(application)
-        self.xmlrpc_ioloop = tornado.ioloop.IOLoop()
-        self.xmlrpc_server = tornado.httpserver.HTTPServer(container, io_loop=self.xmlrpc_ioloop)
-        self.xmlrpc_server.listen(port=port, address=bind)
-        self.info('spider.xmlrpc listening on %s:%s', bind, port)
-        self.xmlrpc_ioloop.start()
