@@ -268,6 +268,7 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 @click.option('-P', '--pid', default="0", help="pid")
 @click.option('-S', '--sid', default="0", help="sid")
 @click.option('-T', '--tid', default="0", help="tid")
+@click.option('-TI', '--tier', default="1", help="tier")
 @click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
 @click.pass_context
 def test(ctx, spider_cls, url, mode, pid, sid, tid, no_input):
@@ -279,6 +280,7 @@ def test(ctx, spider_cls, url, mode, pid, sid, tid, no_input):
         "pid": pid,
         "sid": sid,
         "tid": tid,
+        "tier": tier,
     }
 #    task = None
     task = spider.get_task(message = task, no_check_status = True)
