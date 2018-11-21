@@ -15,7 +15,7 @@ from .Mongo import Mongo
 
 class ProjectsDB(Mongo, BaseProjectsDB):
 
-    __tablename__ = 'projects'
+    __tablename__ = 'project'
 
     incr_key = 'project'
 
