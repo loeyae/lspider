@@ -11,6 +11,7 @@ from cdspider import Component
 from cdspider.exceptions import *
 from cdspider.handler import BaseHandler
 from cdspider.libs.tools import ModulerLoader
+from cdspider.libs.utils import get_object
 from cdspider.libs.constants import *
 
 class Loader(Component):
@@ -21,6 +22,7 @@ class Loader(Component):
         self.ctx = context
         self.task = task
         self.params = {"spider": spider, "no_sync": no_sync}
+        handler = None
         logger = logging.getLogger('handler')
         log_level = logging.WARN
         if context.obj.get('debug', False):
@@ -29,6 +31,8 @@ class Loader(Component):
 
     def get_moduler(self):
         scripts = self.get_scripts()
+        if isinstance(scripts, BaseHandler):
+            return scripts
         moduler = {
             "name": "cdspider.handler.custom",
             "scripts": scripts,
@@ -38,15 +42,19 @@ class Loader(Component):
         return moduler
 
     def get_scripts(self):
-        hasscripts = False
-        #TODO 根据任务从数据库获取详细信息
-        if not hasscripts:
-            mode = self.task.get('mode', HANDLER_MODE_DEFAULT)
-            return DEFAULT_HANDLER_SCRIPTS % {"handler": HANDLER_MODE_HANDLER_MAPPING[mode]}
+        mode = self.task.get('mode', HANDLER_MODE_DEFAULT)
+        _class = get_object('cdspider.handler.%s' % HANDLER_MODE_HANDLER_MAPPING[mode])
+        handler = _class(self.ctx, self.task, spider=self.params.get('spider', None), no_sync=self.params.get('no_sync', False))
+        scripts = handler.get_scripts()
+        if scripts:
+            return scripts
+        return handler
 
     def load(self):
         try:
             moduler = self.get_moduler()
+            if isinstance(moduler, BaseHandler):
+                return moduler
             moduler.update(self.params)
             mod = ModulerLoader(moduler).load_module()
             if hasattr(mod, 'handler'):
