@@ -42,8 +42,7 @@ class Spider(Component):
         else:
             queue = g.get('queue')
 
-        self.inqueue = queue.get('scheduler2spider')
-        self.status_queue = queue.get('status_queue')
+        self.inqueue = queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
         self.queue = queue
         self.no_sync = no_sync
         self.ioloop = tornado.ioloop.IOLoop()
