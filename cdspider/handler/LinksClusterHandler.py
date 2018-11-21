@@ -27,7 +27,7 @@ class LinksClusterHandler(BaseHandler):
     def run_parse(self, rule):
         extractor = LinksExtractor(url=self.response['final_url'])
         extractor.exctract(self.response['last_source'])
-        self.response['parsed'] = extractor.infos['domain']
+        self.response['parsed'] = extractor.infos['subdomain']
 
     # def run_result(self, save):
     #     if self.response['parsed']:
