@@ -106,18 +106,3 @@ HANDLER_MODE_HANDLER_MAPPING = {
     HANDLER_MODE_WEMEDIA_ITEM: 'WemediaItemHandler',
     HANDLER_MODE_LINKS_CLUSTER: 'LinksClusterHandler',
 }
-
-#handler mode mapping db
-HANDLER_MODE_DB_MAPPING = {
-    HANDLER_MODE_DEFAULT: None,
-    HANDLER_MODE_DEFAULT_LIST: 'url',
-    HANDLER_MODE_WECHAT_LIST: 'url',
-    HANDLER_MODE_TOUTIAO_LIST: 'url',
-    HANDLER_MODE_BBS_LIST: 'url',
-    HANDLER_MODE_WEMEDIA_LIST: 'url',
-    HANDLER_MODE_DEFAULT_ITEM: 'GeneralItemHandler',
-    HANDLER_MODE_WECHAT_ITEM: 'WechatItemHandler',
-    HANDLER_MODE_TOUTIAO_ITEM: 'ToutiaoItemHandler',
-    HANDLER_MODE_BBS_ITEM: 'BbsItemHandler',
-    HANDLER_MODE_WEMEDIA_ITEM: 'WemediaItemHandler',
-}
