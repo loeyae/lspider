@@ -23,7 +23,7 @@ class Router(BaseScheduler):
 
     def __init__(self, context, mode):
         super(Router, self).__init__(context)
-        self.outqueue = self.queue["scheduler2task"]
+        self.outqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_TASK]
         self.mode = mode
         self.interval = 5
         self._check_time = None
