@@ -104,8 +104,13 @@ class LinksClusterHandler(BaseHandler):
                     urlmd5 = hashlib.md5(it[0].encode(encoding='UTF-8')).hexdigest()
                     try:
                         urlsUniquedb.insert({"urlmd5": urlmd5, "url": it[0]})
+                        urlpath = urlparse(it[0]).path
+                        if len(urlpath) <= 1:
+                            baseUrl = 1
+                        else:
+                            baseUrl = 0
+                        urlsdb.insert({"url": it[0], "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "baseUrl": baseUrl})
                         print('write success!')
-                        urlsdb.insert({"url": it[0], "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid']})
                     except Exception as e:
                         print('url is exist!')
 
