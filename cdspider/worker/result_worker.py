@@ -21,84 +21,12 @@ class ResultWorker(BaseWorker):
     """
 
     def get_task(self, data):
-        task = {
-            "mode": 'item',
-            "projectid": data.get("projectid"),
-            "status": TaskDB.TASK_STATUS_ACTIVE,
-            "siteid": data.get("siteid"),
-            "urlid": data.get("urlid", 0),
-            "kwid": data.get("kwid", 0),
-            "url": data.get('url'),
-            "atid": data.get('atid', 0),
-            "unid": {"unid": data.get('unid'), "createtime": data.get('createtime')},
-            "rid": data.get('rid'),
-            "item": {
-                'title': data.get('title', None),
-                'author': data.get('author', None),
-                'created': data.get('created', None),
-                'content': data.get('content', None),
-                'summary': data.get('summary', None),
-                },
-            "save": {
-                "base_url": data.get('url')
-            }
-        }
-        return task
+        pass
 
     def on_result(self, message):
         self.proxy = self.g['proxy']
         self.debug("got message: %s" % message)
-        result = self.get_result(message)
-        if not result or result['status'] != self.resultdb.RESULT_STATUS_INIT:
-            return
-        data={}
-        if message.get('task', 0) == 1:
-            task = self.get_task(result)
-            task['queue_message'] = message
-            task['queue'] = self.inqueue
-            inqueue=None
-            outqueue=self.inqueue
-            status_queue = None
-            requeue = self.outqueue
-            excqueue=self.excqueue
-            ProjectsDB=self.ProjectsDB
-            sitetypedb = self.sitetypedb
-            TaskDB = None
-            SitesDB=self.SitesDB
-            UniqueDB=self.UniqueDB
-            UrlsDB=self.UrlsDB
-            AttachmentDB=self.AttachmentDB
-            KeywordsDB=self.KeywordsDB
-            customdb=self.customdb
-            resultdb=self.resultdb
-            spider = Spider(db=self.db, queue=self.queue, handler=None, proxy=self.proxy, log_level=self.log_level)
-            task = spider.get_task({'pid': result.get('projectid')}, task)
-            spider.fetch(task)
-        else:
-            parser = ItemParser(source=result['source'], ruleset=None)
-            data = parser.parse()
-            if data and 'item' in data and data['item']:
-                data['item'] = utils.dictjoin(data['item'], result)
-                created = data['item'].pop('created', None)
-                if created:
-                    created = TimeParser.timeformat(TimeParser.parser_time(str(created)))
-                if not created:
-                    created = int(time.time())
-                update = {}
-                update['title'] = data['item'].pop('title', None)
-                update['author'] = data['item'].pop('author', None)
-                update['summary'] = data['item'].pop('summary', None)
-                update['content'] = data['item'].pop('content', None)
-                update['created'] = created
-                update['status'] = self.resultdb.RESULT_STATUS_PARSED
-                update['updatetime'] = int(time.time())
-                if not result['item']:
-                    del result['item']
-                update['result'] = result or None
-                self.resultdb.update(message['id'], update)
+        pass
 
     def get_result(self, message):
-        if not 'id' in message or not message['id']:
-            return None
-        id = message['id']
-        return self.resultdb.get_detail(id)
+        pass
