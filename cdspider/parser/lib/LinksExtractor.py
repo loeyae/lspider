@@ -18,7 +18,7 @@ class LinksExtractor(object):
     """
     Links Extract
     """
-
+    
     def __init__(self, url, source = None, links = None):
         subdomain, domain = utils.parse_domain(url)
 
