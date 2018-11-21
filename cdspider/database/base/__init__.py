@@ -31,3 +31,4 @@ from .WechatRobotInfodb import WechatRobotInfoDB
 from .WechatRobotMpsChatdb import WechatRobotMpsChatDB
 from .WechatRobotMpsSharingdb import WechatRobotMpsSharingDB
 from .WechatRobotMpsdb import WechatRobotMpsDB
+from .SpiderTaskdb import SpiderTaskDB

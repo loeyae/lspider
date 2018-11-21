@@ -39,11 +39,11 @@ class Spider(Component):
         g = context.obj
         if no_input:
             queue = {}
+            self.inqueue = None
         else:
             queue = g.get('queue')
+            self.inqueue = queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
 
-        self.inqueue = queue.get('scheduler2spider')
-        self.status_queue = queue.get('status_queue')
         self.queue = queue
         self.no_sync = no_sync
         self.ioloop = tornado.ioloop.IOLoop()
@@ -61,8 +61,6 @@ class Spider(Component):
             self.handler = handler
 
     def fetch(self, task, return_result = False):
-        print(task['url'])
-        exit()
         """
         抓取操作
         """
@@ -108,17 +106,17 @@ class Spider(Component):
                         raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['last_url'])
                     last_source_unid = unid
                     last_url = handler.response['last_url']
-                    self.info("Spider crawl end")
+                    self.info("Spider crawl end, source: %s" % str(handler.response["last_source"]))
                     self.info("Spider parse start")
                     handler.parse()
-                    self.info("Spider parse end")
-                    self.info("Spider result start")
-                    handler.on_result(save)
-                    self.info("Spider result end, result: %s" % str(handler.response))
+                    self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
                     if return_result:
                         return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
 
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
+                    self.info("Spider result start")
+                    handler.on_result(save)
+                    self.info("Spider result end")
                     handler.on_next(save)
             finally:
                 self.info("Spider process end")
@@ -285,7 +283,8 @@ class Spider(Component):
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
-                ret = self.fetch(task)
+                return_result = task.pop('return_result', False)
+                ret = self.fetch(task, return_result)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
                     parsed, broken_exc, last_source, final_url = ret[0]
                 else:

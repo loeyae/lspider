@@ -12,7 +12,7 @@ from cdspider.exceptions import *
 
 class SyncKafkaWorker(BaseWorker):
 
-    inqueue_key = "result2kafka"
+    inqueue_key = QUEUE_NAME_RESULT_TO_KAFKA
 
     def __init__(self, context):
         super(SyncKafkaWorker, self).__init__(context)

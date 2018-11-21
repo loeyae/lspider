@@ -33,6 +33,9 @@ class BaseScheduler(Component):
     def schedule(self, message):
         raise NotImplementedError
 
+    def valid(self):
+        return True
+
     def quit(self):
         self._quit = True
         self._running = False
@@ -55,6 +58,9 @@ class BaseScheduler(Component):
         def queue_loop():
             while not self._quit:
                 try:
+                    if not self.valid():
+                        time.sleep(2)
+                        continue
                     message = None
                     if self.inqueue:
                         message = self.inqueue.get_nowait()
@@ -83,7 +89,3 @@ class BaseScheduler(Component):
 
 from .Router import Router
 from .PlantaskScheduler import PlantaskScheduler
-from .SynctaskScheduler import SynctaskScheduler
-from .NewtaskScheduler import NewtaskScheduler
-from .StatusScheduler import StatusScheduler
-from .SearchScheduler import SearchScheduler

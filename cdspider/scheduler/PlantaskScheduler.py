@@ -10,6 +10,7 @@ import time
 import logging
 from . import BaseScheduler
 from cdspider.exceptions import *
+from cdspider.libs.constants import *
 
 class PlantaskScheduler(BaseScheduler):
     """
@@ -19,62 +20,34 @@ class PlantaskScheduler(BaseScheduler):
 
     def __init__(self, context):
         super(PlantaskScheduler, self).__init__(context)
-        self.inqueue = self.queue["scheduler2task"]
+        self.inqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_TASK]
+        self.outqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
         rate_map = context.obj.get('rate_map')
         self.rate_map = rate_map
 
     def schedule(self, message):
-        if not 'pid' in message or not message['pid']:
-            raise CDSpiderError("pid is missing")
-        projectid = message['pid']
-        where = {}
-        if "uid" in message and message['uid']:
-            where["uid"] = message['uid']
-            where["aid"] = 0
-        elif "aid" in message and message['aid']:
-            where["aid"] = message['aid']
-        elif "kwid" in message and message['kwid']:
-            where["kwid"] = message['kwid']
-            where["aid"] = 0
-        elif "crid" in message and message['crid']:
-            where["crid"] = message['crid']
-            where["aid"] = 0
-        elif "sid" in message and message['sid']:
-            where["sid"] = message['sid']
-            where["aid"] = 0
-        tid = 0
-        projection = ["tid", "pid", "sid", "uid", "crid", "aid", "kwid", "rate", "plantime"]
+        self.debug("%s schedule got message: %s" % (self.__class__.__name__, str(message)))
+        if not 'h-mode' in message or not message['h-mode']:
+            raise CDSpiderError("%s handler mode is missing" % self.__class__.__name__)
+        self.info("%s schedule starting..." % self.__class__.__name__)
+        handler_mode = message['h-mode']
+        name = HANDLER_MODE_HANDLER_MAPPING[handler_mode]
+        handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
+        save = {}
         while True:
-            where['tid'] = {"$gt": tid}
-            task_list = self.db["TaskDB"].get_plan_list(pid=projectid, where=where, select=projection, sort=[("tid", 1)])
-            i = 0
-            now = int(time.time())
-            for task in task_list:
-                self.debug("%s schedule task@%s: %s " % (self.__class__.__name__, projectid, str(task)))
-                obj={}
-                if task['aid'] > 0:
-                    obj['mode']='att'
-                elif 'crid' in task and task['crid'] > 0:
-                    obj['mode'] = 'channel'
-                else:
-                    obj['mode']='list'
-                obj['pid']=task['pid']
-                obj['tid']=task['tid']
-                plantime = now if task['plantime'] <= 0 else now + int(self.rate_map.get(str(task['rate']), self.DEFAULT_RATE)[0])
-                self.debug("%s schedule task %s plantime: %s old plantime: %s rate: %s" % (self.__class__.__name__, task['tid'], plantime, task['plantime'], task['rate']))
-                self.send_task(obj, now, plantime)
-                i += 1
-            if i == 0:
-                self.debug("%s check_tasks no newtask@%s" % (self.__class__.__name__, projectid))
+            has_item = False
+            for item in handler.schedule(message, save):
+                if item:
+                    item['mode'] = handler_mode
+                    self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
+                    has_item = True
+            if not has_item:
                 break
-            time.sleep(0.1)
+        self.info("%s schedule end" % self.__class__.__name__)
 
-    def send_task(self, task, now, plantime):
-        if self.queue['scheduler2spider']:
+    def send_task(self, task):
+        if self.outqueue:
             self.debug("push %s into queue: scheduler2spider" % task)
-            self.queue['scheduler2spider'].put_nowait(task)
-        if self.queue['scheduler2plan']:
-            task['plantime'] = plantime
-            task['now'] = now
-            self.debug("push %s into queue: scheduler2plan" % task)
-            self.queue['scheduler2plan'].put_nowait(task)
+            self.outqueue.put_nowait(task)
+        else:
+            raise CDSpiderError("%s outqueue is missing" % self.__class__.__name__)

@@ -18,15 +18,15 @@ class LinksExtractor(object):
     """
     Links Extract
     """
-
-    unique = set()
-    links = list()
-    links4domain = list()
-    links4subdomain = list()
-    links4other = list()
-
+    
     def __init__(self, url, source = None, links = None):
         subdomain, domain = utils.parse_domain(url)
+
+        self.unique = set()
+        self.links = list()
+        self.links4domain = list()
+        self.links4subdomain = list()
+        self.links4other = list()
         self.subdomain = None
         if subdomain and subdomain != 'www':
             self.subdomain = "%s.%s" % (subdomain, domain)

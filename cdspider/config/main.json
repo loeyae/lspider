@@ -13,7 +13,7 @@
         "host": "117.79.146.156",
         "port": 25672,
         "user": "guest",
-        "password": "guest",
+        "password": "Zkt4iyEk1bWmIq39",
         "exchange": "cdspider",
         "maxsize": 1000000,
         "queue_prefix": ""

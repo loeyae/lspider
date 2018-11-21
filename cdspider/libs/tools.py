@@ -92,8 +92,6 @@ class queue_wrapper(collections.UserDict):
         if key in self.data:
             return super(queue_wrapper, self).__getitem__(key)
         queue_setting = copy.deepcopy(self.queue_setting)
-        if key == 'spider2scheduler' or key == 'excinfo_queue':
-            queue_setting['maxsize'] = 0
         cls = connect_message_queue(self.context, key, queue_setting)
         self.data[key] = cls
         return cls
