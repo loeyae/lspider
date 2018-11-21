@@ -17,9 +17,6 @@ class Router(BaseScheduler):
     """
     路由--初级任务分发
     """
-    MODE_PROJECT = 'project'
-    MODE_SITE = 'site'
-    MODE_ITEM = 'item'
 
     def __init__(self, context, mode):
         super(Router, self).__init__(context)
