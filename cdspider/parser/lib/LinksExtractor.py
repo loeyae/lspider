@@ -18,7 +18,7 @@ class LinksExtractor(object):
     """
     Links Extract
     """
-    
+
     def __init__(self, url, source = None, links = None):
         subdomain, domain = utils.parse_domain(url)
 
@@ -27,6 +27,7 @@ class LinksExtractor(object):
         self.links4domain = list()
         self.links4subdomain = list()
         self.links4other = list()
+        self.linksofsubdomain = set()
         self.subdomain = None
         if subdomain and subdomain != 'www':
             self.subdomain = "%s.%s" % (subdomain, domain)
@@ -60,16 +61,26 @@ class LinksExtractor(object):
                 self.links.append(link)
                 self.analyze(link)
 
+    def get_subdomain(self, link):
+        parsed = urlparse(link)
+        extracted = tldextract.extract(link)
+        if parsed.path == '/' or not extracted.path:
+            if all((extracted.subdomain, extracted.subdomain != 'www', extracted.subdomain.find('.') == -1, extracted.subdomain != self.subdomain)):
+                url = "%s.%s" % (extracted.subdomain, self.domain)
+                self.linksofsubdomain.add(url)
+
     def analyze(self, link):
         if self.subdomain:
             if utils.url_is_from_any_domain(link['url'], [self.subdomain]):
                 self.links4subdomain.append(link)
             elif utils.url_is_from_any_domain(link['url'], [self.domain]):
+                self.get_subdomain(link)
                 self.links4domain.append(link)
             else:
                 self.links4other.append(link)
         else:
             if utils.url_is_from_any_domain(link['url'], [self.domain]):
+                self.get_subdomain(link)
                 self.links4domain.append(link)
                 self.links4subdomain.append(link)
             else:
@@ -77,7 +88,7 @@ class LinksExtractor(object):
 
     @property
     def infos(self):
-        return {'all': self.links, 'domain': self.links4domain, 'subdomain': self.links4subdomain, 'other': self.links4other}
+        return {'all': self.links, 'domain': self.links4domain, 'subdomain': self.links4subdomain, 'other': self.links4other, 'subdomains': self.links4subdomain + list(self.linksofsubdomain)}
 
 class TopLinkDetector(object):
 
