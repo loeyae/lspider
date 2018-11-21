@@ -64,7 +64,7 @@ class LinksExtractor(object):
     def get_subdomain(self, link):
         parsed = urlparse(link['url'])
         extracted = tldextract.extract(link['url'])
-        if parsed.path == '/' or not extracted.path:
+        if parsed.path == '/' or not parsed.path:
             if all((extracted.subdomain, extracted.subdomain != 'www', extracted.subdomain.find('.') == -1, extracted.subdomain != self.subdomain)):
                 url = "%s.%s" % (extracted.subdomain, self.domain)
                 self.linksofsubdomain.add(url)
