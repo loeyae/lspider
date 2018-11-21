@@ -106,3 +106,8 @@ HANDLER_MODE_HANDLER_MAPPING = {
 #    HANDLER_MODE_WEMEDIA_ITEM: 'WemediaItemHandler',
     HANDLER_MODE_LINKS_CLUSTER: 'LinksClusterHandler',
 }
+
+
+ROUTER_MODE_PROJECT = 'project'
+ROUTER_MODE_SITE = 'site'
+ROUTER_MODE_ITEM = 'item'
