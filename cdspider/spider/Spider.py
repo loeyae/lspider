@@ -280,10 +280,10 @@ class Spider(Component):
         def fetch(task):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
-            return_result = task.get('return_result', False)
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
+                return_result = task.pop('return_result', False)
                 ret = self.fetch(task, return_result)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
                     parsed, broken_exc, last_source, final_url = ret[0]
