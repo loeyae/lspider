@@ -39,10 +39,11 @@ class Spider(Component):
         g = context.obj
         if no_input:
             queue = {}
+            self.inqueue = None
         else:
             queue = g.get('queue')
+            self.inqueue = queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
 
-        self.inqueue = queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
         self.queue = queue
         self.no_sync = no_sync
         self.ioloop = tornado.ioloop.IOLoop()
