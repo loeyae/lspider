@@ -15,7 +15,7 @@ from .Mongo import Mongo
 
 class SitesDB(Mongo, BaseSitesDB):
 
-    __tablename__ = 'sites'
+    __tablename__ = 'site'
 
     incr_key = 'site'
 
@@ -23,8 +23,8 @@ class SitesDB(Mongo, BaseSitesDB):
         super(SitesDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'sid' in indexes:
-            collection.create_index('sid', unique=True, name='sid')
+        if not 'uuid' in indexes:
+            collection.create_index('uuid', unique=True, name='uuid')
         if not 'p_s' in indexes:
             collection.create_index([('pid', pymongo.ASCENDING),('status', pymongo.ASCENDING)], name='p_s')
         if not 'type' in indexes:
@@ -92,6 +92,9 @@ class SitesDB(Mongo, BaseSitesDB):
 
     def get_detail(self, id):
         return self.get(where={'sid': int(id)})
+
+    def get_site(self, id):
+        return self.get(where={'uuid': int(id)})
 
     def get_list(self, where, select=None, **kwargs):
         kwargs.setdefault('sort', [('sid', 1)])
