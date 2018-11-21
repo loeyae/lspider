@@ -55,9 +55,7 @@ QUEUE_NAME_SCHEDULER_TO_TASK = "scheduler2task"
 QUEUE_NAME_SCHEDULER_TO_SPIDER = "scheduler2spider"
 QUEUE_NAME_SPIDER_TO_RESULT = "spider2result"
 QUEUE_NAME_EXCINFO = "excinfo_queue"
-QUEUE_NAME_SEARCH = "search_work"
 QUEUE_NAME_RESULT_TO_KAFKA = "result2kafka"
-QUEUE_NAME_RESULT_TO_NEWTASK = "result2newtask"
 QUEUE_NAME_WECHAT_TO_REPLY = "wechat2reply"
 
 
