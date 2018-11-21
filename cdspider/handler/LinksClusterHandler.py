@@ -25,9 +25,18 @@ class LinksClusterHandler(BaseHandler):
         }
 
     def run_parse(self, rule):
-        extractor = LinksExtractor(url=self.response['final_url'])
+        # 根据sid取站点域名
+        sitedb = self.db['SitesDB']
+        site = sitedb.get_site(self.task['sid'])
+
+        extractor = LinksExtractor(url=site['url'])
         extractor.exctract(self.response['last_source'])
-        self.response['parsed'] = extractor.infos['subdomain']
+        
+        if '://www.' in site['url']:
+            re_type = 'domain'
+        else:
+            re_type = 'subdomains'
+        self.response['parsed'] = extractor.infos[re_type]
 
     # def run_result(self, save):
     #     if self.response['parsed']:
