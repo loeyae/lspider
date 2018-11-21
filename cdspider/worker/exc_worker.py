@@ -15,7 +15,7 @@ from cdspider.libs import utils
 
 class ExcWorker(BaseWorker):
 
-    inqueue_key = 'excinfo_queue'
+    inqueue_key = QUEUE_NAME_EXCINFO
 
 
     def __init__(self, context):
