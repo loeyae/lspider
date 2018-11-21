@@ -20,14 +20,15 @@ class PlantaskScheduler(BaseScheduler):
 
     def __init__(self, context):
         super(PlantaskScheduler, self).__init__(context)
-        self.inqueue = self.queue["scheduler2task"]
+        self.inqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_TASK]
+        self.outqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
         rate_map = context.obj.get('rate_map')
         self.rate_map = rate_map
 
     def schedule(self, message):
         self.debug("%s schedule got message: %s" % (self.__class__.__name__, str(message)))
         if not 'h-mode' in message or not message['h-mode']:
-            raise CDSpiderError("handler mode is missing")
+            raise CDSpiderError("%s handler mode is missing" % self.__class__.__name__)
         self.info("%s schedule starting..." % self.__class__.__name__)
         handler_mode = message['h-mode']
         name = HANDLER_MODE_HANDLER_MAPPING[handler_mode]
@@ -45,6 +46,8 @@ class PlantaskScheduler(BaseScheduler):
         self.info("%s schedule end" % self.__class__.__name__)
 
     def send_task(self, task):
-        if self.queue['scheduler2spider']:
+        if self.outqueue:
             self.debug("push %s into queue: scheduler2spider" % task)
-            self.queue['scheduler2spider'].put_nowait(task)
+            self.outqueue.put_nowait(task)
+        else:
+            raise CDSpiderError("%s outqueue is missing" % self.__class__.__name__)
