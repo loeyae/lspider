@@ -88,7 +88,7 @@ class LinksExtractor(object):
 
     @property
     def infos(self):
-        return {'all': self.links, 'domain': self.links4domain, 'subdomain': self.links4subdomain, 'other': self.links4other, 'subdomains': self.links4subdomain + list(self.linksofsubdomain)}
+        return {'all': self.links, 'domain': self.links4domain, 'subdomain': self.links4subdomain, 'other': self.links4other, 'subdomains': self.links4subdomain + [{"subdomain": self.linksofsubdomain}]}
 
 class TopLinkDetector(object):
 
