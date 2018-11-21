@@ -104,6 +104,9 @@ class BaseHandler(Component):
     def schedule(self, message, save):
         yield None
 
+    def get_scripts(self):
+        return None
+
     def handler_register(self, handle_type, priority = 1000):
         """
         handler register
