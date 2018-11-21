@@ -27,7 +27,7 @@ class LinksExtractor(object):
         self.links4domain = list()
         self.links4subdomain = list()
         self.links4other = list()
-        self.linksofsubdomain = set()
+        self.linksofsubdomain = dict()
         self.subdomain = None
         if subdomain and subdomain != 'www':
             self.subdomain = "%s.%s" % (subdomain, domain)
@@ -64,10 +64,14 @@ class LinksExtractor(object):
     def get_subdomain(self, link):
         parsed = urlparse(link['url'])
         extracted = tldextract.extract(link['url'])
-        if parsed.path == '/' or not parsed.path:
-            if all((extracted.subdomain, extracted.subdomain != 'www', extracted.subdomain != self.subdomain)):
-                url = "%s.%s" % (extracted.subdomain.split(".").pop(), self.domain)
-                self.linksofsubdomain.add(url)
+        if all((extracted.subdomain, extracted.subdomain != 'www', extracted.subdomain != self.subdomain)):
+            url = "%s://%s.%s" % (parsed.scheme, extracted.subdomain.split(".").pop(), self.domain)
+            key = utils.md5(url)
+            if key in self.linksofsubdomain:
+                if parsed.path == '/' or not parsed.path:
+                    self.linksofsubdomain[key]['title'] = link['title']
+            else:
+                self.linksofsubdomain[key] = {"url": url, "title": title}
 
     def analyze(self, link):
         if self.subdomain:
@@ -88,7 +92,7 @@ class LinksExtractor(object):
 
     @property
     def infos(self):
-        return {'all': self.links, 'domain': self.links4domain, 'subdomain': self.links4subdomain, 'other': self.links4other, 'subdomains': self.links4subdomain + [{"subdomain": self.linksofsubdomain}]}
+        return {'all': self.links, 'domain': self.links4domain, 'subdomain': self.links4subdomain, 'other': self.links4other, 'subdomains': self.links4subdomain + self.linksofsubdomain}
 
 class TopLinkDetector(object):
 
