@@ -33,18 +33,18 @@ class SitesDB(Mongo, BaseSitesDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj={}):
-        obj['sid'] = self._get_increment(self.incr_key)
+        obj['uuid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
         _id = super(SitesDB, self).insert(setting=obj)
-        return obj['sid']
+        return obj['uuid']
 
     def disable(self, id, where = {}):
         if not where:
-            where = {'sid': int(id)}
+            where = {'uuid': int(id)}
         else:
-            where.update({'sid': int(id)})
+            where.update({'uuid': int(id)})
         return super(SitesDB, self).update(setting={"status": self.STATUS_INIT, 'utime': int(time.time())},
                 where=where, multi=False)
 
@@ -58,9 +58,9 @@ class SitesDB(Mongo, BaseSitesDB):
 
     def active(self, id, where = {}):
         if not where:
-            where = {'sid': int(id)}
+            where = {'uuid': int(id)}
         else:
-            where.update({'sid': int(id)})
+            where.update({'uuid': int(id)})
         return super(SitesDB, self).update(setting={"status": self.STATUS_ACTIVE, 'utime': int(time.time())},
                 where=where, multi=False)
 
@@ -76,9 +76,9 @@ class SitesDB(Mongo, BaseSitesDB):
 
     def delete(self, id, where = {}):
         if not where:
-            where = {'sid': int(id)}
+            where = {'uuid': int(id)}
         else:
-            where.update({'sid': int(id)})
+            where.update({'uuid': int(id)})
         return super(SitesDB, self).update(setting={"status": self.STATUS_DELETED, 'utime': int(time.time())},
                 where=where, multi=False)
 
@@ -91,19 +91,19 @@ class SitesDB(Mongo, BaseSitesDB):
                 where=where, multi=True)
 
     def get_detail(self, id):
-        return self.get(where={'sid': int(id)})
+        return self.get(where={'uuid': int(id)})
 
     def get_site(self, id):
         return self.get(where={'uuid': int(id)})
 
     def get_list(self, where, select=None, **kwargs):
-        kwargs.setdefault('sort', [('sid', 1)])
+        kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, select=select, **kwargs)
 
     def get_new_list(self, id, pid, where = {}, select=None, **kwargs):
-        kwargs.setdefault('sort', [('sid', 1)])
+        kwargs.setdefault('sort', [('uuid', 1)])
         if not where:
             where == {}
-        where['sid'] = {'$gt': int(id)}
+        where['uuid'] = {'$gt': int(id)}
         where['pid'] = int(pid)
         return self.find(where=where, select=select, **kwargs)
