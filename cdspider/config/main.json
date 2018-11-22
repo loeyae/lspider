@@ -11,7 +11,7 @@
     "message_queue": {
         "protocol": "amqp",
         "host": "117.79.146.156",
-        "port": 25672,
+        "port": 5672,
         "user": "cdspider",
         "password": "cdspider",
         "exchange": "cdspider",
