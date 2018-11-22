@@ -8,7 +8,7 @@
 """
 from . import BaseHandler
 from cdspider.libs.constants import *
-from cdspider.parser.lib import ListParser
+from cdspider.parser import ListParser
 
 class GeneralListHandler(BaseHandler):
     """
@@ -16,13 +16,16 @@ class GeneralListHandler(BaseHandler):
     """
 
     def route(self, mode, save):
-        if mode == ROUTER_MODE_PROJECT:
+        if not "id" in save:
             save['id'] = 0
+        if mode == ROUTER_MODE_PROJECT:
             for item in self.db['ProjectsDB'].get_new_list(save['id']):
                 if item['uuid'] > save['id']:
                     save['id'] = item['uuid']
                 yield item['uuid']
-
+        elif mode == ROUTER_MODE_SITE:
+            if not "pid" in save:
+                pass
 
     def schedule(self, message, save):
         yield None
