@@ -60,4 +60,4 @@ class Router(BaseScheduler):
                 each.terminate()
             each.join()
 
-        self.info("%s route end" % self.__class__.__name__)
+        self.info("%s route end, %s threads was run" % (self.__class__.__name__, len(threads)))
