@@ -45,7 +45,7 @@ class BaseHandler(Component):
         init
         """
         self.ctx = context
-        self.task = task
+        self.task = task or {}
         g = context.obj
         self.logger = kwargs.pop('logger', logging.getLogger('handler'))
         self.log_level = logging.WARN
@@ -332,4 +332,5 @@ class BaseHandler(Component):
 
 from .Loader import Loader
 from .GeneralHandler import GeneralHandler
+from .GeneralListHandler import GeneralListHandler
 from .LinksClusterHandler import LinksClusterHandler
