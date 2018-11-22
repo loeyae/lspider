@@ -10,7 +10,7 @@
 """
 import time
 import pymongo
-from cdsuuider.database.base import ProjectsDB as BaseProjectsDB
+from cdspider.database.base import ProjectsDB as BaseProjectsDB
 from .Mongo import Mongo
 
 class ProjectsDB(Mongo, BaseProjectsDB):
