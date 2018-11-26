@@ -113,11 +113,13 @@ class LinksClusterHandler(BaseHandler):
                     urlmd5 = hashlib.md5(it[0].encode(encoding='UTF-8')).hexdigest()
                     try:
                         urlsUniquedb.insert({"urlmd5": urlmd5, "url": it[0]})
-                        urlpath = urlparse(it[0]).path
-                        if len(urlpath) <= 1:
+                        urlpath  = urlparse(it[0]).path
+                        urlquery = urlparse(it[0]).query
+                        if len(urlpath) <= 1 and len(urlquery) == 0:
                             baseUrl = 1
                         else:
                             baseUrl = 0
+                        
                         urlsdb.insert({"url": it[0], "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl})
                         print('write success!')
                     except Exception as e:
