@@ -60,7 +60,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(UrlsDB, self).update(setting=obj, where={'uid': int(id)}, multi=False)
+        return super(UrlsDB, self).update(setting=obj, where={'uuid': int(id)}, multi=False)
 
     def update_many(self, obj = {},where=None):
         if where=={} or where==None:
@@ -72,9 +72,9 @@ class UrlsDB(Mongo, BaseUrlsDB):
         obj = {"status": self.STATUS_DELETED}
         obj['utime'] = int(time.time())
         if not where:
-            where = {'uid': int(id)}
+            where = {'uuid': int(id)}
         else:
-            where.update({'uid': int(id)})
+            where.update({'uuid': int(id)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
     def delete_by_site(self, sid, where = {}):
@@ -99,18 +99,18 @@ class UrlsDB(Mongo, BaseUrlsDB):
         obj = {"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
         if not where:
-            where = {'uid': int(id)}
+            where = {'uuid': int(id)}
         else:
-            where.update({'uid': int(id)})
+            where.update({'uuid': int(id)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
     def disable(self, id, where = {}):
         obj = {"status": self.STATUS_INIT}
         obj['utime'] = int(time.time())
         if not where:
-            where = {'uid': int(id)}
+            where = {'uuid': int(id)}
         else:
-            where.update({'uid': int(id)})
+            where.update({'uuid': int(id)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
     def disable_by_site(self, sid, where = {}):
@@ -132,24 +132,24 @@ class UrlsDB(Mongo, BaseUrlsDB):
         return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
 
     def get_detail(self, id):
-        return self.get(where={'uid': int(id)})
+        return self.get(where={'uuid': int(id)})
 
     def get_list(self, where = {}, select=None, **kwargs):
-        kwargs.setdefault('sort', [('uid', 1)])
+        kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, select=select, **kwargs)
 
     def get_new_list(self, id, sid, where = {}, select=None, **kwargs):
-        kwargs.setdefault('sort', [('uid', 1)])
+        kwargs.setdefault('sort', [('uuid', 1)])
         if not where:
             where = {}
-        where['uid'] = {'$gt': int(id)}
+        where['uuid'] = {'$gt': int(id)}
         where['sid'] = int(sid)
         return self.find(where = where, select=select, **kwargs)
 
     def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
-        kwargs.setdefault('sort', [('uid', 1)])
+        kwargs.setdefault('sort', [('uuid', 1)])
         if not where:
             where = {}
-        where['uid'] = {'$gt': int(id)}
+        where['uuid'] = {'$gt': int(id)}
         where['pid'] = pid
         return self.find(where = where, select=select, **kwargs)
