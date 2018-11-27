@@ -103,24 +103,26 @@ class LinksClusterHandler(BaseHandler):
         # 准备 title
         for item in arrTmp:
             arrTitle[item['url']] = item['title']
-        
+
         # 准备写库
         if sortArr:
             urlsdb = self.db['UrlsDB']
             urlsUniquedb = self.db['UrlsUniqueDB']
             for item in sortArr:
                 for it in item:
-                    urlmd5 = hashlib.md5(it[0].encode(encoding='UTF-8')).hexdigest()
+                    # 防止重复，去掉最后的/
+                    url = it[0].rstrip('/')
+                    urlmd5 = hashlib.md5(url.encode(encoding='UTF-8')).hexdigest()
                     try:
-                        urlsUniquedb.insert({"urlmd5": urlmd5, "url": it[0]})
-                        urlpath  = urlparse(it[0]).path
-                        urlquery = urlparse(it[0]).query
+                        urlsUniquedb.insert({"urlmd5": urlmd5, "url": url})
+                        urlpath  = urlparse(url).path
+                        urlquery = urlparse(url).query
                         if len(urlpath) <= 1 and len(urlquery) == 0:
                             baseUrl = 1
                         else:
                             baseUrl = 0
                         
-                        urlsdb.insert({"url": it[0].rstrip('/'), "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl})
+                        urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl})
                         print('write success!')
                     except Exception as e:
                         print('url is exist!')
