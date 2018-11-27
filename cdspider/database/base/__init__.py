@@ -32,3 +32,4 @@ from .WechatRobotMpsChatdb import WechatRobotMpsChatDB
 from .WechatRobotMpsSharingdb import WechatRobotMpsSharingDB
 from .WechatRobotMpsdb import WechatRobotMpsDB
 from .SpiderTaskdb import SpiderTaskDB
+from .ListRuledb import ListRuleDB
