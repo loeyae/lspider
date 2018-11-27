@@ -61,3 +61,42 @@ class Router(BaseScheduler):
             each.join()
 
         self.info("%s route end, %s threads was run" % (self.__class__.__name__, len(threads)))
+
+    def xmlrpc_run(self, port=25555, bind='127.0.0.1'):
+        import umsgpack
+        from cdspider.libs import WSGIXMLRPCApplication
+        from xmlrpc.client import Binary
+
+        application = WSGIXMLRPCApplication()
+
+        application.register_function(self.quit, '_quit')
+
+        def hello():
+            result = {"message": "xmlrpc is running"}
+            return json.dumps(result)
+        application.register_function(hello, 'hello')
+
+        def status(task):
+            r_obj = utils.__redirection__()
+            sys.stdout = r_obj
+            ret = broken_exc = None
+            try:
+                ret = True
+            except :
+                broken_exc = traceback.format_exc()
+            output = sys.stdout.read()
+            result = {"result": ret, "broken_exc": broken_exc, "stdout": output}
+
+            return json.dumps(result)
+        application.register_function(status, 'status')
+
+        import tornado.wsgi
+        import tornado.ioloop
+        import tornado.httpserver
+
+        container = tornado.wsgi.WSGIContainer(application)
+        self.xmlrpc_ioloop = tornado.ioloop.IOLoop()
+        self.xmlrpc_server = tornado.httpserver.HTTPServer(container, io_loop=self.xmlrpc_ioloop)
+        self.xmlrpc_server.listen(port=port, address=bind)
+        self.info('spider.xmlrpc listening on %s:%s', bind, port)
+        self.xmlrpc_ioloop.start()
