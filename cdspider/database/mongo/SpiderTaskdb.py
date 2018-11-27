@@ -168,6 +168,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=_where, table=table, select=select, **kwargs)
 
+    def get_max_id(self, mode, id, where={}):
+        table = self._table_name(mode)
+        return self.get(where=where, select=id, table=table, sort=[(id, -1)])
+
     def _table_name(self, mode):
         table = super(TaskDB, self)._collection_name(mode)
         if not table in self._collections:
