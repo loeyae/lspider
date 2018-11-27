@@ -77,3 +77,6 @@ class SpiderTaskDB(Base):
 
     def get_plan_list(self, mode, plantime, where={}, select=None, **kwargs):
         raise NotImplementedError
+
+    def get_max_id(self, mode, id, where = {}):
+        raise NotImplementedError
