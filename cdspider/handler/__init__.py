@@ -292,13 +292,14 @@ class BaseHandler(Component):
         下一页解析
         """
         self.page += 1
-        rule = self.process.get("page")
+        rule = self.process.get("paging")
         if not rule:
             raise CDSpiderCrawlerNoNextPage(base_url=self.request.get("url", ''), current_url=self.response.get('final_url'))
         builder = UrlBuilder(self.logger, self.log_level)
         save['page'] = self.page
         self.request_params = builder.build(rule, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
+        save['next_url'] = self.request_params['url']
 
     def on_continue(self, broken_exc, save):
         if isinstance(broken_exc, (CDSpiderCrawlerForbidden,)):
@@ -321,6 +322,22 @@ class BaseHandler(Component):
             self.info('Retry to fetch: %s because of %s, current times: %s' % (self.task['url'], str(broken_exc), save['retry']))
         else:
             raise broken_exc
+
+    def format_paging(self, paging):
+        if not paging:
+            return paging
+        if paging.get('pattern', '1') == '1':
+            rule = {"url": paging['pageUrl'], 'incr_data': []}
+            for item in paging['rule']:
+                rule['incr_data'].append({
+                    "name": item['keyName'],
+                    "value": item['value'],
+                    "step": item['step'],
+                    "max": item['max'],
+                    "value": item['value'],
+                })
+            return rule
+        return {"url": {"element": {"xpath": paging['rule']}}}
 
     def finish(self):
         self.handler_run(HANDLER_FUN_FINISH, self.response)
