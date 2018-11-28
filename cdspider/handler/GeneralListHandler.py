@@ -6,9 +6,12 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-11-21 20:45:56
 """
+import copy
 from . import BaseHandler
+from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import ListParser
+from cdspider.parser.lib import TimeParser
 
 class GeneralListHandler(BaseHandler):
     """
@@ -53,8 +56,11 @@ class GeneralListHandler(BaseHandler):
         return self.process.get("scripts")
 
     def init_process(self):
-        urls = self.db['UrlsDB'].get_detail(self.task['uuid'])
-        rule = self.db['ListRuleDB'].get_detail(urls['listRule'])
+        if "listRule" in self.task and self.task['listRule']:
+            rule = copy.deepcopy(self.task['listRule'])
+        else:
+            urls = self.db['UrlsDB'].get_detail(self.task['uuid'])
+            rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
         self.process =  {
             "request": rule.get("request", self.DEFAULT_PROCESS),
             "parse": rule.get("parse", None),
@@ -125,6 +131,16 @@ class GeneralListHandler(BaseHandler):
             'ctime': kwargs.get('ctime', int(time.time())),
             }
         return r
+
+    def _domain_info(self, url):
+        subdomain, domain = utils.parse_domain(url)
+        if not subdomain:
+            subdomain = 'www'
+        return "%s.%s" % (subdomain, domain), domain
+
+    def _typeinfo(self, url):
+        subdomain, domain = self._domain_info(url)
+        return {"domain": domain, "subdomain": subdomain}
 
     def run_result(self, save):
         if self.response['parsed']:
