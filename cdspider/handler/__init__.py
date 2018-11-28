@@ -32,7 +32,7 @@ class BaseHandler(Component):
 
     DEFAULT_PROCESS = {
         "request": {
-            "crawler": "requests",
+            "crawler": "tornado",
             "method": "GET",
             "proxy": "auto",
         }
