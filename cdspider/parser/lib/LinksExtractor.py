@@ -29,7 +29,8 @@ class LinksExtractor(object):
         self.links4other = list()
         self.linksofsubdomain = dict()
         self.subdomain = None
-        if subdomain and subdomain != 'www':
+#        if subdomain and subdomain != 'www':
+        if subdomain:
             self.subdomain = "%s.%s" % (subdomain, domain)
         self.domain = domain
         self.base = url
@@ -64,7 +65,8 @@ class LinksExtractor(object):
     def get_subdomain(self, link):
         parsed = urlparse(link['url'])
         extracted = tldextract.extract(link['url'])
-        if all((extracted.subdomain, extracted.subdomain != 'www', extracted.subdomain != self.subdomain)):
+#        if all((extracted.subdomain, extracted.subdomain != 'www', extracted.subdomain != self.subdomain)):
+        if all((extracted.subdomain, extracted.subdomain != self.subdomain)):
             d = "%s.%s" % (extracted.subdomain.split(".").pop(), self.domain)
             url = "%s://%s" % (parsed.scheme, d)
             key = utils.md5(d)
