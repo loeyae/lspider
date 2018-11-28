@@ -56,6 +56,10 @@ class LinksClusterHandler(BaseHandler):
 
     def run_result(self, save):
         arrTmp   = self.response['parsed']
+        # 处理爬虫触发不成功
+        if not len(arrTmp):
+            print('crawl error')
+            exit()
         arrTitle = {}
         arrUrl   = []
         urlInfo  = []
