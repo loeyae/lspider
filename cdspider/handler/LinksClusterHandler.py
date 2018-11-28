@@ -32,10 +32,13 @@ class LinksClusterHandler(BaseHandler):
         extractor = LinksExtractor(url=site['url'])
         extractor.exctract(self.response['last_source'])
         
-        if '://www.' in site['url']:
-            re_type = 'domain'
-        else:
-            re_type = 'subdomains'
+        # if '://www.' in site['url']:
+        #     re_type = 'domains' 
+        # else:
+        #     re_type = 'subdomains'
+        
+        # domain 改成 subdomains试试
+        re_type = 'subdomains'
         self.response['parsed'] = extractor.infos[re_type]
 
     # def run_result(self, save):
