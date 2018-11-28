@@ -45,7 +45,7 @@ class LinksExtractor(object):
         for i in items:
             attr = Parser.getAttribute(i, 'href')
             if attr:
-                url = urljoin(self.base, attr)
+                url = urljoin(self.base, attr.strip())
                 if not url in self.unique:
                     self.unique.add(url)
                     title = Parser.getText(i)
