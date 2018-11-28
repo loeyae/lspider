@@ -331,7 +331,7 @@ class BaseHandler(Component):
             rule = {"url": paging['pageUrl'], 'incr_data': []}
             for item in paging['rule']:
                 rule['incr_data'].append({
-                    "name": item['keyName'],
+                    "name": item['word'],
                     "value": item['value'],
                     "step": item['step'],
                     "max": item['max'],
