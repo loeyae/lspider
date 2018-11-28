@@ -32,10 +32,13 @@ class LinksClusterHandler(BaseHandler):
         extractor = LinksExtractor(url=site['url'])
         extractor.exctract(self.response['last_source'])
         
-        if '://www.' in site['url']:
-            re_type = 'domain'
-        else:
-            re_type = 'subdomains'
+        # if '://www.' in site['url']:
+        #     re_type = 'domains' 
+        # else:
+        #     re_type = 'subdomains'
+
+        # domain 改成 subdomains试试
+        re_type = 'subdomains'
         self.response['parsed'] = extractor.infos[re_type]
 
     # def run_result(self, save):
@@ -53,6 +56,10 @@ class LinksClusterHandler(BaseHandler):
 
     def run_result(self, save):
         arrTmp   = self.response['parsed']
+        # 处理爬虫触发不成功
+        if not len(arrTmp):
+            print('crawl error')
+            exit()
         arrTitle = {}
         arrUrl   = []
         urlInfo  = []
@@ -103,24 +110,26 @@ class LinksClusterHandler(BaseHandler):
         # 准备 title
         for item in arrTmp:
             arrTitle[item['url']] = item['title']
-        
+
         # 准备写库
         if sortArr:
             urlsdb = self.db['UrlsDB']
             urlsUniquedb = self.db['UrlsUniqueDB']
             for item in sortArr:
                 for it in item:
-                    urlmd5 = hashlib.md5(it[0].encode(encoding='UTF-8')).hexdigest()
+                    # 防止重复，去掉最后的/
+                    url = it[0].rstrip('/')
+                    urlmd5 = hashlib.md5(url.encode(encoding='UTF-8')).hexdigest()
                     try:
-                        urlsUniquedb.insert({"urlmd5": urlmd5, "url": it[0]})
-                        urlpath  = urlparse(it[0]).path
-                        urlquery = urlparse(it[0]).query
+                        urlsUniquedb.insert({"urlmd5": urlmd5, "url": url})
+                        urlpath  = urlparse(url).path
+                        urlquery = urlparse(url).query
                         if len(urlpath) <= 1 and len(urlquery) == 0:
                             baseUrl = 1
                         else:
                             baseUrl = 0
                         
-                        urlsdb.insert({"url": it[0].rstrip('/'), "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl})
+                        urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl, 'ruleStatus': 0})
                         print('write success!')
                     except Exception as e:
                         print('url is exist!')
