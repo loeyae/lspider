@@ -36,7 +36,7 @@ class LinksClusterHandler(BaseHandler):
         #     re_type = 'domains' 
         # else:
         #     re_type = 'subdomains'
-        
+
         # domain 改成 subdomains试试
         re_type = 'subdomains'
         self.response['parsed'] = extractor.infos[re_type]
@@ -125,7 +125,7 @@ class LinksClusterHandler(BaseHandler):
                         else:
                             baseUrl = 0
                         
-                        urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl})
+                        urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl, 'ruleStatus': 0})
                         print('write success!')
                     except Exception as e:
                         print('url is exist!')
