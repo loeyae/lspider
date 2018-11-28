@@ -47,6 +47,7 @@ class BaseHandler(Component):
         self.ctx = context
         self.task = task or {}
         g = context.obj
+        self.proxy = g.get("proxy", None)
         self.logger = kwargs.pop('logger', logging.getLogger('handler'))
         self.log_level = logging.WARN
         if g.get('debug', False):
