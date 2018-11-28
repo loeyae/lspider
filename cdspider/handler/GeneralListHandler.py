@@ -53,7 +53,12 @@ class GeneralListHandler(BaseHandler):
                     save['id'] = item['uuid']
 
     def get_scripts(self):
-        return self.process.get("scripts")
+        if "listRule" in self.task and self.task['listRule']:
+            rule = copy.deepcopy(self.task['listRule'])
+        else:
+            urls = self.db['UrlsDB'].get_detail(self.task['uuid'])
+            rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
+        return rule.get("scripts", None)
 
     def init_process(self):
         if "listRule" in self.task and self.task['listRule']:
@@ -65,7 +70,6 @@ class GeneralListHandler(BaseHandler):
             "request": rule.get("request", self.DEFAULT_PROCESS),
             "parse": rule.get("parse", None),
             "paging": self.format_paging(rule.get("paging", None)),
-            "scripts": rule.get("scripts", None),
             "unique": rule.get("unique", None),
         }
 
