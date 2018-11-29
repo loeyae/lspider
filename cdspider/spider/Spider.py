@@ -291,7 +291,7 @@ class Spider(Component):
                     self.error(ret)
                 if last_source:
                     last_source = utils.decode(last_source)
-                if parsed:
+                if parsed and not return_result:
                     parsed = True
             except :
                 broken_exc = traceback.format_exc()
