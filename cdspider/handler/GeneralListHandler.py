@@ -7,7 +7,10 @@
 :date:    2018-11-21 20:45:56
 """
 import copy
+import time
 from . import BaseHandler
+from urllib.parse import urljoin, urlparse, urlunparse
+from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import ListParser
@@ -118,6 +121,7 @@ class GeneralListHandler(BaseHandler):
 
     def _build_result_info(self, **kwargs):
         now = int(time.time())
+        result = kwargs.get('result', {})
         pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
         if pubtime and pubtime > now:
             pubtime = now
@@ -132,7 +136,7 @@ class GeneralListHandler(BaseHandler):
             'channel': result.pop('channel', None),                            # 频道信息
             'crawlinfo': kwargs.get('crawlinfo'),
             'acid': kwargs['unid'],                                            # unique str
-            'ctime': kwargs.get('ctime', int(time.time())),
+            'ctime': kwargs.get('ctime', self.crawl_id),
             }
         return r
 
@@ -148,15 +152,15 @@ class GeneralListHandler(BaseHandler):
 
     def run_result(self, save):
         if self.response['parsed']:
+            ctime = self.crawl_id
             new_count = self.crawl_info['crawl_count']['new_count']
-            formated = self.build_url_by_rule(self.response['parsed'], final_url)
+            formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
             for item in formated:
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
-                    crawlinfo =  self._build_crawl_info(final_url)
-                    if self.task.get('site', {}).get('type', SitesDB.TYPE_SEARCH) == SitesDB.TYPE_SEARCH:
-                        typeinfo = self._typeinfo(item['url'])
+                    crawlinfo =  self._build_crawl_info(self.response['final_url'])
+                    typeinfo = self._typeinfo(item['url'])
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                     result_id = self.db['ArticlesDB'].insert(result)
                     if not result_id:
@@ -166,6 +170,9 @@ class GeneralListHandler(BaseHandler):
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
+
+    def url_prepare(self, url):
+        return url
 
     def build_url_by_rule(self, data, base_url = None):
         if not base_url:
