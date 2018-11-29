@@ -16,16 +16,16 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
     parse_rule data object
     """
 
-    __tablename__ = 'parse_rules'
+    __tablename__ = 'detailRule'
 
-    incr_key = 'parseRule'
+    incr_key = 'detailRule'
 
     def __init__(self, connector, table=None, **kwargs):
         super(ParseRuleDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'prid' in indexes:
-            collection.create_index('prid', unique=True, name='prid')
+        if not 'uuid' in indexes:
+            collection.create_index('uuid', unique=True, name='uuid')
         if not 'domain' in indexes:
             collection.create_index('domain', name='domain')
         if not 'subdomain' in indexes:
@@ -36,7 +36,7 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
-        obj['prid'] = self._get_increment(self.incr_key)
+        obj['uuid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
@@ -45,18 +45,18 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(ParseRuleDB, self).update(setting=obj, where={"prid": int(id)}, multi=False)
+        return super(ParseRuleDB, self).update(setting=obj, where={"uuid": int(id)}, multi=False)
 
     def delete(self, id, wherer = {}):
         if not where:
-            where = {'prid': int(id)}
+            where = {'uuid': int(id)}
         else:
-            where.update({'prid': int(id)})
+            where.update({'uuid': int(id)})
         return super(ParseRuleDB, self).update(setting={"status": self.STATUS_DELETED},
                 where=where, multi=False)
 
     def get_detail(self, id):
-        return self.get(where={"prid": int(id)})
+        return self.get(where={"uuid": int(id)})
 
     def get_detail_by_domain(self, domain):
         where = {'domain': domain, 'subdomain': {"$in": ["", None]}}
