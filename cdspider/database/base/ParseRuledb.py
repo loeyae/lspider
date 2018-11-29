@@ -12,9 +12,10 @@ from . import Base
 
 {
     "parse_rule": {
-        'prid': int,       # parse_rule id
+        'uuid': int,       # parse_rule id
         'domain': str,     # 域名
         'subdomain': str,  # 二级域名
+        'urlPattern': str, # url 匹配规则
         'name': str,       # 网站名称
         'parse': str,      # 解析规则
         'paging': str,     # 翻页规则
