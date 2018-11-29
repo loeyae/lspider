@@ -22,6 +22,7 @@ limitations under the License.
 """
 from copy import deepcopy
 
+import re
 import lxml.html
 from lxml import etree
 
@@ -32,6 +33,7 @@ class Parser(object):
 
     @classmethod
     def xpath_re(cls, node, expression):
+        expression = re.sub('\/tbody(\[\d+\])?\/', '/', expression)
         regexp_namespace = "http://exslt.org/regular-expressions"
         items = node.xpath(expression, namespaces={'re': regexp_namespace})
         return items
