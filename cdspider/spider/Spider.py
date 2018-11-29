@@ -110,6 +110,7 @@ class Spider(Component):
                     handler.parse()
                     self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
                     if return_result:
+                        handler.on_next(save)
                         return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
 
                         raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
@@ -285,7 +286,7 @@ class Spider(Component):
                 return_result = task.pop('return_result', False)
                 ret = self.fetch(task, return_result)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
-                    parsed, broken_exc, last_source, final_url = ret[0]
+                    parsed, broken_exc, last_source, final_url, save = ret[0]
                 else:
                     self.error(ret)
                 if last_source:
