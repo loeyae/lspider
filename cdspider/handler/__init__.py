@@ -241,7 +241,7 @@ class BaseHandler(Component):
         """
         self.debug("%s parse start" % (self.__class__.__name__))
         if not rule:
-            rule = self.process.get("rule")
+            rule = self.process.get("parse")
         self.debug("%s parse rule: %s" % (self.__class__.__name__, rule))
         rule = self.preparse(rule)
         self.debug("%s preparseed rule: %s" % (self.__class__.__name__, rule))
@@ -265,6 +265,7 @@ class BaseHandler(Component):
         """
         重复处理
         """
+        self.debug("%s on repetition" % (self.__class__.__name__))
         if HANDLER_FUN_REPETITION in self.handle:
             self.handler_run(HANDLER_FUN_REPETITION, self.response)
         else:
@@ -274,6 +275,7 @@ class BaseHandler(Component):
         """
         错误处理
         """
+        self.debug("%s on error" % (self.__class__.__name__))
         self.exception(exc)
         self.crawl_info['err_message'] = str(traceback.format_exc())
         self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info})
@@ -282,6 +284,7 @@ class BaseHandler(Component):
         """
         数据处理
         """
+        self.debug("%s on result" % (self.__class__.__name__))
         self.run_result(save)
         self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
 
@@ -331,6 +334,7 @@ class BaseHandler(Component):
             rule = {"url": paging['pageUrl'], 'incr_data': []}
             for item in paging['rule']:
                 rule['incr_data'].append({
+                    "mode": item['method'],
                     "name": item['word'],
                     "value": item['value'],
                     "step": item['step'],
