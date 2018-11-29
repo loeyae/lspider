@@ -274,7 +274,7 @@ class UrlBuilder(Component):
                     if page > int(item['max']):
                         raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % item['max'],
                                 base_url = save['base_url'], incr_data = item)
-                value = str(item['value'] + (page - 1) * step)
+                value = str(int(item['value']) + (page - 1) * step)
                 if 'prefix' in item and item['prefix']:
                     value = item['prefix'] + value
                 if 'suffix' in item and item['suffix']:
