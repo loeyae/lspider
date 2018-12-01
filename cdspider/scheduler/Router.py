@@ -18,7 +18,7 @@ class Router(BaseScheduler):
     路由--初级任务分发
     """
 
-    def __init__(self, context, mode):
+    def __init__(self, context, mode = ROUTER_MODE_PROJECT):
         super(Router, self).__init__(context)
         self.outqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_TASK]
         self.mode = mode
