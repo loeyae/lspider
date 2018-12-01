@@ -12,8 +12,8 @@
         "protocol": "amqp",
         "host": "117.79.146.156",
         "port": 5672,
-        "user": "guest",
-        "password": "guest",
+        "user": "cdspider",
+        "password": "cdspider",
         "exchange": "cdspider",
         "maxsize": 1000000,
         "queue_prefix": ""
