@@ -25,7 +25,9 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
-        obj.setdefault('pid', 0)
+        obj.setdefault('plantime', 0)
+        obj.setdefault('crawltime', 0)
+        obj.setdefault('expire', 0)
         _id = super(TaskDB, self).insert(setting=obj, table=table)
         return obj['uuid']
 
@@ -53,7 +55,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({'uuid':int(id)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=False)
 
-    def disable_by_param(self, pid, mode, where = {}):
+    def disable_by_pid(self, pid, mode, where = {}):
         table = self._table_name(mode)
         obj={"status": self.STATUS_INIT}
         obj['utime'] = int(time.time())
@@ -62,6 +64,39 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def disable_by_sid(self, sid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
+        obj['save'] = None
+        if not where:
+            where = {"sid": int(sid)}
+        else:
+            where.update({"sid": int(sid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def disable_by_tid(self, tid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
+        obj['save'] = None
+        if not where:
+            where = {"tid": int(tid)}
+        else:
+            where.update({"tid": int(tid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def disable_by_kid(self, kid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_INIT}
+        obj['utime'] = int(time.time())
+        obj['save'] = None
+        if not where:
+            where = {"kid": int(kid)}
+        else:
+            where.update({"kid": int(kid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable_by_url(self, uid, mode, where = {}):
@@ -85,7 +120,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({'uuid':int(id)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=False)
 
-    def active_by_param(self, pid, mode, where = {}):
+    def active_by_pid(self, pid, mode, where = {}):
         table = self._table_name(mode)
         obj={"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
@@ -93,6 +128,36 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def active_by_sid(self, sid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {"sid": int(sid)}
+        else:
+            where.update({"sid": int(sid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def active_by_tid(self, tid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {"tid": int(tid)}
+        else:
+            where.update({"tid": int(tid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def active_by_kid(self, kid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {"kid": int(kid)}
+        else:
+            where.update({"kid": int(kid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active_by_url(self, uid, mode, where = {}):
@@ -117,7 +182,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({'uuid':int(id)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=False)
 
-    def delete_by_param(self, pid, mode, where = {}):
+    def delete_by_pid(self, pid, mode, where = {}):
         table = self._table_name(mode)
         obj={"status": self.STATUS_DELETED}
         obj['utime'] = int(time.time())
@@ -126,6 +191,39 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def delete_by_sid(self, sid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
+        obj['save'] = None
+        if not where:
+            where = {"sid": int(sid)}
+        else:
+            where.update({"sid": int(sid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def delete_by_tid(self, tid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
+        obj['save'] = None
+        if not where:
+            where = {"tid": int(tid)}
+        else:
+            where.update({"tid": int(tid)})
+        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+
+    def delete_by_kid(self, kid, mode, where = {}):
+        table = self._table_name(mode)
+        obj={"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
+        obj['save'] = None
+        if not where:
+            where = {"kid": int(kid)}
+        else:
+            where.update({"kid": int(kid)})
         return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete_by_url(self, uid, mode, where = {}):
@@ -156,13 +254,13 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, table=table, select=select, **kwargs)
 
-    def get_plan_list(self, mode, plantime = None, where = {}, select=None, **kwargs):
+    def get_plan_list(self, mode, id, plantime = None, where = {}, select=None, **kwargs):
         table = self._table_name(mode)
         now = int(time.time())
         if not plantime:
             plantime = now
         where = self._build_where(where)
-        _where = {'$and':[{'status':self.STATUS_ACTIVE},{'plantime':{'$lte': plantime}},{'$or':[{'expire':0},{'expire':{'$gt': now}}]}]}
+        _where = {'$and':[{'status':self.STATUS_ACTIVE},{'plantime':{'$lte': plantime}},{'$or':[{'expire':0},{'expire':{'$gt': now}}]}, {"uuid": {"$gt": id}}]}
         for k, v in where.items():
             _where['$and'].extend([{k: v}])
         kwargs.setdefault('sort', [('uuid', 1)])
