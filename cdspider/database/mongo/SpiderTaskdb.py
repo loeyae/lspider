@@ -28,13 +28,13 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj.setdefault('plantime', 0)
         obj.setdefault('crawltime', 0)
         obj.setdefault('expire', 0)
-        _id = super(TaskDB, self).insert(setting=obj, table=table)
+        _id = super(SpiderTaskDB, self).insert(setting=obj, table=table)
         return obj['uuid']
 
     def update(self, id, mode, obj):
         table = self._table_name(mode)
         obj['utime'] = int(time.time())
-        return super(TaskDB, self).update(setting=obj, where={"uuid": int(id)}, table=table, multi=False)
+        return super(SpiderTaskDB, self).update(setting=obj, where={"uuid": int(id)}, table=table, multi=False)
 
     def update_many(self , mode, obj, where=None):
         obj['plantime']=int(time.time())
@@ -42,7 +42,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             return
         table = self._table_name(mode)
         obj['utime'] = int(time.time())
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable(self, id, mode, where = {}):
         table = self._table_name(mode)
@@ -53,7 +53,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {'uuid':int(id)}
         else:
             where.update({'uuid':int(id)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=False)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=False)
 
     def disable_by_pid(self, pid, mode, where = {}):
         table = self._table_name(mode)
@@ -64,7 +64,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable_by_sid(self, sid, mode, where = {}):
         table = self._table_name(mode)
@@ -75,7 +75,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"sid": int(sid)}
         else:
             where.update({"sid": int(sid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable_by_tid(self, tid, mode, where = {}):
         table = self._table_name(mode)
@@ -86,7 +86,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"tid": int(tid)}
         else:
             where.update({"tid": int(tid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable_by_kid(self, kid, mode, where = {}):
         table = self._table_name(mode)
@@ -97,7 +97,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"kid": int(kid)}
         else:
             where.update({"kid": int(kid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def disable_by_url(self, uid, mode, where = {}):
         table = self._table_name(mode)
@@ -108,7 +108,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"uid": int(uid)}
         else:
             where.update({"uid": int(uid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active(self, id, mode, where = {}):
         table = self._table_name(mode)
@@ -118,7 +118,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {'uuid':int(id)}
         else:
             where.update({'uuid':int(id)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=False)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=False)
 
     def active_by_pid(self, pid, mode, where = {}):
         table = self._table_name(mode)
@@ -128,7 +128,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active_by_sid(self, sid, mode, where = {}):
         table = self._table_name(mode)
@@ -138,7 +138,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"sid": int(sid)}
         else:
             where.update({"sid": int(sid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active_by_tid(self, tid, mode, where = {}):
         table = self._table_name(mode)
@@ -148,7 +148,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"tid": int(tid)}
         else:
             where.update({"tid": int(tid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active_by_kid(self, kid, mode, where = {}):
         table = self._table_name(mode)
@@ -158,7 +158,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"kid": int(kid)}
         else:
             where.update({"kid": int(kid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def active_by_url(self, uid, mode, where = {}):
         table = self._table_name(mode)
@@ -169,7 +169,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"uid": int(uid)}
         else:
             where.update({"uid": int(uid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete(self, id, mode, obj, where = {}):
         table = self._table_name(mode)
@@ -180,7 +180,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {'uuid':int(id)}
         else:
             where.update({'uuid':int(id)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=False)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=False)
 
     def delete_by_pid(self, pid, mode, where = {}):
         table = self._table_name(mode)
@@ -191,7 +191,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete_by_sid(self, sid, mode, where = {}):
         table = self._table_name(mode)
@@ -202,7 +202,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"sid": int(sid)}
         else:
             where.update({"sid": int(sid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete_by_tid(self, tid, mode, where = {}):
         table = self._table_name(mode)
@@ -213,7 +213,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"tid": int(tid)}
         else:
             where.update({"tid": int(tid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete_by_kid(self, kid, mode, where = {}):
         table = self._table_name(mode)
@@ -224,7 +224,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"kid": int(kid)}
         else:
             where.update({"kid": int(kid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def delete_by_url(self, uid, mode, where = {}):
         table = self._table_name(mode)
@@ -235,7 +235,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where = {"uid": int(uid)}
         else:
             where.update({"uid": int(uid)})
-        return super(TaskDB, self).update(setting=obj, where=where, table=table, multi=True)
+        return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
     def get_detail(self, id, mode, crawlinfo=False):
         table = self._table_name(mode)
@@ -271,7 +271,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         return self.get(where=where, select=id, table=table, sort=[(id, -1)])
 
     def _table_name(self, mode):
-        table = super(TaskDB, self)._collection_name(mode)
+        table = super(SpiderTaskDB, self)._collection_name(mode)
         if not table in self._collections:
             self._create_collection(table)
         return table
