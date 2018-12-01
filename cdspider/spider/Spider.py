@@ -77,49 +77,46 @@ class Spider(Component):
             last_source_unid = None
             last_url = None
             self.info("Spider process start")
-            try:
-                self.info("Spider fetch prepare start")
-                handler.init(save)
-                save['retry'] = 0
-                while True:
-                    try:
-                        handler.prepare(save)
-                    except CONTINUE_EXCEPTIONS as e:
-                        handler.on_continue(e, save)
-                        continue
-                    break
-                self.info("Spider fetch prepare end")
-                save['retry'] = 0
-                while True:
-                    self.info('Spider crawl start')
-                    handler.crawl(save)
-                    if isinstance(handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
-                        handler.on_continue(handler.response['broken_exc'], save)
-                        continue
-                    elif handler.response['broken_exc']:
-                        raise handler.response['broken_exc']
-                    if not handler.response['last_source']:
-                        raise CDSpiderCrawlerError('Spider crawl failed')
-                    unid = utils.md5(handler.response['last_source'])
-                    if last_source_unid == unid or last_url == handler.response['last_url']:
-                        raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['last_url'])
-                    last_source_unid = unid
-                    last_url = handler.response['last_url']
-                    self.info("Spider crawl end, source: %s" % str(handler.response["last_source"]))
-                    self.info("Spider parse start")
-                    handler.parse()
-                    self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
-                    if return_result:
-                        handler.on_next(save)
-                        return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
-
-                        raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
-                    self.info("Spider result start")
-                    handler.on_result(save)
-                    self.info("Spider result end")
+            handler.init(save)
+            self.info("Spider fetch prepare start")
+            save['retry'] = 0
+            while True:
+                try:
+                    handler.prepare(save)
+                except CONTINUE_EXCEPTIONS as e:
+                    handler.on_continue(e, save)
+                    continue
+                break
+            self.info("Spider fetch prepare end")
+            save['retry'] = 0
+            while True:
+                self.info('Spider crawl start')
+                handler.crawl(save)
+                if isinstance(handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
+                    handler.on_continue(handler.response['broken_exc'], save)
+                    continue
+                elif handler.response['broken_exc']:
+                    raise handler.response['broken_exc']
+                if not handler.response['last_source']:
+                    raise CDSpiderCrawlerError('Spider crawl failed')
+                unid = utils.md5(handler.response['last_source'])
+                if last_source_unid == unid or last_url == handler.response['last_url']:
+                    raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['last_url'])
+                last_source_unid = unid
+                last_url = handler.response['last_url']
+                self.info("Spider crawl end, source: %s" % str(handler.response["last_source"]))
+                self.info("Spider parse start")
+                handler.parse()
+                self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
+                if return_result:
                     handler.on_next(save)
-            finally:
-                self.info("Spider process end")
+                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
+
+                    raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
+                self.info("Spider result start")
+                handler.on_result(save)
+                self.info("Spider result end")
+                handler.on_next(save)
         except Exception as e:
             if not return_result:
                 handler.on_error(e)
@@ -127,83 +124,13 @@ class Spider(Component):
                 return_data.append((None, traceback.format_exc(), None, None, save))
                 self.error(traceback.format_exc())
         finally:
+            self.info("Spider process end")
             if not return_result:
                 handler.finish()
             handler.close()
             self.info("Spider fetch end" )
             if return_result:
                 return return_data
-
-    def _run_condition(self, ruleset, source, save):
-        """
-        执行条件判断
-        """
-        haystack = None
-        if 'parse' in ruleset:
-            data = self._run_parse({"haystack": ruleset['parse']}, source, save.get('base_url'))
-            if 'haystack' in data:
-                haystack = data['haystack']
-            else:
-                haystack = data
-        elif 'attr' in ruleset:
-            assert 'name' in ruleset['attr'] and ruleset['attr']['name'], "Invalid attr setting: name"
-            if ruleset['attr']['name'] in save:
-                attr = save[ruleset['attr']['name']]
-                if isinstance(attr, types.MethodType):
-                    args = ruleset['attr'].get('args', [])
-                    kwargs = ruleset['attr'].get('kwargs', {})
-                    haystack = attr(*args, **kwargs)
-                else:
-                    haystack = attr
-            else:
-                self.info("Spider run condition save attr: %s" % ruleset['attr'])
-                return False
-        if 'type' in ruleset:
-            _type = ruleset['type']
-            self.debug("Spider run condition haystack type: %s type: %s" % (type(haystack), _type))
-            if _type == 'None':
-                return (haystack == None and [True] or [False])[0]
-            if _type == 'empty':
-                return ((haystack != None and not haystack) and [True] or [False])[0]
-            if not _type:
-                return (not haystack and [True] or [False])[0]
-            return (not haystack and [False] or [True])[0]
-        if 'value' in ruleset:
-            needle = ruleset['value']
-            operator = ruleset.get('operator', '$ne')
-            self.debug("Spider run condition haystack: %s operator: %s needle: %s" % (haystack, operator, needle))
-            if operator == '$gt':
-                return (haystack > needle and [True] or [False])[0]
-            if operator == '$gte':
-                return (haystack >= needle and [True] or [False])[0]
-            if operator == '$lt':
-                return (haystack < needle and [True] or [False])[0]
-            if operator == '$lte':
-                return (haystack <= needle and [True] or [False])[0]
-            if operator == '$ne':
-                return (haystack != needle and [True] or [False])[0]
-            if operator == '$in':
-                return (haystack in needle and [True] or [False])[0]
-            if operator == '$nin':
-                return ((not haystack in needle) and [True] or [False])[0]
-            return (haystack == needle and [True] or [False])[0]
-
-    def _run_parse(self, rule, source, url=None):
-        self.info("Spider run parse start")
-        try:
-            data = {}
-            for k, item in rule.items():
-                self.info("Spider run parse: %s => %s" % (k, item))
-                for parser_name, r in item.items():
-                    parser = utils.load_parser(parser_name, source=source, ruleset=copy.deepcopy(r), log_level=self.log_level, url=url, attach_storage = self.attach_storage)
-                    parsed = parser.parse()
-                    self.info("Spider run parse matched data: %s" % str(parsed))
-                    if parsed:
-                        data[k] = parsed
-                        break
-        finally:
-            self.info("Spider run parse end")
-        return data
 
     def get_handler(self, task):
         if hasattr(self, 'handler'):
