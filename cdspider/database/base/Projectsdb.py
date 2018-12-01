@@ -11,15 +11,12 @@ from . import Base
 
 {
     'projects': {
-        'pid': int,           # 项目id
-        'name': str,          # 项目名称
-        'status': int,        # 项目状态
-        'scripts': str,       # 自定义handler
-        'comments': str,      # 项目描述
-        'ctime': int,         # 创建时间
-        'utime': int,         # 最后一次更新时间
-        'creator': int,       # 创建人id
-        'updator': int,       # 最后一次更新人id
+        'uuid' : int,         # '自增id',
+        'name' : str,         # '项目名称 | 唯一',
+        'baseUrl' : str,      # '根域名 | 唯一',
+        'addAuthor' : int,    # '添加人ID',
+        'updated_at' : str,   # '更新时间',
+        'status' : int,       # '状态(1:正常,0:冻结,-1:删除)',
     }
 }
 

@@ -12,19 +12,21 @@ from . import Base
 
 {
     "urls": {
-        'uid': int,           # url id
-        'name': str,          # 名称
-        'sid': int,           # site id
-        'url': str,           # url
-        'rate': int,          # int
-        'status': int,        # status
-        'main_process': str,  # 主流程配置
-        'sub_process': str,   # 子流程配置
-        'unique': str,        # 生成unique id的配置
-        'ctime': int,         # create time
-        'utime': int,         # last update time
-        'creator': int,       # creator
-        'updator': int,       # last update updator
+        'uuid' : int,             # '自增id',
+        'pid' : int,              # '项目UUID',
+        'sid' : int,              # '站点UUID',
+        'typeChannelList' : int,  # '标记类型 频道列表页 是:1 否:0'
+        'typeChannel' : int,      # '标记类型 频道页 是:1 否:0',
+        'typeList' : int,         # '标记类型 列表页 是:1 否:0',
+        'typeDetail' : int,       # '标记类型 文章页 是:1 否:0',
+        'typeOther' : int,        # '标记类型 其它 是:1 否:0',
+        'url' : str,              # '链接',
+        'dataNum' : int,          # '内容条数',
+        'addAuthor' : int,        # '添加人ID',
+        'updated_at' : int,       # '更新时间',
+        'status' : int,           # '状态(1:已处理,0:未处理,-1:删除)',
+        'ruleId' : int,           # '该url对应规则的UUid',
+        'ruleStatus' : int,       # '规则状态(1:全验证通过 0:未通过)',
     }
 }
 

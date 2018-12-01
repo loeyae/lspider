@@ -13,9 +13,13 @@ from . import Base
     'spider_task': {
         'uuid': int,         # ai id
         'mode': str,         # handler mode
+        'pid': int,          # project id
+        'sid': int,          # site id
+        'tid': int,          # task id
         'uid': int,          # url id
-        'pid': int,          # params id
+        'kid': int,          # keyword id
         'url': str,          # url
+        ''
         'status': int,       # site status
         'expire': int,       # expire time
         'plantime': int,     # plan time

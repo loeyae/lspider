@@ -13,22 +13,37 @@ from . import Base
 # site schema
 {
     'sites': {
-        'sid': int,          # site id
-        'pid': int,          # project id
-        'name': str,         # site name
-        'url': str,          # 基础 url
-        'status': int,       # site status
-        'rate': int,         # 更新频率
-        'comment': str,      # 站点描述
-        'scripts': str,      # 自定义handler
-        'type': str,         # 站点类型
-        'main_process': str, # 主流程配置
-        'sub_process': str,  # 子流程配置
-        'unique': str,       # 生成unique id的配置
-        'ctime': int,        # 创建时间
-        'utime': int,        # 最后一次更新时间
-        'creator': int,      # 创建人
-        'updator': int,      # 最后一次更新人
+        'uuid' : int,          # '自增id',
+        'pid' : int,           # '项目ID',
+        'name' : str,          # '站点名称 | 唯一,MAX50',
+        'url' : str,           # '域名 | 唯一,MAX300',
+        'mediaType' : int,     # '媒体类型(int)',
+        'type' : int,          # '类别(int)',
+        'industry' : int,      # '行业(int)',
+        'grade' : int,         # '级别(int)',
+        'frequency' : int,     # '更新频次(int)',
+        'territory' : int,     # '地域(int)',
+        'province' : int,      # '省(关联地域表ID)',
+        'city' : int,          # '市(关联地域表ID)',
+        'coding' : int,        # '编码(int)',
+        'ip' : int,            # 'IP',
+        'pv' : int,            # 'PV',
+        'icp' : int,           # '备案号',
+        'alexaRanking' : int,  # 'Alexa排名',
+        'channel' : int,       # '频道',
+        'weight' : int,        # '权重',
+        'advancedSetup' : {
+                'url' : str,   # '模拟登录url地址',
+                'post' : str,  # 'post信息',
+                'header' : {
+                        'Cookie' : str,     # 'cookie',
+                        'User-Agent' : str, # 'UA',
+                        'Host' : str,       # 'Host',
+                    },
+        },
+        'addAuthor' : int,     # '添加人ID',
+        'updated_at' : int,    # '更新时间',
+        'status' : int,        # '状态(1:正常,0:冻结,-1:删除)',
     }
 }
 
@@ -54,7 +69,7 @@ class SitesDB(Base):
 
     def update_many(self, id, obj = {}):
         raise NotImplementedError
-    
+
     def delete(self, id, where):
         raise NotImplementedError
 

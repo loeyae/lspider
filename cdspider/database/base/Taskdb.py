@@ -11,24 +11,24 @@ from . import Base
 
 {
     'task': {
-        'tid': int,        # task id
-        'pid': int,        # project id
-        'sid': int,        # site id
-        'kwid': int,       # keyword id, if exists, default: 0
-        'uid': int,        # url id, if exists, default: 0
-        'aid': int,        # attachment id, if exists, default: 0
-        'crid': int,       # channel rule id
-        'url': str,        # base url
-        'rate': int,       # 抓取频率
-        'status': int,     # status, default: 0
-        'expire': int,     # 过期时间, default: 0
-        'save': str,       # 保留的参数
-        'crawlinfo': str,  # 最近10次抓取记录
-        'queuetime': int,  # 最近一次入队时间
-        'crawltime': int,  # 最近一次抓取时间
-        'plantime': int,   # 计划执行时间
-        'ctime': int,      # 创建时间
-        'utime': int,      # 最后一次修改时间
+        'uuid' : int,                         # '自增id',
+        'sid'  : int,                         # '站点ID',
+        'type' : int,                         # '任务类别 int',
+        'name' : int,                         # '任务名称 | 唯一,MAX50',
+        'rule' : {
+                #列表类
+                'filtration' : int,           # '是否过滤(1:过滤,0:不过滤)',
+                'url' : list,                 # url
+                #接口类
+                'url' : str,                  # 基础url
+                'word' : str,                 # '搜索词',
+                #发表人类
+                'authorId' : str,             # '作者ID',
+                'account' :  str,             # '账号',
+        },
+        'addAuthor' : int,                    # '添加人ID',
+        'updated_at' : int,                   # '更新时间',
+        'status' : int,                       # '状态(1:正常,0:冻结,-1:删除)',
     }
 }
 
@@ -75,7 +75,7 @@ class TaskDB(Base):
 
     def update_many(self, id, obj = {}):
         raise NotImplementedError
-    
+
     def delete(self, id, pid, where):
         raise NotImplementedError
 
