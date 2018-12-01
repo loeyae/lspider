@@ -130,7 +130,7 @@ def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
     g = ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
 
-    scheduler = Scheduler(ctx, no_input = True)
+    scheduler = Scheduler(ctx)
     g['instances'].append(scheduler)
     scheduler.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
