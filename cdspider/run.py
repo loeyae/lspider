@@ -83,7 +83,7 @@ def cli(ctx, **kwargs):
 @click.option('--mode', default='project', type=click.Choice(['project', 'site', 'item']), help="分发模式", show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=False):
+def route(ctx, scheduler_cls, mode, no_loop, get_object=False):
     """
     路由: 按project、site、item其中一种模式分发计划任务
     """
