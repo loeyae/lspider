@@ -46,6 +46,7 @@ class Router(BaseScheduler):
                             "h-mode": key,
                             "item": item,
                         }
+                        self.debug("%s route message: %s" % (self.__class__.__name__, str(message)))
                         self.outqueue.put_nowait(message)
                 if not has_item:
                     break
