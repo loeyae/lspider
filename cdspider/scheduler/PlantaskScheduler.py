@@ -33,7 +33,7 @@ class PlantaskScheduler(BaseScheduler):
         handler_mode = message['h-mode']
         name = HANDLER_MODE_HANDLER_MAPPING[handler_mode]
         handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
-        save = {}
+        save = {"now": int(time.time())}
         while True:
             has_item = False
             for item in handler.schedule(message, save):
