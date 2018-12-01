@@ -391,7 +391,7 @@ class BaseHandler(Component):
         self.handler_run(HANDLER_FUN_FINISH, self.response)
 
     def close(self):
-        if isinstance(self.crawler, BaseCrawler):
+        if hasattr(self, 'crawler') and isinstance(self.crawler, BaseCrawler):
             self.crawler.quit()
             self.crawler = None
 
