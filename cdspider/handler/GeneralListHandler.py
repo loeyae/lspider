@@ -23,20 +23,25 @@ class GeneralListHandler(BaseHandler):
 
     def route(self, mode, save):
         if not "id" in save:
-            save['id'] = 0
+            save["id"] = 0
         if mode == ROUTER_MODE_PROJECT:
             for item in self.db['ProjectsDB'].get_new_list(save['id'], select=["uuid"]):
                 if item['uuid'] > save['id']:
-                    save['id'] = item['uuid']
+                    save['id'] = item["uuid"]
                 yield item['uuid']
         elif mode == ROUTER_MODE_SITE:
             if not "pid" in save:
                 save["pid"] = 0
             for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
-                for each in self.db['SitesDB'].get_new_list(save['id'], item['uuid'], select=["uuid"]):
-                    if each['uuid'] > save['id']:
-                        save['id'] = each['uuid']
-                    yield each['uuid']
+                while True:
+                    has_item = False
+                    for each in self.db['SitesDB'].get_new_list(save['id'], item['uuid'], select=["uuid"]):
+                        has_item = True
+                        if each['uuid'] > save['id']:
+                            save['id'] = each['uuid']
+                        yield each['uuid']
+                    if not has_item:
+                        break
                 if item['uuid'] > save['pid']:
                     save['pid'] = item['uuid']
 
@@ -45,15 +50,42 @@ class GeneralListHandler(BaseHandler):
         if not 'id' in save:
             save['id'] = 0
         if mode == ROUTER_MODE_PROJECT:
-            for item in self.db['UrlsDB'].get_new_list_by_pid(save['id'], message['item'], select=['uuid', 'url']):
-                yield item
-                if item['uuid'] > save['id']:
-                    save['id'] = item['uuid']
+            if not 'sid' in save:
+                save['sid'] = 0
+            for item in self.db['SitesDB'].get_new_list(save['sid'], message['item']):
+                while True:
+                    has_item = False
+                    for each in self.schedule_by_site(item, mode, save):
+                        yield each
+                        has_item = True
+                    if not has_item:
+                        break
+                if item['uuid'] > save['sid']:
+                    save['sid'] = item['uuid']
         elif mode == ROUTER_MODE_SITE:
-            for item in self.db['UrlsDB'].get_new_list(save['id'], message['item'], select=['uuid', 'url']):
-                yield item
-                if item['uuid'] > save['id']:
-                    save['id'] = item['uuid']
+            site = self.db['SitesDB'].get_detail(message['item'])
+            for each self.schedule_by_site(site, mode, save):
+                yield each
+
+    def schedule_by_site(self, site, mode, save):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"sid": site['uuid']}, select=['uuid', 'url']):
+            if item['uuid'] > save['id']:
+                save['id'] = item['uuid']
+            yield item
+
+    def newtask(self, message):
+        uid = message['uid']
+        urls = self.db['UrlsDB'].get_detail(uid)
+        task = {
+            'mode': message['mode'],     # handler mode
+            'pid': urls['pid'],          # project id
+            'sid': ursl['sid'],          # site id
+            'tid': urls.get('tid', 0),   # task id
+            'uid': uid,                  # url id
+            'kid': 0,                    # keyword id
+            'url': urls['url'],          # url
+        }
+        self.db['SpiderTaskDB'].insert(task)
 
     def get_scripts(self):
         if "listRule" in self.task and self.task['listRule']:
@@ -67,7 +99,10 @@ class GeneralListHandler(BaseHandler):
         if "listRule" in self.task and self.task['listRule']:
             rule = copy.deepcopy(self.task['listRule'])
         else:
-            urls = self.db['UrlsDB'].get_detail(self.task['uuid'])
+            urls = self.db['UrlsDB'].get_detail(self.task['uid'])
+            if urls['status'] != UrlsDB.STATUS_ACTIVE:
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                raise CDSpiderHandlerError("url no active")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
         self.process =  {
             "request": rule.get("request", self.DEFAULT_PROCESS),
