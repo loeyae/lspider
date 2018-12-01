@@ -35,6 +35,7 @@ class Router(BaseScheduler):
         self.info("%s route starting..." % self.__class__.__name__)
         def handler_schedule(key, name, mode, ctx):
             handler = get_object("cdspider.handler.%s" % name)(ctx, None)
+            self.info("%s loaded handler: %s" % (self.__class__.__name__, handler))
             save = {}
             while True:
                 has_item = False
