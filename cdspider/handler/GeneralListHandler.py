@@ -64,7 +64,7 @@ class GeneralListHandler(BaseHandler):
                     save['sid'] = item['uuid']
         elif mode == ROUTER_MODE_SITE:
             site = self.db['SitesDB'].get_detail(message['item'])
-            for each self.schedule_by_site(site, mode, save):
+            for each in self.schedule_by_site(site, mode, save):
                 yield each
 
     def schedule_by_site(self, site, mode, save):
