@@ -6,6 +6,7 @@ Created on 2018年8月6日
 @author: Wang Fengwei
 '''
 import traceback
+from cdspider.libs.constants import *
 from cdspider.worker import BaseWorker
 from cdspider.message_queue import KafkaQueue
 from cdspider.exceptions import *
