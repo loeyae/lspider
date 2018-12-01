@@ -6,7 +6,7 @@ class Base(object):
 
     STATUS_INIT = 0
     STATUS_ACTIVE = 1
-    STATUS_DELETED = 9
+    STATUS_DELETED = -1
 
 from .Articlesdb import ArticlesDB
 from .AttachDatadb import AttachDataDB
