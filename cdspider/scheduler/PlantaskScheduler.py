@@ -11,6 +11,7 @@ import logging
 from . import BaseScheduler
 from cdspider.exceptions import *
 from cdspider.libs.constants import *
+from cdspider.libs.utils import get_object
 
 class PlantaskScheduler(BaseScheduler):
     """
