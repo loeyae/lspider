@@ -26,32 +26,33 @@ class GeneralItemHandler(BaseHandler):
         self.process['paging'] = self.format_paging(self.process['paging'])
 
     def match_rule(self):
+        parse_rule = self.task.get("detailRule", {})
         url = self.task.get("url", None)
         if not url:
             rid = self.task['rid']
             article = self.db['ArticlesDB'].get_detail(rid, select=['url'])
             url = article['url']
             self.task.setdefault("url", url)
-        subdomain, domain = utils.parse_domain(url)
-        parse_rule = self.task.get("detailRule", {})
-        if not parse_rule and subdomain:
-            parserule_list = self.db['ParseRuleDB'].get_list_by_subdomain(subdomain)
-            for item in parserule_list:
-                if not parse_rule:
-                    parse_rule = item
-                if  'urlPattern' in item and item['urlPattern']:
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        parse_rule = item
         if not parse_rule:
-            parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
-            for item in parserule_list:
-                if not parse_rule:
-                    parse_rule = item
-                if  'urlPattern' in item and item['urlPattern']:
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return item
+            subdomain, domain = utils.parse_domain(url)
+            if subdomain:
+                parserule_list = self.db['ParseRuleDB'].get_list_by_subdomain(subdomain)
+                for item in parserule_list:
+                    if not parse_rule:
+                        parse_rule = item
+                    if  'urlPattern' in item and item['urlPattern']:
+                        u = utils.preg(url, item['urlPattern'])
+                        if u:
+                            parse_rule = item
+            else:
+                parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
+                for item in parserule_list:
+                    if not parse_rule:
+                        parse_rule = item
+                    if  'urlPattern' in item and item['urlPattern']:
+                        u = utils.preg(url, item['urlPattern'])
+                        if u:
+                            return item
             return parse_rule
 
     def run_parse(self, rule):
