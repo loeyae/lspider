@@ -179,6 +179,7 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
     """
     同步数据到kafka
     """
+    g = ctx.obj
     Worker = load_cls(ctx, None, worker_cls)
     worker = Worker(ctx)
     g['instances'].append(worker)
