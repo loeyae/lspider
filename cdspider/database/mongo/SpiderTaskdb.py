@@ -249,8 +249,8 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         table = self._table_name(mode)
         return self.count(where=where, table=table)
 
-    def get_list(self, pid, where = {}, select=None, **kwargs):
-        table = self._table_name(pid)
+    def get_list(self, mode, where = {}, select=None, **kwargs):
+        table = self._table_name(mode)
         kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, table=table, select=select, **kwargs)
 
