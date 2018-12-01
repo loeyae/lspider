@@ -19,7 +19,6 @@ from . import Base
         'uid': int,          # url id
         'kid': int,          # keyword id
         'url': str,          # url
-        ''
         'status': int,       # site status
         'expire': int,       # expire time
         'plantime': int,     # plan time
@@ -40,7 +39,16 @@ class SpiderTaskDB(Base):
     def disable(self, id, mode, where):
         raise NotImplementedError
 
-    def disable_by_param(self, pid, mode, where):
+    def disable_by_pid(self, pid, mode, where):
+        raise NotImplementedError
+
+    def disable_by_sid(self, sid, mode, where):
+        raise NotImplementedError
+
+    def disable_by_tid(self, tid, mode, where):
+        raise NotImplementedError
+
+    def disable_by_kid(self, kid, mode, where):
         raise NotImplementedError
 
     def disable_by_url(self, uid, mode, where):
@@ -49,7 +57,16 @@ class SpiderTaskDB(Base):
     def active(self, id, mode, where):
         raise NotImplementedError
 
-    def active_by_param(self, pid, mode, where):
+    def active_by_pid(self, pid, mode, where):
+        raise NotImplementedError
+
+    def active_by_sid(self, sid, mode, where):
+        raise NotImplementedError
+
+    def active_by_tid(self, tid, mode, where):
+        raise NotImplementedError
+
+    def active_by_kid(self, kid, mode, where):
         raise NotImplementedError
 
     def active_by_url(self, uid, mode, where):
@@ -64,7 +81,16 @@ class SpiderTaskDB(Base):
     def delete(self, id, mode, where):
         raise NotImplementedError
 
-    def delete_by_param(self, pid, mode, where):
+    def delete_by_pid(self, pid, mode, where):
+        raise NotImplementedError
+
+    def delete_by_sid(self, sid, mode, where):
+        raise NotImplementedError
+
+    def delete_by_tid(self, tid, mode, where):
+        raise NotImplementedError
+
+    def delete_by_kid(self, kid, mode, where):
         raise NotImplementedError
 
     def delete_by_url(self, uid, mode, where):
@@ -79,7 +105,7 @@ class SpiderTaskDB(Base):
     def get_list(self, mode, where={}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_plan_list(self, mode, plantime, where={}, select=None, **kwargs):
+    def get_plan_list(self, mode, id, plantime, where={}, select=None, **kwargs):
         raise NotImplementedError
 
     def get_max_id(self, mode, id, where = {}):
