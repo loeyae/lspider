@@ -9,6 +9,7 @@
 """
 import logging
 import traceback
+from cdspider.libs.constants import *
 from cdspider.mailer import BaseSender
 from cdspider.worker import BaseWorker
 from cdspider.libs import utils
