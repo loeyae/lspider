@@ -16,7 +16,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
     __tablename__ = 'spider_task'
 
     def __init__(self, connector, table=None, **kwargs):
-        super(TaskDB, self).__init__(connector, table = table, **kwargs)
+        super(SpiderTaskDB, self).__init__(connector, table = table, **kwargs)
         self._list_collection()
 
     def insert(self, obj):
