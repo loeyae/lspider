@@ -13,7 +13,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 from cdspider import Component
 from cdspider.crawler import BaseCrawler
 from cdspider.crawler import RequestsCrawler, SeleniumCrawler
-from cdspider.database.base import *
+from cdspider.database.base import Base as BaseDB
 from cdspider.libs import utils
 from cdspider.exceptions import *
 from cdspider.libs.tools import *
@@ -53,47 +53,47 @@ class BaseHandler(Component):
         if g.get('debug', False):
             self.log_level = logging.DEBUG
         super(BaseHandler, self).__init__(self.logger, self.log_level)
-        attach_storage = g.get('app_config', {}).get('attach_storage', None)
-        if attach_storage:
-            attach_storage = os.path.realpath(os.path.join(g.get("app_path"), attach_storage))
-        self.attach_storage = attach_storage
         self.db = g.get('db', None)
         self.queue = g.get('queue', None)
-        self.crawl_id = int(time.time())
-        self.crawl_info  = {
-            "crawl_start": self.crawl_id,
-            "crawl_end": None,
-            "crawl_count": {
-                "count": 0,
-                "new_count": 0,
-                "parsed_count": 0,
-                "req_error": 0,
-                "repeat_count": 0,
-            },
-            "broken": None,
-            "traceback": None
-        }
-        self.no_sync = kwargs.pop('no_sync', False)
-        self.spider = kwargs.pop('spider', None)
-        self._settings = kwargs or {}
-        self.crawler = None
-        self.process = {}
-        self.proxy_mode = 'never'
-        self.request = {}
-        self.request_params = {}
-        self.response = {
-            "source": None,
-            "last_source": None,
-            "final_url": self.task.get('url'),
-            "last_url": self.task.get('url'),
-            "broken_exc": None,
-            "parsed": None,
-        }
-        self.force_proxy = False
-        self.auto_proxy = False
-        self.page = 1
-        self.last_result_id = None
-        self.sync_result = set()
+        if self.task:
+            attach_storage = g.get('app_config', {}).get('attach_storage', None)
+            if attach_storage:
+                attach_storage = os.path.realpath(os.path.join(g.get("app_path"), attach_storage))
+            self.attach_storage = attach_storage
+            self.crawl_id = int(time.time())
+            self.crawl_info  = {
+                "crawl_start": self.crawl_id,
+                "crawl_end": None,
+                "crawl_count": {
+                    "count": 0,
+                    "new_count": 0,
+                    "parsed_count": 0,
+                    "req_error": 0,
+                    "repeat_count": 0,
+                },
+                "broken": None,
+                "traceback": None
+            }
+            self.no_sync = kwargs.pop('no_sync', False)
+            self.spider = kwargs.pop('spider', None)
+            self._settings = kwargs or {}
+            self.crawler = None
+            self.process = {}
+            self.proxy_mode = 'never'
+            self.request = {}
+            self.request_params = {}
+            self.response = {
+                "source": None,
+                "last_source": None,
+                "final_url": self.task.get('url', None),
+                "last_url": self.task.get('url', None),
+                "broken_exc": None,
+                "parsed": None,
+            }
+            self.force_proxy = False
+            self.auto_proxy = False
+            self.page = 1
+            self.last_result_id = None
         self.handle = {}
 
     def __del__(self):
@@ -104,6 +104,46 @@ class BaseHandler(Component):
 
     def schedule(self, message, save):
         yield None
+
+    def newtask(self, message):
+        pass
+
+    def status(self, message):
+        mode = message['mode']
+        status = message['status']
+        if status == BaseDB.STATUS_DELETED:
+            if "uid" in message and message['uid']:
+                self.db['SpiderTaskDB'].delete_by_url(message['uid'], mode)
+            elif "tid" in message and message['tid']:
+                self.db['SpiderTaskDB'].delete_by_tid(message['tid'], mode)
+            elif "sid" in message and message['sid']:
+                self.db['SpiderTaskDB'].delete_by_sid(message['sid'], mode)
+            elif "pid" in message and message['pid']:
+                self.db['SpiderTaskDB'].delete_by_pid(message['pid'], mode)
+            elif "kid" in message and message['kid']:
+                self.db['SpiderTaskDB'].delete_by_kid(message['kid'], mode)
+        elif status == BaseDB.STATUS_ACTIVE:
+            if "uid" in message and message['uid']:
+                self.db['SpiderTaskDB'].active_by_url(message['uid'], mode)
+            elif "tid" in message and message['tid']:
+                self.db['SpiderTaskDB'].active_by_tid(message['tid'], mode)
+            elif "sid" in message and message['sid']:
+                self.db['SpiderTaskDB'].active_by_sid(message['sid'], mode)
+            elif "pid" in message and message['pid']:
+                self.db['SpiderTaskDB'].active_by_pid(message['pid'], mode)
+            elif "kid" in message and message['kid']:
+                self.db['SpiderTaskDB'].active_by_kid(message['kid'], mode)
+        elif status == BaseDB.STATUS_INIT:
+            if "uid" in message and message['uid']:
+                self.db['SpiderTaskDB'].disable_by_url(message['uid'], mode)
+            elif "tid" in message and message['tid']:
+                self.db['SpiderTaskDB'].disable_by_tid(message['tid'], mode)
+            elif "sid" in message and message['sid']:
+                self.db['SpiderTaskDB'].disable_by_sid(message['sid'], mode)
+            elif "pid" in message and message['pid']:
+                self.db['SpiderTaskDB'].disable_by_pid(message['pid'], mode)
+            elif "kid" in message and message['kid']:
+                self.db['SpiderTaskDB'].disable_by_kid(message['kid'], mode)
 
     def get_scripts(self):
         return None
@@ -148,6 +188,11 @@ class BaseHandler(Component):
         """
         初始化爬虫
         """
+        if "uuid" in self.task and self.task['uuid']:
+            task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.tasl['mode'])
+            self.task.update(task)
+        self.init_process()
+        self.handler_run(HANDLER_FUN_PROCESS, self.process)
         self.request = self._get_request()
         self.proxy_mode = self.request.pop('proxy', 'never')
         if not self.crawler:
@@ -157,8 +202,6 @@ class BaseHandler(Component):
         builder = UrlBuilder(self.logger, self.log_level)
         self.request_params = builder.build(self.request, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_INIT, self.request_params)
-        self.init_process()
-        self.handler_run(HANDLER_FUN_PROCESS, self.process)
 
     @abc.abstractmethod
     def init_process(self):
