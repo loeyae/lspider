@@ -80,7 +80,7 @@ def cli(ctx, **kwargs):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
-@click.option('--mode', default='project', type=click.Choice(['project', 'site', 'item']), help="分发模式", show_default=True)
+@click.option('--mode', default='project', type=click.Choice(['project', 'site']), help="分发模式", show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def route(ctx, scheduler_cls, mode, no_loop, get_object=False):
