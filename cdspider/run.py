@@ -79,12 +79,9 @@ def cli(ctx, **kwargs):
     return ctx
 
 @cli.command()
-@click.option('--scheduler_cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
+@click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
 @click.option('--mode', default='project', type=click.Choice(['project', 'site', 'item']), help="分发模式", show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
-@click.option('--xmlrpc', default=False, is_flag=True, help='开启xmlrpc', show_default=True)
-@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host")
-@click.option('--xmlrpc-port', default=23333, help="xmlrpc bind port")
 @click.pass_context
 def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, get_object=False):
     """
@@ -99,12 +96,10 @@ def route(ctx, scheduler_cls, mode, no_loop, xmlrpc, xmlrpc_host, xmlrpc_port, g
     if no_loop:
         scheduler.run_once()
     else:
-        if xmlrpc:
-            utils.run_in_thread(scheduler.xmlrpc_run, port=xmlrpc_port, bind=xmlrpc_host)
         scheduler.run()
 
 @cli.command()
-@click.option('--scheduler_cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
@@ -121,6 +116,24 @@ def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
         scheduler.run_once()
     else:
         scheduler.run()
+
+
+@cli.command()
+@click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='scheduler name')
+@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host")
+@click.option('--xmlrpc-port', default=23333, help="xmlrpc bind port")
+@click.pass_context
+def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
+    """
+    spider rpc
+    """
+    g = ctx.obj
+    Scheduler = load_cls(ctx, None, scheduler_cls)
+
+    scheduler = Scheduler(ctx, no_input = True)
+    g['instances'].append(scheduler)
+    scheduler.xmlrpc_run(xmlrpc_port, xmlrpc_host)
+
 
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
@@ -289,11 +302,11 @@ def test(ctx, spider_cls, url, mode, pid, sid, tid, tier, no_input):
 
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
-@click.option('--exc-work-num', default=1, help='exc worker实例个数')
+@click.option('--plantask-schedule-num', default=1, help='plantask schedule实例个数')
 @click.option('--run-in', default='subprocess', type=click.Choice(['subprocess', 'thread']),
               help='运行模式:subprocess or thread')
 @click.pass_context
-def all(ctx, fetch_num, exc_work_num, run_in):
+def all(ctx, fetch_num, plantask_schedule_num, run_in):
     """
     集成运行整个系统
     """
@@ -312,40 +325,41 @@ def all(ctx, fetch_num, exc_work_num, run_in):
         route_config.setdefault('xmlrpc_host', '127.0.0.1')
         threads.append(run_in(ctx.invoke, route, **route_config))
 
-        #newtask_schedule
-        newtask_schedule_config = g['config'].get('newtask_schedule', {})
-        threads.append(run_in(ctx.invoke, newtask_schedule, **newtask_schedule_config))
-
         #plantask_schedule
         plantask_schedule_config = g['config'].get('plantask_schedule', {})
-        threads.append(run_in(ctx.invoke, plantask_schedule, **plantask_schedule_config))
+        for i in range(plantask_schedule_num):
+            threads.append(run_in(ctx.invoke, plantask_schedule, **plantask_schedule_config))
 
-        #synctask_schedule
-        synctask_schedule_config = g['config'].get('synctask_schedule', {})
-        threads.append(run_in(ctx.invoke, synctask_schedule, **synctask_schedule_config))
-
-        #status_schedule
-        status_schedule_config = g['config'].get('status_schedule', {})
-        threads.append(run_in(ctx.invoke, status_schedule, **status_schedule_config))
-
-        #search_schedule
-        search_schedule_config = g['config'].get('search_schedule', {})
-        threads.append(run_in(ctx.invoke, search_schedule, **search_schedule_config))
-
-        #spider_rpc
-        spider_rpc_config = g['config'].get('spider_rpc', {})
-        spider_rpc_config.setdefault('xmlrpc_host', '127.0.0.1')
-        threads.append(run_in(ctx.invoke, spider_rpc, **spider_rpc_config))
+        #schedule_rpc
+        schedule_rpc_config = g['config'].get('schedule_rpc', {})
+        schedule_rpc_config.setdefault('xmlrpc_host', '127.0.0.1')
+        threads.append(run_in(ctx.invoke, schedule_rpc, **schedule_config))
 
         #fetch
         fetcher_config = g['config'].get('fetche', {})
         for i in range(fetch_num):
             threads.append(run_in(ctx.invoke, fetch, **fetcher_config))
 
-        #exc worker
-        exc_worker_config = g['config'].get('exc_work', {})
-        for i in range(exc_work_num):
-            threads.append(run_in(ctx.invoke, exc_work, **exc_worker_config))
+        #spider_rpc
+        spider_rpc_config = g['config'].get('spider_rpc', {})
+        spider_rpc_config.setdefault('xmlrpc_host', '127.0.0.1')
+        threads.append(run_in(ctx.invoke, spider_rpc, **spider_rpc_config))
+
+        #work
+        work_config = g['config'].get('work', None)
+        if isinstance(work_config, (list, tuple)):
+            for item in work_config:
+                threads.append(run_in(ctx.invoke, work, **item))
+        elif work_config:
+            threads.append(run_in(ctx.invoke, work, **work_config))
+
+        #tool
+        tool_config = g['config'].get('tool', None)
+        if isinstance(tool_config, (list, tuple)):
+            for item in tool_config:
+                threads.append(run_in(ctx.invoke, tool, **item))
+        elif tool_config:
+            threads.append(run_in(ctx.invoke, tool, **tool_config))
 
     except:
         g['logger'].error(traceback.format_exc())
