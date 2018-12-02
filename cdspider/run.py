@@ -74,7 +74,7 @@ def cli(ctx, **kwargs):
     ctx.obj['app_path'] = cpath
     ctx.obj.setdefault('rate_map', ctx.obj['app_config'].get('ratemap', {}))
     ctx.obj['instances'] = []
-    if ctx.invoked_subcommand is None and not ctx.obj.get('testing_mode'):
+    if ctx.invoked_subcommand is None:
         ctx.invoke(all)
     return ctx
 
@@ -91,7 +91,7 @@ def route(ctx, scheduler_cls, mode, no_loop, get_object=False):
     Scheduler = load_cls(ctx, None, scheduler_cls)
     scheduler = Scheduler(ctx, mode=mode)
     g['instances'].append(scheduler)
-    if g.get('testing_mode') or get_object:
+    if get_object:
         return scheduler
     if no_loop:
         scheduler.run_once()
@@ -110,7 +110,7 @@ def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
     Scheduler = load_cls(ctx, None, scheduler_cls)
     scheduler = Scheduler(ctx)
     g['instances'].append(scheduler)
-    if g.get('testing_mode') or get_object:
+    if get_object:
         return scheduler
     if no_loop:
         scheduler.run_once()
@@ -148,7 +148,7 @@ def fetch(ctx, fetch_cls, no_loop, no_sync, get_object=False, no_input=False):
     Spider = load_cls(ctx, None, fetch_cls)
     spider = Spider(ctx, no_sync=no_sync, no_input = no_input)
     g['instances'].append(spider)
-    if g.get('testing_mode') or get_object:
+    if get_object:
         return spider
     if no_loop:
         spider.run_once()
@@ -183,7 +183,7 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
     Worker = load_cls(ctx, None, worker_cls)
     worker = Worker(ctx)
     g['instances'].append(worker)
-    if g.get('testing_mode') or get_object:
+    if get_object:
         return worker
     if no_loop:
         worker.run_once()
