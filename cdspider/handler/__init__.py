@@ -400,4 +400,7 @@ class BaseHandler(Component):
 from .Loader import Loader
 from .GeneralHandler import GeneralHandler
 from .GeneralListHandler import GeneralListHandler
+from .GeneralItemHandler import GeneralItemHandler
+from .CommentHandler import CommentHandler
+from .InteractHandler import InteractHandler
 from .LinksClusterHandler import LinksClusterHandler
