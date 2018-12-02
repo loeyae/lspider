@@ -108,7 +108,7 @@ class GeneralItemHandler(BaseHandler):
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
                 else:
                     inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
-                self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+                    self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 crawlinfo = self._build_crawl_info(final_url=self.response['final_url'])
                 typeinfo = self._typeinfo(self.response['final_url'])
                 result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=crawlinfo, source=utils.decode(page_source), **unid)
