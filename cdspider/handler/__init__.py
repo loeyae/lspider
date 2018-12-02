@@ -55,6 +55,7 @@ class BaseHandler(Component):
         super(BaseHandler, self).__init__(self.logger, self.log_level)
         self.db = g.get('db', None)
         self.queue = g.get('queue', None)
+        self.ratemap = g.get('app_config', {}).get('ratemap', {})
         if self.task:
             attach_storage = g.get('app_config', {}).get('attach_storage', None)
             if attach_storage:
