@@ -53,28 +53,35 @@ class GeneralListHandler(BaseHandler):
             if not 'sid' in save:
                 save['sid'] = 0
             for item in self.db['SitesDB'].get_new_list(save['sid'], message['item']):
+                self.debug("%s schedule site: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
-                    for each in self.schedule_by_site(item, mode, save):
+                    for each in self.schedule_by_site(item, message['h-mode'], save):
                         yield each
                         has_item = True
                     if not has_item:
+                        self.debug("%s schedule site end" % (self.__class__.__name__))
                         break
                 if item['uuid'] > save['sid']:
                     save['sid'] = item['uuid']
         elif mode == ROUTER_MODE_SITE:
             site = self.db['SitesDB'].get_detail(message['item'])
-            for each in self.schedule_by_site(site, mode, save):
+            for each in self.schedule_by_site(site, message['h-mode'], save):
                 yield each
 
     def schedule_by_site(self, site, mode, save):
+        plantime = int(save['now']) + int(self.ratemap[str(site['frequency'])][0])
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"sid": site['uuid']}, select=['uuid', 'url']):
+            self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
 
     def newtask(self, message):
         uid = message['uid']
+        tasks = self.g['db']['SpiderTaskDB'].get_list(message['mode'], {"uid": uid})
+        if len(list(tasks)) > 0:
+            return
         urls = self.db['UrlsDB'].get_detail(uid)
         task = {
             'mode': message['mode'],     # handler mode
@@ -102,7 +109,7 @@ class GeneralListHandler(BaseHandler):
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
             if urls['status'] != UrlsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
-                raise CDSpiderHandlerError("url no active")
+                raise CDSpiderHandlerError("url not active")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
         self.process =  {
             "request": rule.get("request", self.DEFAULT_PROCESS),
