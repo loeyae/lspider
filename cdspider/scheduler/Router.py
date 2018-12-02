@@ -48,9 +48,11 @@ class Router(BaseScheduler):
                             "item": item,
                         }
                         self.debug("%s route message: %s" % (self.__class__.__name__, str(message)))
-                        self.outqueue.put_nowait(message)
+                        if not self.testing_mode:
+                            self.outqueue.put_nowait(message)
                 if not has_item:
                     break
+                time.sleep(0.1)
         threads = []
         for key, name in HANDLER_MODE_HANDLER_MAPPING.items():
             threads.append(run_in_thread(handler_schedule, key, name, self.mode, self.ctx))
