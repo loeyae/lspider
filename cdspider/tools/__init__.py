@@ -17,8 +17,8 @@ class Base(Component):
 
     def __init__(self, context, daemon = False):
         self.ctx = context
-        self.g = g
-        super(Base, self).__init__(g['logger'], logging.DEBUG if g['debug'] else logging.WARN)
+        self.g = self.ctx.obj
+        super(Base, self).__init__(self.g['logger'], logging.DEBUG if self.g['debug'] else logging.WARN)
         self.daemon = daemon
         self.ioloop = None
         self._quit = False
