@@ -6,7 +6,7 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-11-28 21:45:37
 """
-
+import copy
 from . import BaseHandler
 from cdspider.libs import utils
 from cdspider.libs.constants import *
@@ -43,7 +43,7 @@ class GeneralItemHandler(BaseHandler):
                     if  'urlPattern' in item and item['urlPattern']:
                         u = utils.preg(url, item['urlPattern'])
                         if u:
-                            parse_rule = item
+                            return item
             else:
                 parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
                 for item in parserule_list:
@@ -53,7 +53,7 @@ class GeneralItemHandler(BaseHandler):
                         u = utils.preg(url, item['urlPattern'])
                         if u:
                             return item
-            return parse_rule
+        return parse_rule
 
     def run_parse(self, rule):
         parser = ItemParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
@@ -103,32 +103,48 @@ class GeneralItemHandler(BaseHandler):
         if self.response['parsed']:
             result_id = self.task.get("rid", None)
             if not result_id:
-                inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
+                if self.testing_mode:
+                    inserted, unid = (True, {"acid": "test_mode", "ctime": self.crawl_id})
+                    self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+                else:
+                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 crawlinfo = self._build_crawl_info(final_url=self.response['final_url'])
                 typeinfo = self._typeinfo(self.response['final_url'])
                 result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=crawlinfo, source=utils.decode(page_source), **unid)
-                self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
-                if inserted:
-#                    result['parentid'] = parentid
-                    result_id = self.db['ArticlesDB'].insert(result)
-                    self.task['rid'] = result_id
+                if self.testing_mode:
+                    self.debug("%s on_result: %s" % (self.__class__.__name__, result))
                 else:
-                    item = self.db['ArticlesDB'].get_detail_by_unid(**unid)
-                    result_id = item['rid']
-                    self.db['ArticlesDB'].update(result_id, result)
+                    self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
+                    if inserted:
+    #                    result['parentid'] = parentid
+                        result_id = self.db['ArticlesDB'].insert(result)
+                        self.task['rid'] = result_id
+                    else:
+                        item = self.db['ArticlesDB'].get_detail_by_unid(**unid)
+                        result_id = item['rid']
+                        self.db['ArticlesDB'].update(result_id, result)
             else:
-                result = self.db['ArticlesDB'].get_detail(result_id)
                 if self.page == 1:
                     crawlinfo = self._build_crawl_info(final_url=self.response['final_url'])
                     typeinfo = self._typeinfo(self.response['final_url'])
                     result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=crawlinfo, source=utils.decode(page_source))
-                    self.db['ArticlesDB'].update(result_id, result)
+
+                    if self.testing_mode:
+                        self.debug("%s on_result: %s" % (self.__class__.__name__, result))
+                    else:
+                        self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
+                        self.db['ArticlesDB'].update(result_id, result)
                 else:
-                    content = result['content']
-                    if 'content' in data and data['content']:
-                        content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
-                    self.db['ArticlesDB'].update(result_id, {"content": content})
+                    if self.testing_mode:
+                        self.debug("%s on_result: %s" % (self.__class__.__name__, self.response['parsed']))
+                    else:
+                        result = self.db['ArticlesDB'].get_detail(result_id)
+                        content = result['content']
+                        if 'content' in self.response['parsed'] and self.response['parsed']['content']:
+                            content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
+                            self.debug("%s on_result content: %s" % (self.__class__.__name__, content))
+                            self.db['ArticlesDB'].update(result_id, {"content": content})
 
             if not result_id:
                 raise CDSpiderDBError("Result insert failed")
