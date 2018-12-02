@@ -72,7 +72,8 @@ class GeneralListHandler(BaseHandler):
     def schedule_by_site(self, site, mode, save):
         plantime = int(save['now']) + int(self.ratemap[str(site['frequency'])][0])
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"sid": site['uuid']}, select=['uuid', 'url']):
-            self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+            if not self.testing_mode:
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
@@ -92,7 +93,9 @@ class GeneralListHandler(BaseHandler):
             'kid': 0,                    # keyword id
             'url': urls['url'],          # url
         }
-        self.db['SpiderTaskDB'].insert(task)
+        self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
+        if not self.testing_mode:
+            self.db['SpiderTaskDB'].insert(task)
 
     def get_scripts(self):
         if "listRule" in self.task and self.task['listRule']:
@@ -204,11 +207,14 @@ class GeneralListHandler(BaseHandler):
                     crawlinfo =  self._build_crawl_info(self.response['final_url'])
                     typeinfo = self._typeinfo(item['url'])
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
-                    result_id = self.db['ArticlesDB'].insert(result)
-                    if not result_id:
-                        raise CDSpiderDBError("Result insert failed")
+                    if self.testing_mode:
+                        self.debug("%s result: %s" % (self.__class__.__name__, result))
+                    else:
+                        result_id = self.db['ArticlesDB'].insert(result)
+                        if not result_id:
+                            raise CDSpiderDBError("Result insert failed")
+                        self.build_item_task(result_id)
                     self.crawl_info['crawl_count']['new_count'] += 1
-                    self.build_item_task(result_id)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_count'] += 1
                 self.on_repetition()
