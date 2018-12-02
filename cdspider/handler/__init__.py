@@ -56,6 +56,7 @@ class BaseHandler(Component):
         self.db = g.get('db', None)
         self.queue = g.get('queue', None)
         self.ratemap = g.get('app_config', {}).get('ratemap', {})
+        self.testing_mode = g.get('testing_mode', False)
         if self.task:
             attach_storage = g.get('app_config', {}).get('attach_storage', None)
             if attach_storage:
