@@ -6,6 +6,8 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-11-14 23:31:54
 """
+import six
+import inspect
 import logging
 from cdspider import Component
 from cdspider.exceptions import *
@@ -19,63 +21,54 @@ class Loader(Component):
     handler loader
     """
     def __init__(self, context, task, spider, no_sync = False):
-        self.ctx = context
-        self.task = task
-        self.params = {"spider": spider, "no_sync": no_sync}
-        handler = None
         logger = logging.getLogger('handler')
         log_level = logging.WARN
         if context.obj.get('debug', False):
             log_level = logging.DEBUG
         super(Loader, self).__init__(logger, log_level)
+        mode = task.get('mode', HANDLER_MODE_DEFAULT)
+        _class = get_object('cdspider.handler.%s' % HANDLER_MODE_HANDLER_MAPPING[mode])
+        self.params = {"context": context, "task": task, "spider": spider, "no_sync": no_sync}
+        self.handler = _class(**self.params)
 
     def get_moduler(self):
         scripts = self.get_scripts()
-        if isinstance(scripts, BaseHandler):
-            return scripts
+        if not scripts:
+            return None
         moduler = {
             "name": "cdspider.handler.custom",
-            "scripts": scripts,
-            "ctx": self.ctx,
-            "task": self.task
+            "scripts": scripts
         }
         return moduler
 
     def get_scripts(self):
-        mode = self.task.get('mode', HANDLER_MODE_DEFAULT)
-        _class = get_object('cdspider.handler.%s' % HANDLER_MODE_HANDLER_MAPPING[mode])
-        handler = _class(self.ctx, self.task, spider=self.params.get('spider', None), no_sync=self.params.get('no_sync', False))
-        scripts = handler.get_scripts()
+        scripts = self.handler.get_scripts()
         if scripts:
-            return scripts
-        return handler
+            return scripts.strip()
+        return None
 
     def load(self):
         try:
             moduler = self.get_moduler()
-            if isinstance(moduler, BaseHandler):
-                return moduler
-            moduler.update(self.params)
-            mod = ModulerLoader(moduler).load_module()
-            if hasattr(mod, 'handler'):
-                return mod.handler
-            else:
-                _class_list = []
-                for each in list(six.itervalues(mod.__dict__)):
-                    if inspect.isclass(each) and each is not BaseHandler and issubclass(each, BaseHandler):
-                        _class_list.append(each)
-                l = len(_class_list)
-                self.info("matched handler: %s" % _class_list)
-                if l > 0:
-                    _class = None
-                    for each in _class_list:
-                        if not _class:
-                            _class = each
-                        else:
-                            if issubclass(each, _class):
+            if moduler:
+                mod = ModulerLoader(moduler).load_module(self.handler, self.params)
+                if hasattr(mod, 'handler') and isinstance(mod.handler, BaseHandler):
+                    return mod.handler
+                else:
+                    _class_list = [item for item in mod.__dict__.values() if (inspect.isclass(item) and issubclass(item, BaseHandler))]
+                    l = len(_class_list)
+                    self.info("matched handler: %s" % _class_list)
+                    if l > 0:
+                        _class = None
+                        for each in _class_list:
+                            if not _class:
                                 _class = each
-                    self.info("selected handler: %s" % _class)
-                    if _class:
-                        return _class(moduler['ctx'], moduler['task'], spider=moduler.get('spider', None), no_sync=moduler.get('no_sync', False))
+                            else:
+                                if issubclass(each, _class):
+                                    _class = each
+                        self.info("selected handler: %s" % _class)
+                        if _class:
+                            return _class(**self.params)
+            return self.handler
         except Exception as exc:
             raise CDSpiderHandlerError(exc)
