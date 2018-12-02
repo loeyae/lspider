@@ -20,6 +20,7 @@ from . import Base
         'kid': int,          # keyword id
         'url': str,          # url
         'status': int,       # site status
+        'status': int,       # site status
         'expire': int,       # expire time
         'plantime': int,     # plan time
         'crawltime': int,    # crawl time
