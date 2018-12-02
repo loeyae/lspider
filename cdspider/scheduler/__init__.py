@@ -20,6 +20,7 @@ class BaseScheduler(Component):
         self._quit = False
         self.ctx = context
         g = context.obj
+        self.testing_mode = g.get('testing_mode', False)
         self.db = g.get('db')
         self.queue = g.get('queue')
         self.ioloop = tornado.ioloop.IOLoop()
