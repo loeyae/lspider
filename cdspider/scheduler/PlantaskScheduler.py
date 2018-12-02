@@ -42,9 +42,12 @@ class PlantaskScheduler(BaseScheduler):
                 if item:
                     item['mode'] = handler_mode
                     self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
+                    if not self.testing_mode:
+                        self.send_task(item)
                     has_item = True
             if not has_item:
                 break
+            time.sleep(0.1)
         self.info("%s schedule end" % self.__class__.__name__)
 
     def send_task(self, task):
