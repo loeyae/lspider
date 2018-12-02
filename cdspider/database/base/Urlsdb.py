@@ -32,6 +32,13 @@ from . import Base
 
 class UrlsDB(Base):
 
+    IS_TYPE_CHANNEL_LIST = 1
+    NO_TYPE_CHANNEL_LIST = 0
+    IS_TYPE_CHANNEL = 1
+    NO_TYPE_CHANNEL = 0
+    IS_TYPE_LIST = 1
+    NO_TYPE_LIST = 0
+
     def insert(self, obj = {}):
         raise NotImplementedError
 
