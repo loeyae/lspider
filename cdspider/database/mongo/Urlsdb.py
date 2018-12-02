@@ -142,14 +142,18 @@ class UrlsDB(Mongo, BaseUrlsDB):
         kwargs.setdefault('sort', [('uuid', 1)])
         if not where:
             where = {}
-        where['uuid'] = {'$gt': int(id)}
-        where['sid'] = int(sid)
-        return self.find(where = where, select=select, **kwargs)
+        where = self._build_where(where)
+        _where = {'$and':[{"$or": [{"typeChannelList": UrlsDB.IS_TYPE_CHANNEL_LIST}, {"typeChannel": UrlsDB.IS_TYPE_CHANNEL}, {"typeList": UrlsDB.IS_TYPE_LIST}]}, {"uuid": {"$gt": id}}, {"sid": sid}]}
+        for k, v in where.items():
+            _where['$and'].extend([{k: v}])
+        return self.find(where = _where, select=select, **kwargs)
 
     def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uuid', 1)])
         if not where:
             where = {}
-        where['uuid'] = {'$gt': int(id)}
-        where['pid'] = pid
-        return self.find(where = where, select=select, **kwargs)
+        where = self._build_where(where)
+        _where = {'$and':[{"$or": [{"typeChannelList": UrlsDB.IS_TYPE_CHANNEL_LIST}, {"typeChannel": UrlsDB.IS_TYPE_CHANNEL}, {"typeList": UrlsDB.IS_TYPE_LIST}]}, {"uuid": {"$gt": id}}, {"pid": pid}]}
+        for k, v in where.items():
+            _where['$and'].extend([{k: v}])
+        return self.find(where = _where, select=select, **kwargs)
