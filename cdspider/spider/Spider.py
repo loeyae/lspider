@@ -128,6 +128,7 @@ class Spider(Component):
             if not return_result:
                 handler.finish()
             handler.close()
+            del handler
             self.info("Spider fetch end" )
             if return_result:
                 return return_data
