@@ -202,8 +202,12 @@ class GeneralListHandler(BaseHandler):
             new_count = self.crawl_info['crawl_count']['new_count']
             formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
             for item in formated:
-                inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
-                self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+                if self.testing_mode:
+                    inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
+                    self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+                else:
+                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
+                    self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     crawlinfo =  self._build_crawl_info(self.response['final_url'])
                     typeinfo = self._typeinfo(item['url'])
