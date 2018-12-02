@@ -6,6 +6,7 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-8-14 14:56:32
 """
+import time
 from cdspider.tools import Base
 from cdspider.libs.constants import *
 
@@ -31,7 +32,7 @@ class newtask_by_pid(Base):
             UrlsDB = self.g['db']['UrlsDB']
             while True:
                 i = 0
-                for item in UrlsDB.get_new_list_by_pid(id, pid, where={'status': {"$in": [UrlsDB.STATUS_INIT, UrlsDB.STATUS_ACTIVE]}, "$or": [{"typeChannelList": UrlsDB.IS_TYPE_CHANNEL_LIST}, {"typeChannel": UrlsDB.IS_TYPE_CHANNEL}, {"typeList": UrlsDB.IS_TYPE_LIST}]}):
+                for item in UrlsDB.get_new_list_by_pid(id, pid, where={'status': {"$in": [UrlsDB.STATUS_INIT, UrlsDB.STATUS_ACTIVE]}}):
                     task = self.g['db']['SpiderTaskDB'].get_list(mode, {"uid": item['uuid']})
                     if len(list(task)) > 0:
                         continue
@@ -43,6 +44,7 @@ class newtask_by_pid(Base):
                         'uid': item['uuid'],         # url id
                         'kid': 0,                    # keyword id
                         'url': item['url'],          # url
+                        'status': item['status'],    # status
                     }
                     self.info("insert into newtask: %s" %  str(d))
                     if not testing_mode:
@@ -54,3 +56,4 @@ class newtask_by_pid(Base):
                         return
                 if i < 1:
                     return
+                time.sleep(0.1)
