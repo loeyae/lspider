@@ -203,7 +203,7 @@ class ModulerLoader(object):
         self.name = moduler['name']
         self.mod = mod
 
-    def load_module(self):
+    def load_module(self, handler, handler_params):
         if self.mod is None:
             self.mod = mod = imp.new_module(self.name)
         else:
@@ -212,6 +212,8 @@ class ModulerLoader(object):
         mod.__loader__ = self
         mod.__moduler__ = self.moduler
         mod.__package__ = 'cdspider'
+        mod.handler = handler
+        mod.handler_params = handler_params
         code = self.get_code()
         six.exec_(code, mod.__dict__)
         linecache.clearcache()
@@ -230,60 +232,6 @@ class ModulerLoader(object):
         if isinstance(script, six.text_type):
             return script.encode('utf8')
         return script
-
-def load_handler(task, **kwargs):
-    """
-    动态加载handler
-    如果task中有定义，则使用task中的handler。如果project也有定义，task中定义的handler需继承自project中定义的handler
-    如果project中有定义，则使用project中的handler
-    否则，根据项目类型，使用默认的handler
-    """
-    from cdspider.handler import BaseHandler, AttachHandler, GeneralHandler, ProjectBaseHandler, SearchHandler
-    mod = None
-    project = task.get("project", None)
-    site = task.get("site", None)
-    urls = task.get("urls", None)
-    channel = task.get("channel", None)
-    if 'pid' in project and project['pid']:
-        project['name'] = 'Project%s' % project['pid']
-    if project and "scripts" in project and project['scripts']:
-        mod = ProjectLoader(project).load_module()
-    if site and "scripts" in site and site['scripts']:
-        site['project'] = {"name": project['name']}
-        mod = TaskLoader(site, mod).load_module()
-    if urls and "scripts" in urls and urls['scripts']:
-        urls['project'] = {"name": project['name']}
-        mod = TaskLoader(urls, mod).load_module()
-    if channel and "scripts" in channel and channel['scripts']:
-        channel['project'] = {"name": project['name']}
-        mod = TaskLoader(channel, mod).load_module()
-    if 'scripts' in task and task['scripts']:
-        t = {}
-        t['project'] = {"name": project['name']}
-        t['scripts'] = task['scripts']
-        mod = TaskLoader(t, mod).load_module()
-    if mod:
-        _class_list = []
-        for each in list(six.itervalues(mod.__dict__)):
-            if inspect.isclass(each) and each is not BaseHandler \
-                            and each is not ProjectBaseHandler and each is not AttachHandler \
-                            and each is not GeneralHandler and each is not SearchHandler \
-                            and issubclass(each, BaseHandler):
-                _class_list.append(each)
-        l = len(_class_list)
-        logging.info("matched handler: %s" % _class_list)
-        if l > 0:
-            _class = None
-            for each in _class_list:
-                if not _class:
-                    _class = each
-                else:
-                    if issubclass(each, _class):
-                        _class = each
-            logging.info("selected handler: %s" % _class)
-            if _class:
-                return _class(task = task, **kwargs)
-    raise CDSpiderHandlerError("HandlerLoader no handler selected")
 
 def load_cls(ctx, param, value):
     if isinstance(value, six.string_types):
