@@ -61,7 +61,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"pid": int(pid)}
+            if isinstance(pid, (list, tuple)):
+                where = {"pid": {"$in": [int(each) for each in pid]}}
+            else:
+                where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -72,7 +75,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"sid": int(sid)}
+            if isinstance(sid, (list, tuple)):
+                where = {"sid": {"$in": [int(each) for each in sid]}}
+            else:
+                where = {"sid": int(sid)}
         else:
             where.update({"sid": int(sid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -83,7 +89,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"tid": int(tid)}
+            if isinstance(tid, (list, tuple)):
+                where = {"tid": {"$in": [int(each) for each in tid]}}
+            else:
+                where = {"tid": int(tid)}
         else:
             where.update({"tid": int(tid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -94,7 +103,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"kid": int(kid)}
+            if isinstance(kid, (list, tuple)):
+                where = {"kid": {"$in": [int(each) for each in kid]}}
+            else:
+                where = {"kid": int(kid)}
         else:
             where.update({"kid": int(kid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -105,7 +117,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"uid": int(uid)}
+            if isinstance(uid, (list, tuple)):
+                where = {"uid": {"$in": [int(each) for each in uid]}}
+            else:
+                where = {"uid": int(uid)}
         else:
             where.update({"uid": int(uid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -125,7 +140,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj={"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
         if not where:
-            where = {"pid": int(pid)}
+            if isinstance(pid, (list, tuple)):
+                where = {"pid": {"$in": [int(each) for each in pid]}}
+            else:
+                where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -135,7 +153,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj={"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
         if not where:
-            where = {"sid": int(sid)}
+            if isinstance(sid, (list, tuple)):
+                where = {"sid": {"$in": [int(each) for each in sid]}}
+            else:
+                where = {"sid": int(sid)}
         else:
             where.update({"sid": int(sid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -145,7 +166,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj={"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
         if not where:
-            where = {"tid": int(tid)}
+            if isinstance(tid, (list, tuple)):
+                where = {"tid": {"$in": [int(each) for each in tid]}}
+            else:
+                where = {"tid": int(tid)}
         else:
             where.update({"tid": int(tid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -155,7 +179,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj={"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
         if not where:
-            where = {"kid": int(kid)}
+            if isinstance(kid, (list, tuple)):
+                where = {"kid": {"$in": [int(each) for each in kid]}}
+            else:
+                where = {"kid": int(kid)}
         else:
             where.update({"kid": int(kid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -166,7 +193,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['plantime'] = int(time.time())
         if not where:
-            where = {"uid": int(uid)}
+            if isinstance(uid, (list, tuple)):
+                where = {"uid": {"$in": [int(each) for each in uid]}}
+            else:
+                where = {"uid": int(uid)}
         else:
             where.update({"uid": int(uid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -188,7 +218,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"pid": int(pid)}
+            if isinstance(pid, (list, tuple)):
+                where = {"pid": {"$in": [int(each) for each in pid]}}
+            else:
+                where = {"pid": int(pid)}
         else:
             where.update({"pid": int(pid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -199,7 +232,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"sid": int(sid)}
+            if isinstance(sid, (list, tuple)):
+                where = {"sid": {"$in": [int(each) for each in sid]}}
+            else:
+                where = {"sid": int(sid)}
         else:
             where.update({"sid": int(sid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -210,7 +246,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"tid": int(tid)}
+            if isinstance(tid, (list, tuple)):
+                where = {"tid": {"$in": [int(each) for each in tid]}}
+            else:
+                where = {"tid": int(tid)}
         else:
             where.update({"tid": int(tid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -221,7 +260,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"kid": int(kid)}
+            if isinstance(kid, (list, tuple)):
+                where = {"kid": {"$in": [int(each) for each in kid]}}
+            else:
+                where = {"kid": int(kid)}
         else:
             where.update({"kid": int(kid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
@@ -232,7 +274,10 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         obj['save'] = None
         if not where:
-            where = {"uid": int(uid)}
+            if isinstance(uid, (list, tuple)):
+                where = {"uid": {"$in": [int(each) for each in uid]}}
+            else:
+                where = {"uid": int(uid)}
         else:
             where.update({"uid": int(uid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
