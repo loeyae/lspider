@@ -115,6 +115,8 @@ class GeneralListHandler(BaseHandler):
                 raise CDSpiderHandlerError("url not active")
             self.task['url'] = urls['url']
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
+            if rule['status'] != ListRuleDB.STATUS_ACTIVE:
+                raise CDSpiderHandlerError("list rule not active")
         self.process =  {
             "request": rule.get("request", self.DEFAULT_PROCESS),
             "parse": rule.get("parse", None),
