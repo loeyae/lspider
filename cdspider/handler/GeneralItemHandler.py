@@ -6,6 +6,7 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-11-28 21:45:37
 """
+import time
 import copy
 from . import BaseHandler
 from cdspider.libs import utils
@@ -27,13 +28,16 @@ class GeneralItemHandler(BaseHandler):
 
     def match_rule(self):
         parse_rule = self.task.get("detailRule", {})
-        url = self.task.get("url", None)
-        if not url:
-            rid = self.task['rid']
+        rid = self.task.get('rid', None)
+        if rid:
             article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo'])
-            url = article['url']
             self.task.setdefault("url", url)
             self.task.setdefault('crawlinfo', article.get('crawlinfo', {}))
+        else:
+            self.task.setdefault('crawlinfo', {})
+        url = self.task.get("url")
+        if not url:
+            raise CDSpiderHandlerError("url not exists")
         if not parse_rule:
             subdomain, domain = utils.parse_domain(url)
             if subdomain:
@@ -61,14 +65,13 @@ class GeneralItemHandler(BaseHandler):
         self.response['parsed'] = parser.parse()
 
     def _build_crawl_info(self, final_url):
-        crawlinfo = self.task.get('crawlinfo', {})
-        if not 'final_url' in crawlinfo:
-            crawlinfo['final_url'] = {str(self.page): final_url}
+        if not 'final_url' in self.task['crawlinfo']:
+            self.task['crawlinfo']['final_url'] = {str(self.page): final_url}
         else:
-            crawlinfo['final_url'][str(self.page)] = final_url
-        if not 'detailRule' in crawlinfo:
-            crawlinfo['detailRule'] = self.process['uuid']
-        crawlinfo['page'] = self.page
+            self.task['crawlinfo']['final_url'][str(self.page)] = final_url
+        if not 'detailRule' in self.task['crawlinfo']:
+            self.task['crawlinfo']['detailRule'] = self.process['uuid']
+        self.task['crawlinfo']['page'] = self.page
         return crawlinfo
 
     def _build_result_info(self, **kwargs):
@@ -107,61 +110,142 @@ class GeneralItemHandler(BaseHandler):
     def run_result(self, save):
         if self.response['parsed']:
             typeinfo = self._typeinfo(self.response['final_url'])
-            result_id = self.result2db(save, typeinfo)
-            self.result2attach(result_id, save, **typeinfo)
+            self.result2db(save, typeinfo)
+            self.result2attach(save, **typeinfo)
 
     def result2db(self, save, typeinfo):
-            result_id = self.task.get("rid", None)
-            crawlinfo = self._build_crawl_info(final_url=self.response['final_url'])
-            self.task['crawlinfo'] = crawlinfo
-            if not result_id:
-                if self.testing_mode:
-                    inserted, unid = (True, {"acid": "test_mode", "ctime": self.crawl_id})
-                    self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+        result_id = self.task.get("rid", None)
+        self._build_crawl_info(final_url=self.response['final_url'])
+        self.task['crawlinfo'] = crawlinfo
+        if not result_id:
+            if self.testing_mode:
+                inserted, unid = (True, {"acid": "testing_mode", "ctime": self.crawl_id})
+                self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+            else:
+                inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
+                self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+            result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], source=utils.decode(page_source), **unid)
+            if self.testing_mode:
+                result_id = 'testing_mode'
+                self.debug("%s on_result: %s" % (self.__class__.__name__, result))
+            else:
+                self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
+                if inserted:
+#                    result['parentid'] = parentid
+                    result_id = self.db['ArticlesDB'].insert(result)
                 else:
-                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
-                    self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
-                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=crawlinfo, source=utils.decode(page_source), **unid)
+                    item = self.db['ArticlesDB'].get_detail_by_unid(**unid)
+                    result_id = item['rid']
+                    self.db['ArticlesDB'].update(result_id, result)
+            self.task['rid'] = result_id
+        else:
+            if self.page == 1:
+                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], source=utils.decode(page_source))
+
                 if self.testing_mode:
                     self.debug("%s on_result: %s" % (self.__class__.__name__, result))
                 else:
                     self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
-                    if inserted:
-    #                    result['parentid'] = parentid
-                        result_id = self.db['ArticlesDB'].insert(result)
-                        self.task['rid'] = result_id
-                    else:
-                        item = self.db['ArticlesDB'].get_detail_by_unid(**unid)
-                        result_id = item['rid']
-                        self.db['ArticlesDB'].update(result_id, result)
+                    self.db['ArticlesDB'].update(result_id, result)
             else:
-                if self.page == 1:
-                    result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=crawlinfo, source=utils.decode(page_source))
-
-                    if self.testing_mode:
-                        self.debug("%s on_result: %s" % (self.__class__.__name__, result))
-                    else:
-                        self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
-                        self.db['ArticlesDB'].update(result_id, result)
+                if self.testing_mode:
+                    self.debug("%s on_result: %s" % (self.__class__.__name__, self.response['parsed']))
                 else:
-                    if self.testing_mode:
-                        self.debug("%s on_result: %s" % (self.__class__.__name__, self.response['parsed']))
-                    else:
-                        result = self.db['ArticlesDB'].get_detail(result_id)
-                        content = result['content']
-                        if 'content' in self.response['parsed'] and self.response['parsed']['content']:
-                            content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
-                            self.debug("%s on_result content: %s" % (self.__class__.__name__, content))
-                            self.db['ArticlesDB'].update(result_id, {"content": content, "crawlinfo": crawlinfo})
+                    result = self.db['ArticlesDB'].get_detail(result_id)
+                    content = result['content']
+                    if 'content' in self.response['parsed'] and self.response['parsed']['content']:
+                        content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
+                        self.debug("%s on_result content: %s" % (self.__class__.__name__, content))
+                        self.db['ArticlesDB'].update(result_id, {"content": content})
+        if not result_id:
+            raise CDSpiderDBError("Result insert failed")
 
-            if not result_id:
-                raise CDSpiderDBError("Result insert failed")
+    def finish(self):
+        super(GeneralItemHandler, self).finish()
+        if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
+            self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
 
-    def result2attach(self, rid, save, domain, subdomain=None):
+    def result2attach(self, save, domain, subdomain=None):
         if self.page != 1:
             return
+        self.result2comment(save, domain, subdomain)
 
+    def build_attach_url(self, rule):
+        if 'preparse' in rule and rule['preparse']:
+            parsed = self.attach_preparse(rule['preparse'].get('parse', None))
+            if parsed:
+                urlrule = rule['preparse'].get('url', None)
+                if urlrule:
+                    if urlrule['base'] == 'parent_url':
+                        urlrule['base'] = self.response['final_url']
+                    return utils.build_url_by_rule(urlrule, parsed)
+        return None
+
+    def result2comment(self, save, domain, subdomain = None):
+        ruleset = self.db['CommentRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
+        for rule in ruleset:
+            url = self.build_attach_url(rule)
+            if url:
+                cid = self.build_comment(url, rule)
+                self.task['crawlinfo']['commentRule'] = rule['uuid']
+                self.task['crawlinfo']['commentTaskId'] = cid
+                return
+        ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
+        for rule in ruleset:
+            url = build_url(rule)
+            if url:
+                cid = self.build_comment(url, rule)
+                self.task['crawlinfo']['commentRule'] = rule['uuid']
+                self.task['crawlinfo']['commentTaskId'] = cid
+                self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
+                return
+
+    def build_comment(self, rid, url, rule):
+        task = {
+            'mode': HANDLER_MODE_COMMENT,                           # handler mode
+            'pid': self.task['crawlinfo'].get('pid', 0),            # project id
+            'sid': self.task['crawlinfo'].get('sid', 0),            # site id
+            'tid': self.task['crawlinfo'].get('tid', 0),            # task id
+            'uid': self.task['crawlinfo'].get('uid', 0),            # url id
+            'kid': rule['uuid'],                                    # rule id
+            'url': url,                                             # url
+            'parentid': self.task['rid'],                           # article id
+            'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire'])
+        }
+        self.debug("%s build comment task: %s" % (self.__class__.__name__, str(task)))
+        if not self.testing_mode:
+            return self.db['SpiderTaskDB'].insert(task)
+        else:
+            return 'testing_mode'
 
     def attach_preparse(self, rule):
-        parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
+        if not rule:
+            return None
+        def build_rule(item):
+            key = item.pop('key')
+            if key and item['filter']:
+                if item['filter'] == '@value:parent_url':
+                    item['filter'] = '@value:%s' % self.response['final_url']
+                elif item['filter'].startswith('@url:'):
+                    r = item['filter'][5:]
+                    v = utils.preg(self.response['final_url'], r)
+                    if not v:
+                        return None
+                    item['filter'] = '@value:%s' % v
+                return {key: item}
+            return None
+        parse = {}
+        if isinstance(rule, (list, tuple)):
+            for item in rule:
+                ret = build_rule(item)
+                if ret:
+                    parse.update(ret)
+        elif isinstance(rule, dict):
+            for item in rule.values():
+                ret = build_rule(item)
+                if ret:
+                    parse.update(ret)
+        if not parse:
+            return None
+        parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(parse), log_level=self.log_level, url=self.response['final_url'])
         return parser.parse()
