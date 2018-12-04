@@ -10,7 +10,7 @@ import copy
 from . import BaseHandler
 from cdspider.libs import utils
 from cdspider.libs.constants import *
-from cdspider.parser import ItemParser
+from cdspider.parser import ItemParser, CustomParser
 
 class GeneralItemHandler(BaseHandler):
     """
@@ -30,9 +30,10 @@ class GeneralItemHandler(BaseHandler):
         url = self.task.get("url", None)
         if not url:
             rid = self.task['rid']
-            article = self.db['ArticlesDB'].get_detail(rid, select=['url'])
+            article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo'])
             url = article['url']
             self.task.setdefault("url", url)
+            self.task.setdefault('crawlinfo', article.get('crawlinfo', {}))
         if not parse_rule:
             subdomain, domain = utils.parse_domain(url)
             if subdomain:
@@ -60,11 +61,15 @@ class GeneralItemHandler(BaseHandler):
         self.response['parsed'] = parser.parse()
 
     def _build_crawl_info(self, final_url):
-        return {
-                "uid": self.task.get("uuid"),
-                "url": final_url,
-                "crawl_id": self.crawl_id,
-        }
+        crawlinfo = self.task.get('crawlinfo', {})
+        if not 'final_url' in crawlinfo:
+            crawlinfo['final_url'] = {str(self.page): final_url}
+        else:
+            crawlinfo['final_url'][str(self.page)] = final_url
+        if not 'detailRule' in crawlinfo:
+            crawlinfo['detailRule'] = self.process['uuid']
+        crawlinfo['page'] = self.page
+        return crawlinfo
 
     def _build_result_info(self, **kwargs):
         now = int(time.time())
@@ -101,7 +106,14 @@ class GeneralItemHandler(BaseHandler):
 
     def run_result(self, save):
         if self.response['parsed']:
+            typeinfo = self._typeinfo(self.response['final_url'])
+            result_id = self.result2db(save, typeinfo)
+            self.result2attach(result_id, save, **typeinfo)
+
+    def result2db(self, save, typeinfo):
             result_id = self.task.get("rid", None)
+            crawlinfo = self._build_crawl_info(final_url=self.response['final_url'])
+            self.task['crawlinfo'] = crawlinfo
             if not result_id:
                 if self.testing_mode:
                     inserted, unid = (True, {"acid": "test_mode", "ctime": self.crawl_id})
@@ -109,8 +121,6 @@ class GeneralItemHandler(BaseHandler):
                 else:
                     inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
-                crawlinfo = self._build_crawl_info(final_url=self.response['final_url'])
-                typeinfo = self._typeinfo(self.response['final_url'])
                 result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=crawlinfo, source=utils.decode(page_source), **unid)
                 if self.testing_mode:
                     self.debug("%s on_result: %s" % (self.__class__.__name__, result))
@@ -126,8 +136,6 @@ class GeneralItemHandler(BaseHandler):
                         self.db['ArticlesDB'].update(result_id, result)
             else:
                 if self.page == 1:
-                    crawlinfo = self._build_crawl_info(final_url=self.response['final_url'])
-                    typeinfo = self._typeinfo(self.response['final_url'])
                     result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=crawlinfo, source=utils.decode(page_source))
 
                     if self.testing_mode:
@@ -144,7 +152,16 @@ class GeneralItemHandler(BaseHandler):
                         if 'content' in self.response['parsed'] and self.response['parsed']['content']:
                             content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
                             self.debug("%s on_result content: %s" % (self.__class__.__name__, content))
-                            self.db['ArticlesDB'].update(result_id, {"content": content})
+                            self.db['ArticlesDB'].update(result_id, {"content": content, "crawlinfo": crawlinfo})
 
             if not result_id:
                 raise CDSpiderDBError("Result insert failed")
+
+    def result2attach(self, rid, save, domain, subdomain=None):
+        if self.page != 1:
+            return
+
+
+    def attach_preparse(self, rule):
+        parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
+        return parser.parse()
