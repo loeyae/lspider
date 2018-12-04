@@ -377,15 +377,26 @@ class BaseHandler(Component):
             return paging
         if paging.get('pattern', '1') == '1':
             rule = {"url": paging['pageUrl'], 'incr_data': []}
-            for item in paging['rule']:
-                rule['incr_data'].append({
-                    "mode": item['method'],
-                    "name": item['word'],
-                    "value": item['value'],
-                    "step": item['step'],
-                    "max": item['max'],
-                    "value": item['value'],
-                })
+            if isinstance(paging['rule'], (list, tuple)):
+                for item in paging['rule']:
+                    rule['incr_data'].append({
+                        "mode": item['method'],
+                        "name": item['word'],
+                        "value": item['value'],
+                        "step": item['step'],
+                        "max": item['max'],
+                        "value": item['value'],
+                    })
+            elif isinstance(paging['rule'], dict):
+                for item in paging['rule'].values():
+                    rule['incr_data'].append({
+                        "mode": item['method'],
+                        "name": item['word'],
+                        "value": item['value'],
+                        "step": item['step'],
+                        "max": item['max'],
+                        "value": item['value'],
+                    })
             return rule
         return {"url": {"element": {"xpath": paging['rule']}}}
 
