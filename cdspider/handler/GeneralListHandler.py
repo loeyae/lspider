@@ -164,6 +164,9 @@ class GeneralListHandler(BaseHandler):
         return {
                 "stid": self.task.get("uuid", 0),
                 "uid": self.task.get("uid", 0),
+                "pid": self.task.get('pid', 0),
+                "sid": self.task.get('sid', 0),
+                "tid": self.task.get('tid', 0),
                 "list_url": final_url,
                 "list_crawl_id": self.crawl_id,
         }
