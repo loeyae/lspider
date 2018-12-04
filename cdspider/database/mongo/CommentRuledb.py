@@ -6,23 +6,23 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-6-21 18:53:06
-:version: SVN: $Id: Attachmentdb.py 2114 2018-07-04 03:56:01Z zhangyi $
+:version: SVN: $Id: CommentRuledb.py 2114 2018-07-04 03:56:01Z zhangyi $
 """
 import time
 import pymongo
-from cdspider.database.base import AttachmentDB as BaseAttachmentDB
+from cdspider.database.base import CommentRuleDB as BaseCommentRuleDB
 from .Mongo import Mongo
 
-class AttachmentDB(Mongo, BaseAttachmentDB):
+class CommentRuleDB(Mongo, BaseCommentRuleDB):
     """
-    AttachmentDB
+    CommentRuleDB
     """
-    __tablename__ = 'attachments'
+    __tablename__ = 'commentRule'
 
-    incr_key = 'attachments'
+    incr_key = 'commentRule'
 
     def __init__(self, connector, table=None, **kwargs):
-        super(AttachmentDB, self).__init__(connector, table = table, **kwargs)
+        super(CommentRuleDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
         if not 'uuid' in indexes:
@@ -39,18 +39,18 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
-        _id = super(AttachmentDB, self).insert(setting=obj)
+        _id = super(CommentRuleDB, self).insert(setting=obj)
         return obj['uuid']
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(AttachmentDB, self).update(setting=obj, where={'uuid': int(id)}, multi=False)
+        return super(CommentRuleDB, self).update(setting=obj, where={'uuid': int(id)}, multi=False)
 
     def update_many(self, obj = {},where=None):
         if where=={} or where==None:
             return
         obj['utime'] = int(time.time())
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=True)
+        return super(CommentRuleDB, self).update(setting=obj, where=where, multi=True)
 
     def delete(self, id, where = {}):
         obj = {"status": self.STATUS_DELETED}
@@ -59,7 +59,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
             where = {'uuid': int(id)}
         else:
             where.update({'uuid': int(id)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
+        return super(CommentRuleDB, self).update(setting=obj, where=where, multi=False)
 
     def active(self, id, where = {}):
         obj = {"status": self.STATUS_ACTIVE}
@@ -68,7 +68,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
             where = {'uuid': int(id)}
         else:
             where.update({'uuid': int(id)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
+        return super(CommentRuleDB, self).update(setting=obj, where=where, multi=False)
 
     def disable(self, id, where = {}):
         obj = {"status": self.STATUS_INIT}
@@ -77,7 +77,7 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
             where = {'uuid': int(id)}
         else:
             where.update({'uuid': int(id)})
-        return super(AttachmentDB, self).update(setting=obj, where=where, multi=False)
+        return super(CommentRuleDB, self).update(setting=obj, where=where, multi=False)
 
     def get_detail(self, id):
         return self.get(where={'uuid': int(id)})
