@@ -386,6 +386,7 @@ class BaseHandler(Component):
                         "step": item['step'],
                         "max": item['max'],
                         "value": item['value'],
+                        "first": item.get('first', '0')
                     })
             elif isinstance(paging['rule'], dict):
                 for item in paging['rule'].values():
@@ -396,6 +397,7 @@ class BaseHandler(Component):
                         "step": item['step'],
                         "max": item['max'],
                         "value": item['value'],
+                        "first": item.get('first', '0')
                     })
             return rule
         return {"url": {"element": {"xpath": paging['rule']}}}
