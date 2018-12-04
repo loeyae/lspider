@@ -18,6 +18,7 @@ from . import Base
         'tid': int,          # task id
         'uid': int,          # url id
         'kid': int,          # keyword id
+        'parentid': str,     # parentid
         'url': str,          # url
         'status': int,       # site status
         'status': int,       # site status
