@@ -200,7 +200,7 @@ class GeneralItemHandler(BaseHandler):
                 self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
                 return
 
-    def build_comment_task(self, rid, url, rule):
+    def build_comment_task(self, url, rule):
         task = {
             'mode': HANDLER_MODE_COMMENT,                           # handler mode
             'pid': self.task['crawlinfo'].get('pid', 0),            # project id
