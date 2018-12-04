@@ -28,6 +28,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj.setdefault('plantime', 0)
         obj.setdefault('crawltime', 0)
         obj.setdefault('expire', 0)
+        obj.setdefault('parentid', None)
         _id = super(SpiderTaskDB, self).insert(setting=obj, table=table)
         return obj['uuid']
 
