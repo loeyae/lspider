@@ -270,9 +270,8 @@ class UrlBuilder(Component):
                 if not 'max' in item or not item['max']:
                     item['max'] = 0
                 step = int(item.get('step', 1))
-                if int(item["max"]) > 0:
-                    if page > int(item['max']):
-                        raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % item['max'],
+                if int(item["max"]) > 0 and page > int(item['max']):
+                    raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % item['max'],
                                 base_url = save['base_url'], incr_data = item)
                 value = str(int(item['value']) + (page - 1) * step)
                 if 'prefix' in item and item['prefix']:
@@ -285,7 +284,10 @@ class UrlBuilder(Component):
                     item.setdefault('type', 'data')
                 else:
                     item.setdefault('type', item['mode'])
-                self._append_kwargs_data(kwargs, item['type'], item['name'], value)
+                if page == 1 and bool(int(item.get('first', 0))):
+                    self._append_kwargs_data(kwargs, item['type'], item['name'], value)
+                else:
+                    self._append_kwargs_data(kwargs, item['type'], item['name'], value)
 
     def _append_kwargs_data(self, kwargs, type, name, value):
         """
