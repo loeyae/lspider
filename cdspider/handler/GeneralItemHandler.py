@@ -186,7 +186,7 @@ class GeneralItemHandler(BaseHandler):
         for rule in ruleset:
             url = self.build_attach_url(rule)
             if url:
-                cid = self.build_comment(url, rule)
+                cid = self.build_comment_task(url, rule)
                 self.task['crawlinfo']['commentRule'] = rule['uuid']
                 self.task['crawlinfo']['commentTaskId'] = cid
                 return
@@ -194,13 +194,13 @@ class GeneralItemHandler(BaseHandler):
         for rule in ruleset:
             url = build_url(rule)
             if url:
-                cid = self.build_comment(url, rule)
+                cid = self.build_comment_task(url, rule)
                 self.task['crawlinfo']['commentRule'] = rule['uuid']
                 self.task['crawlinfo']['commentTaskId'] = cid
                 self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
                 return
 
-    def build_comment(self, rid, url, rule):
+    def build_comment_task(self, rid, url, rule):
         task = {
             'mode': HANDLER_MODE_COMMENT,                           # handler mode
             'pid': self.task['crawlinfo'].get('pid', 0),            # project id
