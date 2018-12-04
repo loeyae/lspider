@@ -170,17 +170,6 @@ class GeneralItemHandler(BaseHandler):
             return
         self.result2comment(save, domain, subdomain)
 
-    def build_attach_url(self, rule):
-        if 'preparse' in rule and rule['preparse']:
-            parsed = self.attach_preparse(rule['preparse'].get('parse', None))
-            if parsed:
-                urlrule = rule['preparse'].get('url', None)
-                if urlrule:
-                    if urlrule['base'] == 'parent_url':
-                        urlrule['base'] = self.response['final_url']
-                    return utils.build_url_by_rule(urlrule, parsed)
-        return None
-
     def result2comment(self, save, domain, subdomain = None):
         ruleset = self.db['CommentRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
@@ -192,13 +181,24 @@ class GeneralItemHandler(BaseHandler):
                 return
         ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
-            url = build_url(rule)
+            url = self.build_attach_url(rule)
             if url:
                 cid = self.build_comment_task(url, rule)
                 self.task['crawlinfo']['commentRule'] = rule['uuid']
                 self.task['crawlinfo']['commentTaskId'] = cid
                 self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
                 return
+
+    def build_attach_url(self, rule):
+        if 'preparse' in rule and rule['preparse']:
+            parsed = self.attach_preparse(rule['preparse'].get('parse', None))
+            if parsed:
+                urlrule = rule['preparse'].get('url', None)
+                if urlrule:
+                    if urlrule['base'] == 'parent_url':
+                        urlrule['base'] = self.response['final_url']
+                    return utils.build_url_by_rule(urlrule, parsed)
+        return None
 
     def build_comment_task(self, url, rule):
         task = {
