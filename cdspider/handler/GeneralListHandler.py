@@ -163,8 +163,8 @@ class GeneralListHandler(BaseHandler):
     def _build_crawl_info(self, final_url):
         return {
                 "uid": self.task.get("uuid"),
-                "url": final_url,
-                "crawl_id": self.crawl_id,
+                "list_url": final_url,
+                "list_crawl_id": self.crawl_id,
         }
 
     def _build_result_info(self, **kwargs):
