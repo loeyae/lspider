@@ -24,8 +24,9 @@ class GeneralItemHandler(BaseHandler):
 
     def init_process(self):
         self.process = self.match_rule()
-        self.process['paging'] = self.format_paging(self.process['paging'])
-        self.process['paging']['url'] = 'base_url'
+        if 'paging' in self.process and self.process['paging']:
+            self.process['paging'] = self.format_paging(self.process['paging'])
+            self.process['paging']['url'] = 'base_url'
 
     def match_rule(self):
         parse_rule = self.task.get("detailRule", {})
@@ -59,9 +60,6 @@ class GeneralItemHandler(BaseHandler):
                         u = utils.preg(url, item['urlPattern'])
                         if u:
                             return item
-
-        if not parse_rule:
-            raise CDSpiderHandlerError("detailRule not exists")
         return parse_rule
 
     def run_parse(self, rule):
