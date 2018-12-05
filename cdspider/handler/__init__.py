@@ -379,6 +379,8 @@ class BaseHandler(Component):
             rule = {"url": paging['pageUrl'], 'incr_data': []}
             if isinstance(paging['rule'], (list, tuple)):
                 for item in paging['rule']:
+                    if not 'word' in item or not item['word']:
+                        continue
                     rule['incr_data'].append({
                         "mode": item['method'],
                         "name": item['word'],
@@ -390,6 +392,8 @@ class BaseHandler(Component):
                     })
             elif isinstance(paging['rule'], dict):
                 for item in paging['rule'].values():
+                    if not 'word' in item or not item['word']:
+                        continue
                     rule['incr_data'].append({
                         "mode": item['method'],
                         "name": item['word'],
