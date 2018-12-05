@@ -27,7 +27,7 @@ class active_task_by_pid(Base):
         UrlsDB = self.g['db']['UrlsDB']
         while True:
             has_item = False
-            for item in UrlsDB.get_new_list_by_pid(uid, pid, where={'status': UrlsDB.STATUS_ACTIVE}):
+            for item in UrlsDB.get_new_list_by_pid(uid, pid, where={'status': UrlsDB.STATUS_ACTIVE, 'ruleStatus': UrlsDB.STATUS_ACTIVE}):
                 self.info("active task by uid: %s" %  str(item['uuid']))
                 if not testing_mode:
                     self.g['db']['SpiderTaskDB'].active_by_url(item['uuid'], mode)
