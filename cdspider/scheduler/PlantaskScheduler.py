@@ -48,6 +48,7 @@ class PlantaskScheduler(BaseScheduler):
             if not has_item:
                 break
             time.sleep(0.1)
+        del handler
         self.info("%s schedule end" % self.__class__.__name__)
 
     def send_task(self, task):
