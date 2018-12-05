@@ -33,7 +33,8 @@ class GeneralItemHandler(BaseHandler):
         rid = self.task.get('rid', None)
         if rid:
             article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo'])
-            self.task.setdefault("url", article['url'])
+            if not 'ulr' in self.task or not self.task['url']:
+                self.task["url"] = article['url']
             self.task.setdefault('crawlinfo', article.get('crawlinfo', {}))
         else:
             self.task.setdefault('crawlinfo', {})
