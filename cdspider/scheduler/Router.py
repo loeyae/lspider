@@ -90,6 +90,7 @@ class Router(BaseScheduler):
                 name = task.get('mode', HANDLER_MODE_DEFAULT)
                 handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
                 handler.newtask(task)
+                del handler
                 parsed = True
             except Exception as exc:
                 errmsg = str(exc)
@@ -109,6 +110,7 @@ class Router(BaseScheduler):
                 name = task.get('mode', HANDLER_MODE_DEFAULT)
                 handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
                 handler.status(task)
+                del handler
                 parsed = True
             except :
                 broken_exc = traceback.format_exc()
