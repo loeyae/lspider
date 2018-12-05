@@ -49,6 +49,8 @@ class UrlsDB(Mongo, BaseUrlsDB):
             collection.create_index('addAuthor', name='addAuthor')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
+        if not 'ruleStatus' in indexes:
+            collection.create_index('ruleStatus', name='ruleStatus')
 
     def insert(self, obj = {}):
         obj['uuid'] = self._get_increment(self.incr_key)
