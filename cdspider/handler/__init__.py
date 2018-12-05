@@ -194,6 +194,8 @@ class BaseHandler(Component):
             task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
             self.task.update(task)
         self.init_process()
+        if not save['base_url']:
+            save['base_url'] = self.task['url']
         self.handler_run(HANDLER_FUN_PROCESS, self.process)
         self.request = self._get_request()
         self.proxy_mode = self.request.pop('proxy', 'never')
