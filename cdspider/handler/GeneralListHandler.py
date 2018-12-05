@@ -102,6 +102,8 @@ class GeneralListHandler(BaseHandler):
             rule = copy.deepcopy(self.task['listRule'])
         else:
             urls = self.db['UrlsDB'].get_detail(self.task['uuid'])
+            if not 'ruleId' in urls or not urls['ruleId']:
+                return None
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
         return rule.get("scripts", None)
 
@@ -110,10 +112,12 @@ class GeneralListHandler(BaseHandler):
             rule = copy.deepcopy(self.task['listRule'])
         else:
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
-            if urls['status'] != UrlsDB.STATUS_ACTIVE:
+            if urls['status'] != UrlsDB.STATUS_ACTIVE or urls['ruleStatus'] != UrlsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderHandlerError("url not active")
             self.task['url'] = urls['url']
+            if not 'ruleId' in urls or not urls['ruleId']:
+                raise CDSpiderHandlerError("url not has list rule")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
