@@ -25,6 +25,7 @@ class GeneralItemHandler(BaseHandler):
     def init_process(self):
         self.process = self.match_rule()
         self.process['paging'] = self.format_paging(self.process['paging'])
+        self.process['paging']['url'] = 'base_url'
 
     def match_rule(self):
         parse_rule = self.task.get("detailRule", {})
