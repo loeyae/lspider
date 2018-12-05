@@ -68,7 +68,7 @@ class Spider(Component):
             self.debug("Spider fetch exit with no task")
             return
         self.info("Spider fetch start, task: %s" % task)
-        save = {"base_url": task['url']}
+        save = {"base_url": task.get('url')}
         handler = self.get_handler(task)
         if return_result:
             return_data = []
