@@ -191,7 +191,7 @@ class BaseHandler(Component):
         初始化爬虫
         """
         if "uuid" in self.task and self.task['uuid']:
-            task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.tasl['mode'])
+            task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
             self.task.update(task)
         self.init_process()
         self.handler_run(HANDLER_FUN_PROCESS, self.process)
