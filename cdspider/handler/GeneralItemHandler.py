@@ -58,6 +58,9 @@ class GeneralItemHandler(BaseHandler):
                         u = utils.preg(url, item['urlPattern'])
                         if u:
                             return item
+
+        if not parse_rule:
+            raise CDSpiderHandlerError("detailRule not exists")
         return parse_rule
 
     def run_parse(self, rule):
