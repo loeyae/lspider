@@ -30,7 +30,7 @@ class CommentsDB(Mongo, BaseCommentsDB, SplitTableMixin):
         obj.setdefault("ctime", int(time.time()))
         table = self._table_name(obj['rid'])
         super(CommentsDB, self).insert(setting=obj, table=table)
-        return obj['rid']
+        return obj['uuid']
 
     def update(self, id, rid, obj = {}):
         table = self._table_name(rid)
