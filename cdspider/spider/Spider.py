@@ -124,8 +124,11 @@ class Spider(Component):
             if not return_result:
                 handler.on_error(e)
             else:
-                return_data.append((None, traceback.format_exc(), None, None, save))
-                self.error(traceback.format_exc())
+                if isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum)):
+                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
+                else:
+                    return_data.append((None, traceback.format_exc(), None, None, save))
+                    self.error(traceback.format_exc())
         finally:
             self.info("Spider process end")
             if not return_result:
