@@ -415,7 +415,7 @@ class BaseHandler(Component):
             return rule
         if not paging['rule']:
             return None
-        return {"url": {"element": {"xpath": paging['rule']}}}
+        return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}}
 
     def finish(self):
         self.handler_run(HANDLER_FUN_FINISH, self.response)
