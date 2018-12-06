@@ -301,6 +301,67 @@ def test(ctx, spider_cls, url, mode, pid, sid, tid, tier, no_input):
     spider.fetch(task=task, return_result = False)
 
 
+
+@cli.command()
+@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
+@click.option('-U', '--url', default='http://2018.ip138.com/ic.asp', help='url')
+@click.option('-M', '--mode', default="default", help="mode")
+@click.option('-P', '--pid', default="0", help="pid")
+@click.option('-S', '--sid', default="0", help="sid")
+@click.option('-T', '--tid', default="0", help="tid")
+@click.option('-I', '--tier', default="1", help="tier")
+@click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
+@click.pass_context
+def spider_test(ctx, spider_cls, no_input):
+    Spider = load_cls(ctx, None, spider_cls)
+    spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
+    task = {
+        "return_result": True,
+        "url": "https://mil.news.sina.com.cn/china/2018-12-02/doc-ihmutuec5541860.shtml",
+        "mode": "item",
+        "detailRule": {
+            'request' : {
+                'proxy' : 'auto',
+                'crawler': 'requests',
+                'data' : None,
+                'cookie' : None,
+                'header' : None,
+                'method' : 'get',
+            },
+            'paging' : {
+                'pattern' : '1',
+                'pageUrl' : 'base_url',
+                'rule' : [{
+                    'method' : 'get',
+                    'word' : 'page',
+                    'value' : '1',
+                    'step' : '1',
+                    'max' : '1',
+                }],
+            },
+            'parse' : {
+                'comment': {'filter': '@xpath://span[@class="count"]/em[1]/a/text()'},
+                'content': {'filter': '@xpath://div[@id="article"]'},
+                'praise': {'filter': '@xpath://span[@class="count"]/em[2]/a/text()'},
+                'pubtime': {'patch': None, 'filter': '@xpath://span[@class="date"]/text()'},
+                'author': {'patch': None, 'filter': '@xpath://div[@class="date-source"]/a/text()'},
+                'title': {'patch': None, 'filter': '@xpath://h1[@class="main-title"]/text()'}
+            },
+            'unique' : {
+                'url' : '',
+                'query' : '',
+                'data' : '',
+            },
+            'scripts' : """
+""",
+        }
+    }
+#    task = None
+    task = spider.get_task(message = task, no_check_status = True)
+    return_result = spider.fetch(task=task, return_result = True)
+    print(return_result)
+
+
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
 @click.option('--plantask-schedule-num', default=1, help='plantask schedule实例个数')
