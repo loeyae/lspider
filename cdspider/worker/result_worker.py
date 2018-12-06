@@ -24,7 +24,7 @@ class ResultWorker(BaseWorker):
 
     def on_result(self, message):
         self.debug("got message: %s" % message)
-        if not 'rid' in message or message['rid']:
+        if not 'rid' in message or not message['rid']:
             raise CDSpiderError("rid not in message")
         rid = message['rid']
         article = self.db['ArticlesDB'].get_detail(rid)
