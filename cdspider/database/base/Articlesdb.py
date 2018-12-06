@@ -34,7 +34,7 @@ from . import Base
 
 class ArticlesDB(Base):
 
-    STATUS_PARSED = 1
+    STATUS_PARSED = 2
 
     def insert(self, obj = {}):
         raise NotImplementedError
