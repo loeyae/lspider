@@ -95,7 +95,6 @@ class Router(BaseScheduler):
                 for each in rid:
                     message = {"rid": each, "mode": task.get('mode', HANDLER_MODE_DEFAULT_ITEM)}
                     self.queue[QUEUE_NAME_SPIDER_TO_RESULT].put_nowait(message)
-                del handler
                 parsed = True
             except Exception as exc:
                 errmsg = str(exc)
