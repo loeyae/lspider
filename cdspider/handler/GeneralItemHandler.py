@@ -89,6 +89,7 @@ class GeneralItemHandler(BaseHandler):
             'url': kwargs['final_url'],
             'title': result.pop('title', None),                                # 标题
             'author': result.pop('author', None),                              # 作者
+            'content': result.pop('content', None),
             'pubtime': pubtime,                                                # 发布时间
             'channel': result.pop('channel', None),                            # 频道信息
             'crawlinfo': kwargs.get('crawlinfo')
