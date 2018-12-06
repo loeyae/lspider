@@ -33,6 +33,8 @@ class GeneralItemHandler(BaseHandler):
         rid = self.task.get('rid', None)
         if rid:
             article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo'])
+            if not article:
+                raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
             if not 'ulr' in self.task or not self.task['url']:
                 self.task["url"] = article['url']
             self.task.setdefault('crawlinfo', article.get('crawlinfo', {}))
