@@ -90,7 +90,7 @@ class GeneralListHandler(BaseHandler):
             task = {
                 'mode': message['mode'],     # handler mode
                 'pid': urls['pid'],          # project id
-                'sid': ursl['sid'],          # site id
+                'sid': urls['sid'],          # site id
                 'tid': urls.get('tid', 0),   # task id
                 'uid': each,                  # url id
                 'kid': 0,                    # keyword id
