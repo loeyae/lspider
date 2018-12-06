@@ -84,7 +84,7 @@ class Router(BaseScheduler):
         application.register_function(hello, 'hello')
 
         def build(task):
-            self.debug("%s route buid get message %s" % (self.__class__.__name__, task))
+            self.debug("%s rpc buid get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
@@ -107,7 +107,7 @@ class Router(BaseScheduler):
         application.register_function(build, 'build')
 
         def newtask(task):
-            self.debug("%s route newtask get message %s" % (self.__class__.__name__, task))
+            self.debug("%s rpc newtask get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
@@ -128,7 +128,7 @@ class Router(BaseScheduler):
         application.register_function(newtask, 'newtask')
 
         def status(task):
-            self.debug("%s route status get message %s" % (self.__class__.__name__, task))
+            self.debug("%s rpc status get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
