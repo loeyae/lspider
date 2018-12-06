@@ -25,7 +25,7 @@ class GeneralItemHandler(BaseHandler):
     def init_process(self):
         self.process = self.match_rule()
         if 'paging' in self.process and self.process['paging']:
-            self.process['paging'] = self.format_paging(self.process['paging'])
+            self.process['paging'] = self.process['paging']
             self.process['paging']['url'] = 'base_url'
 
     def match_rule(self):
@@ -175,6 +175,7 @@ class GeneralItemHandler(BaseHandler):
         if self.page != 1:
             return
         self.result2comment(save, domain, subdomain)
+        self.result2interact(save, domain, subdomain)
 
     def result2comment(self, save, domain, subdomain = None):
         ruleset = self.db['CommentRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
@@ -184,6 +185,7 @@ class GeneralItemHandler(BaseHandler):
                 cid = self.build_comment_task(url, rule)
                 self.task['crawlinfo']['commentRule'] = rule['uuid']
                 self.task['crawlinfo']['commentTaskId'] = cid
+                self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
                 return
         ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
@@ -193,6 +195,26 @@ class GeneralItemHandler(BaseHandler):
                 self.task['crawlinfo']['commentRule'] = rule['uuid']
                 self.task['crawlinfo']['commentTaskId'] = cid
                 self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
+                return
+
+    def result2interact(self, save, domain, subdomain = None):
+        ruleset = self.db['AttachmentsDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
+        for rule in ruleset:
+            url = self.build_attach_url(rule)
+            if url:
+                cid = self.build_interact_task(url, rule)
+                self.task['crawlinfo']['interactRule'] = rule['uuid']
+                self.task['crawlinfo']['interactTaskId'] = cid
+                self.debug("%s new interact task: %s" % (self.__class__.__name__, str(cid)))
+                return
+        ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
+        for rule in ruleset:
+            url = self.build_attach_url(rule)
+            if url:
+                cid = self.build_interact_task(url, rule)
+                self.task['crawlinfo']['interactRule'] = rule['uuid']
+                self.task['crawlinfo']['interactTaskId'] = cid
+                self.debug("%s new interact task: %s" % (self.__class__.__name__, str(cid)))
                 return
 
     def build_attach_url(self, rule):
@@ -254,4 +276,5 @@ class GeneralItemHandler(BaseHandler):
         if not parse:
             return None
         parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(parse), log_level=self.log_level, url=self.response['final_url'])
-        return parser.parse()
+        parsed = parser.parse()
+        return utils.filter(parsed)
