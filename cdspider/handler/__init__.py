@@ -67,13 +67,12 @@ class BaseHandler(Component):
                 "crawl_start": self.crawl_id,
                 "crawl_end": None,
                 "crawl_count": {
-                    "count": 0,
+                    "total": 0,
                     "new_count": 0,
-                    "parsed_count": 0,
-                    "req_error": 0,
                     "repeat_count": 0,
+                    "page": 0,
+                    "repeat_page": 0,
                 },
-                "broken": None,
                 "traceback": None
             }
             self.no_sync = kwargs.pop('no_sync', False)
@@ -324,7 +323,7 @@ class BaseHandler(Component):
         """
         self.debug("%s on error" % (self.__class__.__name__))
         self.exception(exc)
-        self.crawl_info['err_message'] = str(traceback.format_exc())
+        self.crawl_info['traceback'] = str(traceback.format_exc())
         self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info})
 
     def on_result(self, save):
@@ -418,6 +417,15 @@ class BaseHandler(Component):
         return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}}}
 
     def finish(self):
+        if "uuid" in self.task and self.task['uuid']:
+            crawlinfo = self.task.get('crawlinfo', {}) or {}
+            self.crawl_info['crawl_end'] = int(time.time())
+            crawlinfo[str(self.crawl_id)] = self.crawl_info
+            crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
+            if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
+                del crawlinfo_sorted[0]
+            save = self.task.get("save")
+            self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": save})
         self.handler_run(HANDLER_FUN_FINISH, self.response)
 
     def close(self):
