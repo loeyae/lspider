@@ -100,6 +100,8 @@ class Router(BaseScheduler):
                 broken_exc = traceback.format_exc()
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
+
+            return json.dumps(result)
         application.register_function(build, 'build')
 
         def newtask(task):
