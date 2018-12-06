@@ -211,10 +211,12 @@ class GeneralListHandler(BaseHandler):
 
     def run_result(self, save):
         if self.response['parsed']:
+            self.crawl_info['crawl_count']['page'] += 1
             ctime = self.crawl_id
             new_count = self.crawl_info['crawl_count']['new_count']
             formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
             for item in formated:
+                self.crawl_info['crawl_count']['total'] += 1
                 if self.testing_mode:
                     inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
@@ -233,8 +235,10 @@ class GeneralListHandler(BaseHandler):
                             raise CDSpiderDBError("Result insert failed")
                         self.build_item_task(result_id)
                     self.crawl_info['crawl_count']['new_count'] += 1
+                else:
+                    self.crawl_info['crawl_count']['repeat_count'] += 1
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
-                self.crawl_info['crawl_count']['repeat_count'] += 1
+                self.crawl_info['crawl_count']['repeat_page'] += 1
                 self.on_repetition()
 
     def url_prepare(self, url):
