@@ -8,25 +8,33 @@
 :date:    2018-1-9 17:27:08
 """
 import time
-from cdspider.database.base import TaskDB
+from cdspider.database.base import ArticlesDB
 from cdspider.worker import BaseWorker
-from cdspider.parser import ItemParser
-from cdspider.spider import Spider
+from cdspider.handler import GeneralItemHandler
 from cdspider.libs import utils
+from cdspider.libs.tools import load_cls
+from cdspider.libs.constants import *
 from cdspider.parser.lib.time_parser import Parser as TimeParser
 
 class ResultWorker(BaseWorker):
     """
     结果处理
     """
-
-    def get_task(self, data):
-        pass
+    inqueue_key = QUEUE_NAME_SPIDER_TO_RESULT
 
     def on_result(self, message):
-        self.proxy = self.g['proxy']
         self.debug("got message: %s" % message)
-        pass
-
-    def get_result(self, message):
-        pass
+        if not 'rid' in message or message['rid']:
+            raise CDSpiderError("rid not in message")
+        rid = message['rid']
+        article = self.db['ArticlesDB'].get_detail(rid)
+        if not article:
+            raise CDSpiderDBDataNotFound("article: %s not exists" % rid)
+        spider_cls = 'cdspider.spider.Spider'
+        Spider = load_cls(self.ctx, None, spider_cls)
+        spider = Spider(self.ctx, no_sync = True, handler=None, no_input=True)
+        task = {
+            "rid": rid,
+            "mode": message.get('mode', HANDLER_MODE_DEFAULT_ITEM),
+        }
+        spider.fetch(task=task)
