@@ -100,6 +100,7 @@ class Router(BaseScheduler):
             except Exception as exc:
                 errmsg = str(exc)
                 broken_exc = traceback.format_exc()
+                self.error(broken_exc)
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
 
@@ -122,6 +123,7 @@ class Router(BaseScheduler):
             except Exception as exc:
                 errmsg = str(exc)
                 broken_exc = traceback.format_exc()
+                self.error(broken_exc)
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
 
@@ -142,6 +144,7 @@ class Router(BaseScheduler):
                 parsed = True
             except :
                 broken_exc = traceback.format_exc()
+                self.error(broken_exc)
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
 
