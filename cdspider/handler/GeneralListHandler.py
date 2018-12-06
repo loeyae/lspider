@@ -124,7 +124,7 @@ class GeneralListHandler(BaseHandler):
         self.process =  {
             "request": rule.get("request", self.DEFAULT_PROCESS),
             "parse": rule.get("parse", None),
-            "paging": self.format_paging(rule.get("paging", None)),
+            "paging": rule.get("paging", None),
             "unique": rule.get("unique", None),
         }
 
