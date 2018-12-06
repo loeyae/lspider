@@ -114,7 +114,8 @@ class Router(BaseScheduler):
             try:
                 task = json.loads(task)
                 name = task.get('mode', HANDLER_MODE_DEFAULT)
-                handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
+
+                handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
                 handler.newtask(task)
                 del handler
                 parsed = True
@@ -135,7 +136,7 @@ class Router(BaseScheduler):
             try:
                 task = json.loads(task)
                 name = task.get('mode', HANDLER_MODE_DEFAULT)
-                handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
+                handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
                 handler.status(task)
                 del handler
                 parsed = True
