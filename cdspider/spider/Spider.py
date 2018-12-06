@@ -108,12 +108,12 @@ class Spider(Component):
                 handler.parse()
                 self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
                 if return_result:
+                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
                     self.info("Spider next start")
                     handler.on_next(save)
                     self.info("Spider next end")
-                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
-
                     raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
+
                 self.info("Spider result start")
                 handler.on_result(save)
                 self.info("Spider result end")
@@ -125,9 +125,7 @@ class Spider(Component):
                 if not isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum)):
                     handler.on_error(e)
             else:
-                if isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum)):
-                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
-                else:
+                if not isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerBroken)):
                     return_data.append((None, traceback.format_exc(), None, None, save))
                     self.error(traceback.format_exc())
         finally:
