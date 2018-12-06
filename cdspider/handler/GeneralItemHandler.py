@@ -74,7 +74,7 @@ class GeneralItemHandler(BaseHandler):
         else:
             self.task['crawlinfo']['final_url'][str(self.page)] = final_url
         if not 'detailRule' in self.task['crawlinfo']:
-            self.task['crawlinfo']['detailRule'] = self.process['uuid']
+            self.task['crawlinfo']['detailRule'] = self.process.get('uuid', 0)
         self.task['crawlinfo']['page'] = self.page
         return crawlinfo
 
