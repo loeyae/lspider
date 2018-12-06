@@ -84,7 +84,7 @@ class GeneralItemHandler(BaseHandler):
         if pubtime and pubtime > now:
             pubtime = now
         r = {
-            "status": kwargs.get('status', ArticlesDB.STATUS_INIT),
+            "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'title': result.pop('title', None),                                # 标题
             'author': result.pop('author', None),                              # 作者
@@ -94,7 +94,7 @@ class GeneralItemHandler(BaseHandler):
             'crawlinfo': kwargs.get('crawlinfo')
         }
         if all(r['title'], r['author'], r['content'], r['pubtime']):
-            r['status'] = ArticlesDB.STATUS_ACTIVE
+            r['status'] = ArticlesDB.STATUS_PARSED
         if "unid" in kwargs:
             r['acid'] = kwargs['unid']                                         # unique str
         if "ctime" in kwargs:
