@@ -37,11 +37,10 @@ class Spider(Component):
         self._running = False
         self.ctx = context
         g = context.obj
+        queue = g.get('queue')
         if no_input:
-            queue = {}
             self.inqueue = None
         else:
-            queue = g.get('queue')
             self.inqueue = queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
 
         self.queue = queue
