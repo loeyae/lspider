@@ -381,6 +381,8 @@ class BaseHandler(Component):
         if not paging:
             return paging
         if paging.get('pattern', '1') == '1':
+            if not paging['pageUrl']:
+                return None
             rule = {"url": paging['pageUrl'], 'incr_data': []}
             if isinstance(paging['rule'], (list, tuple)):
                 for item in paging['rule']:
@@ -408,7 +410,11 @@ class BaseHandler(Component):
                         "value": item['value'],
                         "first": item.get('first', '0')
                     })
+            if not rule['incr_data']:
+                return None
             return rule
+        if not paging['rule']:
+            return None
         return {"url": {"element": {"xpath": paging['rule']}}}
 
     def finish(self):
