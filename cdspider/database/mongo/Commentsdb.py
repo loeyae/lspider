@@ -19,32 +19,34 @@ class CommentsDB(Mongo, BaseCommentsDB, SplitTableMixin):
 
     __tablename__ = 'comments'
 
+    incr_key = 'comments'
+
     def __init__(self, connector, table=None, **kwargs):
         super(CommentsDB, self).__init__(connector, table = table, **kwargs)
         self._check_collection()
 
     def insert(self, obj = {}):
+        obj['uuid'] = self._get_increment(self.incr_key)
         obj.setdefault("ctime", int(time.time()))
         table = self._table_name(obj['rid'])
         super(CommentsDB, self).insert(setting=obj, table=table)
         return obj['rid']
 
-    def update(self, id, obj = {}):
-        table = self._table_name(id)
+    def update(self, id, rid, obj = {}):
+        table = self._table_name(rid)
         obj['utime'] = int(time.time())
-        return super(CommentsDB, self).update(setting=obj, where={"rid": id}, table=table)
+        return super(CommentsDB, self).update(setting=obj, where={"uuid": id}, table=table)
 
-    def get_detail(self, id):
-        table = self._table_name(id)
-        return self.get(where={"rid": id}, table=table)
+    def get_detail(self, id, rid):
+        table = self._table_name(rid)
+        return self.get(where={"uuid": id}, table=table)
 
-    def get_detail_by_unid(self, unid, ctime):
-        table = self._get_collection(ctime)
-        return self.get(where = {"acid", unid}, table=table)
-
-    def get_list(self, ctime, where = {}, select = None, **kwargs):
-        table = self._get_collection(ctime)
+    def get_list(self, rid, where = {}, select = None, **kwargs):
+        table = self._table_name(rid)
         kwargs.setdefault('sort', [('ctime', 1)])
+        if not where:
+            where = {}
+        where['rid'] = rid
         return self.find(table=table, where=where, select=select, **kwargs)
 
     def get_count(self, ctime, where = {}, select = None, **kwargs):
@@ -75,10 +77,14 @@ class CommentsDB(Mongo, BaseCommentsDB, SplitTableMixin):
     def _create_collection(self, table):
         collection = self._db.get_collection(table)
         indexes = collection.index_information()
+        if not 'uuid' in indexes:
+            collection.create_index('uuid', unique=True, name='uuid')
         if not 'rid' in indexes:
-            collection.create_index('rid', unique=True, name='rid')
-        if not 'acid' in indexes:
-            collection.create_index('acid', name='acid')
+            collection.create_index('rid', name='rid')
+        if not 'unid' in indexes:
+            collection.create_index('unid', unique=True, name='unid')
+        if not 'pubtime' in indexes:
+            collection.create_index('pubtime', name='pubtime')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
         self._collections.add(table)
