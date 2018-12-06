@@ -80,7 +80,7 @@ class GeneralListHandler(BaseHandler):
 
     def newtask(self, message):
         uid = message['uid']
-        tasks = self.g['db']['SpiderTaskDB'].get_list(message['mode'], {"uid": uid})
+        tasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": uid})
         if len(list(tasks)) > 0:
             return
         urls = self.db['UrlsDB'].get_detail(uid)
