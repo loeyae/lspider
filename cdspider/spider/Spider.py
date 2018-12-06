@@ -210,6 +210,7 @@ class Spider(Component):
         application.register_function(hello, 'hello')
 
         def fetch(task):
+            self.debug("%s fetch get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
