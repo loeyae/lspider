@@ -211,6 +211,7 @@ class GeneralListHandler(BaseHandler):
 
     def run_result(self, save):
         if self.response['parsed']:
+            self.crawl_info['crawl_urls'][str(self.page)] = self.response['final_url']
             self.crawl_info['crawl_count']['page'] += 1
             ctime = self.crawl_id
             new_count = self.crawl_info['crawl_count']['new_count']
@@ -276,3 +277,14 @@ class GeneralListHandler(BaseHandler):
             'rid': rid,
         }
         self.queue['scheduler2spider'].put_nowait(message)
+
+    def finish(self):
+        super(GeneralListHandler, self).finish()
+        crawlinfo = self.task.get('crawlinfo', {}) or {}
+        self.crawl_info['crawl_end'] = int(time.time())
+        crawlinfo[str(self.crawl_id)] = self.crawl_info
+        crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
+        if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
+            del crawlinfo_sorted[0]
+        save = self.task.get("save")
+        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": save})
