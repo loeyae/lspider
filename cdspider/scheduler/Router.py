@@ -81,6 +81,27 @@ class Router(BaseScheduler):
             return json.dumps(result)
         application.register_function(hello, 'hello')
 
+        def build(task):
+            r_obj = utils.__redirection__()
+            sys.stdout = r_obj
+            parsed = broken_exc = last_source = final_url = save = errmsg = None
+            try:
+                task = json.loads(task)
+                rid = task['rid']
+                if not isinstance(rid, (list, tuple)):
+                    rid = [rid]
+                for each in rid:
+                    message = {"rid": each, "mode": task.get('mode', HANDLER_MODE_DEFAULT_ITEM)}
+                    self.queue[QUEUE_NAME_SPIDER_TO_RESULT].put_nowait(message)
+                del handler
+                parsed = True
+            except Exception as exc:
+                errmsg = str(exc)
+                broken_exc = traceback.format_exc()
+            output = sys.stdout.read()
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
+        application.register_function(build, 'build')
+
         def newtask(task):
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
