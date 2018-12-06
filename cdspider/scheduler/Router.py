@@ -7,7 +7,7 @@
 :date:    2018-9-21 16:10:41
 """
 import time
-import logging
+import sys
 from . import BaseScheduler
 from cdspider.exceptions import *
 from cdspider.libs.constants import *
