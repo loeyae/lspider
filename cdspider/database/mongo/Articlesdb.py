@@ -92,8 +92,10 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
             collection.create_index('crawlinfo.pid', name='pid')
         if not 'sid' in indexes:
             collection.create_index('crawlinfo.sid', name='sid')
+        if not 'tid' in indexes:
+            collection.create_index('crawlinfo.tid', name='tid')
         if not 'uid' in indexes:
             collection.create_index('crawlinfo.uid', name='uid')
-        if not 'kwid' in indexes:
-            collection.create_index('crawlinfo.kwid', name='kwid')
+        if not 'kid' in indexes:
+            collection.create_index('crawlinfo.kid', name='kid')
         self._collections.add(table)
