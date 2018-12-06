@@ -122,7 +122,7 @@ class Spider(Component):
                 self.info("Spider next end")
         except Exception as e:
             if not return_result:
-                if isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum)):
+                if not isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum)):
                     handler.on_error(e)
             else:
                 if isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum)):
