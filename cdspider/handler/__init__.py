@@ -66,6 +66,7 @@ class BaseHandler(Component):
             self.crawl_info  = {
                 "crawl_start": self.crawl_id,
                 "crawl_end": None,
+                "crawl_urls": {},
                 "crawl_count": {
                     "total": 0,
                     "new_count": 0,
@@ -417,15 +418,6 @@ class BaseHandler(Component):
         return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}}}
 
     def finish(self):
-        if "uuid" in self.task and self.task['uuid']:
-            crawlinfo = self.task.get('crawlinfo', {}) or {}
-            self.crawl_info['crawl_end'] = int(time.time())
-            crawlinfo[str(self.crawl_id)] = self.crawl_info
-            crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
-            if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
-                del crawlinfo_sorted[0]
-            save = self.task.get("save")
-            self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": save})
         self.handler_run(HANDLER_FUN_FINISH, self.response)
 
     def close(self):
