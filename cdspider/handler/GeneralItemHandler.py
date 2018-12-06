@@ -25,7 +25,6 @@ class GeneralItemHandler(BaseHandler):
     def init_process(self):
         self.process = self.match_rule()
         if 'paging' in self.process and self.process['paging']:
-            self.process['paging'] = self.process['paging']
             self.process['paging']['url'] = 'base_url'
 
     def match_rule(self):
