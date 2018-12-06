@@ -108,14 +108,18 @@ class Spider(Component):
                 handler.parse()
                 self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
                 if return_result:
+                    self.info("Spider next start")
                     handler.on_next(save)
+                    self.info("Spider next end")
                     return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
 
                     raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
                 self.info("Spider result start")
                 handler.on_result(save)
                 self.info("Spider result end")
+                self.info("Spider next start")
                 handler.on_next(save)
+                self.info("Spider next end")
         except Exception as e:
             if not return_result:
                 handler.on_error(e)
