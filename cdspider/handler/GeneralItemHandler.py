@@ -95,7 +95,7 @@ class GeneralItemHandler(BaseHandler):
             'channel': result.pop('channel', None),                            # 频道信息
             'crawlinfo': kwargs.get('crawlinfo')
         }
-        if all(r['title'], r['author'], r['content'], r['pubtime']):
+        if all((r['title'], r['author'], r['content'], r['pubtime'])):
             r['status'] = ArticlesDB.STATUS_PARSED
         if "unid" in kwargs:
             r['acid'] = kwargs['unid']                                         # unique str
