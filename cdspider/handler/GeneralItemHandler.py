@@ -76,7 +76,6 @@ class GeneralItemHandler(BaseHandler):
         if not 'detailRule' in self.task['crawlinfo']:
             self.task['crawlinfo']['detailRule'] = self.process.get('uuid', 0)
         self.task['crawlinfo']['page'] = self.page
-        return crawlinfo
 
     def _build_result_info(self, **kwargs):
         now = int(time.time())
