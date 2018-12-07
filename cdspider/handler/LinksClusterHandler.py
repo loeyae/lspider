@@ -60,6 +60,7 @@ class LinksClusterHandler(BaseHandler):
         if not len(arrTmp):
             print('crawl error')
             exit()
+        
         arrTitle = {}
         arrUrl   = []
         urlInfo  = []
@@ -114,14 +115,14 @@ class LinksClusterHandler(BaseHandler):
         # 准备写库
         if sortArr:
             urlsdb = self.db['UrlsDB']
-            urlsUniquedb = self.db['UrlsUniqueDB']
+            # urlsUniquedb = self.db['UrlsUniqueDB']
             for item in sortArr:
                 for it in item:
                     # 防止重复，去掉最后的/
                     url = it[0].rstrip('/')
                     urlmd5 = hashlib.md5(url.encode(encoding='UTF-8')).hexdigest()
                     try:
-                        urlsUniquedb.insert({"urlmd5": urlmd5, "url": url})
+                        # urlsUniquedb.insert({"urlmd5": urlmd5, "url": url})
                         urlpath  = urlparse(url).path
                         urlquery = urlparse(url).query
                         if len(urlpath) <= 1 and len(urlquery) == 0:
