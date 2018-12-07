@@ -9,6 +9,7 @@
 import time
 import copy
 from . import BaseHandler
+from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import ItemParser, CustomParser
