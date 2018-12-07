@@ -200,7 +200,7 @@ class GeneralItemHandler(BaseHandler):
                 return
 
     def result2interact(self, save, domain, subdomain = None):
-        ruleset = self.db['AttachmentsDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
+        ruleset = self.db['AttachmentDB'].get_list_by_subdomain(subdomain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
             url = self.build_attach_url(rule)
             if url:
@@ -209,7 +209,7 @@ class GeneralItemHandler(BaseHandler):
                 self.task['crawlinfo']['interactTaskId'] = cid
                 self.debug("%s new interact task: %s" % (self.__class__.__name__, str(cid)))
                 return
-        ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
+        ruleset = self.db['AttachmentDB'].get_list_by_domain(domain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
             url = self.build_attach_url(rule)
             if url:
