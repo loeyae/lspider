@@ -80,6 +80,7 @@ class GeneralItemHandler(BaseHandler):
 
     def _build_result_info(self, **kwargs):
         now = int(time.time())
+        result = kwargs.pop('result')
         pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
         if pubtime and pubtime > now:
             pubtime = now
