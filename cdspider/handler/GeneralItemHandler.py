@@ -12,6 +12,7 @@ from . import BaseHandler
 from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import ItemParser, CustomParser
+from cdspider.parser.lib import TimeParser
 
 class GeneralItemHandler(BaseHandler):
     """
