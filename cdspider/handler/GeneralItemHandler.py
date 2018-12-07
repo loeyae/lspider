@@ -9,9 +9,11 @@
 import time
 import copy
 from . import BaseHandler
+from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import ItemParser, CustomParser
+from cdspider.parser.lib import TimeParser
 
 class GeneralItemHandler(BaseHandler):
     """
@@ -25,7 +27,6 @@ class GeneralItemHandler(BaseHandler):
     def init_process(self):
         self.process = self.match_rule()
         if 'paging' in self.process and self.process['paging']:
-            self.process['paging'] = self.format_paging(self.process['paging'])
             self.process['paging']['url'] = 'base_url'
 
     def match_rule(self):
@@ -75,17 +76,17 @@ class GeneralItemHandler(BaseHandler):
         else:
             self.task['crawlinfo']['final_url'][str(self.page)] = final_url
         if not 'detailRule' in self.task['crawlinfo']:
-            self.task['crawlinfo']['detailRule'] = self.process['uuid']
+            self.task['crawlinfo']['detailRule'] = self.process.get('uuid', 0)
         self.task['crawlinfo']['page'] = self.page
-        return crawlinfo
 
     def _build_result_info(self, **kwargs):
         now = int(time.time())
+        result = kwargs.pop('result')
         pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
         if pubtime and pubtime > now:
             pubtime = now
         r = {
-            "status": kwargs.get('status', ArticlesDB.STATUS_INIT),
+            "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'title': result.pop('title', None),                                # 标题
             'author': result.pop('author', None),                              # 作者
@@ -94,6 +95,8 @@ class GeneralItemHandler(BaseHandler):
             'channel': result.pop('channel', None),                            # 频道信息
             'crawlinfo': kwargs.get('crawlinfo')
         }
+        if all((r['title'], r['author'], r['content'], r['pubtime'])):
+            r['status'] = ArticlesDB.STATUS_PARSED
         if "unid" in kwargs:
             r['acid'] = kwargs['unid']                                         # unique str
         if "ctime" in kwargs:
@@ -122,7 +125,6 @@ class GeneralItemHandler(BaseHandler):
     def result2db(self, save, typeinfo):
         result_id = self.task.get("rid", None)
         self._build_crawl_info(final_url=self.response['final_url'])
-        self.task['crawlinfo'] = crawlinfo
         if not result_id:
             if self.testing_mode:
                 inserted, unid = (True, {"acid": "testing_mode", "ctime": self.crawl_id})
@@ -130,7 +132,7 @@ class GeneralItemHandler(BaseHandler):
             else:
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
-            result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], source=utils.decode(page_source), **unid)
+            result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], **unid)
             if self.testing_mode:
                 result_id = 'testing_mode'
                 self.debug("%s on_result: %s" % (self.__class__.__name__, result))
@@ -146,7 +148,7 @@ class GeneralItemHandler(BaseHandler):
             self.task['rid'] = result_id
         else:
             if self.page == 1:
-                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], source=utils.decode(page_source))
+                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'])
 
                 if self.testing_mode:
                     self.debug("%s on_result: %s" % (self.__class__.__name__, result))
@@ -175,6 +177,7 @@ class GeneralItemHandler(BaseHandler):
         if self.page != 1:
             return
         self.result2comment(save, domain, subdomain)
+        self.result2interact(save, domain, subdomain)
 
     def result2comment(self, save, domain, subdomain = None):
         ruleset = self.db['CommentRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
@@ -184,6 +187,7 @@ class GeneralItemHandler(BaseHandler):
                 cid = self.build_comment_task(url, rule)
                 self.task['crawlinfo']['commentRule'] = rule['uuid']
                 self.task['crawlinfo']['commentTaskId'] = cid
+                self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
                 return
         ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
@@ -193,6 +197,26 @@ class GeneralItemHandler(BaseHandler):
                 self.task['crawlinfo']['commentRule'] = rule['uuid']
                 self.task['crawlinfo']['commentTaskId'] = cid
                 self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
+                return
+
+    def result2interact(self, save, domain, subdomain = None):
+        ruleset = self.db['AttachmentDB'].get_list_by_subdomain(subdomain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
+        for rule in ruleset:
+            url = self.build_attach_url(rule)
+            if url:
+                cid = self.build_interact_task(url, rule)
+                self.task['crawlinfo']['interactRule'] = rule['uuid']
+                self.task['crawlinfo']['interactTaskId'] = cid
+                self.debug("%s new interact task: %s" % (self.__class__.__name__, str(cid)))
+                return
+        ruleset = self.db['AttachmentDB'].get_list_by_domain(domain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
+        for rule in ruleset:
+            url = self.build_attach_url(rule)
+            if url:
+                cid = self.build_interact_task(url, rule)
+                self.task['crawlinfo']['interactRule'] = rule['uuid']
+                self.task['crawlinfo']['interactTaskId'] = cid
+                self.debug("%s new interact task: %s" % (self.__class__.__name__, str(cid)))
                 return
 
     def build_attach_url(self, rule):
@@ -254,4 +278,5 @@ class GeneralItemHandler(BaseHandler):
         if not parse:
             return None
         parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(parse), log_level=self.log_level, url=self.response['final_url'])
-        return parser.parse()
+        parsed = parser.parse()
+        return utils.filter(parsed)

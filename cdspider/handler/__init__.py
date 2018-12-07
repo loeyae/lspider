@@ -66,14 +66,14 @@ class BaseHandler(Component):
             self.crawl_info  = {
                 "crawl_start": self.crawl_id,
                 "crawl_end": None,
+                "crawl_urls": {},
                 "crawl_count": {
-                    "count": 0,
+                    "total": 0,
                     "new_count": 0,
-                    "parsed_count": 0,
-                    "req_error": 0,
                     "repeat_count": 0,
+                    "page": 0,
+                    "repeat_page": 0,
                 },
-                "broken": None,
                 "traceback": None
             }
             self.no_sync = kwargs.pop('no_sync', False)
@@ -324,7 +324,7 @@ class BaseHandler(Component):
         """
         self.debug("%s on error" % (self.__class__.__name__))
         self.exception(exc)
-        self.crawl_info['err_message'] = str(traceback.format_exc())
+        self.crawl_info['traceback'] = str(traceback.format_exc())
         self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info})
 
     def on_result(self, save):
@@ -344,7 +344,9 @@ class BaseHandler(Component):
         """
         self.page += 1
         rule = self.process.get("paging")
-        self.debug("%s on next: %s" % (self.__class__.__name__, rule))
+        self.debug("%s on next rule: %s" % (self.__class__.__name__, rule))
+        rule = self.format_paging(rule)
+        self.debug("%s on next formated rule: %s" % (self.__class__.__name__, rule))
         if not rule:
             raise CDSpiderCrawlerNoNextPage(base_url=self.request.get("url", ''), current_url=self.response.get('final_url'))
         builder = UrlBuilder(self.logger, self.log_level)
@@ -379,6 +381,8 @@ class BaseHandler(Component):
         if not paging:
             return paging
         if paging.get('pattern', '1') == '1':
+            if not paging['pageUrl']:
+                return None
             rule = {"url": paging['pageUrl'], 'incr_data': []}
             if isinstance(paging['rule'], (list, tuple)):
                 for item in paging['rule']:
@@ -406,8 +410,12 @@ class BaseHandler(Component):
                         "value": item['value'],
                         "first": item.get('first', '0')
                     })
+            if not rule['incr_data']:
+                return None
             return rule
-        return {"url": {"element": {"xpath": paging['rule']}}}
+        if not paging['rule']:
+            return None
+        return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}}}
 
     def finish(self):
         self.handler_run(HANDLER_FUN_FINISH, self.response)

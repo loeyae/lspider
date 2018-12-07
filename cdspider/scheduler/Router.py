@@ -84,6 +84,7 @@ class Router(BaseScheduler):
         application.register_function(hello, 'hello')
 
         def build(task):
+            self.debug("%s rpc buid get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
@@ -99,6 +100,7 @@ class Router(BaseScheduler):
             except Exception as exc:
                 errmsg = str(exc)
                 broken_exc = traceback.format_exc()
+                self.error(broken_exc)
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
 
@@ -106,19 +108,22 @@ class Router(BaseScheduler):
         application.register_function(build, 'build')
 
         def newtask(task):
+            self.debug("%s rpc newtask get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
             try:
                 task = json.loads(task)
                 name = task.get('mode', HANDLER_MODE_DEFAULT)
-                handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
+
+                handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
                 handler.newtask(task)
                 del handler
                 parsed = True
             except Exception as exc:
                 errmsg = str(exc)
                 broken_exc = traceback.format_exc()
+                self.error(broken_exc)
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
 
@@ -126,18 +131,20 @@ class Router(BaseScheduler):
         application.register_function(newtask, 'newtask')
 
         def status(task):
+            self.debug("%s rpc status get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
                 name = task.get('mode', HANDLER_MODE_DEFAULT)
-                handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
+                handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
                 handler.status(task)
                 del handler
                 parsed = True
             except :
                 broken_exc = traceback.format_exc()
+                self.error(broken_exc)
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
 

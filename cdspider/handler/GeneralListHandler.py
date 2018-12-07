@@ -80,22 +80,25 @@ class GeneralListHandler(BaseHandler):
 
     def newtask(self, message):
         uid = message['uid']
-        tasks = self.g['db']['SpiderTaskDB'].get_list(message['mode'], {"uid": uid})
-        if len(list(tasks)) > 0:
-            return
-        urls = self.db['UrlsDB'].get_detail(uid)
-        task = {
-            'mode': message['mode'],     # handler mode
-            'pid': urls['pid'],          # project id
-            'sid': ursl['sid'],          # site id
-            'tid': urls.get('tid', 0),   # task id
-            'uid': uid,                  # url id
-            'kid': 0,                    # keyword id
-            'url': urls['url'],          # url
-        }
-        self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
-        if not self.testing_mode:
-            self.db['SpiderTaskDB'].insert(task)
+        if not isinstance(uid, (list, tuple)):
+            uid = [uid]
+        for each in uid:
+            tasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
+            if len(list(tasks)) > 0:
+                continue
+            urls = self.db['UrlsDB'].get_detail(each)
+            task = {
+                'mode': message['mode'],     # handler mode
+                'pid': urls['pid'],          # project id
+                'sid': urls['sid'],          # site id
+                'tid': urls.get('tid', 0),   # task id
+                'uid': each,                  # url id
+                'kid': 0,                    # keyword id
+                'url': urls['url'],          # url
+            }
+            self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
+            if not self.testing_mode:
+                self.db['SpiderTaskDB'].insert(task)
 
     def get_scripts(self):
         if "listRule" in self.task and self.task['listRule']:
@@ -124,7 +127,7 @@ class GeneralListHandler(BaseHandler):
         self.process =  {
             "request": rule.get("request", self.DEFAULT_PROCESS),
             "parse": rule.get("parse", None),
-            "paging": self.format_paging(rule.get("paging", None)),
+            "paging": rule.get("paging", None),
             "unique": rule.get("unique", None),
         }
 
@@ -208,10 +211,13 @@ class GeneralListHandler(BaseHandler):
 
     def run_result(self, save):
         if self.response['parsed']:
+            self.crawl_info['crawl_urls'][str(self.page)] = self.response['final_url']
+            self.crawl_info['crawl_count']['page'] += 1
             ctime = self.crawl_id
             new_count = self.crawl_info['crawl_count']['new_count']
             formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
             for item in formated:
+                self.crawl_info['crawl_count']['total'] += 1
                 if self.testing_mode:
                     inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
@@ -230,8 +236,10 @@ class GeneralListHandler(BaseHandler):
                             raise CDSpiderDBError("Result insert failed")
                         self.build_item_task(result_id)
                     self.crawl_info['crawl_count']['new_count'] += 1
+                else:
+                    self.crawl_info['crawl_count']['repeat_count'] += 1
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
-                self.crawl_info['crawl_count']['repeat_count'] += 1
+                self.crawl_info['crawl_count']['repeat_page'] += 1
                 self.on_repetition()
 
     def url_prepare(self, url):
@@ -269,3 +277,14 @@ class GeneralListHandler(BaseHandler):
             'rid': rid,
         }
         self.queue['scheduler2spider'].put_nowait(message)
+
+    def finish(self):
+        super(GeneralListHandler, self).finish()
+        crawlinfo = self.task.get('crawlinfo', {}) or {}
+        self.crawl_info['crawl_end'] = int(time.time())
+        crawlinfo[str(self.crawl_id)] = self.crawl_info
+        crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
+        if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
+            del crawlinfo_sorted[0]
+        save = self.task.get("save")
+        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": save})

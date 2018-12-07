@@ -108,12 +108,12 @@ class Spider(Component):
                 handler.parse()
                 self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
                 if return_result:
+                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
                     self.info("Spider next start")
                     handler.on_next(save)
                     self.info("Spider next end")
-                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
-
                     raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
+
                 self.info("Spider result start")
                 handler.on_result(save)
                 self.info("Spider result end")
@@ -122,10 +122,12 @@ class Spider(Component):
                 self.info("Spider next end")
         except Exception as e:
             if not return_result:
-                handler.on_error(e)
+                if not isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum)):
+                    handler.on_error(e)
             else:
-                return_data.append((None, traceback.format_exc(), None, None, save))
-                self.error(traceback.format_exc())
+                if not isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerBroken)):
+                    return_data.append((None, traceback.format_exc(), None, None, save))
+                    self.error(traceback.format_exc())
         finally:
             self.info("Spider process end")
             if not return_result:
@@ -208,6 +210,7 @@ class Spider(Component):
         application.register_function(hello, 'hello')
 
         def fetch(task):
+            self.debug("%s rpc get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
@@ -226,6 +229,7 @@ class Spider(Component):
             except Exception as exc:
                 errmsg = str(exc)
                 broken_exc = traceback.format_exc()
+                self.error(broken_exc)
             output = sys.stdout.read()
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
 
