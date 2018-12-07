@@ -122,7 +122,6 @@ class GeneralItemHandler(BaseHandler):
     def result2db(self, save, typeinfo):
         result_id = self.task.get("rid", None)
         self._build_crawl_info(final_url=self.response['final_url'])
-        self.task['crawlinfo'] = crawlinfo
         if not result_id:
             if self.testing_mode:
                 inserted, unid = (True, {"acid": "testing_mode", "ctime": self.crawl_id})
