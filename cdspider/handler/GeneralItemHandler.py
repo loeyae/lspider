@@ -129,7 +129,7 @@ class GeneralItemHandler(BaseHandler):
             else:
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
-            result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], source=utils.decode(page_source), **unid)
+            result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], **unid)
             if self.testing_mode:
                 result_id = 'testing_mode'
                 self.debug("%s on_result: %s" % (self.__class__.__name__, result))
@@ -145,7 +145,7 @@ class GeneralItemHandler(BaseHandler):
             self.task['rid'] = result_id
         else:
             if self.page == 1:
-                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], source=utils.decode(page_source))
+                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'])
 
                 if self.testing_mode:
                     self.debug("%s on_result: %s" % (self.__class__.__name__, result))
