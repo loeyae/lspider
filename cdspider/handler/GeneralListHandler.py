@@ -19,18 +19,40 @@ from cdspider.parser.lib import TimeParser
 class GeneralListHandler(BaseHandler):
     """
     general list handler
+    :property task 爬虫任务信息 {"mode": "list", "uuid": SpiderTask uuid}
+                   当测试改handler时 {"mode": "list", "url": url, "listRule": 列表规则，参考列表规则}
     """
 
     def route(self, mode, save):
+        """
+        schedule 分发
+        :param mode  project|site 分发模式: 按项目|按站点
+        :param save 传递的上下文
+        :return 包含uuid的迭代器，项目模式为项目的uuid，站点模式为站点的uuid
+        :notice 该方法返回的迭代器用于router生成queue消息，以便plantask听取，消息格式为:
+        {"mode": route mode, "h-mode": handler mode, "uuid": uuid}
+        """
         if not "id" in save:
+            '''
+            初始化上下文中的id参数,该参数用于数据查询
+            '''
             save["id"] = 0
         if mode == ROUTER_MODE_PROJECT:
+            '''
+            按项目分发
+            '''
             for item in self.db['ProjectsDB'].get_new_list(save['id'], select=["uuid"]):
                 if item['uuid'] > save['id']:
                     save['id'] = item["uuid"]
                 yield item['uuid']
         elif mode == ROUTER_MODE_SITE:
+            '''
+            按站点分发
+            '''
             if not "pid" in save:
+                '''
+                初始化上下文中的pid参数,该参数用于项目数据查询
+                '''
                 save["pid"] = 0
             for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
                 while True:
@@ -46,16 +68,34 @@ class GeneralListHandler(BaseHandler):
                     save['pid'] = item['uuid']
 
     def schedule(self, message, save):
+        """
+        根据router的queue消息，计划爬虫任务
+        :param message route传递过来的消息
+        :param save 传递的上下文
+        :return 包含uuid, url的字典迭代器，为SpiderTaskDB中数据
+        :notice 该方法返回的迭代器用于plantask生成queue消息，以便fetch听取，消息格式为
+        {"mode": handler mode, "uuid": SpiderTask uuid, "url": SpiderTask url}
+        """
         mode = message['mode']
         if not 'id' in save:
+            '''
+            初始化上下文中的id参数,该参数用于数据查询
+            '''
             save['id'] = 0
         if mode == ROUTER_MODE_PROJECT:
+            '''
+            按项目分发的计划任务
+            '''
             if not 'sid' in save:
+                '''
+                初始化上下文中的sid参数,该参数用于站点数据查询
+                '''
                 save['sid'] = 0
             for item in self.db['SitesDB'].get_new_list(save['sid'], message['item']):
                 self.debug("%s schedule site: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
+                    #以站点为单位获取计划中的爬虫任务
                     for each in self.schedule_by_site(item, message['h-mode'], save):
                         yield each
                         has_item = True
@@ -65,11 +105,22 @@ class GeneralListHandler(BaseHandler):
                 if item['uuid'] > save['sid']:
                     save['sid'] = item['uuid']
         elif mode == ROUTER_MODE_SITE:
+            '''
+            按站点分发的计划任务
+            '''
             site = self.db['SitesDB'].get_detail(message['item'])
+            #获取该站点计划中的爬虫任务
             for each in self.schedule_by_site(site, message['h-mode'], save):
                 yield each
 
     def schedule_by_site(self, site, mode, save):
+        """
+        获取站点下计划中的爬虫任务
+        :param site 站点信息
+        :param mode handler mode
+        :param save 上下文参数
+        :return 包含爬虫任务uuid, url的字典迭代器
+        """
         plantime = int(save['now']) + int(self.ratemap[str(site['frequency'])][0])
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"sid": site['uuid']}, select=['uuid', 'url']):
             if not self.testing_mode:
@@ -79,6 +130,10 @@ class GeneralListHandler(BaseHandler):
             yield item
 
     def newtask(self, message):
+        """
+        新建爬虫任务
+        :param message [{"uid": url uuid, "mode": handler mode}]
+        """
         uid = message['uid']
         if not isinstance(uid, (list, tuple)):
             uid = [uid]
@@ -101,7 +156,14 @@ class GeneralListHandler(BaseHandler):
                 self.db['SpiderTaskDB'].insert(task)
 
     def get_scripts(self):
+        """
+        获取列表规则中的自定义脚本
+        :return 自定义脚本
+        """
         if "listRule" in self.task and self.task['listRule']:
+            '''
+            如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
+            '''
             rule = copy.deepcopy(self.task['listRule'])
         else:
             urls = self.db['UrlsDB'].get_detail(self.task['uuid'])
@@ -111,7 +173,14 @@ class GeneralListHandler(BaseHandler):
         return rule.get("scripts", None)
 
     def init_process(self):
+        """
+        初始化爬虫流程
+        :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
+        """
         if "listRule" in self.task and self.task['listRule']:
+            '''
+            如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
+            '''
             rule = copy.deepcopy(self.task['listRule'])
         else:
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
@@ -134,7 +203,12 @@ class GeneralListHandler(BaseHandler):
     def get_unique_setting(self, url, data):
         """
         获取生成唯一ID的字段
+        :param url 用来生成唯一索引的url
+        :param data 用来生成唯一索引的数据
+        :input self.process 爬取流程 {"unique": 唯一索引设置}
+        :return 唯一索引的源字符串
         """
+        #获取唯一索引设置规则
         identify = self.process.get('unique', None)
         subdomain, domain = utils.parse_domain(url)
         if not subdomain:
@@ -164,21 +238,44 @@ class GeneralListHandler(BaseHandler):
         return u
 
     def run_parse(self, rule):
+        """
+        根据解析规则解析源码，获取相应数据
+        :param rule 解析规则
+        :input self.response 爬虫结果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
+        :output self.response {"parsed": 解析结果}
+        """
         parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
         self.response['parsed'] = parser.parse()
 
     def _build_crawl_info(self, final_url):
+        """
+        构造文章数据的爬虫信息
+        :param final_url 请求的url
+        :input self.task 爬虫任务信息
+        :input self.crawl_id 爬虫运行时刻
+        """
         return {
-                "stid": self.task.get("uuid", 0),
-                "uid": self.task.get("uid", 0),
-                "pid": self.task.get('pid', 0),
-                "sid": self.task.get('sid', 0),
-                "tid": self.task.get('tid', 0),
-                "list_url": final_url,
-                "list_crawl_id": self.crawl_id,
+                "stid": self.task.get("uuid", 0),   # SpiderTask uuid
+                "uid": self.task.get("uid", 0),     # url id
+                "pid": self.task.get('pid', 0),     # project id
+                "sid": self.task.get('sid', 0),     # site id
+                "tid": self.task.get('tid', 0),     # task id
+                "list_url": final_url,              # 列表url
+                "list_crawl_id": self.crawl_id,     # 列表抓取时间
         }
 
     def _build_result_info(self, **kwargs):
+        """
+        构造文章数据
+        :param result 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
+        :param final_url 请求的url
+        :param typeinfo 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
+        :param crawlinfo 爬虫信息
+        :param unid 文章唯一索引
+        :param ctime 抓取时间
+        :param status 状态
+        :input self.crawl_id 爬取时刻
+        """
         now = int(time.time())
         result = kwargs.get('result', {})
         pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
@@ -200,21 +297,34 @@ class GeneralListHandler(BaseHandler):
         return r
 
     def _domain_info(self, url):
+        """
+        根据url获取域名信息
+        :param url url
+        """
         subdomain, domain = utils.parse_domain(url)
         if not subdomain:
             subdomain = 'www'
         return "%s.%s" % (subdomain, domain), domain
 
     def _typeinfo(self, url):
+        """
+        根据url获取域名信息
+        :param url url
+        """
         subdomain, domain = self._domain_info(url)
         return {"domain": domain, "subdomain": subdomain}
 
     def run_result(self, save):
+        """
+        爬虫结果处理
+        :param save 保存的上下文信息
+        """
         if self.response['parsed']:
             self.crawl_info['crawl_urls'][str(self.page)] = self.response['final_url']
             self.crawl_info['crawl_count']['page'] += 1
             ctime = self.crawl_id
             new_count = self.crawl_info['crawl_count']['new_count']
+            #格式化url
             formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
             for item in formated:
                 self.crawl_info['crawl_count']['total'] += 1
@@ -222,6 +332,7 @@ class GeneralListHandler(BaseHandler):
                     inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
                 else:
+                    #查询文章是否已经存在
                     inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
@@ -246,6 +357,11 @@ class GeneralListHandler(BaseHandler):
         return url
 
     def build_url_by_rule(self, data, base_url = None):
+        """
+        根据url规则格式化url
+        :param data 解析到的数据
+        :param base_url 基本url
+        """
         if not base_url:
             base_url = self.task.get('url')
         urlrule = self.process.get("url")
@@ -279,6 +395,9 @@ class GeneralListHandler(BaseHandler):
         self.queue['scheduler2spider'].put_nowait(message)
 
     def finish(self):
+        """
+        记录抓取日志
+        """
         super(GeneralListHandler, self).finish()
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
