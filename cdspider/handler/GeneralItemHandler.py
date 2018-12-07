@@ -117,6 +117,7 @@ class GeneralItemHandler(BaseHandler):
         return {"domain": domain, "subdomain": subdomain}
 
     def run_result(self, save):
+        self._build_crawl_info(final_url=self.response['final_url'])
         if self.response['parsed']:
             typeinfo = self._typeinfo(self.response['final_url'])
             self.result2db(save, typeinfo)
@@ -124,7 +125,6 @@ class GeneralItemHandler(BaseHandler):
 
     def result2db(self, save, typeinfo):
         result_id = self.task.get("rid", None)
-        self._build_crawl_info(final_url=self.response['final_url'])
         if not result_id:
             if self.testing_mode:
                 inserted, unid = (True, {"acid": "testing_mode", "ctime": self.crawl_id})
