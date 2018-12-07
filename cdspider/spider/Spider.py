@@ -68,6 +68,7 @@ class Spider(Component):
             return
         self.info("Spider fetch start, task: %s" % task)
         save = {"base_url": task.get('url')}
+        task['save'] = save
         handler = self.get_handler(task)
         if return_result:
             return_data = []
