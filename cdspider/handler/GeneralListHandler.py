@@ -296,24 +296,6 @@ class GeneralListHandler(BaseHandler):
             }
         return r
 
-    def _domain_info(self, url):
-        """
-        根据url获取域名信息
-        :param url url
-        """
-        subdomain, domain = utils.parse_domain(url)
-        if not subdomain:
-            subdomain = 'www'
-        return "%s.%s" % (subdomain, domain), domain
-
-    def _typeinfo(self, url):
-        """
-        根据url获取域名信息
-        :param url url
-        """
-        subdomain, domain = self._domain_info(url)
-        return {"domain": domain, "subdomain": subdomain}
-
     def run_result(self, save):
         """
         爬虫结果处理
@@ -337,7 +319,7 @@ class GeneralListHandler(BaseHandler):
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     crawlinfo =  self._build_crawl_info(self.response['final_url'])
-                    typeinfo = self._typeinfo(item['url'])
+                    typeinfo = utils.typeinfo(item['url'])
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                     if self.testing_mode:
                         self.debug("%s result: %s" % (self.__class__.__name__, result))
