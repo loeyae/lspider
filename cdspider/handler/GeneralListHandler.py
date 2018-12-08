@@ -200,6 +200,8 @@ class GeneralListHandler(BaseHandler):
             if not 'ruleId' in urls or not urls['ruleId']:
                 raise CDSpiderHandlerError("url not has list rule")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
+            if not rule:
+                raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
         self.process =  {
