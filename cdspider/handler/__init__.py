@@ -191,7 +191,7 @@ class BaseHandler(Component):
         初始化爬虫
         """
         if "uuid" in self.task and self.task['uuid']:
-            task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
+            task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'], select={"save": False})
             self.task.update(task)
         self.init_process()
         if not save['base_url']:
