@@ -154,9 +154,9 @@ class Spider(Component):
     def run_once(self):
         self.info("Spider once starting...")
         message = self.inqueue.get_nowait()
-        self.debug("Spider get message: %s" % message)
+        self.debug("Spider got message: %s" % message)
         task = self.get_task(message)
-        self.debug("Spider get task: %s" % task)
+        self.debug("Spider got task: %s" % task)
         self.fetch(task)
         if hasattr(self, 'handler'):
             del self.handler
@@ -174,6 +174,7 @@ class Spider(Component):
             while not self._quit:
                 try:
                     message = self.inqueue.get_nowait()
+                    self.debug("%s fetch got message %s" % (self.__class__.__name__, message))
                     task = self.get_task(message)
                     self.fetch(task)
                     time.sleep(0.1)
@@ -211,7 +212,7 @@ class Spider(Component):
         application.register_function(hello, 'hello')
 
         def fetch(task):
-            self.debug("%s rpc get message %s" % (self.__class__.__name__, task))
+            self.debug("%s rpc got message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
