@@ -124,6 +124,9 @@ class GeneralListHandler(BaseHandler):
         plantime = int(save['now']) + int(self.ratemap[str(site['frequency'])][0])
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"sid": site['uuid']}, select=['uuid', 'url']):
             if not self.testing_mode:
+                '''
+                testing_mode打开时，数据不入库
+                '''
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
@@ -153,6 +156,9 @@ class GeneralListHandler(BaseHandler):
             }
             self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
             if not self.testing_mode:
+                '''
+                testing_mode打开时，数据不入库
+                '''
                 self.db['SpiderTaskDB'].insert(task)
 
     def get_scripts(self):
