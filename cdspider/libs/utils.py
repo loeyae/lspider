@@ -68,6 +68,16 @@ def parse_domain(url):
     except:
         return None, None
 
+def domain_info(url):
+    subdomain, domain = parse_domain(url)
+    if not subdomain:
+        subdomain = 'www'
+    return "%s.%s" % (subdomain, domain), domain
+
+def typeinfo(url):
+    subdomain, domain = domain_info(url)
+    return {"domain": domain, "subdomain": subdomain}
+
 def remove_punctuation(content):
     if not isinstance(content, str):
         content = content.decode('utf-8')
