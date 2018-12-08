@@ -275,10 +275,13 @@ class GeneralListHandler(BaseHandler):
             for item in formated:
                 self.crawl_info['crawl_count']['total'] += 1
                 if self.testing_mode:
+                    '''
+                    testing_mode打开时，数据不入库
+                    '''
                     inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
                 else:
-                    #查询文章是否已经存在
+                    #生成文章唯一索引并判断文章是否已经存在
                     inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
@@ -286,6 +289,9 @@ class GeneralListHandler(BaseHandler):
                     typeinfo = utils.typeinfo(item['url'])
                     result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                     if self.testing_mode:
+                        '''
+                        testing_mode打开时，数据不入库
+                        '''
                         self.debug("%s result: %s" % (self.__class__.__name__, result))
                     else:
                         result_id = self.db['ArticlesDB'].insert(result)
