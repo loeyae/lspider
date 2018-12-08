@@ -20,7 +20,7 @@ from cdspider.parser.lib import TimeParser
 class GeneralListHandler(BaseHandler):
     """
     general list handler
-    :property task 爬虫任务信息 {"mode": "list", "uuid": SpiderTask uuid}
+    :property task 爬虫任务信息 {"mode": "list", "uuid": SpiderTask.list uuid}
                    当测试该handler，数据应为 {"mode": "list", "url": url, "listRule": 列表规则，参考列表规则}
     """
 
