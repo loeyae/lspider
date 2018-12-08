@@ -200,43 +200,6 @@ class GeneralListHandler(BaseHandler):
             "unique": rule.get("unique", None),
         }
 
-    def get_unique_setting(self, url, data):
-        """
-        获取生成唯一ID的字段
-        :param url 用来生成唯一索引的url
-        :param data 用来生成唯一索引的数据
-        :input self.process 爬取流程 {"unique": 唯一索引设置}
-        :return 唯一索引的源字符串
-        """
-        #获取唯一索引设置规则
-        identify = self.process.get('unique', None)
-        subdomain, domain = utils.parse_domain(url)
-        if not subdomain:
-            parsed = urlparse(url)
-            arr = list(parsed)
-            arr[1] = "www.%s" % arr[1]
-            u = urlunparse(arr)
-        else:
-            u = url
-        if identify:
-            if 'url' in identify and identify['url']:
-                rule, key = utils.rule2pattern(identify['url'])
-                if rule and key:
-                    ret = re.search(rule, url)
-                    if ret:
-                        u = ret.group(key)
-                else:
-                    ret = re.search(identify['url'], url)
-                    if ret:
-                        u = ret.group(0)
-            if 'query' in identify and identify['query']:
-                u = utils.build_filter_query(url, identify['query'])
-            if 'data' in identify and identify['data']:
-                udict = dict.fromkeys(identify['data'])
-                query = utils.dictunion(data, udict)
-                return utils.build_query(u, query)
-        return u
-
     def run_parse(self, rule):
         """
         根据解析规则解析源码，获取相应数据
