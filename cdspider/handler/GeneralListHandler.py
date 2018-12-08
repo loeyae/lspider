@@ -8,8 +8,9 @@
 """
 import copy
 import time
+import traceback
 from . import BaseHandler
-from urllib.parse import urljoin, urlparse, urlunparse
+from urllib.parse import urljoin
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
@@ -332,6 +333,7 @@ class GeneralListHandler(BaseHandler):
             try:
                 item['url'] = self.url_prepare(item['url'])
             except:
+                self.error(traceback.format_exc())
                 continue
             if urlrule and 'name' in urlrule and urlrule['name']:
                 parsed = {urlrule['name']: item['url']}
