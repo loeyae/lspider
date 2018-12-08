@@ -98,7 +98,7 @@ class SpiderTaskDB(Base):
     def delete_by_url(self, uid, mode, where):
         raise NotImplementedError
 
-    def get_detail(self, id, mode, crawlinfo=False):
+    def get_detail(self, id, mode, select={}, crawlinfo=False):
         raise NotImplementedError
 
     def get_count(self, mode, where = {}):
