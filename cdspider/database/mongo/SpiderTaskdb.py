@@ -283,11 +283,9 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({"uid": int(uid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
-    def get_detail(self, id, mode, crawlinfo=False):
+    def get_detail(self, id, mode, select={}, crawlinfo=False):
         table = self._table_name(mode)
-        if crawlinfo:
-            select=None
-        else:
+        if not crawlinfo:
             select={"crawlinfo": False}
         return self.get(where={"uuid": int(id)}, select=select, table=table)
 
