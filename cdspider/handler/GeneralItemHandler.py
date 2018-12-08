@@ -19,7 +19,7 @@ from cdspider.parser.lib import TimeParser
 class GeneralItemHandler(BaseHandler):
     """
     general item handler
-    :property task 爬虫任务信息 {"mode": "item", "rid": Article uuid}
+    :property task 爬虫任务信息 {"mode": "item", "rid": Article rid}
                    当测试该handler，数据应为 {"mode": "item", "url": url, "detailRule": 详情规则，参考详情规则}
     """
 
