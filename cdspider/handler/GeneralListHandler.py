@@ -192,6 +192,7 @@ class GeneralListHandler(BaseHandler):
         else:
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
             if not urls:
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
                 raise CDSpiderDBDataNotFound("urls: %s not exists" % self.task['uid'])
             if urls['status'] != UrlsDB.STATUS_ACTIVE or urls['ruleStatus'] != UrlsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
@@ -201,6 +202,7 @@ class GeneralListHandler(BaseHandler):
                 raise CDSpiderHandlerError("url not has list rule")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
             if not rule:
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
