@@ -181,13 +181,12 @@ class CommentHandler(BaseHandler):
                     inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.task['parent_url'], each), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
-                    result = self.build_comment_info(result=each, **unid)
-                    if self.testing_mode:
+                    result = self.build_comment_info(result=each, final_url=self.response['final_url'], **unid)
+                    self.debug("%s result: %s" % (self.__class__.__name__, result))
+                    if not self.testing_mode:
                         '''
                         testing_mode打开时，数据不入库
                         '''
-                        self.debug("%s result: %s" % (self.__class__.__name__, result))
-                    else:
                         result_id = self.db['CommentsDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
@@ -210,10 +209,10 @@ class CommentHandler(BaseHandler):
             'tid': self.task['tid'],                        # task id
             'uid': self.task['uid'],                        # url id
             'ruleId': self.task['kid'],                     # commentRule id
-            'acid': self.task['acid'],                      # article acid
-            'rid': self.task['parentid'],                   # article rid
             'list_url': kwargs.pop('final_url'),            # 列表url
         }
+        result['acid'] = self.task['acid']                      # article acid
+        result['rid'] = self.task['parentid']                   # article rid
         result['unid'] = kwargs.pop('unid')
         result['ctime'] = kwargs.pop('ctime')
         return result
