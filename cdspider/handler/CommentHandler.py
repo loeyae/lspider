@@ -37,10 +37,11 @@ class CommentHandler(BaseHandler):
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
         """
-        article = self.db['ArticlesDB'].get_detail(self.task['parentid'], select=['url'])
+        article = self.db['ArticlesDB'].get_detail(self.task['parentid'], select=['url', 'acid'])
         if not article:
             raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
         self.task['parent_url'] = article['url']
+        self.task['acid'] = article['acid']
         self.process = self.match_rule()
 
     def match_rule(self):
@@ -209,6 +210,7 @@ class CommentHandler(BaseHandler):
             'tid': self.task['tid'],                        # task id
             'uid': self.task['uid'],                        # url id
             'ruleId': self.task['kid'],                     # commentRule id
+            'acid': self.task['acid'],                      # article acid
             'rid': self.task['parentid'],                   # article rid
             'list_url': kwargs.pop('final_url'),            # 列表url
         }
