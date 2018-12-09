@@ -167,8 +167,8 @@ class GeneralItemHandler(BaseHandler):
         if "ctime" in kwargs:
             r['ctime'] = kwargs['ctime']
         if "typeinfo" in kwargs:
-            r['domain'] = kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
-            r['subdomain'] = kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
+            r['domain'] = kwargs.get("typeinfo", {}).get('domain', None)          # 站点域名
+            r['subdomain'] = kwargs.get("typeinfo", {}).get('subdomain', None)    # 站点域名
         return r
 
     def run_result(self, save):
@@ -179,7 +179,7 @@ class GeneralItemHandler(BaseHandler):
         self._build_crawl_info(final_url=self.response['final_url'])
         if self.response['parsed']:
             typeinfo = utils.typeinfo(self.response['final_url'])
-            self.result2db(save, typeinfo)
+            self.result2db(save, copy.deepcopy(typeinfo))
             self.result2attach(save, **typeinfo)
 
     def result2db(self, save, typeinfo):
