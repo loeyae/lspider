@@ -167,22 +167,28 @@ class GeneralListHandler(BaseHandler):
         获取列表规则中的自定义脚本
         :return 自定义脚本
         """
-        if "listRule" in self.task and self.task['listRule']:
-            '''
-            如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
-            '''
-            rule = copy.deepcopy(self.task['listRule'])
-        else:
-            urls = self.db['UrlsDB'].get_detail(self.task['uuid'])
-            if not urls or not 'ruleId' in urls or not urls['ruleId']:
-                return None
-            rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
-        return rule.get("scripts", None)
+        try:
+            rule = self.match_rule()
+            return rule.get("scripts", None)
+        except:
+            return None
 
     def init_process(self):
         """
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
+        """
+        rule = self.match_rule()
+        self.process =  {
+            "request": rule.get("request", self.DEFAULT_PROCESS),
+            "parse": rule.get("parse", None),
+            "paging": rule.get("paging", None),
+            "unique": rule.get("unique", None),
+        }
+
+    def match_rule(self):
+        """
+        获取匹配的规则
         """
         if "listRule" in self.task and self.task['listRule']:
             '''
@@ -206,12 +212,7 @@ class GeneralListHandler(BaseHandler):
                 raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
-        self.process =  {
-            "request": rule.get("request", self.DEFAULT_PROCESS),
-            "parse": rule.get("parse", None),
-            "paging": rule.get("paging", None),
-            "unique": rule.get("unique", None),
-        }
+        return rule
 
     def run_parse(self, rule):
         """
