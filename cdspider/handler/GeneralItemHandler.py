@@ -27,8 +27,11 @@ class GeneralItemHandler(BaseHandler):
         """
         获取自定义脚本
         """
-        rule = self.match_rule()
-        return rule.get("scripts", None)
+        try:
+            rule = self.match_rule()
+            return rule.get("scripts", None)
+        except:
+            return None
 
     def init_process(self):
         """
@@ -106,7 +109,7 @@ class GeneralItemHandler(BaseHandler):
         """
         文章解析
         :param rule 解析规则
-        :input self.response 爬虫结果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
+        :input self.response 爬虫��果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
         :output self.response {"parsed": 解析结果}
         """
         parser = ItemParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
