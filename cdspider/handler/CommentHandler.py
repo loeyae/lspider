@@ -9,9 +9,7 @@
 import copy
 import time
 from . import BaseHandler
-from urllib.parse import urljoin, urlparse, urlunparse
 from cdspider.database.base import *
-from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import CustomParser
 
@@ -258,7 +256,7 @@ class CommentHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(GeneralListHandler, self).finish(save)
+        super(CommentHandler, self).finish(save)
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
         crawlinfo[str(self.crawl_id)] = self.crawl_info
