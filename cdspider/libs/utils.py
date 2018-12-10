@@ -45,7 +45,10 @@ def format_(data, params):
 
 def build_url_by_rule(rule, params):
     url = rule.get('base')
-    if rule.get('mode', 'get') == 'format':
+    if not params:
+        return url
+    mode = rule.get('mode', 'get')
+    if mode == 'format':
         keylist = re.findall('\{(\w+)\}', url)
         format_params = {}
         for key in keylist:
@@ -59,7 +62,13 @@ def build_url_by_rule(rule, params):
             else:
                 format_params[key] = '{%s}' % key
         return url.format(**format_params)
-    return build_query(url, params)
+    elif mode == 'replace':
+        for key, value in params.items():
+            replace, subject = rule2subitem(str(key), str(value))
+            url = re.sub(replace, subject, url)
+    elif mode == 'get':
+        return build_query(url, params)
+    return url
 
 def parse_domain(url):
     try:
