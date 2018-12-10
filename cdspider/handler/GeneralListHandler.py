@@ -406,11 +406,15 @@ class GeneralListHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(GeneralListHandler, self).finish()
+        super(GeneralListHandler, self).finish(save)
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
         crawlinfo[str(self.crawl_id)] = self.crawl_info
         crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
         if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
             del crawlinfo_sorted[0]
-        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": save})
+        s = self.task.get("save")
+        if not s:
+            s = {}
+        s.update(save)
+        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
