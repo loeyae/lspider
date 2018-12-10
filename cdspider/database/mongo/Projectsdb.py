@@ -27,8 +27,6 @@ class ProjectsDB(Mongo, BaseProjectsDB):
             collection.create_index('uuid', unique=True, name='uuid')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
-        if not 'ctime' in indexes:
-            collection.create_index('ctime', name='ctime')
 
     def get_detail(self, id):
         return self.get(where={'uuid': int(id)})
