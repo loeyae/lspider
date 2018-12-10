@@ -95,4 +95,4 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where == {}
         where['uuid'] = {'$gt': int(id)}
         kwargs.setdefault('sort', [('uuid', 1)])
-        return self.find(where=_where, select=select, **kwargs)
+        return self.find(where=where, select=select, **kwargs)
