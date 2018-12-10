@@ -27,7 +27,7 @@ class CustomParser(BaseParser):
                 return parser.parse()
             else:
                 ruleset['onlyOne'] = 0
-        else:
+        elif ruleset:
             rule = list(ruleset.values())[0]
             if 'filter' in rule and rule['filter'] and rule['filter'].startswith('@json:'):
                 parser = JsonParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
