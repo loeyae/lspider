@@ -207,6 +207,7 @@ class BaseHandler(Component):
         self.request['url'] = self.task.get('url')
         request = copy.deepcopy(self.request)
         if 'paging' in save and save['paging']:
+            save['page'] = self.page
             rule = self.process.get("paging")
             self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
             rule = self.format_paging(rule)
