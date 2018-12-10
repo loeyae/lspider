@@ -194,7 +194,7 @@ class BaseHandler(Component):
         if "uuid" in self.task and self.task['uuid']:
             task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'], select={"save": False}, crawlinfo = True)
             self.task.update(task)
-        self.init_process()
+        self.init_process(save)
         if not save['base_url']:
             save['base_url'] = self.task['url']
         self.handler_run(HANDLER_FUN_PROCESS, self.process)
@@ -203,13 +203,18 @@ class BaseHandler(Component):
         if not self.crawler:
             self.crawler = self.get_crawler(self.request)
         self.request['url'] = self.task.get('url')
-
+        request = copy.deepcopy(self.request)
+        if 'paging' in save and save['paging']:
+            rule = self.process.get("paging")
+            self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
+            rule = self.format_paging(rule)
+            request.update(rule)
         builder = UrlBuilder(self.logger, self.log_level)
-        self.request_params = builder.build(self.request, self.response['last_source'], self.crawler, save)
+        self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_INIT, self.request_params)
 
     @abc.abstractmethod
-    def init_process(self):
+    def init_process(self, save):
         pass
 
     def prepare(self, save):
@@ -242,6 +247,7 @@ class BaseHandler(Component):
                 self.crawler.crawl(**params)
                 self.response['last_source'] = self.crawler.page_source
                 self.response['last_url'] = self.crawler.final_url
+                save['request_url'] = self.crawler.final_url
             if self.page == 1:
                 self.response['final_url'] = self.response['last_url']
                 self.response['source'] = self.response['last_source']
@@ -309,7 +315,7 @@ class BaseHandler(Component):
 #        self.response['parsed'] = parsed
         pass
 
-    def on_repetition(self):
+    def on_repetition(self, save):
         """
         重复处理
         """
@@ -317,7 +323,7 @@ class BaseHandler(Component):
         if HANDLER_FUN_REPETITION in self.handle:
             self.handler_run(HANDLER_FUN_REPETITION, self.response)
         else:
-            raise CDSpiderCrawlerNoNextPage(base_url=self.task.get('save', {}).get("base_url", ''), current_url=self.task.get('save', {}).get("request_url", ''))
+            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get("request_url", ''))
 
     def on_error(self, exc):
         """
@@ -349,10 +355,12 @@ class BaseHandler(Component):
         rule = self.format_paging(rule)
         self.debug("%s on next formated rule: %s" % (self.__class__.__name__, rule))
         if not rule:
-            raise CDSpiderCrawlerNoNextPage(base_url=self.request.get("url", ''), current_url=self.response.get('final_url'))
+            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
         builder = UrlBuilder(self.logger, self.log_level)
         save['page'] = self.page
-        self.request_params = builder.build(rule, self.response['last_source'], self.crawler, save)
+        request = copy.deepcopy(self.request)
+        request.update(rule)
+        self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
         save['next_url'] = self.request_params['url']
 
@@ -382,7 +390,7 @@ class BaseHandler(Component):
         if not paging:
             return paging
         if paging.get('pattern', '1') == '1':
-            if not paging['pageUrl']:
+            if not "pageUrl" in paging or not paging['pageUrl']:
                 return None
             rule = {"url": paging['pageUrl'], 'incr_data': []}
             if isinstance(paging['rule'], (list, tuple)):
@@ -455,7 +463,7 @@ class BaseHandler(Component):
                 return utils.build_query(u, query)
         return u
 
-    def finish(self):
+    def finish(self, save):
         self.handler_run(HANDLER_FUN_FINISH, self.response)
 
     def close(self):
