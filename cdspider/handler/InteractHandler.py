@@ -190,7 +190,17 @@ class InteractHandler(BaseHandler):
         :input self.response 爬虫结果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
         :output self.response {"parsed": 解析结果}
         """
-        parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
+        def build_rule(item):
+            key = item.pop('key')
+            if key and item['filter']:
+                return {key: item}
+            return None
+        r = {}
+        for item in rule:
+            _r = build_rule(item)
+            if _r:
+                r.update(r)
+        parser = CustomParser(source=self.response['last_source'], ruleset=r, log_level=self.log_level, url=self.response['final_url'])
         self.response['parsed'] = parser.parse()
 
     def run_result(self, save):
