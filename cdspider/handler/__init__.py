@@ -393,7 +393,7 @@ class BaseHandler(Component):
     def format_paging(self, paging):
         if not paging:
             return paging
-        if paging.get('pattern', '1') == '1':
+        if paging.get('pattern', 1) == 1:
             if not "pageUrl" in paging or not paging['pageUrl']:
                 return None
             rule = {"url": paging['pageUrl'], 'incr_data': []}
