@@ -39,7 +39,6 @@ class InteractHandler(BaseHandler):
             raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
         self.task['acid'] = article['acid']
         self.process = self.match_rule()
-        save['paging'] = True
 
     def match_rule(self):
         """
