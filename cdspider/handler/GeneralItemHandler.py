@@ -269,13 +269,19 @@ class GeneralItemHandler(BaseHandler):
         :param domain 域名
         :param subdomain 子域名
         """
+        self.debug("%s new attach task starting" % (self.__class__.__name__))
         if self.page != 1:
             '''
             只在第一页时执行
             '''
             return
+        self.debug("%s new comment task starting" % (self.__class__.__name__))
         self.result2comment(save, domain, subdomain)
+        self.debug("%s new comment task end" % (self.__class__.__name__))
+        self.debug("%s new interact task starting" % (self.__class__.__name__))
         self.result2interact(save, domain, subdomain)
+        self.debug("%s new interact task end" % (self.__class__.__name__))
+        self.debug("%s new attach task end" % (self.__class__.__name__))
 
     def result2comment(self, save, domain, subdomain = None):
         """
@@ -292,10 +298,11 @@ class GeneralItemHandler(BaseHandler):
                     根据规则生成出任务url，则为成功
                     '''
                     cid = self.build_comment_task(url, data, rule)
-                    self.task['crawlinfo']['commentRule'] = rule['uuid']
-                    self.task['crawlinfo']['commentTaskId'] = cid
-                    self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
-                    return cid
+                    if cid:
+                        self.task['crawlinfo']['commentRule'] = rule['uuid']
+                        self.task['crawlinfo']['commentTaskId'] = cid
+                        self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
+                    return True
                 return False
             except:
                 self.error(traceback.format_exc())
@@ -303,11 +310,13 @@ class GeneralItemHandler(BaseHandler):
         #通过子域名获取评论任务
         ruleset = self.db['CommentRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
+            self.debug("%s comment task rule: %s" % (self.__class__.__name__, str(rule)))
             if build_task(rule):
                 return
         #通过域名获取评论任务
         ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
+            self.debug("%s comment task rule: %s" % (self.__class__.__name__, str(rule)))
             if build_task(rule):
                 return
 
@@ -326,22 +335,25 @@ class GeneralItemHandler(BaseHandler):
                     根据规则生成出任务url，则为成功
                     '''
                     cid = self.build_interact_task(url, data, rule)
-                    self.task['crawlinfo']['interactRule'] = rule['uuid']
-                    self.task['crawlinfo']['interactTaskId'] = cid
-                    if 'interactRuleList' in  self.task['crawlinfo']:
-                         self.task['crawlinfo']['interactRuleList'][str(rule['uuid'])] = cid
-                    else:
-                        self.task['crawlinfo']['interactRuleList'] = {str(rule['uuid']): cid}
-                    self.debug("%s new interact task: %s" % (self.__class__.__name__, str(cid)))
+                    if cid:
+                        self.task['crawlinfo']['interactRule'] = rule['uuid']
+                        self.task['crawlinfo']['interactTaskId'] = cid
+                        if 'interactRuleList' in  self.task['crawlinfo']:
+                             self.task['crawlinfo']['interactRuleList'][str(rule['uuid'])] = cid
+                        else:
+                            self.task['crawlinfo']['interactRuleList'] = {str(rule['uuid']): cid}
+                        self.debug("%s new interact task: %s" % (self.__class__.__name__, str(cid)))
             except:
                 self.error(traceback.format_exc())
         #通过子域名获取互动数任务
         ruleset = self.db['AttachmentDB'].get_list_by_subdomain(subdomain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
+            self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
             buid_task(rule)
         #通过域名获取互动数任务
         ruleset = self.db['AttachmentDB'].get_list_by_domain(domain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
+            self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
             buid_task(rule)
 
     def build_attach_url(self, rule):
@@ -351,17 +363,17 @@ class GeneralItemHandler(BaseHandler):
         """
         if 'preparse' in rule and rule['preparse']:
             #根据解析规则匹配解析内容
-            rule = rule['preparse'].get('parse', None)
+            parse = rule['preparse'].get('parse', None)
             parsed = {}
             if rule:
-                parsed = self.attach_preparse(rule)
+                parsed = self.attach_preparse(parse)
             urlrule = rule['preparse'].get('url', {})
             if urlrule:
                 #格式化url设置，将parent_rul替换为详情页url
                 if urlrule['base'] == 'parent_url':
                     urlrule['base'] = self.response['final_url']
             return (utils.build_url_by_rule(urlrule, parsed), parsed)
-        return None
+        return (None, None)
 
     def build_comment_task(self, url, data, rule):
         """
@@ -386,7 +398,10 @@ class GeneralItemHandler(BaseHandler):
             '''
             testing_mode打开时，数据不入库
             '''
-            return self.db['SpiderTaskDB'].insert(task)
+            try:
+                return self.db['SpiderTaskDB'].insert(task)
+            except:
+                return None
         else:
             return 'testing_mode'
 
@@ -413,7 +428,10 @@ class GeneralItemHandler(BaseHandler):
             '''
             testing_mode打开时，数据不入库
             '''
-            return self.db['SpiderTaskDB'].insert(task)
+            try:
+                return self.db['SpiderTaskDB'].insert(task)
+            except:
+                return None
         else:
             return 'testing_mode'
 
@@ -441,7 +459,6 @@ class GeneralItemHandler(BaseHandler):
                         raise CDSpiderSettingError("rule: % not matched with %s" % (item['filter'], self.response['final_url']))
                     item['filter'] = '@value:%s' % v
                 return {key: item}
-            raise CDSpiderSettingError("attach rule is invalid")
         #格式化解析规则
         parse = {}
         if isinstance(rule, (list, tuple)):
