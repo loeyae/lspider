@@ -67,6 +67,27 @@ class GeneralListHandler(BaseHandler):
                         break
                 if item['uuid'] > save['pid']:
                     save['pid'] = item['uuid']
+        elif mode == ROUTER_MODE_TASK:
+            '''
+            按任务分发
+            '''
+            if not "pid" in save:
+                '''
+                初始化上下文中的pid参数,该参数用于项目数据查询
+                '''
+                save["pid"] = 0
+            for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
+                while True:
+                    has_item = False
+                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_LIST]}}, select=["uuid"]):
+                        has_item = True
+                        if each['uuid'] > save['id']:
+                            save['id'] = each['uuid']
+                        yield each['uuid']
+                    if not has_item:
+                        break
+                if item['uuid'] > save['pid']:
+                    save['pid'] = item['uuid']
 
     def schedule(self, message, save):
         """
@@ -87,34 +108,54 @@ class GeneralListHandler(BaseHandler):
             '''
             按项目分发的计划任务
             '''
-            if not 'sid' in save:
+            if not 'tid' in save:
                 '''
-                初始化上下文中的sid参数,该参数用于站点数据查询
+                初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
-                save['sid'] = 0
-            for item in self.db['SitesDB'].get_new_list(save['sid'], message['item']):
+                save['tid'] = 0
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_LIST]}}):
                 self.debug("%s schedule site: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
                     #以站点为单位获取计划中的爬虫任务
-                    for each in self.schedule_by_site(item, message['h-mode'], save):
+                    for each in self.schedule_by_task(item, message['h-mode'], save):
                         yield each
                         has_item = True
                     if not has_item:
                         self.debug("%s schedule site end" % (self.__class__.__name__))
                         break
-                if item['uuid'] > save['sid']:
-                    save['sid'] = item['uuid']
+                if item['uuid'] > save['tid']:
+                    save['tid'] = item['uuid']
         elif mode == ROUTER_MODE_SITE:
             '''
             按站点分发的计划任务
             '''
-            site = self.db['SitesDB'].get_detail(message['item'])
+            if not 'tid' in save:
+                '''
+                初始化上下文中的tid参数,该参数用于站点数据查询
+                '''
+                save['tid'] = 0
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_LIST]}}):
+                #获取该站点计划中的爬虫任务
+                has_item = False
+                for each in self.schedule_by_task(item, message['h-mode'], save):
+                    yield each
+                    has_item = True
+                    if not has_item:
+                        self.debug("%s schedule site end" % (self.__class__.__name__))
+                        break
+                if item['uuid'] > save['tid']:
+                    save['tid'] = item['uuid']
+        elif mode == ROUTER_MODE_TASK:
+            '''
+            按站点分发的计划任务
+            '''
+            task = self.db['TaskDB'].get_detail(message['item'])
             #获取该站点计划中的爬虫任务
-            for each in self.schedule_by_site(site, message['h-mode'], save):
+            for each in self.schedule_by_task(task, message['h-mode'], save):
                 yield each
 
-    def schedule_by_site(self, site, mode, save):
+    def schedule_by_task(self, task, mode, save):
         """
         获取站点下计划中的爬虫任务
         :param site 站点信息
@@ -123,7 +164,7 @@ class GeneralListHandler(BaseHandler):
         :return 包含爬虫任务uuid, url的字典迭代器
         """
         plantime = int(save['now']) + int(self.ratemap[str(site['frequency'])][0])
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"sid": site['uuid']}, select=['uuid', 'url']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
