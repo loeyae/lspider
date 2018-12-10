@@ -321,18 +321,18 @@ class BaseHandler(Component):
         """
         self.debug("%s on repetition" % (self.__class__.__name__))
         if HANDLER_FUN_REPETITION in self.handle:
-            self.handler_run(HANDLER_FUN_REPETITION, self.response)
+            self.handler_run(HANDLER_FUN_REPETITION, {"response": self.response, "save": save})
         else:
             raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get("request_url", ''))
 
-    def on_error(self, exc):
+    def on_error(self, exc, save):
         """
         错误处理
         """
         self.debug("%s on error" % (self.__class__.__name__))
         self.exception(exc)
         self.crawl_info['traceback'] = str(traceback.format_exc())
-        self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info})
+        self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info, "save": save})
 
     def on_result(self, save):
         """
@@ -464,7 +464,7 @@ class BaseHandler(Component):
         return u
 
     def finish(self, save):
-        self.handler_run(HANDLER_FUN_FINISH, self.response)
+        self.handler_run(HANDLER_FUN_FINISH, {"save": save, "response": self.response})
 
     def close(self):
         if hasattr(self, 'crawler') and isinstance(self.crawler, BaseCrawler):
