@@ -193,6 +193,8 @@ class BaseHandler(Component):
         """
         if "uuid" in self.task and self.task['uuid']:
             task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
+            if not task:
+                raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
             self.task.update(task)
         self.init_process(save)
         if not save['base_url']:
