@@ -37,74 +37,29 @@ class TaskDB(Base):
     def insert(self, obj={}):
         raise NotImplementedError
 
-    def disable(self, id, pid, where):
+    def disable(self, id, where):
         raise NotImplementedError
 
-    def disable_by_project(self, pid, where):
+    def active(self, id, where):
         raise NotImplementedError
 
-    def disable_by_site(self, sid, pid, where):
-        raise NotImplementedError
-
-    def disable_by_urls(self, uid, pid, where):
-        raise NotImplementedError
-
-    def disable_by_attachment(self, aid, pid, where):
-        raise NotImplementedError
-
-    def disable_by_keyword(self, kid, pid, where):
-        raise NotImplementedError
-
-    def active(self, id, pid, where):
-        raise NotImplementedError
-
-    def active_by_site(self, sid, pid, where):
-        raise NotImplementedError
-
-    def active_by_urls(self, uid, pid, where):
-        raise NotImplementedError
-
-    def active_by_attachment(self, aid, pid, where):
-        raise NotImplementedError
-
-    def active_by_keyword(self, kid, pid, where):
-        raise NotImplementedError
-
-    def update(self, id, pid, obj={}):
+    def update(self, id, obj={}):
         raise NotImplementedError
 
     def update_many(self, id, obj = {}):
         raise NotImplementedError
 
-    def delete(self, id, pid, where):
+    def delete(self, id, where):
         raise NotImplementedError
 
-    def delete_by_project(self, pid, where):
+    def get_detail(self, id, select=None):
         raise NotImplementedError
 
-    def delete_by_site(self, sid, pid, where):
+    def get_count(self, where = {}):
         raise NotImplementedError
 
-    def delete_by_urls(self, uid, pid, where):
+    def get_list(self, where={}, select=None, **kwargs):
         raise NotImplementedError
 
-    def delete_by_attachment(self, aid, pid, where):
-        raise NotImplementedError
-
-    def delete_by_keyword(self, kid, pid, where):
-        raise NotImplementedError
-
-    def get_detail(self, id, pid, crawlinfo=False):
-        raise NotImplementedError
-
-    def get_count(self, pid, where = {}):
-        raise NotImplementedError
-
-    def get_list(self, pid, where={}, select=None, **kwargs):
-        raise NotImplementedError
-
-    def get_init_list(self, pid, where={}, select=None, **kwargs):
-        raise NotImplementedError
-
-    def get_plan_list(self, pid, plantime, where={}, select=None, **kwargs):
+    def get_new_list(self, id, where={}, select=None, **kwargs):
         raise NotImplementedError
