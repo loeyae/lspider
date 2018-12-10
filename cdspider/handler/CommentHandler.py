@@ -56,7 +56,7 @@ class CommentHandler(BaseHandler):
             parse_rule = self.db['CommentRuleDB'].get_detail(ruleId)
             if not parse_rule:
                 raise CDSpiderDBDataNotFound("CommentRule: %s not exists" % self.task['kid'])
-            if rule['status'] != CommentRuleDB.STATUS_ACTIVE:
+            if parse_rule['status'] != CommentRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("comment rule not active")
         return parse_rule
 
