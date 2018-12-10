@@ -208,7 +208,9 @@ class BaseHandler(Component):
             rule = self.process.get("paging")
             self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
             rule = self.format_paging(rule)
-            request.update(rule)
+            self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
+            if rule:
+                request.update(rule)
         builder = UrlBuilder(self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_INIT, self.request_params)
