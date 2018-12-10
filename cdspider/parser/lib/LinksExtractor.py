@@ -41,9 +41,11 @@ class LinksExtractor(object):
 
     def exctract(self, source):
         doc = Parser.fromstring(source)
-        items = Parser.getElementsByTag(doc, 'a', attr='href', value="^((?!(?:javascript:[^;]*;|#)).)+$")
+        items = Parser.getElementsByTag(doc, 'a', attr='href', value="^((?!(?:javascript:).+).)+$")
         for i in items:
             attr = Parser.getAttribute(i, 'href')
+            if attr == '#':
+                continue
             if attr:
                 url = urljoin(self.base, attr.strip())
                 if not url in self.unique:
