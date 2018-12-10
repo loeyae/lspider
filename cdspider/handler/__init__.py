@@ -447,10 +447,10 @@ class BaseHandler(Component):
                     ret = re.search(identify['url'], url)
                     if ret:
                         u = ret.group(0)
-            if 'query' in identify and identify['query']:
-                u = utils.build_filter_query(url, identify['query'])
-            if 'data' in identify and identify['data']:
-                udict = dict.fromkeys(identify['data'])
+            if 'query' in identify and identify['query'].strp(','):
+                u = utils.build_filter_query(url, identify['query'].strp(',').split(','))
+            if 'data' in identify and identify['data'].strp(','):
+                udict = dict.fromkeys(identify['data'].strp(',').split(','))
                 query = utils.dictunion(data, udict)
                 return utils.build_query(u, query)
         return u
