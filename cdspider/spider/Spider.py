@@ -68,7 +68,6 @@ class Spider(Component):
             return
         self.info("Spider fetch start, task: %s" % task)
         save = {"base_url": task.get('url')}
-        task['save'] = save
         handler = self.get_handler(task)
         if return_result:
             return_data = []
@@ -132,7 +131,7 @@ class Spider(Component):
         finally:
             self.info("Spider process end")
             if not return_result:
-                handler.finish()
+                handler.finish(save)
             del handler
             self.info("Spider fetch end" )
             if return_result:
