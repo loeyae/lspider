@@ -17,9 +17,9 @@ class AttachmentDB(Mongo, BaseAttachmentDB):
     """
     AttachmentDB
     """
-    __tablename__ = 'attachments'
+    __tablename__ = 'interactionNumRule'
 
-    incr_key = 'attachments'
+    incr_key = 'interactionNumRule'
 
     def __init__(self, connector, table=None, **kwargs):
         super(AttachmentDB, self).__init__(connector, table = table, **kwargs)
