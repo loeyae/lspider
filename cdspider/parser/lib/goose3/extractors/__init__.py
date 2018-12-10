@@ -104,6 +104,10 @@ class BaseExtractor(object):
             custom_rule = custom_rule[5:]
             custom_rule, key = rule2pattern(custom_rule)
             if not custom_rule or not key:
+                if not ret:
+                    return None
+                if onlyOne:
+                    return ret[0]
                 return ret
             matched = re.findall(custom_rule, self.article.raw_html, re.S|re.I)
             ret = [self.parser.fromstring(item if item.startswith('<') else "<div>%s</div>" % item) for item in matched if item]
