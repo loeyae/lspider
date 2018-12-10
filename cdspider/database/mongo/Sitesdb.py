@@ -25,12 +25,10 @@ class SitesDB(Mongo, BaseSitesDB):
         indexes = collection.index_information()
         if not 'uuid' in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
-        if not 'p_s' in indexes:
-            collection.create_index([('pid', pymongo.ASCENDING),('status', pymongo.ASCENDING)], name='p_s')
-        if not 'type' in indexes:
-            collection.create_index('type', name='type')
-        if not 'ctime' in indexes:
-            collection.create_index('ctime', name='ctime')
+        if not 'pid' in indexes:
+            collection.create_index('pid', name='pid')
+        if not 'status' in indexes:
+            collection.create_index('status', name='status')
 
     def insert(self, obj={}):
         obj['uuid'] = self._get_increment(self.incr_key)
