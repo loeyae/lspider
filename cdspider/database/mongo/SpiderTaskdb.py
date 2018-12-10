@@ -326,7 +326,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         if not 'uuid' in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
         if not 'u_k_p' in indexes:
-            collection.create_index([("uid", pymongo.ASCENDING), ("kid", pymongo.ASCENDING), ("parentId", pymongo.ASCENDING)], unique=True, name='u_p')
+            collection.create_index([("uid", pymongo.ASCENDING), ("kid", pymongo.ASCENDING), ("parentid", pymongo.ASCENDING)], unique=True, name='u_p')
         if not 'pid' in indexes:
             collection.create_index('pid', name='pid')
         if not 'uid' in indexes:
