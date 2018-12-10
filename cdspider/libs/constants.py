@@ -78,21 +78,21 @@ HANDLER_FUN_FINISH = '14'
 
 
 #handler mode
-HANDLER_MODE_DEFAULT = 'default'                    # 默认handler
-HANDLER_MODE_DEFAULT_LIST = 'list'                  # 默认列表handler
-HANDLER_MODE_WECHAT_LIST = 'wechat-list'            # 微信列表handler
-HANDLER_MODE_TOUTIAO_LIST = 'toutiao-list'          # 头条列表handler
-HANDLER_MODE_BBS_LIST = 'bbs-list'                  # 论坛列表handler
-HANDLER_MODE_WEMEDIA_LIST = 'wemedia-list'          # 自媒体列表handler
-HANDLER_MODE_DEFAULT_ITEM = 'item'                  # 默认详情handler
-HANDLER_MODE_WECHAT_ITEM = 'wechat-item'            # 微信详情handler
-HANDLER_MODE_TOUTIAO_ITEM = 'toutiao-item'          # 头条详情handler
-HANDLER_MODE_BBS_ITEM = 'bbs-item'                  # 论坛详情handler
-HANDLER_MODE_WEMEDIA_ITEM = 'wemedia-item'          # 自媒体详情handler
-HANDLER_MODE_LINKS_CLUSTER = 'links-cluster'        # Url聚类handler
-HANDLER_MODE_WEIBO = 'weibo'                        # 微博handler
-HANDLER_MODE_COMMENT = 'comment'                    # 评论handler
-HANDLER_MODE_INTERACT = 'interact'                  # 互动数（阅读数、点赞数...）handler
+HANDLER_MODE_DEFAULT = 'default'                      # 默认handler
+HANDLER_MODE_DEFAULT_LIST = 'list'                    # 默认列表handler
+HANDLER_MODE_WECHAT_LIST = 'wechat-list'              # 微信列表handler
+HANDLER_MODE_TOUTIAO_LIST = 'toutiao-list'            # 头条列表handler
+HANDLER_MODE_BBS_LIST = 'bbs-list'                    # 论坛列表handler
+HANDLER_MODE_WEMEDIA_LIST = 'wemedia-list'            # 自媒体列表handler
+HANDLER_MODE_DEFAULT_ITEM = 'item'                    # 默认详情handler
+HANDLER_MODE_WECHAT_ITEM = 'wechat-item'              # 微信详情handler
+HANDLER_MODE_TOUTIAO_ITEM = 'toutiao-item'            # 头条详情handler
+HANDLER_MODE_BBS_ITEM = 'bbs-item'                    # 论坛详情handler
+HANDLER_MODE_WEMEDIA_ITEM = 'wemedia-item'            # 自媒体详情handler
+HANDLER_MODE_LINKS_CLUSTER = 'links-cluster'          # Url聚类handler
+HANDLER_MODE_WEIBO = 'weibo'                          # 微博handler
+HANDLER_MODE_COMMENT = 'comment'                      # 评论handler
+HANDLER_MODE_INTERACT = 'interact'                    # 互动数（阅读数、点赞数...）handler
 
 #handler mode mapping HANDLER
 HANDLER_MODE_HANDLER_MAPPING = {
@@ -113,5 +113,27 @@ HANDLER_MODE_HANDLER_MAPPING = {
     HANDLER_MODE_INTERACT: 'InteractHandler',
 }
 
+#route mode
 ROUTER_MODE_PROJECT = 'project'
 ROUTER_MODE_SITE = 'site'
+ROUTER_MODE_TASK = 'task'
+
+#task type
+TASK_TYPE_LIST = 1      # '列表类',
+TASK_TYPE_SEARCH = 2    # '搜索类',
+TASK_TYPE_AUTHOR = 3    # '作者类',
+TASK_TYPE_OTHER = 4     # '其他类',
+
+#media type
+MEDIA_TYPE_NEWS = 1     # '新闻',
+MEDIA_TYPE_BBS = 2      # '论坛',
+MEDIA_TYPE_ECS = 3      # '电商',
+MEDIA_TYPE_WEWCHAT = 4  # '微信',
+MEDIA_TYPE_TOUTIAO = 5  # '头条',
+MEDIA_TYPE_APP = 6      # 'APP',
+MEDIA_TYPE_ASK = 7      # '问答',
+MEDIA_TYPE_TIEBA = 8    # '贴吧',
+MEDIA_TYPE_PAPER = 9    # '报刊',
+MEDIA_TYPE_BLOG = 10    # '博客',
+MEDIA_TYPE_VEDIO = 11   # '视频',
+MEDIA_TYPE_OTHER = 99   # '其他',
