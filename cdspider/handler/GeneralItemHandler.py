@@ -33,7 +33,7 @@ class GeneralItemHandler(BaseHandler):
         except:
             return None
 
-    def init_process(self):
+    def init_process(self, save):
         """
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则}
@@ -254,7 +254,7 @@ class GeneralItemHandler(BaseHandler):
         if not result_id:
             raise CDSpiderDBError("Result insert failed")
 
-    def finish(self):
+    def finish(self, save):
         """
         记录抓取日志
         """
