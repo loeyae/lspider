@@ -390,6 +390,7 @@ class GeneralItemHandler(BaseHandler):
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': self.task['rid'],                           # article id
+            'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
             'save': {"data": data}
         }
@@ -423,6 +424,7 @@ class GeneralItemHandler(BaseHandler):
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': self.task['rid'],                           # article id
+            'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
             'save': {"data": data}
         }
