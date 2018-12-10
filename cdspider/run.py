@@ -27,6 +27,7 @@ cpath = os.path.dirname(__file__)
 @click.option('--app-config', default=os.path.join(cpath, "config", "app.json"),
               help="配置文件", show_default=True)
 @click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
+@click.option('--db-debug', default=False, is_flag=True, help='debug模式', show_default=True)
 @click.option('--runtime-dir', default=None, help ='runtime文件夹', show_default=True)
 @click.option('--database', help='数据库设置, default: '
               '{protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: cdspider}')
@@ -56,7 +57,7 @@ def cli(ctx, **kwargs):
     db_object = {}
     if db_setting:
         connector = connect_db(ctx, None, db_setting)
-        db_object = db_wrapper(connector, db_setting.get('protocol'))
+        db_object = db_wrapper(connector, db_setting.get('protocol'), log_level=logging.DEBUG if kwargs['db_debug'] else logging.WARN)
     kwargs['db'] = db_object
 
     queue_object = {}
