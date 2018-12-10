@@ -54,7 +54,7 @@ class InteractHandler(BaseHandler):
             parse_rule = self.db['AttachmentDB'].get_detail(ruleId)
             if not parse_rule:
                 raise CDSpiderDBDataNotFound("interactionNumRule: %s not exists" % self.task['kid'])
-            if rule['status'] != AttachmentDB.STATUS_ACTIVE:
+            if parse_rule['status'] != AttachmentDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("interaction num rule not active")
         return parse_rule
 
