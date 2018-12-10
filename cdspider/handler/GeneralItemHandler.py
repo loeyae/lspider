@@ -286,12 +286,12 @@ class GeneralItemHandler(BaseHandler):
         """
         def build_task(rule):
             try:
-                url = self.build_attach_url(rule)
+                url, data = self.build_attach_url(rule)
                 if url:
                     '''
                     根据规则生成出任务url，则为成功
                     '''
-                    cid = self.build_comment_task(url, rule)
+                    cid = self.build_comment_task(url, data, rule)
                     self.task['crawlinfo']['commentRule'] = rule['uuid']
                     self.task['crawlinfo']['commentTaskId'] = cid
                     self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
@@ -320,12 +320,12 @@ class GeneralItemHandler(BaseHandler):
         """
         def buid_task(rule):
             try:
-                url = self.build_attach_url(rule)
+                url, data = self.build_attach_url(rule)
                 if url:
                     '''
                     根据规则生成出任务url，则为成功
                     '''
-                    cid = self.build_interact_task(url, rule)
+                    cid = self.build_interact_task(url, data, rule)
                     self.task['crawlinfo']['interactRule'] = rule['uuid']
                     self.task['crawlinfo']['interactTaskId'] = cid
                     if 'interactRuleList' in  self.task['crawlinfo']:
@@ -360,10 +360,10 @@ class GeneralItemHandler(BaseHandler):
                 #格式化url设置，将parent_rul替换为详情页url
                 if urlrule['base'] == 'parent_url':
                     urlrule['base'] = self.response['final_url']
-            return utils.build_url_by_rule(urlrule, parsed)
+            return (utils.build_url_by_rule(urlrule, parsed), parsed)
         return None
 
-    def build_comment_task(self, url, rule):
+    def build_comment_task(self, url, data, rule):
         """
         构造评论任务
         :param url taks url
@@ -378,7 +378,8 @@ class GeneralItemHandler(BaseHandler):
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': self.task['rid'],                           # article id
-            'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire'])
+            'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
+            'save': {"data": data}
         }
         self.debug("%s build comment task: %s" % (self.__class__.__name__, str(task)))
         if not self.testing_mode:
@@ -389,7 +390,7 @@ class GeneralItemHandler(BaseHandler):
         else:
             return 'testing_mode'
 
-    def build_interact_task(self, url, rule):
+    def build_interact_task(self, url, data, rule):
         """
         构造互动数任务
         :param url taks url
@@ -404,7 +405,8 @@ class GeneralItemHandler(BaseHandler):
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': self.task['rid'],                           # article id
-            'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire'])
+            'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
+            'save': {"data": data}
         }
         self.debug("%s build interact task: %s" % (self.__class__.__name__, str(task)))
         if not self.testing_mode:
