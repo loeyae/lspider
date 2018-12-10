@@ -148,10 +148,10 @@ class GeneralListHandler(BaseHandler):
             urls = self.db['UrlsDB'].get_detail(each)
             task = {
                 'mode': message['mode'],     # handler mode
-                'pid': urls['pid'],          # project id
-                'sid': urls['sid'],          # site id
-                'tid': urls.get('tid', 0),   # task id
-                'uid': each,                  # url id
+                'pid': urls['pid'],          # project uuid
+                'sid': urls['sid'],          # site uuid
+                'tid': urls.get('tid', 0),   # task uuid
+                'uid': each,                  # url uuid
                 'kid': 0,                    # keyword id
                 'url': urls['url'],          # url
             }
