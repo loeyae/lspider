@@ -195,7 +195,7 @@ class InteractHandler(BaseHandler):
         for item in rule:
             _r = build_rule(item)
             if _r:
-                r.update(r)
+                r.update(_r)
         parser = CustomParser(source=self.response['last_source'], ruleset=r, log_level=self.log_level, url=self.response['final_url'])
         self.response['parsed'] = parser.parse()
 
@@ -227,14 +227,13 @@ class InteractHandler(BaseHandler):
                     'sid': self.task['sid'],                        # site id
                     'tid': self.task['tid'],                        # task id
                     'uid': self.task['uid'],                        # url id
-                    'ruleId': self.task['kid'],                     # commentRule id
+                    'ruleId': self.task['kid'],                     # interactionNumRule id
                     'list_url': self.response['final_url'],            # 列表url
                 }
                 result['ctime'] = self.crawl_id
                 result['acid'] = self.task['acid']
                 result['utime'] = 0
-                result['ruleId'] = self.task['kid'],                     # commentRule id
-                result['rid'] = self.task['parentId']
+                result['rid'] = rid
                 self.debug("%s result: %s" % (self.__class__.__name__, result))
                 if not self.testing_mode:
                     '''
