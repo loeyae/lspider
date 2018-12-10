@@ -258,7 +258,7 @@ class GeneralItemHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(GeneralItemHandler, self).finish()
+        super(GeneralItemHandler, self).finish(save)
         if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
             self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
 
