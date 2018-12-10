@@ -214,7 +214,7 @@ class GeneralListHandler(BaseHandler):
         except:
             return None
 
-    def init_process(self):
+    def init_process(self, save):
         """
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
@@ -402,7 +402,7 @@ class GeneralListHandler(BaseHandler):
         }
         self.queue['scheduler2spider'].put_nowait(message)
 
-    def finish(self):
+    def finish(self, save):
         """
         记录抓取日志
         """
@@ -413,5 +413,4 @@ class GeneralListHandler(BaseHandler):
         crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
         if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
             del crawlinfo_sorted[0]
-        save = self.task.get("save")
         self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": save})
