@@ -32,7 +32,7 @@ class InteractHandler(BaseHandler):
         except:
             return None
 
-    def init_process(self):
+    def init_process(self, save):
         """
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
@@ -42,6 +42,7 @@ class InteractHandler(BaseHandler):
             raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
         self.task['acid'] = article['acid']
         self.process = self.match_rule()
+        save['paging'] = True
 
     def match_rule(self):
         """
