@@ -58,9 +58,10 @@ class db_wrapper(collections.UserDict):
     """
     connector = None
     protocol = None
-    def __init__(self, connector, protocol):
+    def __init__(self, connector, protocol, log_level = logging.WARN):
         self.connector = connector
         self.protocol = protocol
+        self.log_level = log_level
         super(db_wrapper, self).__init__()
 
     def __getitem__(self, key):
@@ -68,12 +69,12 @@ class db_wrapper(collections.UserDict):
             return super(db_wrapper, self).__getitem__(key)
         try:
             db = 'cdspider.database.{protocol}.{db}'.format(protocol=self.protocol, db=key)
-            cls = load_cls(None, None, db)(self.connector)
+            cls = load_cls(None, None, db)(self.connector, log_level=self.log_level)
             self.data[key] = cls
             return cls
         except (ImportError, AttributeError):
             db = 'cdspider.database.{protocol}.{db}'.format(protocol=self.protocol, db='Base')
-            cls = load_cls(None, None, db)(self.connector, table=key)
+            cls = load_cls(None, None, db)(self.connector, table=key, log_level=self.log_level)
             self.data[key] = cls
             return cls
 
