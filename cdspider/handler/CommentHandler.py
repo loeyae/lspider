@@ -230,7 +230,7 @@ class CommentHandler(BaseHandler):
                     self.crawl_info['crawl_count']['repeat_count'] += 1
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_page'] += 1
-                self.on_repetition()
+                self.on_repetition(save)
 
     def build_comment_info(self, **kwargs):
         """
