@@ -39,6 +39,9 @@ class CommentHandler(BaseHandler):
         if "commentRule" in self.task:
             self.task['parent_url'] = self.task['url']
             self.task['acid'] = "testing_mode"
+            typeinfo = utils.typeinfo(self.task['parent_url'])
+            if typeinfo['domain'] != self.task['commentRule']['domain'] or typeinfo['subdomain'] != self.task['commentRule']['subdomain']:
+                raise CDSpiderNotUrlMatched()
             crawler = self.get_crawler(self.task.get('commentRule', {}).get('request'))
             crawler.crawl(url=self.task['parent_url'])
             url, data = utils.build_attach_url(CustomParser, crawler.page_source, crawler.final_url, self.task.get('commentRule', {}), self.log_level)
