@@ -17,7 +17,7 @@ class LinksClusterHandler(BaseHandler):
     general handler
     """
 
-    def init_process(self):
+    def init_process(self, save):
         self.process =  {
             "request": self.DEFAULT_PROCESS,
             "parse": None,
@@ -31,9 +31,9 @@ class LinksClusterHandler(BaseHandler):
 
         extractor = LinksExtractor(url=site['url'])
         extractor.exctract(self.response['last_source'])
-        
+
         # if '://www.' in site['url']:
-        #     re_type = 'domains' 
+        #     re_type = 'domains'
         # else:
         #     re_type = 'subdomains'
 
@@ -60,7 +60,7 @@ class LinksClusterHandler(BaseHandler):
         if not len(arrTmp):
             print('crawl error')
             exit()
-        
+
         arrTitle = {}
         arrUrl   = []
         urlInfo  = []
@@ -129,7 +129,7 @@ class LinksClusterHandler(BaseHandler):
                             baseUrl = 1
                         else:
                             baseUrl = 0
-                        
+
                         urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl, 'ruleStatus': 0})
                         print('write success!')
                     except Exception as e:
