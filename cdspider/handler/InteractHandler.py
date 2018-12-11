@@ -16,7 +16,7 @@ from cdspider.parser import CustomParser
 class InteractHandler(BaseHandler):
     """
     interact handler
-    :property task 爬虫任务信息 {"mode": "interact", "uuid": SpiderTask.comment uuid}
+    :property task 爬虫任务信息 {"mode": "interact", "uuid": SpiderTask.interact uuid}
                    当测试该handler，数据应为 {"mode": "interact", "url": url, "interactionNumRule": 互动数规则，参考互动数规则}
     """
     def get_scripts(self):
