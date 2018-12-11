@@ -34,11 +34,11 @@ class InteractHandler(BaseHandler):
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
         """
-        if "commentRule" in self.task:
+        if "interactionNumRule" in self.task:
             self.task['parent_url'] = self.task['url']
             self.task['acid'] = "testing_mode"
             typeinfo = utils.typeinfo(self.task['parent_url'])
-            if typeinfo['domain'] != self.task['commentRule']['domain'] or typeinfo['subdomain'] != self.task['commentRule']['subdomain']:
+            if typeinfo['domain'] != self.task['interactionNumRule']['domain'] or typeinfo['subdomain'] != self.task['interactionNumRule']['subdomain']:
                 raise CDSpiderNotUrlMatched()
             crawler = self.get_crawler(self.task.get('interactionNumRule', {}).get('request'))
             crawler.crawl(url=self.task['parent_url'])
