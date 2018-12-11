@@ -425,7 +425,7 @@ class BaseHandler(Component):
                         "step": item['step'],
                         "max": item['max'],
                         "value": item['value'],
-                        "first": item.get('first', '0')
+                        "first": item.get('addParameter', '0')
                     })
             if not rule['incr_data']:
                 return None
