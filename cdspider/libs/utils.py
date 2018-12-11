@@ -630,7 +630,7 @@ def table2kvlist(data):
         item = []
         for i in range(l):
             if not values[i]:
-                continue
+                return d
             if len(values[i]) <= 0:
                 return d
             item.append(values[i].pop(0))
@@ -892,7 +892,6 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
                 '''
                 r = item['filter'][5:]
                 v = preg(final_url, r)
-                print(r, v)
                 if not v:
                     return False
                 item['filter'] = '@value:%s' % v
