@@ -142,12 +142,12 @@ class UrlsDB(Mongo, BaseUrlsDB):
         kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, select=select, **kwargs)
 
-    def get_new_list(self, id, sid, where = {}, select=None, **kwargs):
+    def get_new_list(self, id, where = {}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uuid', 1)])
         if not where:
             where = {}
         where = self._build_where(where)
-        _where = {'$and':[{"$or": [{"typeChannelList": UrlsDB.IS_TYPE_CHANNEL_LIST}, {"typeChannel": UrlsDB.IS_TYPE_CHANNEL}, {"typeList": UrlsDB.IS_TYPE_LIST}]}, {"uuid": {"$gt": id}}, {"sid": sid}]}
+        _where = {'$and':[{"$or": [{"typeChannelList": UrlsDB.IS_TYPE_CHANNEL_LIST}, {"typeChannel": UrlsDB.IS_TYPE_CHANNEL}, {"typeList": UrlsDB.IS_TYPE_LIST}]}, {"uuid": {"$gt": id}}]}
         for k, v in where.items():
             _where['$and'].extend([{k: v}])
         return self.find(where = _where, select=select, **kwargs)
