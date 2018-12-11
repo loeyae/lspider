@@ -34,10 +34,23 @@ class InteractHandler(BaseHandler):
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
         """
-        article = self.db['ArticlesDB'].get_detail(self.task['parentid'], select=['url', 'acid'])
-        if not article:
-            raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
-        self.task['acid'] = article['acid']
+        if "commentRule" in self.task:
+            self.task['parent_url'] = self.task['url']
+            self.task['acid'] = "testing_mode"
+            crawler = self.get_crawler(self.task.get('interactionNumRule', {}).get('request'))
+            crawler.crawl(url=self.task['parent_url'])
+            url, data = utils.build_attach_url(CustomParser, crawler.page_source, crawler.final_url, self.task.get('interactionNumRule', {}), self.log_level)
+            del crawler
+            if not url:
+                raise CDSpiderNotUrlMatched()
+            self.task['url'] = url
+            save['base_url'] = url
+            self.task['save'] = {"data": data}
+        else:
+            article = self.db['ArticlesDB'].get_detail(self.task['parentid'], select=['url', 'acid'])
+            if not article:
+                raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
+            self.task['acid'] = article['acid']
         self.process = self.match_rule()
 
     def match_rule(self):
