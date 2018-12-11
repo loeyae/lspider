@@ -29,6 +29,8 @@ class UrlsDB(Mongo, BaseUrlsDB):
             collection.create_index('pid', name='pid')
         if not 'sid' in indexes:
             collection.create_index('sid', name='sid')
+        if not 'tid' in indexes:
+            collection.create_index('tid', name='tid')
         if not 'typeChannel' in indexes:
             collection.create_index('typeChannel', name='typeChannel')
         if not 'typeList' in indexes:
