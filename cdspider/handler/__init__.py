@@ -30,6 +30,7 @@ class BaseHandler(Component):
     CRAWL_INFO_LIMIT_COUNT = 10
     EXPIRE_STEP = 1
     DEFAULT_RATE = 4
+    ALLOWED_REPEAT = 2
 
     DEFAULT_PROCESS = {
         "request": {
@@ -325,6 +326,8 @@ class BaseHandler(Component):
         重复处理
         """
         self.debug("%s on repetition" % (self.__class__.__name__))
+        if self.crawl_info['crawl_count']['repeat_page'] < self.ALLOWED_REPEAT:
+            return
         if HANDLER_FUN_REPETITION in self.handle:
             self.handler_run(HANDLER_FUN_REPETITION, {"response": self.response, "save": save})
         else:
@@ -394,7 +397,7 @@ class BaseHandler(Component):
     def format_paging(self, paging):
         if not paging:
             return paging
-        if paging.get('pattern', 1) == 1:
+        if int(paging.get('pattern', 1)) == 1:
             if not "pageUrl" in paging or not paging['pageUrl']:
                 return None
             rule = {"url": paging['pageUrl'], 'incr_data': []}
