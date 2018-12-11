@@ -20,7 +20,7 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
 
     def __init__(self, connector, table=None, **kwargs):
         super(ListRuleDB, self).__init__(connector, table = table, **kwargs)
-        self._check_collection()
+        self._create_collection(self.__tablename__)
 
     def insert(self, obj = {}):
         obj.setdefault("ctime", int(time.time()))
@@ -42,13 +42,6 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
     def get_count(self, where = {}, select = None, **kwargs):
         return self.count(where=where, select=select, **kwargs)
 
-    def _check_collection(self):
-        self._list_collection()
-        suffix = time.strftime("%Y%m")
-        name = super(ListRuleDB, self)._collection_name(suffix)
-        if not name in self._collections:
-            self._create_collection(name)
-
     def _create_collection(self, table):
         collection = self._db.get_collection(table)
         indexes = collection.index_information()
@@ -58,4 +51,3 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
             collection.create_index('status', name='status')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
-        self._collections.add(table)
