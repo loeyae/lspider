@@ -867,3 +867,77 @@ class xml_tool(object):
 
     def save_file(self, filename):
         return le.ElementTree(self.root).write(filename, pretty_print=True, xml_declaration=True, encoding='utf-8')
+
+
+
+def attach_preparse(parser_cls, source, final_url, rule, log_level):
+    """
+    附加任务url生成规则参数获取
+    """
+    if not rule:
+        return {}
+    def build_rule(item):
+        key = item.pop('key')
+        if key and item['filter']:
+            if item['filter'] == '@value:parent_url':
+                '''
+                规则为获取父级url时，将详情页url赋给规则
+                '''
+                item['filter'] = '@value:%s' % final_url
+            elif item['filter'].startswith('@url:'):
+                '''
+                规则为@url:开头时，表示从详情页url中正则匹配数据
+                '''
+                r = item['filter'][5:]
+                v = preg(final_url, r)
+                if not v:
+                    return False
+                item['filter'] = '@value:%s' % v
+            return {key: item}
+        return None
+    #格式化解析规则
+    parse = {}
+    if isinstance(rule, (list, tuple)):
+        for item in rule:
+            ret = build_rule(item)
+            if ret:
+                parse.update(ret)
+    elif isinstance(rule, dict):
+        for item in rule.values():
+            ret = build_rule(item)
+            if ret == False:
+                return False
+            if ret:
+                parse.update(ret)
+    if not parse:
+        return {}
+    parser = parser_cls(source=source, ruleset=copy.deepcopy(parse), log_level=log_level, url=final_url)
+    parsed = parser.parse()
+    parsed = filter(parsed)
+    if parsed.keys() != parse.keys():
+        '''
+        数据未完全解析到，则任务匹配失败
+        '''
+        return False
+    return parsed
+
+def build_attach_url(parser_cls, source, final_url, rule, log_level):
+        """
+        根据规则构造附加任务url
+        :param rule 附加任务url生成规则
+        """
+        if 'preparse' in rule and rule['preparse']:
+            #根据解析规则匹配解析内容
+            parse = rule['preparse'].get('parse', None)
+            parsed = {}
+            if rule:
+                parsed = attach_preparse(parser_cls, source, final_url, parse, log_level)
+                if parsed == False:
+                    return (None, None)
+            urlrule = rule['preparse'].get('url', {})
+            if urlrule:
+                #格式化url设置，将parent_rul替换为详情页url
+                if urlrule['base'] == 'parent_url':
+                    urlrule['base'] = final_url
+            return (build_url_by_rule(urlrule, parsed), parsed)
+        return (None, None)
