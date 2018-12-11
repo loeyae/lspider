@@ -320,7 +320,7 @@ class GeneralListHandler(BaseHandler):
         :param save 保存的上下文信息
         :input self.response {"parsed": 解析结果, "final_url": 请求的url}
         """
-        self.crawl_info['crawl_urls'][str(self.page)] = self.response['final_url']
+        self.crawl_info['crawl_urls'][str(self.page)] = self.response['last_url']
         self.crawl_info['crawl_count']['page'] += 1
         if self.response['parsed']:
             ctime = self.crawl_id
