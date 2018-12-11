@@ -876,7 +876,7 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
     """
     if not rule:
         return {}
-    def build_rule(item):
+    def build_rule(item, final_url):
         key = item.pop('key')
         if key and item['filter']:
             if item['filter'] == '@value:parent_url':
@@ -890,6 +890,7 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
                 '''
                 r = item['filter'][5:]
                 v = preg(final_url, r)
+                print(r, v)
                 if not v:
                     return False
                 item['filter'] = '@value:%s' % v
@@ -899,19 +900,21 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
     parse = {}
     if isinstance(rule, (list, tuple)):
         for item in rule:
-            ret = build_rule(item)
+            ret = build_rule(item, final_url)
+            if ret == False:
+                return False
             if ret:
                 parse.update(ret)
     elif isinstance(rule, dict):
         for item in rule.values():
-            ret = build_rule(item)
+            ret = build_rule(item, final_url)
             if ret == False:
                 return False
             if ret:
                 parse.update(ret)
     if not parse:
         return {}
-    parser = parser_cls(source=source, ruleset=copy.deepcopy(parse), log_level=log_level, url=final_url)
+    parser = parser_cls(source=source, ruleset=parse, log_level=log_level, url=final_url)
     parsed = parser.parse()
     parsed = filter(parsed)
     if parsed.keys() != parse.keys():
