@@ -248,9 +248,9 @@ class UrlBuilder(Component):
                 if 'base' in item:
                     rndval = "%s%s" % (item['base'], rndval)
                 if 'prefix' in item and item['prefix']:
-                    rndval = item['prefix'] + str(rndval)
+                    rndval = "%s%s" % (item['prefix'], str(rndval))
                 if 'suffix' in item and item['suffix']:
-                    rndval = str(rndval) + item['suffix']
+                    rndval =  "%s%s" % (str(rndval), item['suffix'])
                 self._append_kwargs_data(kwargs, item['type'], rndkey, rndval)
 
     def _parse_incr_data(self, kwargs, save):
