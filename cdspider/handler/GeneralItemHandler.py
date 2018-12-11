@@ -292,7 +292,7 @@ class GeneralItemHandler(BaseHandler):
         """
         def build_task(rule):
             try:
-                url, data = self.build_attach_url(rule)
+                url, data = utils.build_attach_url(CustomParser, self.response['last_source'], self.response['final_url'], rule, self.log_level)
                 if url:
                     '''
                     根据规则生成出任务url，则为成功
@@ -329,7 +329,7 @@ class GeneralItemHandler(BaseHandler):
         """
         def buid_task(rule):
             try:
-                url, data = self.build_attach_url(rule)
+                url, data = utils.build_attach_url(CustomParser, self.response['last_source'], self.response['final_url'], rule, self.log_level)
                 if url:
                     '''
                     根据规则生成出任务url，则为成功
@@ -355,25 +355,6 @@ class GeneralItemHandler(BaseHandler):
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
             buid_task(rule)
-
-    def build_attach_url(self, rule):
-        """
-        根据规则构造附加任务url
-        :param rule 附加任务url生成规则
-        """
-        if 'preparse' in rule and rule['preparse']:
-            #根据解析规则匹配解析内容
-            parse = rule['preparse'].get('parse', None)
-            parsed = {}
-            if rule:
-                parsed = self.attach_preparse(parse)
-            urlrule = rule['preparse'].get('url', {})
-            if urlrule:
-                #格式化url设置，将parent_rul替换为详情页url
-                if urlrule['base'] == 'parent_url':
-                    urlrule['base'] = self.response['final_url']
-            return (utils.build_url_by_rule(urlrule, parsed), parsed)
-        return (None, None)
 
     def build_comment_task(self, url, data, rule):
         """
@@ -442,49 +423,3 @@ class GeneralItemHandler(BaseHandler):
                 return None
         else:
             return 'testing_mode'
-
-    def attach_preparse(self, rule):
-        """
-        附加任务url生成规则参数获取
-        """
-        if not rule:
-            return {}
-        def build_rule(item):
-            key = item.pop('key')
-            if key and item['filter']:
-                if item['filter'] == '@value:parent_url':
-                    '''
-                    规则为获取父级url时，将详情页url赋给规则
-                    '''
-                    item['filter'] = '@value:%s' % self.response['final_url']
-                elif item['filter'].startswith('@url:'):
-                    '''
-                    规则为@url:开头时，表示从详情页url中正则匹配数据
-                    '''
-                    r = item['filter'][5:]
-                    v = utils.preg(self.response['final_url'], r)
-                    if not v:
-                        raise CDSpiderSettingError("rule: % not matched with %s" % (item['filter'], self.response['final_url']))
-                    item['filter'] = '@value:%s' % v
-                return {key: item}
-        #格式化解析规则
-        parse = {}
-        if isinstance(rule, (list, tuple)):
-            for item in rule:
-                ret = build_rule(item)
-                if ret:
-                    parse.update(ret)
-        elif isinstance(rule, dict):
-            for item in rule.values():
-                ret = build_rule(item)
-                if ret:
-                    parse.update(ret)
-        parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(parse), log_level=self.log_level, url=self.response['final_url'])
-        parsed = parser.parse()
-        parsed = utils.filter(parsed)
-        if parsed.keys() != parse.keys():
-            '''
-            数据未完全解析到，则任务匹配失败
-            '''
-            raise CDSpiderSettingError("rule: %s not matched completion data, matched data: %s" % (str(parse), str(parsed)))
-        return parsed
