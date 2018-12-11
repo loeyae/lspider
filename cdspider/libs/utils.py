@@ -629,6 +629,8 @@ def table2kvlist(data):
     while True:
         item = []
         for i in range(l):
+            if not values[i]:
+                continue
             if len(values[i]) <= 0:
                 return d
             item.append(values[i].pop(0))
