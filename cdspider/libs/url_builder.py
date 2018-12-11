@@ -182,6 +182,13 @@ class UrlBuilder(Component):
             self.debug("UrlBuilder parse hard code rule: %s" % str(kwargs['hard_code']))
             data = []
             for item in kwargs['hard_code']:
+                if 'mode' in item and item['mode']:
+                    if item['mode'] == 'get':
+                        item.setdefault('type', 'url')
+                    elif item['mode'] == 'post':
+                        item.setdefault('type', 'data')
+                    else:
+                        item.setdefault('type', item['mode'])
                 if 'attr' in item:
                     if item['attr'] == 'referer':
                         if not save.get("referer"):
@@ -208,6 +215,13 @@ class UrlBuilder(Component):
             self.debug("UrlBuilder parse cookie data rule: %s" % str(kwargs['cookie']))
             data = []
             for item in kwargs['cookie']:
+                if 'mode' in item and item['mode']:
+                    if item['mode'] == 'get':
+                        item.setdefault('type', 'url')
+                    elif item['mode'] == 'post':
+                        item.setdefault('type', 'data')
+                    else:
+                        item.setdefault('type', item['mode'])
                 if 'params' in item and item['params']:
                     cookie_value = crawler.get_cookie(item['value'], **item['params'])
                 else:
@@ -233,6 +247,13 @@ class UrlBuilder(Component):
             for item in kwargs['random']:
                 assert 'name' in item and item['name'], "invalid setting name of random data"
                 assert 'value' in item, "invalid setting value of random data"
+                if 'mode' in item and item['mode']:
+                    if item['mode'] == 'get':
+                        item.setdefault('type', 'url')
+                    elif item['mode'] == 'post':
+                        item.setdefault('type', 'data')
+                    else:
+                        item.setdefault('type', item['mode'])
                 item.setdefault('type', 'url')
                 rndkey = item['name']
                 rndtype = item['value']
@@ -278,12 +299,13 @@ class UrlBuilder(Component):
                     value = item['prefix'] + value
                 if 'suffix' in item and item['suffix']:
                     value += item['suffix']
-                if item['mode'] == 'get':
-                    item.setdefault('type', 'url')
-                elif item['mode'] == 'post':
-                    item.setdefault('type', 'data')
-                else:
-                    item.setdefault('type', item['mode'])
+                if 'mode' in item and item['mode']:
+                    if item['mode'] == 'get':
+                        item.setdefault('type', 'url')
+                    elif item['mode'] == 'post':
+                        item.setdefault('type', 'data')
+                    else:
+                        item.setdefault('type', item['mode'])
                 if page == 1 and bool(int(item.get('first', 0))):
                     self._append_kwargs_data(kwargs, item['type'], item['name'], value)
                 else:
