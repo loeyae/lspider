@@ -20,7 +20,7 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
 
     def __init__(self, connector, table=None, **kwargs):
         super(ListRuleDB, self).__init__(connector, table = table, **kwargs)
-        self._create_collection(self.__tablename__)
+        self._create_collection(self.table)
 
     def insert(self, obj = {}):
         obj.setdefault("ctime", int(time.time()))
