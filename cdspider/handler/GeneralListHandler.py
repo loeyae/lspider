@@ -24,6 +24,8 @@ class GeneralListHandler(BaseHandler):
                    当测试该handler，数据应为 {"mode": "list", "url": url, "listRule": 列表规则，参考列表规则}
     """
 
+    BBS_TYPES = (MEDIA_TYPE_BBS,)
+
     def route(self, mode, save):
         """
         schedule 分发
@@ -245,6 +247,7 @@ class GeneralListHandler(BaseHandler):
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderHandlerError("url not active")
             self.task['url'] = urls['url']
+            self.task['urls'] = urls
             if not 'ruleId' in urls or not urls['ruleId']:
                 raise CDSpiderHandlerError("url not has list rule")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
@@ -397,7 +400,7 @@ class GeneralListHandler(BaseHandler):
         生成详情抓取任务并入队
         """
         message = {
-            'mode': HANDLER_MODE_DEFAULT_ITEM,
+            'mode': HANDLER_MODE_BBS_ITEM if self.task['urls'].get('mediaType') in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
             'rid': rid,
         }
         self.queue['scheduler2spider'].put_nowait(message)
