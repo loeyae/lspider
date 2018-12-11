@@ -11,13 +11,14 @@ import time
 from . import BaseHandler
 from cdspider.database.base import *
 from cdspider.libs.constants import *
+from cdspider.libs import utils
 from cdspider.parser import CustomParser
 
 class CommentHandler(BaseHandler):
     """
     comment handler
     :property task 爬虫任务信息 {"mode": "comment", "uuid": SpiderTask.comment uuid}
-                   当测试该handler，数据应为 {"mode": "comment", "url": url, "detailRule": 评论规则，参考评论规则}
+                   当测试该handler，数据应为 {"mode": "comment", "url": url, "commentRule": 评论规则，参考评论规则}
     """
 
     def get_scripts(self):
@@ -35,11 +36,24 @@ class CommentHandler(BaseHandler):
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
         """
-        article = self.db['ArticlesDB'].get_detail(self.task['parentid'], select=['url', 'acid'])
-        if not article:
-            raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
-        self.task['parent_url'] = article['url']
-        self.task['acid'] = article['acid']
+        if "commentRule" in self.task:
+            self.task['parent_url'] = self.task['url']
+            self.task['acid'] = "testing_mode"
+            crawler = self.get_crawler(self.task.get('commentRule', {}).get('request'))
+            crawler.crawl(url=self.task['parent_url'])
+            url, data = utils.build_attach_url(CustomParser, crawler.page_source, crawler.final_url, self.task.get('commentRule', {}), self.log_level)
+            del crawler
+            if not url:
+                raise CDSpiderNotUrlMatched()
+            self.task['url'] = url
+            save['base_url'] = url
+            self.task['save'] = {"data": data}
+        else:
+            article = self.db['ArticlesDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])
+            if not article:
+                raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
+            self.task['parent_url'] = article['url']
+            self.task['acid'] = article['acid']
         self.process = self.match_rule()
         save['paging'] = True
 
