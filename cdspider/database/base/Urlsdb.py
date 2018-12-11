@@ -84,7 +84,7 @@ class UrlsDB(Base):
     def get_list(self, where = {}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_new_list(self, id, sid, where = {}, select=None, **kwargs):
+    def get_new_list(self, id, where = {}, select=None, **kwargs):
         raise NotImplementedError
 
     def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
