@@ -101,7 +101,7 @@ HANDLER_MODE_HANDLER_MAPPING = {
 #    HANDLER_MODE_WECHAT_LIST: 'WechatListHandler',
 #    HANDLER_MODE_TOUTIAO_LIST: 'ToutiaoListHandler',
 #    HANDLER_MODE_BBS_LIST: 'BbsListHandler',
-#    HANDLER_MODE_WEMEDIA_LIST: 'WemediaListHandler',
+    HANDLER_MODE_WEMEDIA_LIST: 'WemediaListHandler',
     HANDLER_MODE_DEFAULT_ITEM: 'GeneralItemHandler',
 #    HANDLER_MODE_WECHAT_ITEM: 'WechatItemHandler',
 #    HANDLER_MODE_TOUTIAO_ITEM: 'ToutiaoItemHandler',
