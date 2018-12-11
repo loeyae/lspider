@@ -207,6 +207,9 @@ class BaseHandler(Component):
             self.crawler = self.get_crawler(self.request)
         self.request['url'] = self.task.get('url')
         request = copy.deepcopy(self.request)
+        if "request" in save and save['request']:
+            self.debug("%s other request parameters: %s" % (self.__class__.__name__, save['request']))
+            request.update(save['request'])
         if 'paging' in save and save['paging']:
             save['page'] = self.page
             rule = self.process.get("paging")
