@@ -81,12 +81,12 @@ def cli(ctx, **kwargs):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
-@click.option('--mode', default='project', type=click.Choice(['project', 'site']), help="分发模式", show_default=True)
+@click.option('--mode', default='project', type=click.Choice(['project', 'site', 'task']), help="分发模式", show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def route(ctx, scheduler_cls, mode, no_loop, get_object=False):
     """
-    路由: 按project、site、item其中一种模式分发计划任务
+    路由: 按project、site、task其中一种方式分发计划任务
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -277,70 +277,37 @@ def aichat_rpc_hello(ctx, aichat_rpc):
     print(aichat_rpc.hello())
 
 @cli.command()
-@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
-@click.option('-U', '--url', default='http://2018.ip138.com/ic.asp', help='url')
-@click.option('-M', '--mode', default="default", help="mode")
-@click.option('-P', '--pid', default="0", help="pid")
-@click.option('-S', '--sid', default="0", help="sid")
-@click.option('-T', '--tid', default="0", help="tid")
-@click.option('-I', '--tier', default="1", help="tier")
-@click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
+@click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name')
+@click.option('-I', '--id', help="task id")
+@click.option('-M', '--mode', default='project', help="mode id")
+@click.option('-H', '--handler-mode', default='list', help="mode id")
 @click.pass_context
-def test(ctx, spider_cls, url, mode, pid, sid, tid, tier, no_input):
-    Spider = load_cls(ctx, None, spider_cls)
-    spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
+def schedule_test(ctx, scheduler_cls, id, mode, handler_mode):
+    """
+    按任务ID抓取数据
+    """
+    g = ctx.obj
+    Scheduler = load_cls(ctx, None, scheduler_cls)
+    scheduler = Scheduler(ctx)
     task = {
-        "url": url,
+        "item": int(id),
         "mode": mode,
-        "pid": pid,
-        "sid": sid,
-        "tid": tid,
-        "tier": tier,
+        "h-mode": handler_mode
     }
-#    task = None
-    task = spider.get_task(message = task, no_check_status = True)
-    spider.fetch(task=task, return_result = False)
-
-
+    scheduler.schedule(task)
 
 @cli.command()
 @click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
+@click.option('-s', '--setting', callback=load_config, type=click.File(mode='r', encoding='utf-8'),
+              help='任务配置json文件', show_default=True)
 @click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
 @click.pass_context
-def spider_test(ctx, spider_cls, no_input):
+def spider_test(ctx, spider_cls, setting, no_input):
     Spider = load_cls(ctx, None, spider_cls)
     spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
-    task = {
-        "return_result": True,
-        "url": "http://www.cast.org.cn/col/col79/index.html",
-        "mode": "list",
-        "listRule": {
-            'request' : {
-                'proxy' : 'auto',
-                'crawler': 'requests',
-                'data' : None,
-                'cookie' : None,
-                'header' : None,
-                'method' : 'get',
-            },
-            'paging' : {
-            },
-            'parse' : {
-            },
-            'unique' : {
-                'url' : '',
-                'query' : '',
-                'data' : '',
-            },
-            'scripts' : """
-""",
-        }
-    }
-#    task = None
-    task = spider.get_task(message = task, no_check_status = True)
+    task = spider.get_task(message = setting, no_check_status = True)
     return_result = spider.fetch(task=task, return_result = True)
     print(return_result)
-
 
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
