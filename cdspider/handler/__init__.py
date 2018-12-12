@@ -232,7 +232,7 @@ class BaseHandler(Component):
         """
         self.handler_run(HANDLER_FUN_PREPARE, {"request": self.request, "request_params": self.request_params, "save": save})
 
-    def precrawl(self):
+    def precrawl(self, save):
         if isinstance(self.crawler, SeleniumCrawler) and self.request_params['method'].upper() == 'GET':
             self.request_params['method'] = 'open'
         if (self.proxy_mode == PROXY_TYPE_EVER or self.force_proxy or (self.proxy_mode == PROXY_TYPE_AUTO and self.auto_proxy)) and self.proxy:
@@ -248,7 +248,7 @@ class BaseHandler(Component):
         :param: crawler 是否更新crawler对象
         """
         try:
-            self.precrawl()
+            self.precrawl(save)
             params = copy.deepcopy(self.request_params)
             if HANDLER_FUN_CRAWL in self.handle:
                 self.handler_run(HANDLER_FUN_CRAWL, {"request": self.request, "requst_params": params, "response": self.response, "save": save})
