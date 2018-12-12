@@ -182,7 +182,7 @@ class InteractHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'kid']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
@@ -192,9 +192,9 @@ class InteractHandler(BaseHandler):
                     continue
                 plantime = int(save['now']) + int(self.ratemap[str(rule.get('frequency', self.DEFAULT_RATE))][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+            yield item
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
-            yield item
 
     def run_parse(self, rule):
         """
