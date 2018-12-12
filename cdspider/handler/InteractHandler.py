@@ -143,7 +143,7 @@ class InteractHandler(BaseHandler):
             if not 'tid' in save:
                 save['tid'] = 0
             for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item']}):
-                self.debug("%s schedule site: %s" % (self.__class__.__name__, str(item)))
+                self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
                     for each in self.schedule_by_task(item, message['h-mode'], save):
