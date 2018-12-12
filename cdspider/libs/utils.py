@@ -274,7 +274,6 @@ def quertstr2dict(value):
     if not value:
         return {}
     d = [parse.unquote(item).split('=') for item in value.split("&")]
-    print(d)
     return dict([(i[0], i[1]) for i in d])
 
 def rule2pattern(rule):
