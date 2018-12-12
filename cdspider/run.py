@@ -306,7 +306,7 @@ def spider_test(ctx, spider_cls, setting, no_input):
     Spider = load_cls(ctx, None, spider_cls)
     spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
     task = spider.get_task(message = setting, no_check_status = True)
-    return_result = spider.fetch(task=task, return_result = True)
+    return_result = spider.fetch(task=task, return_result = setting.get("return_result", False))
     print(return_result)
 
 @cli.command()
