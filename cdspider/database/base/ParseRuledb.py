@@ -11,7 +11,7 @@
 from . import Base
 
 {
-    "parse_rule": {
+    "detailRule": {
         'uuid' : int,               # '主键ID | 唯一',
         'name' : str,               # '规则名称',
         'domain' : str,             # '基础URL',
