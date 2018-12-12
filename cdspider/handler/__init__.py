@@ -275,9 +275,9 @@ class BaseHandler(Component):
             cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
             if len(cookie_list) > 1:
                 for item in cookie_list:
-                    request['cookies_list'].append(utils.query2dict(item))
+                    request['cookies_list'].append(utils.quertstr2dict(item))
             else:
-                request['cookies'] = utils.query2dict(cookie_list[0])
+                request['cookies'] = utils.quertstr2dict(cookie_list[0])
             del request['cookie']
         if 'header' in request and request['header']:
             header_list = re.split('(?:(?:\r\n)|\r|\n)', request['header'])
@@ -285,11 +285,11 @@ class BaseHandler(Component):
                 for item in header_list:
                     request['headers_list'].append(utils.query2dict(item))
             else:
-                request['headers'] = utils.query2dict(header_list[0])
-            request['headers'] = utils.query2dict(request['header'])
+                request['headers'] = utils.quertstr2dict(header_list[0])
+            request['headers'] = utils.quertstr2dict(request['header'])
             del request['header']
         if 'data' in request and request['data']:
-            request['data'] = utils.query2dict(request['data'])
+            request['data'] = utils.quertstr2dict(request['data'])
         else:
             request['data'] = {}
         return request
