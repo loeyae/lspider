@@ -200,7 +200,7 @@ class BaseHandler(Component):
         self.init_process(save)
         if not save['base_url']:
             save['base_url'] = self.task['url']
-        self.handler_run(HANDLER_FUN_PROCESS, self.process)
+        self.handler_run(HANDLER_FUN_PROCESS, {"process": self.process, "save": save})
         self.request = self._get_request()
         self.proxy_mode = self.request.pop('proxy', 'never')
         if not self.crawler:
@@ -220,7 +220,7 @@ class BaseHandler(Component):
                 request.update(rule)
         builder = UrlBuilder(self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
-        self.handler_run(HANDLER_FUN_INIT, self.request_params)
+        self.handler_run(HANDLER_FUN_INIT, {"request_params": self.request_params, "save": save})
 
     @abc.abstractmethod
     def init_process(self, save):
@@ -239,7 +239,7 @@ class BaseHandler(Component):
             self.request_params['proxy'] = copy.deepcopy(self.proxy)
         else:
             self.request_params['proxy'] = None
-        self.handler_run(HANDLER_FUN_PRECRAWL, self.request_params)
+        self.handler_run(HANDLER_FUN_PRECRAWL, {"request_params": self.request_params, "save": save})
 
     def crawl(self, save):
         """
@@ -263,7 +263,7 @@ class BaseHandler(Component):
         except Exception as exc:
             self.response['broken_exc'] = exc
         finally:
-            self.handler_run(HANDLER_FUN_POSTCRAWL, {"reponse": self.response, "save": save})
+            self.handler_run(HANDLER_FUN_POSTCRAWL, {"response": self.response, "save": save})
 
     def _get_request(self):
         """
@@ -295,7 +295,7 @@ class BaseHandler(Component):
         return request
 
     def preparse(self, rule):
-        self.handler_run(HANDLER_FUN_PREPARSE, rule)
+        self.handler_run(HANDLER_FUN_PREPARSE, {"rule": rule, "response": self.response})
         return rule
 
     def parse(self, rule = None):
@@ -313,7 +313,7 @@ class BaseHandler(Component):
             self.handler_run(HANDLER_FUN_PARSE, {"rule": rule, "response": self.response, "handler": self})
         else:
             self.run_parse(rule)
-        self.handler_run(HANDLER_FUN_POSTPARSE, self.response)
+        self.handler_run(HANDLER_FUN_POSTPARSE, {"response": self.response})
         self.debug("%s parse end" % (self.__class__.__name__))
 
     @abc.abstractmethod
