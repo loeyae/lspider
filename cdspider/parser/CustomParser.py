@@ -44,5 +44,5 @@ class CustomParser(BaseParser):
             catalogue = g.parse(raw_html=source, encoding='UTF8')
         data = catalogue.infos
         if onlyOne:
-            return data[0] if isinstance(data, list) else data
+            return data[0] if (isinstance(data, list) and data) else data
         return data
