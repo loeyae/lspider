@@ -270,6 +270,12 @@ def query2dict(value):
 def parse_arg(ctx, param, value):
     return query2dict(value)
 
+def quertstr2dict(value):
+    if not value:
+        return {}
+    d = [item.split('=') for item in value.split("&")]
+    return dict([(i[0], i[1]) for i in d])
+
 def rule2pattern(rule):
     """
     将页面配置转化为正则表达式
