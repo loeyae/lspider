@@ -203,6 +203,7 @@ class WemediaListHandler(BaseHandler):
                 'uid': each,                 # url uuid
                 'kid': 0,                    # keyword id
                 'url': t['url'],             # url
+                'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             }
             self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
             if not self.testing_mode:
