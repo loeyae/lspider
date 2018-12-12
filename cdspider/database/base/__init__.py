@@ -37,3 +37,4 @@ from .ListRuledb import ListRuleDB
 from .CommentRuledb import CommentRuleDB
 from .Authordb import AuthorDB
 from .AuthorListRuledb import AuthorListRuleDB
+from .ParseRuledb import ParseRuleDB
