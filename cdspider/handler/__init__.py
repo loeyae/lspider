@@ -251,7 +251,7 @@ class BaseHandler(Component):
             self.precrawl()
             params = copy.deepcopy(self.request_params)
             if HANDLER_FUN_CRAWL in self.handle:
-                self.handler_run(HANDLER_FUN_CRAWL, {"params": params, "response": self.response, "save": save})
+                self.handler_run(HANDLER_FUN_CRAWL, {"request": self.request, "requst_params": params, "response": self.response, "save": save})
             else:
                 self.crawler.crawl(**params)
                 self.response['last_source'] = self.crawler.page_source
