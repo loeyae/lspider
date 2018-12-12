@@ -488,3 +488,4 @@ from .GeneralItemHandler import GeneralItemHandler
 from .CommentHandler import CommentHandler
 from .InteractHandler import InteractHandler
 from .LinksClusterHandler import LinksClusterHandler
+from .WemediaListHandler import WemediaListHandler
