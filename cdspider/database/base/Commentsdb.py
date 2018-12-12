@@ -12,13 +12,13 @@ from . import Base
 {
     "comments": {
         'rid': str,         # result id
-        'ctid': str,        # 评论唯一id
+        'unid': str,        # 评论唯一id
         'acid': str,        # 文章ID
+        'id': str,          # 评论ID
         'author': str,      # 评论作者
         'pubtime': int,     # 发表时间
         'comment': str,     # 评论内容
-        'like_num': int,    # 点赞数
-        'parent_ctid': str, # 父级评论ID
+        'parentid': str,    # 父级评论ID
         'ctime': int,       # 创建时间
         'utime': int,       # 最后一次更新时间
     }
