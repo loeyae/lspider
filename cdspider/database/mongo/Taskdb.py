@@ -79,11 +79,9 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         return super(TaskDB, self).update(setting=obj, where=where, multi=False)
 
     def get_detail(self, id, select=None):
-        table = self._table_name(pid)
         return self.get(where={'uuid': int(id)}, select=select)
 
     def get_count(self, where = {}):
-        table = self._table_name(pid)
         return self.count(where=where)
 
     def get_list(self, where = {}, select=None, **kwargs):
