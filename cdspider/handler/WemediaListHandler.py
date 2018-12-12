@@ -184,8 +184,8 @@ class WemediaListHandler(BaseHandler):
             uid = [uid]
         tasks = {}
         for each in uid:
-            tasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
-            if len(list(tasks)) > 0:
+            spiderTasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
+            if len(list(spiderTasks)) > 0:
                 continue
             author = self.db['AuthorDB'].get_detail(each)
             if str(author['tid']) in tasks:
