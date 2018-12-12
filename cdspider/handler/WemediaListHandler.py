@@ -182,19 +182,11 @@ class WemediaListHandler(BaseHandler):
         uid = message['uid']
         if not isinstance(uid, (list, tuple)):
             uid = [uid]
-        tasks = {}
         for each in uid:
             spiderTasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
             if len(list(spiderTasks)) > 0:
                 continue
             author = self.db['AuthorDB'].get_detail(each)
-            if str(author['tid']) in tasks:
-                t = tasks[str(author['tid'])]
-            else:
-                t = self.db['TaskDB'].get_detail(author['tid'])
-                tasks[str(author['tid'])] = t
-            if not t:
-                continue
             task = {
                 'mode': message['mode'],     # handler mode
                 'pid': author['pid'],        # project uuid
@@ -202,7 +194,7 @@ class WemediaListHandler(BaseHandler):
                 'tid': author['tid'],        # task uuid
                 'uid': each,                 # url uuid
                 'kid': 0,                    # keyword id
-                'url': t['url'],             # url
+                'url': "base_url",           # url
                 'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             }
             self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
