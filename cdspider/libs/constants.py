@@ -60,21 +60,21 @@ QUEUE_NAME_WECHAT_TO_REPLY = "wechat2reply"
 
 
 #handler redister fn type
-HANDLER_FUN_INIT = '0'
-HANDLER_FUN_PROCESS = '1'
-HANDLER_FUN_PREPARE = '2'
-HANDLER_FUN_PRECRAWL = '3'
-HANDLER_FUN_CRAWL = '4'
-HANDLER_FUN_POSTCRAWL = '5'
-HANDLER_FUN_PREPARSE = '6'
-HANDLER_FUN_PARSE = '7'
-HANDLER_FUN_POSTPARSE = '8'
-HANDLER_FUN_RESULT = '9'
-HANDLER_FUN_NEXT = '10'
-HANDLER_FUN_CONTINUE = '11'
-HANDLER_FUN_REPETITION = '12'
-HANDLER_FUN_ERROR = '13'
-HANDLER_FUN_FINISH = '14'
+HANDLER_FUN_INIT = '0'                   # 初始化自定义方法类型
+HANDLER_FUN_PROCESS = '1'                # 初始化流程自定义方法类型
+HANDLER_FUN_PREPARE = '2'                # 预处理自定义方法类型
+HANDLER_FUN_PRECRAWL = '3'               # 抓取前自定义方法类型
+HANDLER_FUN_CRAWL = '4'                  # 抓取自定义方法类型（将代替系统的抓取方法）
+HANDLER_FUN_POSTCRAWL = '5'              # 抓取后自定义方法类型
+HANDLER_FUN_PREPARSE = '6'               # 解析前自定义方法类型
+HANDLER_FUN_PARSE = '7'                  # 解析自定义方法类型（将代替系统的解析方法）
+HANDLER_FUN_POSTPARSE = '8'              # 解析后自定义方法类型
+HANDLER_FUN_RESULT = '9'                 # 结果处理发放类型
+HANDLER_FUN_NEXT = '10'                  # 下一步自定义方法类型
+HANDLER_FUN_CONTINUE = '11'              # continue自定义方法类型
+HANDLER_FUN_REPETITION = '12'            # 重复处理自定义方法类型
+HANDLER_FUN_ERROR = '13'                 # 错误处理自定义方法类型
+HANDLER_FUN_FINISH = '14'                # finish自定义方法类型
 
 
 #handler mode
