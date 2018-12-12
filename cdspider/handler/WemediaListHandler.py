@@ -114,7 +114,7 @@ class WemediaListHandler(BaseHandler):
                 '''
                 save['tid'] = 0
             for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}}):
-                self.debug("%s schedule site: %s" % (self.__class__.__name__, str(item)))
+                self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
                     #以站点为单位获取计划中的爬虫任务
@@ -122,7 +122,7 @@ class WemediaListHandler(BaseHandler):
                         yield each
                         has_item = True
                     if not has_item:
-                        self.debug("%s schedule site end" % (self.__class__.__name__))
+                        self.debug("%s schedule task end" % (self.__class__.__name__))
                         break
                 if item['uuid'] > save['tid']:
                     save['tid'] = item['uuid']
@@ -136,13 +136,15 @@ class WemediaListHandler(BaseHandler):
                 '''
                 save['tid'] = 0
             for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}}):
+                self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 #获取该站点计划中的爬虫任务
-                has_item = False
-                for each in self.schedule_by_task(item, message['h-mode'], save):
-                    yield each
-                    has_item = True
+                while True:
+                    has_item = False
+                    for each in self.schedule_by_task(item, message['h-mode'], save):
+                        yield each
+                        has_item = True
                     if not has_item:
-                        self.debug("%s schedule site end" % (self.__class__.__name__))
+                        self.debug("%s schedule task end" % (self.__class__.__name__))
                         break
                 if item['uuid'] > save['tid']:
                     save['tid'] = item['uuid']
