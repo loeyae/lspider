@@ -229,6 +229,16 @@ class InteractHandler(BaseHandler):
             result = copy.deepcopy(self.response['parsed'])
             attach_data = self.db['AttachDataDB'].get_detail(rid)
             if attach_data:
+                if not "crawlinfo" in attach_data:
+                    #爬虫信息记录
+                    result['crawlinfo'] = {
+                        'pid': self.task['pid'],                        # project id
+                        'sid': self.task['sid'],                        # site id
+                        'tid': self.task['tid'],                        # task id
+                        'uid': self.task['uid'],                        # url id
+                        'ruleId': self.task['kid'],                     # interactionNumRule id
+                        'list_url': self.response['final_url'],         # 列表url
+                    }
                 result['utime'] = int(time.time())
                 self.debug("%s result: %s" % (self.__class__.__name__, result))
                 if not self.testing_mode:
@@ -245,7 +255,7 @@ class InteractHandler(BaseHandler):
                     'tid': self.task['tid'],                        # task id
                     'uid': self.task['uid'],                        # url id
                     'ruleId': self.task['kid'],                     # interactionNumRule id
-                    'list_url': self.response['final_url'],            # 列表url
+                    'list_url': self.response['final_url'],         # 列表url
                 }
                 result['ctime'] = self.crawl_id
                 result['acid'] = self.task['acid']
