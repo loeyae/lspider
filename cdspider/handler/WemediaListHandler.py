@@ -278,5 +278,186 @@ class WemediaListHandler(BaseHandler):
         parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
         self.response['parsed'] = parser.parse()
 
+    def _build_crawl_info(self, final_url):
+        """
+        构造文章数据的爬虫信息
+        :param final_url 请求的url
+        :input self.task 爬虫任务信息
+        :input self.crawl_id 爬虫运行时刻
+        """
+        return {
+                "stid": self.task.get("uuid", 0),   # SpiderTask uuid
+                "uid": self.task.get("uid", 0),     # url id
+                "pid": self.task.get('pid', 0),     # project id
+                "sid": self.task.get('sid', 0),     # site id
+                "tid": self.task.get('tid', 0),     # task id
+                "list_url": final_url,              # 列表url
+                "list_crawl_id": self.crawl_id,     # 列表抓取时间
+        }
+
+    def _build_result_info(self, **kwargs):
+        """
+        构造文章数据
+        :param result 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
+        :param final_url 请求的url
+        :param typeinfo 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
+        :param crawlinfo 爬虫信息
+        :param unid 文章唯一索引
+        :param ctime 抓取时间
+        :param status 状态
+        :input self.crawl_id 爬取时刻
+        """
+        now = int(time.time())
+        result = kwargs.get('result', {})
+        pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
+        if pubtime and pubtime > now:
+            pubtime = now
+        r = {
+            'status': kwargs.get('status', ArticlesDB.STATUS_INIT),
+            'url': kwargs['final_url'],
+            'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
+            'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
+            'title': result.pop('title', None),                                # 标题
+            'author': result.pop('author', None),                              # 作者
+            'pubtime': pubtime,                                                # 发布时间
+            'channel': result.pop('channel', None),                            # 频道信息
+            'crawlinfo': kwargs.get('crawlinfo'),
+            'acid': kwargs['unid'],                                            # unique str
+            'ctime': kwargs.get('ctime', self.crawl_id),
+            }
+        return r
+
+    def _build_interact_info(self, **kwargs):
+        result = kwargs.get('result', {})
+        r = {
+            'crawlinfo': {
+                    'pid': self.task['pid'],                        # project id
+                    'sid': self.task['sid'],                        # site id
+                    'tid': self.task['tid'],                        # task id
+                    'uid': self.task['uid'],                        # url id
+                    'ruleId': 0,                                    # interactionNumRule id
+                    'final_url': self.response['final_url'],         # 列表url
+                },
+            'status': kwargs.get('status', ArticlesDB.STATUS_INIT),
+            'viewNum': result.get('view', kwargs.get('viewNum', 0)),
+            'spreadNum': result.get('repost', kwargs.get('spreadNum', 0)),
+            'commentNum': result.get('comment', kwargs.get('commentNum', 0)),
+            'likeNum': result.get('praise', kwargs.get('likeNum', 0)),
+            'rid': kwargs['rid'],
+            'acid': kwargs['unid'],                                            # unique str
+            'ctime': kwargs.get('ctime', self.crawl_id),
+            }
+        return r
+
+    def add_interact(self, **kwargs):
+        r = self._build_interact_info(result=self.response['parsed'], **kwargs)
+        try:
+            self.db['AttachDataDB'].insert(r)
+        except:
+            pass
+
     def run_result(self, save):
-        pass
+        """
+        爬虫结果处理
+        :param save 保存的上下文信息
+        :input self.response {"parsed": 解析结果, "final_url": 请求的url}
+        """
+        self.crawl_info['crawl_urls'][str(self.page)] = self.response['last_url']
+        self.crawl_info['crawl_count']['page'] += 1
+        if self.response['parsed']:
+            ctime = self.crawl_id
+            new_count = self.crawl_info['crawl_count']['new_count']
+            #格式化url
+            formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
+            for item in formated:
+                self.crawl_info['crawl_count']['total'] += 1
+                if self.testing_mode:
+                    '''
+                    testing_mode打开时，数据不入库
+                    '''
+                    inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
+                    self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+                else:
+                    #生成文章唯一索引并判断文章是否已经存在
+                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
+                    self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+                if inserted:
+                    crawlinfo =  self._build_crawl_info(self.response['final_url'])
+                    typeinfo = utils.typeinfo(item['url'])
+                    result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
+                    if self.testing_mode:
+                        '''
+                        testing_mode打开时，数据不入库
+                        '''
+                        self.debug("%s result: %s" % (self.__class__.__name__, result))
+                    else:
+                        result_id = self.db['ArticlesDB'].insert(result)
+                        if not result_id:
+                            raise CDSpiderDBError("Result insert failed")
+                        self.add_interact(rid=result_id, **unid)
+                        self.build_item_task(result_id)
+                    self.crawl_info['crawl_count']['new_count'] += 1
+                else:
+                    self.crawl_info['crawl_count']['repeat_count'] += 1
+            if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
+                self.crawl_info['crawl_count']['repeat_page'] += 1
+                self.on_repetition(save)
+
+    def url_prepare(self, url):
+        return url
+
+    def build_url_by_rule(self, data, base_url = None):
+        """
+        根据url规则格式化url
+        :param data 解析到的数据
+        :param base_url 基本url
+        """
+        if not base_url:
+            base_url = self.task.get('url')
+        urlrule = self.process.get("url")
+        formated = []
+        for item in data:
+            if not 'url' in item or not item['url']:
+                raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(task)))
+            if item['url'].startswith('javascript') or item['url'] == '/':
+                continue
+            try:
+                item['url'] = self.url_prepare(item['url'])
+            except:
+                self.error(traceback.format_exc())
+                continue
+            if urlrule and 'name' in urlrule and urlrule['name']:
+                parsed = {urlrule['name']: item['url']}
+                item['url'] = utils.build_url_by_rule(urlrule, parsed)
+            else:
+                item['url'] = urljoin(base_url, item['url'])
+            formated.append(item)
+        return formated
+
+
+    def build_item_task(self, rid):
+        """
+        生成详情抓取任务并入队
+        """
+        message = {
+            'mode': HANDLER_MODE_BBS_ITEM if self.task['urls'].get('mediaType') in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
+            'rid': rid,
+        }
+        self.queue['scheduler2spider'].put_nowait(message)
+
+    def finish(self, save):
+        """
+        记录抓取日志
+        """
+        super(GeneralListHandler, self).finish(save)
+        crawlinfo = self.task.get('crawlinfo', {}) or {}
+        self.crawl_info['crawl_end'] = int(time.time())
+        crawlinfo[str(self.crawl_id)] = self.crawl_info
+        crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
+        if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
+            del crawlinfo_sorted[0]
+        s = self.task.get("save")
+        if not s:
+            s = {}
+        s.update(save)
+        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
