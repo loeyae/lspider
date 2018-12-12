@@ -97,6 +97,11 @@ class queue_wrapper(collections.UserDict):
         self.data[key] = cls
         return cls
 
+def underline_dict(d):
+    if not isinstance(d, dict):
+        return d
+    return dict((k.replace('-', '_'), underline_dict(v)) for k, v in six.iteritems(d))
+
 def read_config(ctx, param, value):
     """
     load配置文件
@@ -104,14 +109,12 @@ def read_config(ctx, param, value):
     if not value:
         return {}
 
-    def underline_dict(d):
-        if not isinstance(d, dict):
-            return d
-        return dict((k.replace('-', '_'), underline_dict(v)) for k, v in six.iteritems(d))
-
     config = underline_dict(json.load(value))
     ctx.default_map = config
     return config
+
+def load_config(ctx, param, value):
+    return underline_dict(json.load(value))
 
 def load_crawler(ctx, param, value):
     """
