@@ -251,9 +251,9 @@ class WemediaListHandler(BaseHandler):
             rule = self.db['AuthorListRuleDB'].get_detail_by_tid(author['tid'])
             if not rule:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
-                raise CDSpiderDBDataNotFound("rule: %s not exists" % author['ruleId'])
+                raise CDSpiderDBDataNotFound("author rule by tid: %s not exists" % author['tid'])
             if rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
-                raise CDSpiderHandlerError("list rule not active")
+                raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
         parameters = author.get('parameters')
         if parameters:
             save['request'] = {
