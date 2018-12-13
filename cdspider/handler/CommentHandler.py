@@ -187,12 +187,18 @@ class CommentHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
+        rules = {}
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'kid']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
                 '''
-                rule = self.db['CommentRuleDB'].get_detail(item.pop('kid', 0))
+                ruleId = item.pop('kid', 0)
+                if str(ruleId) in rules:
+                    rule = rules[str(ruleId)]
+                else:
+                    rule = self.db['CommentRuleDB'].get_detail(ruleId)
+                    rules[str(ruleId)] = rule
                 if not rule:
                     continue
                 plantime = int(save['now']) + int(self.ratemap[str(rule.get('frequency', self.DEFAULT_RATE))][0])
