@@ -78,7 +78,10 @@ class WechatRuleDB(Base):
     def update_many(self,obj, where=None):
         raise NotImplementedError
 
-    def get_detail(self, id):
+    def get_detail(self, id, select=None):
+        raise NotImplementedError
+
+    def get_detail_by_tid(self, id, select=None):
         raise NotImplementedError
 
     def get_count(self, createtime, where = {}, select = None, **kwargs):
