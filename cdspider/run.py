@@ -300,14 +300,19 @@ def schedule_test(ctx, scheduler_cls, id, mode, handler_mode):
 @click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('-s', '--setting', callback=load_config, type=click.File(mode='r', encoding='utf-8'),
               help='任务配置json文件', show_default=True)
+@click.option('-o', '--output', default=None, help='数据保存的文件')
 @click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
 @click.pass_context
-def spider_test(ctx, spider_cls, setting, no_input):
+def spider_test(ctx, spider_cls, setting, output, no_input):
     Spider = load_cls(ctx, None, spider_cls)
     spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
     task = spider.get_task(message = setting, no_check_status = True)
     return_result = spider.fetch(task=task, return_result = setting.get("return_result", False))
     print(return_result)
+    if output:
+        f = open(output, 'w')
+        f.write(json.dumps(return_result))
+        f.close()
 
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
