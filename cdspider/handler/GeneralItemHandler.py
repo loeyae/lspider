@@ -38,6 +38,17 @@ class GeneralItemHandler(BaseHandler):
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则}
         """
+        if "detailRule" in self.task:
+            typeinfo = utils.typeinfo(self.task['url'])
+            if typeinfo['domain'] != self.task['detailRule']['domain'] or typeinfo['subdomain'] != self.task['detailRule']['subdomain']:
+                raise CDSpiderNotUrlMatched()
+            if  'urlPattern' in self.task['detailRule'] and self.task['detailRule']['urlPattern']:
+                '''
+                如果规则中存在url匹配规则，则进行url匹配规则验证
+                '''
+                u = utils.preg(url, item['urlPattern'])
+                if not u:
+                    raise CDSpiderNotUrlMatched()
         self.process = self.match_rule()
         if 'paging' in self.process and self.process['paging']:
             self.process['paging']['url'] = 'base_url'
