@@ -232,7 +232,7 @@ class WemediaListHandler(BaseHandler):
         """
         获取匹配的规则
         """
-        if "authorListRule" in self.task and self.task['authorListRule']:
+        if "authorListRule" in self.task:
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
             '''
