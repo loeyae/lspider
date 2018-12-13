@@ -58,6 +58,8 @@ class CommentHandler(BaseHandler):
             self.task['parent_url'] = article['url']
             self.task['acid'] = article['acid']
         self.process = self.match_rule()
+        if not 'data' in self.process['unique'] or not self.process['unique']['data']:
+            self.process['unique']['data'] = ','. join(self.process['parse']['item'].keys())
         save['paging'] = True
 
     def match_rule(self):
