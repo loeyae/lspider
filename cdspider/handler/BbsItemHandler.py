@@ -265,7 +265,6 @@ class BbsItemHandler(BaseHandler):
             "filter": rule['filter'],
             'item': rule['item']
         }
-        print("rrrrrrrrrrrrrrrrrrrrrrrrrrrrr", replies_rule)
         replies_parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(replies_rule), log_level=self.log_level, url=self.response['final_url'])
         parsed['replies'] = replies_parser.parse()
         self.response['parsed'] = parsed
