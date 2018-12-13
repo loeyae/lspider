@@ -155,7 +155,7 @@ class BbsItemHandler(BaseHandler):
         获取自定义脚本
         """
         try:
-            rule = self.match_rule()
+            rule = self.match_rule() or {}
             return rule.get("scripts", None)
         except:
             return None
