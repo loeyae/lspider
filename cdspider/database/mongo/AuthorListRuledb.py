@@ -35,6 +35,9 @@ class AuthorListRuleDB(Mongo, BaseAuthorListRuleDB, SplitTableMixin):
     def get_detail(self, id, select=None):
         return self.get(where={"uuid": id}, select=select)
 
+    def get_detail_by_tid(self, id, select=None):
+        return self.get(where={"tid": id}, select=select)
+
     def get_list(self, where = {}, select = None, **kwargs):
         kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, select=select, **kwargs)
