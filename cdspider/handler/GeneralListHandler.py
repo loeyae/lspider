@@ -191,6 +191,8 @@ class GeneralListHandler(BaseHandler):
             if len(list(tasks)) > 0:
                 continue
             urls = self.db['UrlsDB'].get_detail(each)
+            if not urls:
+                raise CDSpiderDBDataNotFound("url: %s not found" % each)
             task = {
                 'mode': message['mode'],     # handler mode
                 'pid': urls['pid'],          # project uuid
