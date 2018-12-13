@@ -15,9 +15,9 @@ from .Mongo import Mongo
 
 class AuthorDB(Mongo, BaseAuthorDB):
 
-    __tablename__ = 'urls'
+    __tablename__ = 'author'
 
-    incr_key = 'url'
+    incr_key = 'author'
 
     def __init__(self, connector, table=None, **kwargs):
         super(AuthorDB, self).__init__(connector, table = table, **kwargs)
