@@ -57,7 +57,7 @@ class CommentHandler(BaseHandler):
                 raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
             self.task['parent_url'] = article['url']
             self.task['acid'] = article['acid']
-        self.process = self.match_rule()
+        self.process = self.match_rule()  or {"unique": {"data": None}}
         if not 'data' in self.process['unique'] or not self.process['unique']['data']:
             self.process['unique']['data'] = ','. join(self.process['parse']['item'].keys())
         save['paging'] = True
