@@ -189,6 +189,8 @@ class WemediaListHandler(BaseHandler):
             if len(list(spiderTasks)) > 0:
                 continue
             author = self.db['AuthorDB'].get_detail(each)
+            if not author:
+                raise CDSpiderDBDataNotFound("author: %s not found" % each)
             task = {
                 'mode': message['mode'],     # handler mode
                 'pid': author['pid'],        # project uuid
