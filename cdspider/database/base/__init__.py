@@ -40,3 +40,4 @@ from .Authordb import AuthorDB
 from .AuthorListRuledb import AuthorListRuleDB
 from .ParseRuledb import ParseRuleDB
 from .Repliesdb import RepliesDB
+from .Wechatdb import WechatDB
