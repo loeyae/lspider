@@ -19,6 +19,7 @@ from .Taskdb import TaskDB
 from .Uniquedb import UniqueDB
 from .Urlsdb import UrlsDB
 from .CommentsUniquedb import CommentsUniqueDB
+from .RepliesUniquedb import RepliesUniqueDB
 from .UrlsUniquedb import UrlsUniqueDB
 from .WechatRobotChatInfodb import WechatRobotChatInfoDB
 from .WechatRobotChatRoomsdb import WechatRobotChatRoomsDB
