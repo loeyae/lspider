@@ -106,7 +106,7 @@ class BaseCrawler(Component):
     @abc.abstractmethod
     def crawl(self, *args, **kwargs):
         """
-        抓取操作。由于__init__时，如果传入url参数会执行该方法，在实现��方法时默认的第一个参数必须为接收url的参数
+        抓取操作。由于__init__时，如果传入url参数会执行该方法，在实现该方法时默认的第一个参数必须为接收url的参数
         """
         pass
 
