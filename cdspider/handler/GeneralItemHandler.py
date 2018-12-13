@@ -216,8 +216,10 @@ class GeneralItemHandler(BaseHandler):
                 self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
                 if inserted:
                     result_id = self.db['ArticlesDB'].insert(result)
+                    self.task['crawlinfo'] = result['crawlinfo']
                 else:
                     item = self.db['ArticlesDB'].get_detail_by_unid(**unid)
+                    self.task['crawlinfo'] = item['crawlinfo']
                     result_id = item['rid']
                     self.db['ArticlesDB'].update(result_id, result)
             self.task['rid'] = result_id
