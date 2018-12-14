@@ -351,7 +351,7 @@ class WemediaListHandler(BaseHandler):
         return r
 
     def add_interact(self, **kwargs):
-        r = self._build_interact_info(result=self.response['parsed'], **kwargs)
+        r = self._build_interact_info(**kwargs)
         try:
             self.db['AttachDataDB'].insert(r)
         except:
@@ -395,7 +395,7 @@ class WemediaListHandler(BaseHandler):
                         result_id = self.db['ArticlesDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
-                        self.add_interact(rid=result_id, **unid)
+                        self.add_interact(rid=result_id, result=item, **unid)
                         self.build_item_task(result_id)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
