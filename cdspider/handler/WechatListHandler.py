@@ -9,8 +9,9 @@
 import copy
 import time
 import traceback
+import html
 from . import BaseHandler
-from urllib.parse import urljoin
+from urllib.parse import urljoin, unquote_plus
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
@@ -23,6 +24,8 @@ class WechatListHandler(BaseHandler):
     :property task 爬虫任务信息 {"mode": "wechat-list", "uuid": SpiderTask.author uuid}
                    当测试该handler，数据应为 {"mode": "wechat-list", "wxauthorRule": 公众号搜索解析, "author": 自媒体号设置，参考自媒体号, "authorListRule": 自媒体列表规则，参考自媒体列表规则}
     """
+
+    EXPIRE = 7200
 
     def route(self, mode, save):
         """
@@ -286,15 +289,22 @@ class WechatListHandler(BaseHandler):
 
     def prepare(self, save):
         super(WechatListHandler, self).prepare(save)
-        if not 'save' in self.task or not self.task['save'] or not 'base_url' in self.task['save'] or not self.task['save']['base_url']:
+        if not 'save' in self.task or not self.task['save']:
+            self.task['save'] = {}
+        ctime = self.task['save'].get('timestamp')
+        if not self.task['save'].get('base_url') or self.crawl_id - int(ctime) > self.EXPIRE:
             params = copy.deepcopy(self.request_params)
             self.crawler.crawl(**params)
             parser = CustomParser(source=self.crawler.page_source, ruleset=copy.deepcopy(self.task['prepare_rule']['parse']))
             accountInfo = parser.parse()
-            if not accountInfo or not accountInfo['url']:
+            if not accountInfo or not accountInfo[0]['url']:
                 raise CDSpiderParserNoContent("Wechat account not found")
-            save['base_url'] = accountInfo['url']
-            self.task['url'] = accountInfo['url']
+            print(accountInfo)
+            save['base_url'] = html.unescape(accountInfo[0]['url'])
+            save['timestamp'] = self.crawl_id
+            self.request_params['url'] = html.unescape(accountInfo[0]['url'])
+        else:
+            self.request_params['url'] = self.task['save'].get('base_url')
 
     def run_parse(self, rule):
         """
@@ -306,55 +316,22 @@ class WechatListHandler(BaseHandler):
         parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
         self.response['parsed'] = parser.parse()
 
-    def _build_crawl_info(self, final_url):
+    def update_crawl_info(self):
         """
         构造文章数据的爬虫信息
-        :param final_url 请求的url
-        :input self.task 爬虫任务信息
-        :input self.crawl_id 爬虫运行时刻
         """
-        return {
-                "mode": HANDLER_MODE_DEFAULT_ITEM,  # mode
-                "stid": self.task.get("uuid", 0),   # SpiderTask uuid
-                "uid": self.task.get("uid", 0),     # url id
-                "pid": self.task.get('pid', 0),     # project id
-                "sid": self.task.get('sid', 0),     # site id
-                "tid": self.task.get('tid', 0),     # task id
-                "list_url": final_url,              # 列表url
-                "list_crawl_id": self.crawl_id,     # 列表抓取时间
-        }
+        crawlinfo = self.task.get('crawlinfo', {}) or {}
+        self.crawl_info['crawl_end'] = int(time.time())
+        crawlinfo[str(self.crawl_id)] = self.crawl_info
+        crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
+        if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
+            del crawlinfo_sorted[0]
+        s = self.task.get("save")
+        if not s:
+            s = {}
+        s.update(save)
+        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": save})
 
-    def _build_result_info(self, **kwargs):
-        """
-        构造文章数据
-        :param result 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
-        :param final_url 请求的url
-        :param typeinfo 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
-        :param crawlinfo 爬虫信息
-        :param unid 文章唯一索引
-        :param ctime 抓取时间
-        :param status 状态
-        :input self.crawl_id 爬取时刻
-        """
-        now = int(time.time())
-        result = kwargs.get('result', {})
-        pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
-        if pubtime and pubtime > now:
-            pubtime = now
-        r = {
-            'status': kwargs.get('status', ArticlesDB.STATUS_INIT),
-            'url': kwargs['final_url'],
-            'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
-            'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
-            'title': result.pop('title', None),                                # 标题
-            'author': result.pop('author', None),                              # 作者
-            'pubtime': pubtime,                                                # 发布时间
-            'channel': result.pop('channel', None),                            # 频道信息
-            'crawlinfo': kwargs.get('crawlinfo'),
-            'acid': kwargs['unid'],                                            # unique str
-            'ctime': kwargs.get('ctime', self.crawl_id),
-            }
-        return r
 
     def run_result(self, save):
         """
@@ -364,46 +341,22 @@ class WechatListHandler(BaseHandler):
         """
         self.crawl_info['crawl_urls'][str(self.page)] = self.response['last_url']
         self.crawl_info['crawl_count']['page'] += 1
+        self.crawl_info['crawl_count']['total'] = len(self.response['parsed'])
+        self.update_crawl_info()
         if self.response['parsed']:
-            ctime = self.crawl_id
-            new_count = self.crawl_info['crawl_count']['new_count']
             #格式化url
             formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
             for item in formated:
-                self.crawl_info['crawl_count']['total'] += 1
                 if self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
                     '''
-                    inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
-                    self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+                    self.debug("%s result: %s" % (self.__class__.__name__, item))
                 else:
-                    #生成文章唯一索引并判断文章是否已经存在
-                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
-                    self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
-                if inserted:
-                    crawlinfo =  self._build_crawl_info(self.response['final_url'])
-                    typeinfo = utils.typeinfo(item['url'])
-                    result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
-                    if self.testing_mode:
-                        '''
-                        testing_mode打开时，数据不入库
-                        '''
-                        self.debug("%s result: %s" % (self.__class__.__name__, result))
-                    else:
-                        result_id = self.db['ArticlesDB'].insert(result)
-                        if not result_id:
-                            raise CDSpiderDBError("Result insert failed")
-                        self.build_item_task(result_id)
-                    self.crawl_info['crawl_count']['new_count'] += 1
-                else:
-                    self.crawl_info['crawl_count']['repeat_count'] += 1
-            if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
-                self.crawl_info['crawl_count']['repeat_page'] += 1
-                self.on_repetition(save)
+                    self.build_item_task(url)
 
     def url_prepare(self, url):
-        return url
+        return html.unescape(url)
 
     def build_url_by_rule(self, data, base_url = None):
         """
@@ -434,29 +387,14 @@ class WechatListHandler(BaseHandler):
         return formated
 
 
-    def build_item_task(self, rid):
+    def build_item_task(self, url):
         """
         生成详情抓取任务并入队
         """
         message = {
-            'mode': HANDLER_MODE_DEFAULT_ITEM,
-            'rid': rid,
+            'mode': HANDLER_MODE_WECHAT_ITEM,
+            'url': url,
+            'crawlid': self.crawl_id,
+            'stid': self.task['uuid'],
         }
         self.queue['scheduler2spider'].put_nowait(message)
-
-    def finish(self, save):
-        """
-        记录抓取日志
-        """
-        super(GeneralListHandler, self).finish(save)
-        crawlinfo = self.task.get('crawlinfo', {}) or {}
-        self.crawl_info['crawl_end'] = int(time.time())
-        crawlinfo[str(self.crawl_id)] = self.crawl_info
-        crawlinfo_sorted = [(k, crawlinfo[k]) for k in sorted(crawlinfo.keys())]
-        if len(crawlinfo_sorted) > self.CRAWL_INFO_LIMIT_COUNT:
-            del crawlinfo_sorted[0]
-        s = self.task.get("save")
-        if not s:
-            s = {}
-        s.update(save)
-        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
