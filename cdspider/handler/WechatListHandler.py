@@ -14,7 +14,7 @@ from urllib.parse import urljoin
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
-from cdspider.parser import ListParser
+from cdspider.parser import ListParser, CustomParser
 from cdspider.parser.lib import TimeParser
 
 class WechatListHandler(BaseHandler):
@@ -165,12 +165,15 @@ class WechatListHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
-        plantime = int(save['now']) + int(self.ratemap[str(task.get('frequency', self.DEFAULT_RATE))][0])
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
                 '''
+                author = self.db['WechatDB'].get_detail(item['uid'])
+                if not author:
+                    self.db['SpiderTaskDB'].delete(item['uuid'], mode)
+                plantime = int(save['now']) + int(self.ratemap[str(author.get('frequency', self.DEFAULT_RATE))][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
@@ -215,6 +218,11 @@ class WechatListHandler(BaseHandler):
         """
         save = {}
         try:
+            if "uuid" in self.task and self.task['uuid']:
+                task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
+                if not task:
+                    raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
+                self.task.update(task)
             rule = self.match_rule(save) or {}
             return rule.get("scripts", None)
         except:
@@ -266,15 +274,27 @@ class WechatListHandler(BaseHandler):
         account = author.get('account')
         if account:
             save['request'] = {
-                "hard_code": {
+                "hard_code": [{
                     "mode": "format",
                     "name": "account",
                     "value": account,
-                },
+                }],
             }
         self.task['prepare_rule'] = wechatRule
         self.task['url'] = wechatRule['baseUrl']
         return rule
+
+    def prepare(self, save):
+        super(WechatListHandler, self).prepare(save)
+        if not 'save' in self.task or not self.task['save'] or not 'base_url' in self.task['save'] or not self.task['save']['base_url']:
+            params = copy.deepcopy(self.request_params)
+            self.crawler.crawl(**params)
+            parser = CustomParser(source=self.crawler.page_source, ruleset=copy.deepcopy(self.task['prepare_rule']['parse']))
+            accountInfo = parser.parse()
+            if not accountInfo or not accountInfo['url']:
+                raise CDSpiderParserNoContent("Wechat account not found")
+            save['base_url'] = accountInfo['url']
+            self.task['url'] = accountInfo['url']
 
     def run_parse(self, rule):
         """
@@ -336,35 +356,6 @@ class WechatListHandler(BaseHandler):
             }
         return r
 
-    def _build_interact_info(self, **kwargs):
-        result = kwargs.get('result', {})
-        r = {
-            'crawlinfo': {
-                    'pid': self.task['pid'],                        # project id
-                    'sid': self.task['sid'],                        # site id
-                    'tid': self.task['tid'],                        # task id
-                    'uid': self.task['uid'],                        # url id
-                    'ruleId': 0,                                    # interactionNumRule id
-                    'final_url': self.response['final_url'],         # 列表url
-                },
-            'status': kwargs.get('status', ArticlesDB.STATUS_INIT),
-            'viewNum': result.get('view', kwargs.get('viewNum', 0)),
-            'spreadNum': result.get('repost', kwargs.get('spreadNum', 0)),
-            'commentNum': result.get('comment', kwargs.get('commentNum', 0)),
-            'likeNum': result.get('praise', kwargs.get('likeNum', 0)),
-            'rid': kwargs['rid'],
-            'acid': kwargs['unid'],                                            # unique str
-            'ctime': kwargs.get('ctime', self.crawl_id),
-            }
-        return r
-
-    def add_interact(self, **kwargs):
-        r = self._build_interact_info(result=self.response['parsed'], **kwargs)
-        try:
-            self.db['AttachDataDB'].insert(r)
-        except:
-            pass
-
     def run_result(self, save):
         """
         爬虫结果处理
@@ -403,7 +394,6 @@ class WechatListHandler(BaseHandler):
                         result_id = self.db['ArticlesDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
-                        self.add_interact(rid=result_id, **unid)
                         self.build_item_task(result_id)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
@@ -449,7 +439,7 @@ class WechatListHandler(BaseHandler):
         生成详情抓取任务并入队
         """
         message = {
-            'mode': HANDLER_MODE_BBS_ITEM if self.task['urls'].get('mediaType') in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
+            'mode': HANDLER_MODE_DEFAULT_ITEM,
             'rid': rid,
         }
         self.queue['scheduler2spider'].put_nowait(message)
