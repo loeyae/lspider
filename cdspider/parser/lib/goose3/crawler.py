@@ -522,7 +522,8 @@ class CustomCrawler(object):
                     parsed = self.extractor.extract(key, rule, onlyOne)
                     parsed = utils.patch_result(parsed, rule)
                     parsed = utils.extract_result(parsed, rule)
-                    data[key] = parsed
+                    if parsed:
+                        data[key] = parsed
 
                 self.catalogue.data = utils.table2kvlist(data)
             else:
