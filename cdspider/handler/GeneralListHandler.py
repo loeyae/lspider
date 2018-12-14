@@ -333,13 +333,6 @@ class GeneralListHandler(BaseHandler):
         :param save 保存的上下文信息
         :input self.response {"parsed": 解析结果, "final_url": 请求的url}
         """
-        if not self.response['parsed']:
-            if self.page > 1:
-                self.page -= 1
-            if broken_exc:
-                raise broken_exc
-            raise CDSpiderParserNoContent("No parsed content",
-                base_url=save.get("base_url"), current_url=self.response['last_url'])
         self.crawl_info['crawl_urls'][str(self.page)] = self.response['last_url']
         self.crawl_info['crawl_count']['page'] += 1
         ctime = self.crawl_id
