@@ -155,6 +155,11 @@ class BbsItemHandler(BaseHandler):
         获取自定义脚本
         """
         try:
+            if "uuid" in self.task and self.task['uuid']:
+                task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
+                if not task:
+                    raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
+                self.task.update(task)
             rule = self.match_rule() or {}
             return rule.get("scripts", None)
         except:
