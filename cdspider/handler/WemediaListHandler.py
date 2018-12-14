@@ -215,9 +215,15 @@ class WemediaListHandler(BaseHandler):
         """
         save = {}
         try:
+            if "uuid" in self.task and self.task['uuid']:
+                task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
+                if not task:
+                    raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
+                self.task.update(task)
             rule = self.match_rule(save)
             return rule.get("scripts", None)
         except:
+            self.error(traceback.format_exc())
             return None
 
     def init_process(self, save):
@@ -444,7 +450,7 @@ class WemediaListHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(GeneralListHandler, self).finish(save)
+        super(WemediaListHandler, self).finish(save)
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
         crawlinfo[str(self.crawl_id)] = self.crawl_info
