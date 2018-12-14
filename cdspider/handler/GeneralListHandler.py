@@ -280,6 +280,7 @@ class GeneralListHandler(BaseHandler):
         :input self.crawl_id 爬虫运行时刻
         """
         return {
+                'mode': HANDLER_MODE_BBS_ITEM if self.task['urls'].get('mediaType') in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
                 "stid": self.task.get("uuid", 0),   # SpiderTask uuid
                 "uid": self.task.get("uid", 0),     # url id
                 "pid": self.task.get('pid', 0),     # project id
