@@ -209,8 +209,8 @@ def tool(ctx, name, arg, daemon):
         c.run_once(*arg)
 
 @cli.command()
-@click.option('--rebot-cls', default='cdspider.robots.WxchatRobots', callback=load_cls, help='schedule name')
-@click.option('--aichat-rpc', default='http://127.0.0.1:27777', help='robot rpc server')
+@click.option('--rebot-cls', default='cdspider.robots.WxchatRobots', callback=load_cls, help='schedule name', show_default=True)
+@click.option('--aichat-rpc', default='http://127.0.0.1:27777', help='robot rpc server', show_default=True)
 @click.option('-u', '--uuid', help='唯一标识')
 @click.pass_context
 def wechat(ctx, rebot_cls, aichat_rpc, uuid):
@@ -235,8 +235,8 @@ def wechat(ctx, rebot_cls, aichat_rpc, uuid):
     robot.run()
 
 @cli.command()
-@click.option('--rebot-cls', default='cdspider.robots.AichatRobots', callback=load_cls, help='schedule name')
-@click.option('-u', '--uuid', default=None, help='唯一标识')
+@click.option('--rebot-cls', default='cdspider.robots.AichatRobots', callback=load_cls, help='schedule name', show_default=True)
+@click.option('-u', '--uuid', default=None, help='唯一标识', show_default=True)
 @click.option('-b', '--bot-data', help='AI头脑文件目录')
 @click.option('-c', '--commands',  multiple=True, help='commands')
 @click.pass_context
@@ -249,12 +249,12 @@ def aichat(ctx, rebot_cls, uuid, bot_data, commands):
     robot.run(uuid)
 
 @cli.command()
-@click.option('--rebot-cls', default='cdspider.robots.AichatRobots', callback=load_cls, help='rebot name')
+@click.option('--rebot-cls', default='cdspider.robots.AichatRobots', callback=load_cls, help='rebot name', show_default=True)
 @click.option('-b', '--bot-data', help='AI头脑文件目录')
 @click.option('-c', '--commands', default=[], multiple=True, help='commands')
-@click.option('-s', '--settings', default=None, multiple=True, help='bot settings: [name, sex, age, company]')
-@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host")
-@click.option('--xmlrpc-port', default=27777, help="xmlrpc bind port")
+@click.option('-s', '--settings', default=None, multiple=True, help='bot settings: [name, sex, age, company]', show_default=True)
+@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host", show_default=True)
+@click.option('--xmlrpc-port', default=27777, help="xmlrpc bind port", show_default=True)
 @click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
 @click.pass_context
 def aichat_rpc(ctx, rebot_cls, bot_data, commands, settings, xmlrpc_host, xmlrpc_port, debug):
@@ -277,14 +277,14 @@ def aichat_rpc_hello(ctx, aichat_rpc):
     print(aichat_rpc.hello())
 
 @cli.command()
-@click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name', show_default=True)
 @click.option('-I', '--id', help="task id")
-@click.option('-M', '--mode', default='project', help="mode id")
-@click.option('-H', '--handler-mode', default='list', help="mode id")
+@click.option('-M', '--mode', default='project', help="mode id", show_default=True)
+@click.option('-H', '--handler-mode', default='list', help="mode id", show_default=True)
 @click.pass_context
 def schedule_test(ctx, scheduler_cls, id, mode, handler_mode):
     """
-    按任务ID抓取数据
+    计划任务测试
     """
     g = ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -297,13 +297,16 @@ def schedule_test(ctx, scheduler_cls, id, mode, handler_mode):
     scheduler.schedule(task)
 
 @cli.command()
-@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
+@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name', show_default=True)
 @click.option('-s', '--setting', callback=load_config, type=click.File(mode='r', encoding='utf-8'),
               help='任务配置json文件', show_default=True)
-@click.option('-o', '--output', default=None, help='数据保存的文件')
-@click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input')
+@click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
+@click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input', show_default=True)
 @click.pass_context
 def spider_test(ctx, spider_cls, setting, output, no_input):
+    """
+    抓取流程测试
+    """
     Spider = load_cls(ctx, None, spider_cls)
     spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
     task = spider.get_task(message = setting, no_check_status = True)
@@ -313,6 +316,63 @@ def spider_test(ctx, spider_cls, setting, output, no_input):
         f = open(output, 'w')
         f.write(json.dumps(return_result))
         f.close()
+
+@cli.command()
+@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name', show_default=True)
+@click.option('-t', '--tid', help="task id")
+@click.option('-m', '--mode', default='list', help="mode id", show_default=True)
+@click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
+@click.pass_context
+def fetch_task(ctx, spider_cls, tid, mode, output):
+    """
+    按任务ID抓取数据,测试时使用
+    """
+    g = ctx.obj
+    Spider = load_cls(ctx, None, spider_cls)
+    spider = Spider(ctx, no_sync = True, handler=None, no_input=True)
+    task = {
+        "uuid": int(tid),
+        "mode": mode,
+    }
+    return_result = False
+    if output:
+        return_result = True
+    ret = spider.fetch(task=task, return_result=return_result)
+    if output:
+        if output == "print":
+            print(ret)
+        else:
+            f = open(output, 'w')
+            f.write(json.dumps(ret))
+            f.close()
+
+@cli.command()
+@click.option('--worker-cls', default='cdspider.worker.ResultWorker', callback=load_cls, help='spider name', show_default=True)
+@click.option('-r', '--rid', help="result id")
+@click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
+@click.pass_context
+def fetch_result(ctx, worker_cls, rid, output):
+    """
+    抓取文章测试结果
+    """
+    g = ctx.obj
+    Worker = load_cls(ctx, None, worker_cls)
+    worker = Worker(ctx)
+    task = {
+        "rid": rid
+    }
+    task['return_result'] = False
+    if output:
+        task['return_result'] = True
+    ret = worker.on_result(message=task)
+    if output:
+        if output == "print":
+            print(ret)
+        else:
+            f = open(output, 'w')
+            f.write(json.dumps(ret))
+            f.close()
+
 
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
