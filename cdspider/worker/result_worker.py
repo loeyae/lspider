@@ -35,7 +35,7 @@ class ResultWorker(BaseWorker):
         spider = Spider(self.ctx, no_sync = True, handler=None, no_input=True)
         task = {
             "rid": rid,
-            "mode": message.get('mode', HANDLER_MODE_DEFAULT_ITEM),
+            "mode": article.get('crawlinfo', {}).get('mode', message.get('mode', HANDLER_MODE_DEFAULT_ITEM)),
         }
         return_result = message.get('return_result', False)
         return spider.fetch(task=task, return_result=return_result)
