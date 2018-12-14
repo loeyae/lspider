@@ -489,3 +489,5 @@ from .CommentHandler import CommentHandler
 from .InteractHandler import InteractHandler
 from .LinksClusterHandler import LinksClusterHandler
 from .WemediaListHandler import WemediaListHandler
+from .BbsItemHandler import BbsItemHandler
+from .WechatListHandler import WechatListHandler
