@@ -333,45 +333,51 @@ class GeneralListHandler(BaseHandler):
         :param save 保存的上下文信息
         :input self.response {"parsed": 解析结果, "final_url": 请求的url}
         """
+        if not self.response['parsed']:
+            if self.page > 1:
+                self.page -= 1
+            if broken_exc:
+                raise broken_exc
+            raise CDSpiderParserNoContent("No parsed content",
+                base_url=save.get("base_url"), current_url=self.response['last_url'])
         self.crawl_info['crawl_urls'][str(self.page)] = self.response['last_url']
         self.crawl_info['crawl_count']['page'] += 1
-        if self.response['parsed']:
-            ctime = self.crawl_id
-            new_count = self.crawl_info['crawl_count']['new_count']
-            #格式化url
-            formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
-            for item in formated:
-                self.crawl_info['crawl_count']['total'] += 1
+        ctime = self.crawl_id
+        new_count = self.crawl_info['crawl_count']['new_count']
+        #格式化url
+        formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
+        for item in formated:
+            self.crawl_info['crawl_count']['total'] += 1
+            if self.testing_mode:
+                '''
+                testing_mode打开时，数据不入库
+                '''
+                inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
+                self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+            else:
+                #生成文章唯一索引并判断文章是否已经存在
+                inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
+                self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+            if inserted:
+                crawlinfo =  self._build_crawl_info(self.response['final_url'])
+                typeinfo = utils.typeinfo(item['url'])
+                result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                 if self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
                     '''
-                    inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
-                    self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+                    self.debug("%s result: %s" % (self.__class__.__name__, result))
                 else:
-                    #生成文章唯一索引并判断文章是否已经存在
-                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
-                    self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
-                if inserted:
-                    crawlinfo =  self._build_crawl_info(self.response['final_url'])
-                    typeinfo = utils.typeinfo(item['url'])
-                    result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
-                    if self.testing_mode:
-                        '''
-                        testing_mode打开时，数据不入库
-                        '''
-                        self.debug("%s result: %s" % (self.__class__.__name__, result))
-                    else:
-                        result_id = self.db['ArticlesDB'].insert(result)
-                        if not result_id:
-                            raise CDSpiderDBError("Result insert failed")
-                        self.build_item_task(result_id)
-                    self.crawl_info['crawl_count']['new_count'] += 1
-                else:
-                    self.crawl_info['crawl_count']['repeat_count'] += 1
-            if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
-                self.crawl_info['crawl_count']['repeat_page'] += 1
-                self.on_repetition(save)
+                    result_id = self.db['ArticlesDB'].insert(result)
+                    if not result_id:
+                        raise CDSpiderDBError("Result insert failed")
+                    self.build_item_task(result_id)
+                self.crawl_info['crawl_count']['new_count'] += 1
+            else:
+                self.crawl_info['crawl_count']['repeat_count'] += 1
+        if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
+            self.crawl_info['crawl_count']['repeat_page'] += 1
+            self.on_repetition(save)
 
     def url_prepare(self, url):
         return url
