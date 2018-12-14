@@ -278,9 +278,9 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name', show_default=True)
-@click.option('-I', '--id', help="task id")
-@click.option('-M', '--mode', default='project', help="mode id", show_default=True)
-@click.option('-H', '--handler-mode', default='list', help="mode id", show_default=True)
+@click.option('-i', '--id', help="task id")
+@click.option('-m', '--mode', default='project', help="mode id", show_default=True)
+@click.option('-h', '--handler-mode', default='list', help="mode id", show_default=True)
 @click.pass_context
 def schedule_test(ctx, scheduler_cls, id, mode, handler_mode):
     """
