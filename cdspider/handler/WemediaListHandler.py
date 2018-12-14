@@ -441,7 +441,7 @@ class WemediaListHandler(BaseHandler):
         生成详情抓取任务并入队
         """
         message = {
-            'mode': HANDLER_MODE_BBS_ITEM if self.task['urls'].get('mediaType') in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
+            'mode': HANDLER_MODE_DEFAULT_ITEM,
             'rid': rid,
         }
         self.queue['scheduler2spider'].put_nowait(message)
