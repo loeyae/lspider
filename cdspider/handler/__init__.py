@@ -354,8 +354,10 @@ class BaseHandler(Component):
                 self.page -= 1
             if broken_exc:
                 raise broken_exc
-            raise CDSpiderParserNoContent("No parsed content",
-                base_url=save.get("base_url"), current_url=self.response['last_url'])
+            if self.page > 1:
+                raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
+            else:
+                raise CDSpiderParserNoContent(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
         self.run_result(save)
         self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
 
