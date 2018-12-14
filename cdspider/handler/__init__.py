@@ -349,6 +349,13 @@ class BaseHandler(Component):
         数据处理
         """
         self.debug("%s on result" % (self.__class__.__name__))
+        if not self.response['parsed']:
+            if self.page > 1:
+                self.page -= 1
+            if broken_exc:
+                raise broken_exc
+            raise CDSpiderParserNoContent("No parsed content",
+                base_url=save.get("base_url"), current_url=self.response['last_url'])
         self.run_result(save)
         self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
 
