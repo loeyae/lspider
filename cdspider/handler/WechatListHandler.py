@@ -17,7 +17,7 @@ from cdspider.libs.constants import *
 from cdspider.parser import ListParser
 from cdspider.parser.lib import TimeParser
 
-class WechatListHandler(object):
+class WechatListHandler(BaseHandler):
     """
     wechat list handler
     :property task 爬虫任务信息 {"mode": "wechat-list", "uuid": SpiderTask.author uuid}
