@@ -276,6 +276,7 @@ class BbsItemHandler(BaseHandler):
         :input self.task 爬虫任务信息
         :input self.page 当前的页码
         """
+        self.task['article']['crawlinfo']['mode'] = HANDLER_MODE_BBS_ITEM
         if not 'final_url' in self.task['crawlinfo']:
             self.task['article']['crawlinfo']['final_url'] = {str(self.page): final_url}
         else:
