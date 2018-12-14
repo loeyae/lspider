@@ -37,4 +37,5 @@ class ResultWorker(BaseWorker):
             "rid": rid,
             "mode": message.get('mode', HANDLER_MODE_DEFAULT_ITEM),
         }
-        spider.fetch(task=task)
+        return_result = message.get('return_result', False)
+        return spider.fetch(task=task, return_result=return_result)
