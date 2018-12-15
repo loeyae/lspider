@@ -280,6 +280,8 @@ class WechatItemHandler(BaseHandler):
                 self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
                 if inserted:
                     result_id = self.db['ArticlesDB'].insert(result)
+                    if not result_id:
+                        raise CDSpiderDBError("Result insert failed")
                     self.task['crawlinfo'] = result['crawlinfo']
                     self.task['rid'] = result_id
                     self.crawl_info['crawl_count']['new_count'] += 1
@@ -318,8 +320,6 @@ class WechatItemHandler(BaseHandler):
                         content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
                         self.debug("%s on_result content: %s" % (self.__class__.__name__, content))
                         self.db['ArticlesDB'].update(result_id, {"content": content})
-        if not result_id:
-            raise CDSpiderDBError("Result insert failed")
 
     def finish(self, save):
         """
