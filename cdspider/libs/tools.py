@@ -192,10 +192,10 @@ def connect_db(ctx, param, value):
     return connector
 
 def connect_rpc(ctx, param, value):
-    if not value:
-        return
-    from xmlrpc import client as xmlrpc_client
-    return xmlrpc_client.ServerProxy(value, allow_none=True)
+    if isinstance(value, six.string_types):
+        from xmlrpc import client as xmlrpc_client
+        return xmlrpc_client.ServerProxy(value, allow_none=True)
+    return value
 
 class ModulerLoader(object):
     """
