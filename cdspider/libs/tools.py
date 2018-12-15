@@ -114,6 +114,10 @@ def read_config(ctx, param, value):
     return config
 
 def load_config(ctx, param, value):
+    if value == None:
+        return None
+    if not value:
+        return {}
     return underline_dict(json.load(value))
 
 def load_crawler(ctx, param, value):
