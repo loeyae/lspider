@@ -108,7 +108,7 @@ def remove_whitespace(content):
         content = str(content)
     tbl = dict.fromkeys(ord(x) for x in '\t\v\f')
     content = content.translate(tbl)
-    return re.sub('((?:\r\n\s*)+|(?:\r\s*)+|(?:\n\s*)+)', '\r\n', content)
+    return re.sub('((?:\r\n\s*)+|(?:\r\s*)+|(?:\n\s*)+|(?:<style>).+?(?:</style>))', '\r\n', content)
 
 def decode(data, errors="ignore"):
     if isinstance(data, bytes):
