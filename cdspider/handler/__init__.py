@@ -500,3 +500,4 @@ from .LinksClusterHandler import LinksClusterHandler
 from .WemediaListHandler import WemediaListHandler
 from .BbsItemHandler import BbsItemHandler
 from .WechatListHandler import WechatListHandler
+from .WechatItemHandler import WechatItemHandler
