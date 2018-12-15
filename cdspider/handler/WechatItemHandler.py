@@ -51,6 +51,23 @@ class WechatItemHandler(BaseHandler):
                 if not u:
                     raise CDSpiderNotUrlMatched()
         self.process = self.match_rule()
+        if not self.process:
+            self.process = {"parse": {}, "unique": {}}
+        self.process['parse'].update({
+            "__biz": {
+                "filter": '@reg:var\s+biz\s*=\s*""\s*\|\|\s*"[biz]";',
+            },
+            "mid": {
+                "filter": '@reg:var\s+mid\s*=\s*""\s*\|\|\s*""\|\|\s*"[mid]";'
+            },
+            "idx": {
+                "filter": '@reg:var\s+idx\s*=\s*""\s*\|\|\s*""\s*\|\|\s*"[idx]";'
+            }
+        })
+        self.process['unique'].update({
+            "url": "[url]\?.+",
+            "data": "__biz,mid,idx"
+        })
 
     def match_rule(self):
         """
@@ -62,8 +79,8 @@ class WechatItemHandler(BaseHandler):
         stid = self.task.get('stid', None)
         if stid:
             spiderTask = self.db['SpiderTaskDB'].get_detail(stid, HANDLER_MODE_WECHAT_LIST)
-            if not author:
-                raise CDSpiderHandlerError("Wechat: %s not exists" % rid)
+            if not spiderTask:
+                raise CDSpiderHandlerError("list task: %s not exists" % stid)
             crawlinfo = {
                 "mode": HANDLER_MODE_WECHAT_ITEM,  # mode
                 "stid": self.task.get("stid", 0),   # SpiderTask uuid
@@ -185,6 +202,7 @@ class WechatItemHandler(BaseHandler):
             'content': result.pop('content', None),
             'pubtime': pubtime,                                                # 发布时间
             'channel': result.pop('channel', None),                            # 频道信息
+            'result': result,
             'crawlinfo': kwargs.get('crawlinfo')
         }
         if all((r['title'], r['author'], r['content'], r['pubtime'])):
@@ -202,6 +220,8 @@ class WechatItemHandler(BaseHandler):
         return r
 
     def run_next(self, task):
+        if 'rid' in self.task:
+            del self.task['rid']
         crawlinfo = {
                 "mode": HANDLER_MODE_WECHAT_ITEM,    # mode
                 "stid": self.task.get("stid", 0),    # SpiderTask uuid
@@ -232,6 +252,7 @@ class WechatItemHandler(BaseHandler):
         :param typeinfo 域名信息
         """
         result_id = self.task.get("rid", None)
+        ctime = self.crawl_id
         if not result_id:
             '''
             如果任务中没有文章id，则生成文章唯一索引，并判断是否已经存在。
@@ -304,13 +325,13 @@ class WechatItemHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(GeneralItemHandler, self).finish(save)
+        super(WechatItemHandler, self).finish(save)
         if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
             self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
         if self.task.get('stid') and self.task.get('crawlid') and not self.testing_mode:
             if self.crawl_info['crawl_count']['repeat_count'] == self.crawl_info['crawl_count']['total']:
                 self.crawl_info['crawl_count']['repeat_page'] += 1
-            self.db['SpiderTaskDB'].update(self.task['stid'], HANDLER_MODE_WECHAT_LIST, {"crawlinfo." % self.task['crawlid']: self.crawl_info})
+            self.db['SpiderTaskDB'].update(self.task['stid'], HANDLER_MODE_WECHAT_LIST, {"crawlinfo.%s" % self.task['crawlid']: self.crawl_info})
 
     def result2attach(self, save, domain, subdomain=None):
         """
