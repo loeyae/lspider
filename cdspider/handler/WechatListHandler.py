@@ -10,7 +10,7 @@ import copy
 import time
 import traceback
 import html
-from . import BaseHandler
+from . import BaseHandler, Loader
 from urllib.parse import urljoin, unquote_plus
 from cdspider.database.base import *
 from cdspider.libs import utils
@@ -346,14 +346,38 @@ class WechatListHandler(BaseHandler):
         if self.response['parsed']:
             #格式化url
             formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
+            item_handler = None
+            item_save = {"base_url": task.get('url')}
             for item in formated:
-                if self.testing_mode:
-                    '''
-                    testing_mode打开时，数据不入库
-                    '''
-                    self.debug("%s result: %s" % (self.__class__.__name__, item))
-                else:
-                    self.build_item_task(url)
+                try:
+                    item_task = self.build_item_task(url)
+                    if item_handler == None:
+                        item_handler = Loader(self.ctx, task = item_task, spider = self.spider, no_sync = self.no_sync).load()
+                        item_handler.init(item_save)
+                    else:
+                        item_handler.run_next(item_task)
+                    item_save['retry'] = 0
+                    while True:
+                        self.info('Item Spider crawl start')
+                        item_handler.crawl(item_save)
+                        if isinstance(item_handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
+                            item_handler.on_continue(item_handler.response['broken_exc'], item_save)
+                            continue
+                        elif item_handler.response['broken_exc']:
+                            raise handler.response['broken_exc']
+                        if not item_handler.response['last_source']:
+                            raise CDSpiderCrawlerError('Item Spider crawl failed')
+                        self.info("Spider crawl end, source: %s" % str(handler.response["last_source"]))
+                        self.info("Spider parse start")
+                        handler.parse()
+                        self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
+                        self.info("Spider result start")
+                        handler.on_result(save)
+                        self.info("Spider result end")
+                except Exception as e:
+                    self.on_error(e, save)
+            if item_handler:
+                item_handler.finish(item_save)
 
     def url_prepare(self, url):
         return html.unescape(url)
@@ -397,4 +421,5 @@ class WechatListHandler(BaseHandler):
             'crawlid': self.crawl_id,
             'stid': self.task['uuid'],
         }
-        self.queue['scheduler2spider'].put_nowait(message)
+        return message
+#        self.queue['scheduler2spider'].put_nowait(message)
