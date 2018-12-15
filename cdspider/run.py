@@ -373,6 +373,29 @@ def fetch_result(ctx, worker_cls, rid, output):
             f.write(json.dumps(ret))
             f.close()
 
+@cli.command()
+@click.option('-r', '--rpc', default='http://127.0.0.1:23333', callback=connect_rpc, help='rpc host', show_default=True)
+@click.option('-m', '--method', default='hello', help="rpc method", show_default=True)
+@click.option('-p', '--params', callback=load_config, type=click.File(mode='r', encoding='utf-8'),
+              help='任务配置json文件', show_default=True)
+@click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
+@click.pass_context
+def rpc_test(ctx, rpc, method, params, output):
+    import json
+    rpc = connect_rpc(ctx, None, rpc)
+    ret = None
+    if hasattr(rpc, method):
+        if params == None:
+            data = getattr(rpc, method)()
+        else:
+            data = getattr(rpc, method)(json.dumps(params))
+        ret = json.loads(data)
+    if output:
+        f = open(output, 'w')
+        f.write(json.dumps(ret))
+        f.close()
+    else:
+        print(ret)
 
 @cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
