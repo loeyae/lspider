@@ -352,8 +352,8 @@ class BaseHandler(Component):
         if not self.response['parsed']:
             if self.page > 1:
                 self.page -= 1
-            if broken_exc:
-                raise broken_exc
+            if self.response['broken_exc']:
+                raise self.response['broken_exc']
             if self.page > 1:
                 raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
             else:
