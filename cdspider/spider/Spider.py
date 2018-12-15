@@ -103,7 +103,7 @@ class Spider(Component):
                     raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['last_url'])
                 last_source_unid = unid
                 last_url = handler.response['last_url']
-                self.info("Spider crawl end, source: %s" % str(handler.response["last_source"]))
+                self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["last_source"]))
                 self.info("Spider parse start")
                 handler.parse()
                 self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
