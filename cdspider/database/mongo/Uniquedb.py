@@ -8,6 +8,7 @@
 :date:    2018-1-9 21:36:43
 :version: SVN: $Id: Uniquedb.py 2430 2018-07-31 01:30:48Z zhangyi $
 """
+import traceback
 from pymongo.errors import *
 from cdspider.database.base import UniqueDB as BaseUniqueDB
 from .Mongo import Mongo, SplitTableMixin
