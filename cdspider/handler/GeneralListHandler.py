@@ -321,6 +321,7 @@ class GeneralListHandler(BaseHandler):
             'author': result.pop('author', None),                              # 作者
             'pubtime': pubtime,                                                # 发布时间
             'channel': result.pop('channel', None),                            # 频道信息
+            'result': result,
             'crawlinfo': kwargs.get('crawlinfo'),
             'acid': kwargs['unid'],                                            # unique str
             'ctime': kwargs.get('ctime', self.crawl_id),
