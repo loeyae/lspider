@@ -16,7 +16,6 @@ from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import ListParser, CustomParser
-from cdspider.parser.lib import TimeParser
 
 class WechatListHandler(BaseHandler):
     """
@@ -291,20 +290,18 @@ class WechatListHandler(BaseHandler):
         super(WechatListHandler, self).prepare(save)
         if not 'save' in self.task or not self.task['save']:
             self.task['save'] = {}
-        ctime = self.task['save'].get('timestamp')
-        if not self.task['save'].get('base_url') or self.crawl_id - int(ctime) > self.EXPIRE:
+        ctime = self.task['save'].get('timestamp', 0)
+        if not self.task['save'].get('request_url') or self.crawl_id - int(ctime) > self.EXPIRE:
             params = copy.deepcopy(self.request_params)
             self.crawler.crawl(**params)
             parser = CustomParser(source=self.crawler.page_source, ruleset=copy.deepcopy(self.task['prepare_rule']['parse']))
             accountInfo = parser.parse()
             if not accountInfo or not accountInfo[0]['url']:
                 raise CDSpiderParserNoContent("Wechat account not found")
-            print(accountInfo)
-            save['base_url'] = html.unescape(accountInfo[0]['url'])
             save['timestamp'] = self.crawl_id
             self.request_params['url'] = html.unescape(accountInfo[0]['url'])
         else:
-            self.request_params['url'] = self.task['save'].get('base_url')
+            self.request_params['url'] = self.task['save'].get('request_url')
 
     def run_parse(self, rule):
         """
@@ -316,7 +313,7 @@ class WechatListHandler(BaseHandler):
         parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
         self.response['parsed'] = parser.parse()
 
-    def update_crawl_info(self):
+    def update_crawl_info(self, save):
         """
         构造文章数据的爬虫信息
         """
@@ -342,20 +339,17 @@ class WechatListHandler(BaseHandler):
         self.crawl_info['crawl_urls'][str(self.page)] = self.response['last_url']
         self.crawl_info['crawl_count']['page'] += 1
         self.crawl_info['crawl_count']['total'] = len(self.response['parsed'])
-        self.update_crawl_info()
+        self.update_crawl_info(save)
         if self.response['parsed']:
             #格式化url
+            item_save = {"base_url": self.response['last_url']}
             formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
-            item_handler = None
-            item_save = {"base_url": task.get('url')}
+            item_handler = Loader(self.ctx, task = self.build_item_task(self.response['last_url']), spider = self.spider, no_sync = self.no_sync).load()
+            item_handler.init(item_save)
             for item in formated:
                 try:
-                    item_task = self.build_item_task(url)
-                    if item_handler == None:
-                        item_handler = Loader(self.ctx, task = item_task, spider = self.spider, no_sync = self.no_sync).load()
-                        item_handler.init(item_save)
-                    else:
-                        item_handler.run_next(item_task)
+                    item_task = self.build_item_task(item['url'])
+                    item_handler.run_next(item_task)
                     item_save['retry'] = 0
                     while True:
                         self.info('Item Spider crawl start')
@@ -364,16 +358,17 @@ class WechatListHandler(BaseHandler):
                             item_handler.on_continue(item_handler.response['broken_exc'], item_save)
                             continue
                         elif item_handler.response['broken_exc']:
-                            raise handler.response['broken_exc']
+                            raise item_handler.response['broken_exc']
                         if not item_handler.response['last_source']:
                             raise CDSpiderCrawlerError('Item Spider crawl failed')
-                        self.info("Spider crawl end, source: %s" % str(handler.response["last_source"]))
-                        self.info("Spider parse start")
-                        handler.parse()
-                        self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
-                        self.info("Spider result start")
-                        handler.on_result(save)
-                        self.info("Spider result end")
+                        self.info("Item Spider crawl end, source: %s" % utils.remove_whitespace(item_handler.response["last_source"]))
+                        self.info("Item Spider parse start")
+                        item_handler.parse()
+                        self.info("Item Spider parse end, result: %s" % str(item_handler.response["parsed"]))
+                        self.info("Item Spider result start")
+                        item_handler.on_result(save)
+                        self.info("Item Spider result end")
+                        break
                 except Exception as e:
                     self.on_error(e, save)
             if item_handler:
@@ -423,3 +418,14 @@ class WechatListHandler(BaseHandler):
         }
         return message
 #        self.queue['scheduler2spider'].put_nowait(message)
+
+    def finish(self, save):
+        """
+        记录抓取日志
+        """
+        super(WechatListHandler, self).finish(save)
+        s = self.task.get("save")
+        if not s:
+            s = {}
+        s.update(save)
+        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "save": s})
