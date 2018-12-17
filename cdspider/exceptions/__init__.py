@@ -160,6 +160,13 @@ class CDSpiderCrawlerBroken(CDSpiderCrawlerError):
 
     msg = "CDSpider Crawler Broken"
 
+class CDSpiderCrawlerReturnBroken(CDSpiderCrawlerBroken):
+    """
+    抓取时中断抓取
+    """
+
+    msg = "CDSpider Crawler Prepare Broken"
+
 class CDSpiderCrawlerDoLogin(CDSpiderCrawlerBroken):
     """
     抓取时需要登录验证
@@ -169,7 +176,7 @@ class CDSpiderCrawlerDoLogin(CDSpiderCrawlerBroken):
 
 class CDSpiderCrawlerNoExists(CDSpiderCrawlerBroken):
     """
-    抓取时目标不存在
+    抓取时目标不�在
     """
 
     msg = "CDSpider Crawler No Exists"
