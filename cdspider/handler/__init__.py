@@ -443,7 +443,7 @@ class BaseHandler(Component):
             return rule
         if not paging['rule']:
             return None
-        return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}}}
+        return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}, "patch": paging.get('patch', None)}}
 
     def get_unique_setting(self, url, data):
         """
