@@ -125,7 +125,9 @@ class Spider(Component):
                 if not isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum)):
                     handler.on_error(e, save)
             else:
-                if not isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerBroken)):
+                if isinstance(e, (CDSpiderCrawlerReturnBroken,)):
+                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
+                elif not isinstance(e, (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerBroken)):
                     return_data.append((None, traceback.format_exc(), None, None, save))
                     self.error(traceback.format_exc())
         finally:
