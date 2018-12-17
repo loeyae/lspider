@@ -32,9 +32,6 @@ class ToutiaoListHandler(BaseHandler):
                    当测试该handler，数据应为 {"mode": "list", "url": url, "listRule": 列表规则，参考列表规则}
     """
 
-    mediaType = (MEDIA_TYPE_TOUTIAO,)
-
-
     def route(self, mode, save):
         """
         schedule 分发
@@ -90,7 +87,7 @@ class ToutiaoListHandler(BaseHandler):
             for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
                 while True:
                     has_item = False
-                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": [MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO]}}, select=["uuid"]):
+                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_LIST]}}, select=["uuid"]):
                         has_item = True
                         if each['uuid'] > save['id']:
                             save['id'] = each['uuid']
@@ -124,7 +121,7 @@ class ToutiaoListHandler(BaseHandler):
                 初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": [MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO]}}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_LIST]}}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
@@ -146,7 +143,7 @@ class ToutiaoListHandler(BaseHandler):
                 初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": [MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO]}}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_LIST]}}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 #获取该站点计划中的爬虫任务
                 while True:
@@ -163,6 +160,7 @@ class ToutiaoListHandler(BaseHandler):
             '''
             按站点分发的计划任务
             '''
+            message['item']
             task = self.db['TaskDB'].get_detail(message['item'])
             #获取该站点计划中的爬虫任务
             for each in self.schedule_by_task(task, message['h-mode'], save):
@@ -249,7 +247,7 @@ class ToutiaoListHandler(BaseHandler):
             '''
             rule = copy.deepcopy(self.task['listRule'])
         else:
-            urls = self.db['UrlsDB'].get_detail(self.task['uid'])
+            urls = self.db['authorListRule'].get_detail(self.task['uid'])
             if not urls:
                 self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
                 raise CDSpiderDBDataNotFound("urls: %s not exists" % self.task['uid'])
@@ -352,7 +350,7 @@ class ToutiaoListHandler(BaseHandler):
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
                 else:
                     #生成文章唯一索引并判断文章是否已经存在
-                    inserted, unid = self.db['ToutiaoUniquedb'].insert(self.get_unique_setting(item['url'], {}), ctime)
+                    inserted, unid = self.db['Uniquedb'].insert(self.get_unique_setting(item['url'], {}), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     crawlinfo =  self._build_crawl_info(self.response['final_url'])
@@ -421,7 +419,7 @@ class ToutiaoListHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(GeneralListHandler, self).finish(save)
+        super(ToutiaoListHandler, self).finish(save)
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
         crawlinfo[str(self.crawl_id)] = self.crawl_info
