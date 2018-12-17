@@ -299,9 +299,10 @@ class WechatListHandler(BaseHandler):
             if not accountInfo or not accountInfo[0]['url']:
                 raise CDSpiderParserNoContent("Wechat account not found")
             only_account = self.task.get('only_account', False)
+            print(accountInfo)
             if only_account:
                 self.response['parsed'] = accountInfo[0]
-                raise CDSpiderCrawlerNoNextPage()
+                raise CDSpiderCrawlerReturnBroken()
             save['timestamp'] = self.crawl_id
             self.request_params['url'] = html.unescape(accountInfo[0]['url'])
         else:
