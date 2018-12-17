@@ -42,3 +42,6 @@ from .ParseRuledb import ParseRuleDB
 from .Repliesdb import RepliesDB
 from .Wechatdb import WechatDB
 from .WechatRuledb import WechatRuleDB
+from .ToutiaoListRuledb import ToutiaoListRuledb
+from .ToutiaoParseRuledb import ToutiaoParseRuledb
+from .ToutiaoUniquedb import ToutiaoUniquedb
