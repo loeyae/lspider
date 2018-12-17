@@ -293,6 +293,8 @@ class WechatListHandler(BaseHandler):
         ctime = self.task['save'].get('timestamp', 0)
         if not self.task['save'].get('request_url') or self.crawl_id - int(ctime) > self.EXPIRE:
             params = copy.deepcopy(self.request_params)
+            proxy_mode = self.proxy_mode
+            self.proxy_mode = self.task['prepare_rule'].get('request', {}).get('proxy', 'never')
             self.crawler.crawl(**params)
             parser = CustomParser(source=self.crawler.page_source, ruleset=copy.deepcopy(self.task['prepare_rule']['parse']))
             accountInfo = parser.parse()
@@ -304,6 +306,7 @@ class WechatListHandler(BaseHandler):
                 raise CDSpiderCrawlerReturnBroken()
             save['timestamp'] = self.crawl_id
             self.request_params['url'] = html.unescape(accountInfo[0]['url'])
+            self.proxy_mode = proxy_mode
         else:
             self.request_params['url'] = self.task['save'].get('request_url')
 
