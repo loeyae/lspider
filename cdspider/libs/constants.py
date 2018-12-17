@@ -99,7 +99,7 @@ HANDLER_MODE_HANDLER_MAPPING = {
     HANDLER_MODE_DEFAULT: 'GeneralHandler',
     HANDLER_MODE_DEFAULT_LIST: 'GeneralListHandler',
     HANDLER_MODE_WECHAT_LIST: 'WechatListHandler',
-#    HANDLER_MODE_TOUTIAO_LIST: 'ToutiaoListHandler',
+    HANDLER_MODE_TOUTIAO_LIST: 'ToutiaoListHandler',
 #    HANDLER_MODE_BBS_LIST: 'BbsListHandler',
     HANDLER_MODE_WEMEDIA_LIST: 'WemediaListHandler',
     HANDLER_MODE_DEFAULT_ITEM: 'GeneralItemHandler',
