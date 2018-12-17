@@ -9,28 +9,28 @@
 :version: SVN: $Id: Resultdb.py 2338 2018-07-08 05:58:24Z zhangyi $
 """
 import time
-from cdspider.database.base import ToutaoListRuledb as BaseToutaoListRuledb
+from cdspider.database.base import ToutiaoListRuledb as BaseToutiaoListRuledb
 from .Mongo import Mongo, SplitTableMixin
 
-class ToutaoListRuledb(Mongo, BaseToutaoListRuledb, SplitTableMixin):
+class ToutiaoListRuledb(Mongo, BaseToutiaoListRuledb, SplitTableMixin):
 
     __tablename__ = 'ToutaoListRule'
 
     incr_key = 'ToutaoListRule'
 
     def __init__(self, connector, table=None, **kwargs):
-        super(ToutaoListRuledb, self).__init__(connector, table = table, **kwargs)
+        super(ToutiaoListRuledb, self).__init__(connector, table = table, **kwargs)
         self._check_collection()
 
     def insert(self, obj = {}):
         obj.setdefault("ctime", int(time.time()))
         obj['uuid'] = self._get_increment(self.incr_key)
-        super(ToutaoListRuledb, self).insert(setting=obj)
+        super(ToutiaoListRuledb, self).insert(setting=obj)
         return obj['uuid']
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(ToutaoListRuledb, self).update(setting=obj, where={"uuid": id})
+        return super(ToutiaoListRuledb, self).update(setting=obj, where={"uuid": id})
 
     def get_detail(self, id, select=None):
         return self.get(where={"uuid": id}, select=select)
@@ -45,7 +45,7 @@ class ToutaoListRuledb(Mongo, BaseToutaoListRuledb, SplitTableMixin):
     def _check_collection(self):
         self._list_collection()
         suffix = time.strftime("%Y%m")
-        name = super(ToutaoListRuledb, self)._collection_name(suffix)
+        name = super(ToutiaoListRuledb, self)._collection_name(suffix)
         if not name in self._collections:
             self._create_collection(name)
 
