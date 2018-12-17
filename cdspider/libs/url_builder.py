@@ -146,6 +146,7 @@ class UrlBuilder(Component):
                 elementdata = self._run_parse({'element': setting['element']}, source, base_url)
                 if elementdata and elementdata['element']:
                     url = elementdata['element']
+                    url = utils.patch_result(url, setting)
                 else:
                     raise CDSpiderNotUrlMatched('Invalid element data', base_url, rule={'element': setting['element']})
                 if view_data:
