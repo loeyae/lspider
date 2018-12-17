@@ -13,7 +13,6 @@ import pymongo
 from cdspider.database.base import UrlsUniqueDB as BaseUrlsUniqueDB
 from .Mongo import Mongo
 
-
 class UrlsUniqueDB(Mongo, BaseUrlsUniqueDB):
 
     __tablename__ = 'urlsUnique'
