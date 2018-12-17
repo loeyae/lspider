@@ -146,7 +146,6 @@ class UrlBuilder(Component):
                 elementdata = self._run_parse({'element': setting['element']}, source, base_url)
                 if elementdata and elementdata['element']:
                     url = elementdata['element']
-                    url = utils.patch_result(url, setting)
                 else:
                     raise CDSpiderNotUrlMatched('Invalid element data', base_url, rule={'element': setting['element']})
                 if view_data:
@@ -167,6 +166,8 @@ class UrlBuilder(Component):
                             self._append_kwargs_data(kwargs, 'url', k, v)
                 except:
                     pass
+
+            url = utils.patch_result(url, setting)
         elif isinstance(kwargs['url'], list):
             setting = kwargs['url']
             url = setting[0].format(self._run_parse(setting[1], source, base_url))
