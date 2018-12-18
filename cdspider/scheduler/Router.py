@@ -85,6 +85,14 @@ class Router(BaseScheduler):
         handler.status(message)
         del handler
 
+    def build_item_task(self, message):
+        rid = message['rid']
+        if not isinstance(rid, (list, tuple)):
+            rid = [rid]
+        for each in rid:
+            m = {"rid": each, "mode": message.get('mode', HANDLER_MODE_DEFAULT_ITEM)}
+            self.queue[QUEUE_NAME_SPIDER_TO_RESULT].put_nowait(m)
+
     def xmlrpc_run(self, port=25555, bind='127.0.0.1'):
         import umsgpack
         from cdspider.libs import WSGIXMLRPCApplication
@@ -106,12 +114,7 @@ class Router(BaseScheduler):
             parsed = broken_exc = last_source = final_url = save = errmsg = None
             try:
                 task = json.loads(task)
-                rid = task['rid']
-                if not isinstance(rid, (list, tuple)):
-                    rid = [rid]
-                for each in rid:
-                    message = {"rid": each, "mode": task.get('mode', HANDLER_MODE_DEFAULT_ITEM)}
-                    self.queue[QUEUE_NAME_SPIDER_TO_RESULT].put_nowait(message)
+                self.build_item_task(task)
                 parsed = True
             except Exception as exc:
                 errmsg = str(exc)
