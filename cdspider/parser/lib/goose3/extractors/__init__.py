@@ -22,7 +22,7 @@ limitations under the License.
 """
 import re
 import lxml
-from cdspider.libs.utils import rule2pattern, patch_result, extract_result
+from cdspider.libs.utils import preg, rule2pattern, patch_result, extract_result
 
 class BaseExtractor(object):
 
@@ -140,6 +140,9 @@ class BaseExtractor(object):
         elif custom_rule.startswith('@value:'):
             ret = custom_rule[7:]
             return ret
+        elif custom_rule.startswith('@url:'):
+            r = custom_rule[5:]
+            return preg(self.config.final_url, r)
         elif custom_rule.startswith('@reg:'):
             custom_rule = custom_rule[5:]
             rule, key = rule2pattern(custom_rule)
