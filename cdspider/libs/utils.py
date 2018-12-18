@@ -915,9 +915,7 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
     """
     附加任务url生成规则参数获取
     """
-
-    parse = array2rule(rule, final_url)
-    parsed = rule2parse(parser_cls, source, final_url, parse, log_level)
+    parsed = rule2parse(parser_cls, source, final_url, rule, log_level)
     if parsed.keys() != parse.keys():
         '''
         数据未完全解析到，则任务匹配失败
@@ -934,14 +932,19 @@ def build_attach_url(parser_cls, source, final_url, rule, log_level):
             #根据解析规则匹配解析内容
             parse = rule['preparse'].get('parse', None)
             parsed = {}
-            if rule:
-                parsed = attach_preparse(parser_cls, source, final_url, parse, log_level)
+            if parse:
+                _rule = array2rule(parse, final_url)
+                parsed = attach_preparse(parser_cls, source, final_url, _rule, log_level)
                 if parsed == False:
                     return (None, None)
+            hard_code = []
+            for k, r in parsed.items():
+                if 'mode' in _rule[k]:
+                    hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
             urlrule = rule['preparse'].get('url', {})
             if urlrule:
                 #格式化url设置，将parent_rul替换为详情页url
                 if urlrule['base'] == 'parent_url':
                     urlrule['base'] = final_url
-            return (build_url_by_rule(urlrule, parsed), parsed)
+            return (build_url_by_rule(urlrule, parsed), hard_code)
         return (None, None)
