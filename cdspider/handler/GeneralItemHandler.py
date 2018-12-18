@@ -387,7 +387,7 @@ class GeneralItemHandler(BaseHandler):
             'parentid': self.task['rid'],                           # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
-            'save': {"data": data}
+            'save': {"hard_code": data}
         }
         self.debug("%s build comment task: %s" % (self.__class__.__name__, str(task)))
         if not self.testing_mode:
@@ -421,7 +421,7 @@ class GeneralItemHandler(BaseHandler):
             'parentid': self.task['rid'],                           # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
-            'save': {"data": data}
+            'save': {"hard_code": data}
         }
         self.debug("%s build interact task: %s" % (self.__class__.__name__, str(task)))
         if not self.testing_mode:
