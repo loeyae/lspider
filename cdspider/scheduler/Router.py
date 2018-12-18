@@ -21,9 +21,11 @@ class Router(BaseScheduler):
     路由--初级任务分发
     """
 
-    def __init__(self, context, mode = ROUTER_MODE_PROJECT):
+    def __init__(self, context, mode = ROUTER_MODE_PROJECT, outqueue = None):
         super(Router, self).__init__(context)
-        self.outqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_TASK]
+        if not outqueue:
+            outqueue = QUEUE_NAME_SCHEDULER_TO_TASK
+        self.outqueue = self.queue[outqueue]
         self.mode = mode
         self.interval = 5
         self._check_time = None
