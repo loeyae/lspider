@@ -938,13 +938,16 @@ def build_attach_url(parser_cls, source, final_url, rule, log_level):
                 if parsed == False:
                     return (None, None)
             hard_code = []
+            params = {}
             for k, r in parsed.items():
                 if 'mode' in _rule[k]:
                     hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
+                else:
+                    params[k] = r
             urlrule = rule['preparse'].get('url', {})
             if urlrule:
                 #格式化url设置，将parent_rul替换为详情页url
                 if urlrule['base'] == 'parent_url':
                     urlrule['base'] = final_url
-            return (build_url_by_rule(urlrule, parsed), hard_code)
+            return (build_url_by_rule(urlrule, params), hard_code)
         return (None, None)
