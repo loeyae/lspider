@@ -104,9 +104,8 @@ class TornadoCrawler(BaseCrawler):
             fetch['request_timeout'] = fetch['timeout']
             del fetch['timeout']
         # data rename to body
-        if 'data' in fetch:
-            fetch['body'] = fetch['data']
-            del fetch['data']
+        if 'data' in kwargs:
+            fetch['body'] = utils.url_encode(kwargs['data'])
 
         return fetch
 
