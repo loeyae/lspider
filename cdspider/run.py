@@ -82,15 +82,16 @@ def cli(ctx, **kwargs):
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
 @click.option('--mode', default='project', type=click.Choice(['project', 'site', 'task']), help="分发模式", show_default=True)
+@click.option('--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def route(ctx, scheduler_cls, mode, no_loop, get_object=False):
+def route(ctx, scheduler_cls, mode, outqueue, no_loop, get_object=False):
     """
     路由: 按project、site、task其中一种方式分发计划任务
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    scheduler = Scheduler(ctx, mode=mode)
+    scheduler = Scheduler(ctx, mode=mode, outqueue=outqueue)
     g['instances'].append(scheduler)
     if get_object:
         return scheduler
@@ -101,15 +102,17 @@ def route(ctx, scheduler_cls, mode, no_loop, get_object=False):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name')
+@click.option('--inqueue', default=None, help='监听的queue', show_default=True)
+@click.option('--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def plantask_schedule(ctx, scheduler_cls, no_loop,  get_object=False):
+def plantask_schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop,  get_object=False):
     """
     按任务的plantime进行抓取队列入队
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    scheduler = Scheduler(ctx)
+    scheduler = Scheduler(ctx, inqueue=inqueue, outqueue=outqueue)
     g['instances'].append(scheduler)
     if get_object:
         return scheduler
@@ -171,7 +174,7 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     g = ctx.obj
     Spider = load_cls(ctx, None, spider_cls)
 
-    spider = Spider(ctx, no_input = True)
+    spider = Spider(ctx, inqueue = False)
     g['instances'].append(spider)
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
@@ -311,7 +314,10 @@ def spider_test(ctx, spider_cls, setting, output, no_input):
     抓取流程测试
     """
     Spider = load_cls(ctx, None, spider_cls)
-    spider = Spider(ctx, no_sync = True, handler=None, no_input=no_input)
+    inqueue
+    if no_input:
+        inqueue = False
+    spider = Spider(ctx, no_sync = True, handler=None, inqueue=inqueue)
     task = spider.get_task(message = setting, no_check_status = True)
     return_result = spider.fetch(task=task, return_result = setting.get("return_result", False))
     print(return_result)
@@ -332,7 +338,7 @@ def fetch_task(ctx, spider_cls, tid, mode, output):
     """
     g = ctx.obj
     Spider = load_cls(ctx, None, spider_cls)
-    spider = Spider(ctx, no_sync = True, handler=None, no_input=True)
+    spider = Spider(ctx, no_sync = True, handler=None, inqueue=False)
     task = {
         "uuid": int(tid),
         "mode": mode,
