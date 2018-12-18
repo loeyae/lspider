@@ -198,6 +198,8 @@ class BaseHandler(Component):
             if not task:
                 raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
             self.task.update(task)
+            if 'save' in task and task['save'] and 'hard_code' in task['save']:
+                save['hard_code'] = task['save']['hard_code']
         self.init_process(save)
         if not save['init_url']:
             save['init_url'] = self.task['url']
@@ -291,7 +293,7 @@ class BaseHandler(Component):
         if 'data' in request and request['data']:
             if isinstance(request['data'], six.text_type):
                 request['data'] = utils.quertstr2dict(request['data'])
-            else:
+            elif not 'hard_code' in save or not save['hard_code']:
                 rule = utils.array2rule(request.pop('data'), save['init_url'])
                 parsed = utils.rule2parse(CustomParser, DEFAULT_SOURCE, save['init_url'], rule, self.log_level)
                 hard_code = []
