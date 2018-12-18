@@ -19,10 +19,14 @@ class PlantaskScheduler(BaseScheduler):
     """
     DEFAULT_RATE = [7200, "每2小时一次"]
 
-    def __init__(self, context):
+    def __init__(self, context, inqueue = None, outqueue = None):
         super(PlantaskScheduler, self).__init__(context)
-        self.inqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_TASK]
-        self.outqueue = self.queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
+        if not inqueue:
+            inqueue = QUEUE_NAME_SCHEDULER_TO_TASK
+        self.inqueue = self.queue[inqueue]
+        if not outqueue:
+            outqueue = QUEUE_NAME_SCHEDULER_TO_SPIDER
+        self.outqueue = self.queue[outqueue]
         rate_map = context.obj.get('rate_map')
         self.rate_map = rate_map
 
