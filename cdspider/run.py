@@ -138,16 +138,19 @@ def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
 
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
+@click.option('--inqueue', default=None, help='监听的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.option('--no-sync', default=False, is_flag=True, help='不同步数据给kafka', show_default=True)
 @click.pass_context
-def fetch(ctx, fetch_cls, no_loop, no_sync, get_object=False, no_input=False):
+def fetch(ctx, fetch_cls, inqueue, no_loop, no_sync, get_object=False, no_input=False):
     """
     Fetch: 监听任务并执行抓取
     """
     g = ctx.obj
     Spider = load_cls(ctx, None, fetch_cls)
-    spider = Spider(ctx, no_sync=no_sync, no_input = no_input)
+    if no_input:
+        inqueue = False
+    spider = Spider(ctx, no_sync=no_sync, inqueue = inqueue)
     g['instances'].append(spider)
     if get_object:
         return spider
