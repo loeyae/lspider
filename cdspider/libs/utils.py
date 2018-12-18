@@ -876,14 +876,7 @@ class xml_tool(object):
     def save_file(self, filename):
         return le.ElementTree(self.root).write(filename, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
-
-
-def attach_preparse(parser_cls, source, final_url, rule, log_level):
-    """
-    附加任务url生成规则参数获取
-    """
-    if not rule:
-        return {}
+def array2rule(rule, final_url):
     def build_rule(item, final_url):
         key = item.pop('key')
         if key and item['filter']:
@@ -892,15 +885,6 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
                 规则为获取父级url时，将详情页url赋给规则
                 '''
                 item['filter'] = '@value:%s' % final_url
-            elif item['filter'].startswith('@url:'):
-                '''
-                规则为@url:开头时，表示从详情页url中正则匹配数据
-                '''
-                r = item['filter'][5:]
-                v = preg(final_url, r)
-                if not v:
-                    return False
-                item['filter'] = '@value:%s' % v
             return {key: item}
         return None
     #格式化解析规则
@@ -908,22 +892,32 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
     if isinstance(rule, (list, tuple)):
         for item in rule:
             ret = build_rule(item, final_url)
-            if ret == False:
-                return False
             if ret:
                 parse.update(ret)
     elif isinstance(rule, dict):
         for item in rule.values():
             ret = build_rule(item, final_url)
-            if ret == False:
-                return False
             if ret:
                 parse.update(ret)
-    if not parse:
+    return parse
+
+def rule2parse(parser_cls, source, final_url, rule, log_level):
+    """
+    根据规则解析出结果
+    """
+    if not rule:
         return {}
-    parser = parser_cls(source=source, ruleset=parse, log_level=log_level, url=final_url)
+    parser = parser_cls(source=source, ruleset=rule, log_level=log_level, url=final_url)
     parsed = parser.parse()
-    parsed = filter(parsed)
+    return filter(parsed)
+
+def attach_preparse(parser_cls, source, final_url, rule, log_level):
+    """
+    附加任务url生成规则参数获取
+    """
+
+    parse = array2rule(rule, final_url)
+    parsed = rule2parse(parser_cls, source, final_url, parse, log_level)
     if parsed.keys() != parse.keys():
         '''
         数据未完全解析到，则任务匹配失败
