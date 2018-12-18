@@ -57,6 +57,7 @@ QUEUE_NAME_SPIDER_TO_RESULT = "spider2result"
 QUEUE_NAME_EXCINFO = "excinfo_queue"
 QUEUE_NAME_RESULT_TO_KAFKA = "result2kafka"
 QUEUE_NAME_WECHAT_TO_REPLY = "wechat2reply"
+QUEUE_NAME_WEB_TO_CLUSTER = "web2cluster"
 
 
 #handler redister fn type
