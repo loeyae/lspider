@@ -22,7 +22,6 @@ from cdspider import Component
 from cdspider.handler import BaseHandler, Loader
 from cdspider.exceptions import *
 from cdspider.libs import utils
-from cdspider.libs import UrlBuilder
 from cdspider.libs.tools import *
 from cdspider.database.base import *
 from cdspider.libs.constants import *
@@ -32,16 +31,18 @@ class Spider(Component):
     爬虫流程实现
     """
 
-    def __init__(self, context, no_sync = False, handler=None, no_input=False):
+    def __init__(self, context, no_sync = False, handler=None, inqueue = None):
         self._quit = False
         self._running = False
         self.ctx = context
         g = context.obj
         queue = g.get('queue')
-        if no_input:
+        if inqueue == False:
             self.inqueue = None
         else:
-            self.inqueue = queue[QUEUE_NAME_SCHEDULER_TO_SPIDER]
+            if not inqueue:
+                inqueue = QUEUE_NAME_SCHEDULER_TO_SPIDER
+            self.inqueue = queue[inqueue]
 
         self.queue = queue
         self.no_sync = no_sync
