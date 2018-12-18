@@ -58,6 +58,7 @@ class Router(BaseScheduler):
                 if not has_item:
                     break
                 time.sleep(0.1)
+            del handler
         threads = []
         for key, name in HANDLER_MODE_HANDLER_MAPPING.items():
             threads.append(run_in_thread(handler_schedule, key, name, self.mode, self.ctx))
@@ -70,6 +71,19 @@ class Router(BaseScheduler):
             each.join()
 
         self.info("%s route end, %s threads was run" % (self.__class__.__name__, len(threads)))
+
+    def newtask(self, message):
+        name = message.get('mode', HANDLER_MODE_DEFAULT)
+
+        handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        handler.newtask(message)
+        del handler
+
+    def status(self, message):
+        message = task.get('mode', HANDLER_MODE_DEFAULT)
+        handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        handler.status(message)
+        del handler
 
     def xmlrpc_run(self, port=25555, bind='127.0.0.1'):
         import umsgpack
@@ -116,11 +130,7 @@ class Router(BaseScheduler):
             parsed = broken_exc = last_source = final_url = save = errmsg = None
             try:
                 task = json.loads(task)
-                name = task.get('mode', HANDLER_MODE_DEFAULT)
-
-                handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
-                handler.newtask(task)
-                del handler
+                self.newtask(task)
                 parsed = True
             except Exception as exc:
                 errmsg = str(exc)
@@ -139,10 +149,7 @@ class Router(BaseScheduler):
             parsed = broken_exc = last_source = final_url = save = None
             try:
                 task = json.loads(task)
-                name = task.get('mode', HANDLER_MODE_DEFAULT)
-                handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
-                handler.status(task)
-                del handler
+                self.status(task)
                 parsed = True
             except :
                 broken_exc = traceback.format_exc()
