@@ -20,6 +20,7 @@ from cdspider.libs.tools import *
 from cdspider.parser import *
 from cdspider.libs.url_builder import UrlBuilder
 from cdspider.libs.constants import *
+from cdspider.parser import CustomParser
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseHandler(Component):
@@ -198,10 +199,10 @@ class BaseHandler(Component):
                 raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
             self.task.update(task)
         self.init_process(save)
-        if not save['base_url']:
-            save['base_url'] = self.task['url']
+        if not save['init_url']:
+            save['init_url'] = self.task['url']
         self.handler_run(HANDLER_FUN_PROCESS, {"process": self.process, "save": save})
-        self.request = self._get_request()
+        self.request = self._get_request(save)
         self.proxy_mode = self.request.pop('proxy', 'never')
         if not self.crawler:
             self.crawler = self.get_crawler(self.request)
@@ -265,7 +266,7 @@ class BaseHandler(Component):
         finally:
             self.handler_run(HANDLER_FUN_POSTCRAWL, {"response": self.response, "save": save})
 
-    def _get_request(self):
+    def _get_request(self, save):
         """
         获取请求配置
         """
@@ -288,7 +289,15 @@ class BaseHandler(Component):
                 request['headers'] = utils.quertstr2dict(header_list[0])
             del request['header']
         if 'data' in request and request['data']:
-            request['data'] = utils.quertstr2dict(request['data'])
+            if isinstance(request['data'], six.text_type):
+                request['data'] = utils.quertstr2dict(request['data'])
+            else:
+                rule = utils.array2rule(request.pop('data'), save['init_url'])
+                parsed = utils.rule2parse(CustomParser, DEFAULT_SOURCE, save['init_url'], rule, self.log_level)
+                hard_code = []
+                for k, r in parsed.items():
+                    hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
+                request['hard_code'] = hard_code
         else:
             request['data'] = {}
         return request
