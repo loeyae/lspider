@@ -170,6 +170,17 @@ class BbsItemHandler(BaseHandler):
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
         """
+        if 'forumRule' in self.task:
+            typeinfo = utils.typeinfo(self.task['url'])
+            if typeinfo['domain'] != self.task['detailRule']['domain'] or typeinfo['subdomain'] != self.task['detailRule']['subdomain']:
+                raise CDSpiderNotUrlMatched()
+            if  'urlPattern' in self.task['detailRule'] and self.task['detailRule']['urlPattern']:
+                '''
+                如果规则中存在url匹配规则，则进行url匹配规则验证
+                '''
+                u = utils.preg(url, item['urlPattern'])
+                if not u:
+                    raise CDSpiderNotUrlMatched()
         if "parentid" in self.task:
             self.task['rid'] = self.task['parentid']
         #根据task中的rid获取文章信息
