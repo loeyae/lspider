@@ -220,7 +220,7 @@ class GeneralListHandler(BaseHandler):
                 if not task:
                     raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
                 self.task.update(task)
-            rule = self.match_rule()
+            rule = self.match_rule({})
             return rule.get("scripts", None)
         except:
             return None
@@ -230,7 +230,7 @@ class GeneralListHandler(BaseHandler):
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
         """
-        rule = self.match_rule()
+        rule = self.match_rule(save)
         self.process =  {
             "request": rule.get("request", self.DEFAULT_PROCESS),
             "parse": rule.get("parse", None),
@@ -238,7 +238,7 @@ class GeneralListHandler(BaseHandler):
             "unique": rule.get("unique", None),
         }
 
-    def match_rule(self):
+    def match_rule(self, save):
         """
         获取匹配的规则
         """
@@ -255,7 +255,7 @@ class GeneralListHandler(BaseHandler):
             if urls['status'] != UrlsDB.STATUS_ACTIVE or urls['ruleStatus'] != UrlsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderHandlerError("url not active")
-            self.task['url'] = urls['url']
+            save['init_url'] = urls['url']
             self.task['urls'] = urls
             if not 'ruleId' in urls or not urls['ruleId']:
                 raise CDSpiderHandlerError("url not has list rule")
@@ -265,6 +265,8 @@ class GeneralListHandler(BaseHandler):
                 raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
+        if 'jsonUrl' in rule and rule['jsonUrl']:
+            save['base_url'] = rule['jsonUrl']
         return rule
 
     def run_parse(self, rule):
