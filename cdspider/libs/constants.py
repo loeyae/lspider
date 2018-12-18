@@ -17,6 +17,9 @@ from cdspider.handler import %(handler)s
 handler = %(handler)s(__moduler__['ctx'], __moduler__['task'], spider=__moduler__.get('spider', None), no_sync=__moduler__.get('no_sync', False))
 """
 
+#default source
+DEFAULT_SOURCE = "<html></html>"
+
 #exception set
 from cdspider.exceptions import *
 
