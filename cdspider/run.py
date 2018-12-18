@@ -314,7 +314,7 @@ def spider_test(ctx, spider_cls, setting, output, no_input):
     抓取流程测试
     """
     Spider = load_cls(ctx, None, spider_cls)
-    inqueue
+    inqueue = None
     if no_input:
         inqueue = False
     spider = Spider(ctx, no_sync = True, handler=None, inqueue=inqueue)
