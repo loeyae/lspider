@@ -13,6 +13,7 @@ from cdspider.database.base import *
 from cdspider.libs.constants import *
 from cdspider.libs import utils
 from cdspider.parser import CustomParser
+from cdspider.parser.lib import TimeParser
 
 class CommentHandler(BaseHandler):
     """
@@ -266,7 +267,12 @@ class CommentHandler(BaseHandler):
         """
         构造评论数据
         """
+        now = int(time.time())
         result = kwargs.pop('result')
+        #格式化发布时间
+        pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
+        if pubtime and pubtime > now:
+            pubtime = now
         #爬虫信息记录
         result['crawlinfo'] = {
             'pid': self.task['pid'],                        # project id
@@ -276,6 +282,7 @@ class CommentHandler(BaseHandler):
             'ruleId': self.task['kid'],                     # commentRule id
             'list_url': kwargs.pop('final_url'),            # 列表url
         }
+        result['pubtime'] = pubtime                             # pubtime
         result['acid'] = self.task['acid']                      # article acid
         result['rid'] = self.task['parentid']                   # article rid
         result['unid'] = kwargs.pop('unid')
