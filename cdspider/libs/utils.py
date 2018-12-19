@@ -630,17 +630,19 @@ def table2kvlist(data):
     """
     keys = list(data.keys())
     values = list(data.values())
+    vlen = [len(item) for item in values]
+    vl = max(vlen)
     d = []
     l = len(keys)
-    while True:
-        item = []
-        for i in range(l):
-            if not values[i]:
-                return d
-            if len(values[i]) <= 0:
-                return d
-            item.append(values[i].pop(0))
-        d.append(dict(zip(keys,item)))
+    if l > 0:
+        for j in range(vl):
+            item = []
+            for i in range(l):
+                v = None
+                if values[i] and len(values[i]) > j:
+                    v = values[i][j]
+                item.append(v)
+            d.append(dict(zip(keys,item)))
     return d
 
 def list2kv(data):
