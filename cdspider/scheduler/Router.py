@@ -80,7 +80,7 @@ class Router(BaseScheduler):
         del handler
 
     def status(self, message):
-        message = task.get('mode', HANDLER_MODE_DEFAULT)
+        name = message.get('mode', HANDLER_MODE_DEFAULT)
         handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
         handler.status(message)
         del handler
