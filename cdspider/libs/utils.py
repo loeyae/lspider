@@ -630,7 +630,7 @@ def table2kvlist(data):
     """
     keys = list(data.keys())
     values = list(data.values())
-    vlen = [len(item) if item else 0 for item in values]
+    vlen = [len(item) if isinstance(item, (list, tuple)) else 0 for item in values]
     vl = max(vlen)
     d = []
     l = len(keys)
