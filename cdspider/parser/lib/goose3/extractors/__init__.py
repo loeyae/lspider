@@ -115,7 +115,6 @@ class BaseExtractor(object):
             if custom_rule.startswith('@xpath:'):
                 custom_rule = custom_rule[7:]
             ret = self.parser.xpath_re(doc, custom_rule)
-
         if not ret:
             return None
         if onlyOne:
@@ -169,6 +168,8 @@ class BaseExtractor(object):
             return [self.f(item, dtype, target) for item in ret] if isinstance(ret, (list, tuple)) else self.f(ret, dtype, target)
 
     def correction_result(self, data, rule, callback=None):
+        if not data:
+            return data
         return self.patch_result(self.extract_result(data, rule, callback), rule, None)
 
     def patch_result(self, data, rule, callback=None):
