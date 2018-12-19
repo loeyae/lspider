@@ -199,7 +199,6 @@ class LinksClusterHandler(BaseHandler):
                             baseUrl = 1
                         else:
                             baseUrl = 0
-                        print(url)
                         urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl, 'ruleStatus': 0})
                         print('write success!')
                     except Exception as e:
