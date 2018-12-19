@@ -916,7 +916,7 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
     附加任务url生成规则参数获取
     """
     parsed = rule2parse(parser_cls, source, final_url, rule, log_level)
-    if parsed.keys() != parse.keys():
+    if parsed.keys() != rule.keys():
         '''
         数据未完全解析到，则任务匹配失败
         '''
