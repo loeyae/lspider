@@ -31,8 +31,7 @@ class LinksClusterHandler(BaseHandler):
         """
         #self.queue['web2cluster'].put_nowait(message)
         urlsdb = self.db['UrlsDB']
-        #print(message)
-        where = {'tid': message['tid']}
+        where = {'tid': message['tid'], 'tier' : message['tier']}
         hits = 50
         count = urlsdb.get_count(where = where)
         arrTmp = []
@@ -42,9 +41,8 @@ class LinksClusterHandler(BaseHandler):
             for i in list(ret):
                 arrTmp.append(i)
 
-        arrUuid = {}
+        arrUuid  = {}
         arrUrl   = []
-        urlInfo  = []
         outarr   = {}
         sortArr  = []
         for item in arrTmp:
@@ -64,10 +62,10 @@ class LinksClusterHandler(BaseHandler):
             for q in querys:
                 queryArr.append(q.split('='))
 
-            pnum = len(paths) if len(paths)<=9 else 9
-            qnum = len(queryArr) if len(queryArr)<=9 else 9
+            pnum = len(paths) if len(paths) <= 9 else 9
+            qnum = len(queryArr) if len(queryArr) <= 9 else 9
             # 以url为key num为值
-            outarr[url] = str(pnum)+str(qnum)
+            outarr[url] = str(pnum) + str(qnum)
         # 按值分堆
         arrtmp = sorted(outarr.items(), key=lambda d:d[1], reverse = True)
         # 开始对堆进行排序
@@ -96,15 +94,11 @@ class LinksClusterHandler(BaseHandler):
         if sortArr:
             for item in sortArr:
                 for it in item:
-                    # 防止重复，去掉最后的/
-                    url = it[0].rstrip('/')
                     try:
-                        urlpath  = urlparse(url).path
-                        urlquery = urlparse(url).query
-                        urlsdb.update(id = arrUuid[it[0]], obj = {"url": url, "cluster": it[1]})
+                        urlsdb.update(id = arrUuid[it[0]], obj = {"cluster": it[1]})
                         print('update success!')
                     except Exception as e:
-                        print(e)
+                        print('update error!')
 
     def run_parse(self, rule):
         # 根据sid取站点域名
