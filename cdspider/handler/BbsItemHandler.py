@@ -19,7 +19,7 @@ class BbsItemHandler(BaseHandler):
     """
     general item handler
     :property task 爬虫任务信息 {"mode": "item", "rid": Article rid}
-                   当测试该handler，数据应为 {"mode": "item", "url": url, "detailRule": 详情规则，参考详情规则}
+                   当测试该handler，数据应为 {"mode": "item", "url": url, "forumRule": 详情规则，参考详情规则}
     """
 
     def route(self, mode, save):
@@ -172,9 +172,9 @@ class BbsItemHandler(BaseHandler):
         """
         if 'forumRule' in self.task:
             typeinfo = utils.typeinfo(self.task['url'])
-            if typeinfo['domain'] != self.task['detailRule']['domain'] or typeinfo['subdomain'] != self.task['detailRule']['subdomain']:
+            if typeinfo['domain'] != self.task['forumRule']['domain'] or typeinfo['subdomain'] != self.task['forumRule']['subdomain']:
                 raise CDSpiderNotUrlMatched()
-            if  'urlPattern' in self.task['detailRule'] and self.task['detailRule']['urlPattern']:
+            if  'urlPattern' in self.task['forumRule'] and self.task['forumRule']['urlPattern']:
                 '''
                 如果规则中存在url匹配规则，则进行url匹配规则验证
                 '''
@@ -297,8 +297,8 @@ class BbsItemHandler(BaseHandler):
             self.task['article']['crawlinfo']['final_url'] = {str(self.page): final_url}
         else:
             self.task['article']['crawlinfo']['final_url'][str(self.page)] = final_url
-        if not 'detailRule' in self.task['crawlinfo']:
-            self.task['article']['crawlinfo']['detailRule'] = self.process.get('uuid', 0)
+        if not 'forumRule' in self.task['crawlinfo']:
+            self.task['article']['crawlinfo']['forumRule'] = self.process.get('uuid', 0)
         self.task['article']['crawlinfo']['page'] = 1
         self.task['article']['crawlinfo']['forumRule'] = self.prcoess.get('uuid', 0)
 
