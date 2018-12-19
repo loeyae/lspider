@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import time
 import os
 import glob
 from copy import deepcopy
@@ -522,9 +523,7 @@ class CustomCrawler(object):
                     parsed = self.extractor.extract(key, rule, onlyOne)
                     parsed = utils.patch_result(parsed, rule)
                     parsed = utils.extract_result(parsed, rule)
-                    if parsed:
-                        data[key] = parsed
-
+                    data[key] = parsed
                 self.catalogue.data = utils.table2kvlist(data)
             else:
                 for key, rule in custom_rule.items():
