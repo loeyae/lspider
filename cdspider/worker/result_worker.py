@@ -32,7 +32,7 @@ class ResultWorker(BaseWorker):
             raise CDSpiderDBDataNotFound("article: %s not exists" % rid)
         spider_cls = 'cdspider.spider.Spider'
         Spider = load_cls(self.ctx, None, spider_cls)
-        spider = Spider(self.ctx, no_sync = True, handler=None, no_input=True)
+        spider = Spider(self.ctx, no_sync = True, handler=None, inqueue=False)
         task = {
             "rid": rid,
             "mode": article.get('crawlinfo', {}).get('mode', message.get('mode', HANDLER_MODE_DEFAULT_ITEM)),
