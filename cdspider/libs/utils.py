@@ -639,7 +639,7 @@ def table2kvlist(data):
             item = []
             for i in range(l):
                 v = None
-                if values[i] and len(values[i]) > j:
+                if values[i] and isinstance(values[i], (list, tuple)) and len(values[i]) > j:
                     v = values[i][j]
                 item.append(v)
             d.append(dict(zip(keys,item)))
