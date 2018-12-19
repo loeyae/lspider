@@ -34,71 +34,75 @@ class LinksClusterHandler(BaseHandler):
         where = {'tid': message['tid'], 'tier' : message['tier']}
         hits = 50
         count = urlsdb.get_count(where = where)
-        arrTmp = []
-        for i in range(math.ceil(count / hits)):
-            offset = 0 if i == 0 else i * hits
-            ret = urlsdb.get_list(where = where, select={'uuid': True, 'url': True, 'title': True}, offset = offset, hits = hits)
-            for i in list(ret):
-                arrTmp.append(i)
+        if count > 0:
+            arrTmp = []
+            for i in range(math.ceil(count / hits)):
+                offset = 0 if i == 0 else i * hits
+                ret = urlsdb.get_list(where = where, select={'uuid': True, 'url': True, 'title': True}, offset = offset, hits = hits)
+                for i in list(ret):
+                    arrTmp.append(i)
 
-        arrUuid  = {}
-        arrUrl   = []
-        outarr   = {}
-        sortArr  = []
-        for item in arrTmp:
-            arrUrl.append(item['url'])
+            arrUuid  = {}
+            arrUrl   = []
+            outarr   = {}
+            sortArr  = []
+            for item in arrTmp:
+                arrUrl.append(item['url'])
 
-        for url in arrUrl:
-            queryArr = []
-            # 解析 path query
-            urlInfo  = urlparse(url)
-            urlpath  = urlInfo.path
-            urlquery = urlInfo.query
-            # 分割并计算值
-            urlpath_ = re.split(r'/|\.',urlpath)
-            paths    = [tok.lower() for tok in urlpath_ if len(tok) > 0]
-            urlquery_= re.split(r'&',urlquery)
-            querys   = [tok.lower() for tok in urlquery_ if len(tok) > 0]
-            for q in querys:
-                queryArr.append(q.split('='))
+            for url in arrUrl:
+                queryArr = []
+                # 解析 path query
+                urlInfo  = urlparse(url)
+                urlpath  = urlInfo.path
+                urlquery = urlInfo.query
+                # 分割并计算值
+                urlpath_ = re.split(r'/|\.',urlpath)
+                paths    = [tok.lower() for tok in urlpath_ if len(tok) > 0]
+                urlquery_= re.split(r'&',urlquery)
+                querys   = [tok.lower() for tok in urlquery_ if len(tok) > 0]
+                for q in querys:
+                    queryArr.append(q.split('='))
 
-            pnum = len(paths) if len(paths) <= 9 else 9
-            qnum = len(queryArr) if len(queryArr) <= 9 else 9
-            # 以url为key num为值
-            outarr[url] = str(pnum) + str(qnum)
-        # 按值分堆
-        arrtmp = sorted(outarr.items(), key=lambda d:d[1], reverse = True)
-        # 开始对堆进行排序
-        n = arrtmp[0][1]
-        arr = {}
-        for i in range(len(arrtmp)):
-            if n == arrtmp[i][1]:
-                arr[arrtmp[i][0]] = arrtmp[i][1]
-            else:
-                # 找到一堆，排序，暂存
-                sortTmp = sorted(arr.items(), key=lambda d:d[0], reverse = True)
-                sortArr.append(sortTmp)
-                # 重新再来
-                arr = {}
-                n = arrtmp[i][1]
-                arr[arrtmp[i][0]] = arrtmp[i][1]
+                pnum = len(paths) if len(paths) <= 9 else 9
+                qnum = len(queryArr) if len(queryArr) <= 9 else 9
+                # 以url为key num为值
+                outarr[url] = str(pnum) + str(qnum)
+            # 按值分堆
+            arrtmp = sorted(outarr.items(), key=lambda d:d[1], reverse = True)
+            # 开始对堆进行排序
+            n = arrtmp[0][1]
+            arr = {}
+            for i in range(len(arrtmp)):
+                if n == arrtmp[i][1]:
+                    arr[arrtmp[i][0]] = arrtmp[i][1]
+                else:
+                    # 找到一堆，排序，暂存
+                    sortTmp = sorted(arr.items(), key=lambda d:d[0], reverse = True)
+                    sortArr.append(sortTmp)
+                    # 重新再来
+                    arr = {}
+                    n = arrtmp[i][1]
+                    arr[arrtmp[i][0]] = arrtmp[i][1]
 
-        # 循环退出，arr还有数据，排序，暂存
-        sortTmp = sorted(arr.items(), key=lambda d:d[0], reverse = True)
-        sortArr.append(sortTmp)
-        for item in arrTmp:
-            arrUuid[item['url']] = item['uuid']
 
-        # 更新数据
-        if sortArr:
-            for item in sortArr:
-                for it in item:
-                    try:
-                        urlsdb.update(id = arrUuid[it[0]], obj = {"cluster": it[1]})
-                        print('update success!')
-                    except Exception as e:
-                        print('update error!')
+            # 循环退出，arr还有数据，排序，暂存
+            sortTmp = sorted(arr.items(), key=lambda d:d[0], reverse = True)
+            sortArr.append(sortTmp)
+            for item in arrTmp:
+                arrUuid[item['url']] = item['uuid']
 
+            # 更新数据
+            if sortArr:
+                for item in sortArr:
+                    for it in item:
+                        try:
+                            urlsdb.update(id = arrUuid[it[0]], obj = {"cluster": it[1]})
+                            print('update success!')
+                        except Exception:
+                            print('update error!')
+        else:
+            print('find no data!')
+            
     def run_parse(self, rule):
         # 根据sid取站点域名
         sitedb = self.db['SitesDB']
@@ -194,7 +198,7 @@ class LinksClusterHandler(BaseHandler):
                             baseUrl = 0
                         urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl, 'ruleStatus': 0})
                         print('write success!')
-                    except Exception as e:
+                    except Exception:
                         print('url is exist!')
         # urlsdb = self.db['UrlsDB']
         # if self.response['parsed']:
