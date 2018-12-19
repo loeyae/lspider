@@ -229,7 +229,8 @@ class DocumentCleaner(object):
         return nodes_to_return
 
     def replace_with_para(self, doc, div):
-        self.parser.replaceTag(div, 'p')
+        pass
+        #self.parser.replaceTag(div, 'p')
 
     def div_to_para(self, doc, dom_type):
         bad_divs = 0
