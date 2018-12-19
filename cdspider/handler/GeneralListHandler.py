@@ -255,7 +255,7 @@ class GeneralListHandler(BaseHandler):
             if urls['status'] != UrlsDB.STATUS_ACTIVE or urls['ruleStatus'] != UrlsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderHandlerError("url not active")
-            save['init_url'] = urls['url']
+            save['base_url'] = urls['url']
             self.task['urls'] = urls
             if not 'ruleId' in urls or not urls['ruleId']:
                 raise CDSpiderHandlerError("url not has list rule")
@@ -266,7 +266,8 @@ class GeneralListHandler(BaseHandler):
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
         if 'jsonUrl' in rule and rule['jsonUrl']:
-            save['base_url'] = rule['jsonUrl']
+            self.task['url'] = rule['jsonUrl']
+
         return rule
 
     def run_parse(self, rule):
