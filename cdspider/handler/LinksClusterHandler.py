@@ -86,7 +86,6 @@ class LinksClusterHandler(BaseHandler):
         # 循环退出，arr还有数据，排序，暂存
         sortTmp = sorted(arr.items(), key=lambda d:d[0], reverse = True)
         sortArr.append(sortTmp)
-
         for item in arrTmp:
             arrUuid[item['url']] = item['uuid']
 
