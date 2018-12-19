@@ -359,7 +359,7 @@ class ContentExtractor(BaseExtractor):
         sub_paragraphs = self.parser.getElementsByTag(elm, tag='p')
         for para in sub_paragraphs:
             txt = self.parser.getText(para)
-            if len(txt) < 25:
+            if len(txt) < 1:
                 self.parser.remove(para)
 
         sub_paragraphs2 = self.parser.getElementsByTag(elm, tag='p')
