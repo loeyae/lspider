@@ -8,6 +8,7 @@
 :date:    2018-1-9 21:58:31
 :version: SVN: $Id: Urlsdb.py 2116 2018-07-04 03:56:12Z zhangyi $
 """
+import sys
 import time
 import pymongo
 from cdspider.database.base import UrlsDB as BaseUrlsDB
@@ -161,3 +162,6 @@ class UrlsDB(Mongo, BaseUrlsDB):
         for k, v in where.items():
             _where['$and'].extend([{k: v}])
         return self.find(where = _where, select=select, **kwargs)
+
+    def get_count(self, where = {}):
+        return self.count(where = where)

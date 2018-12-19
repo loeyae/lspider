@@ -10,19 +10,101 @@ from . import BaseHandler
 from cdspider.parser.lib import LinksExtractor
 from urllib.parse import urlparse
 import re
+import sys
 import hashlib
+import math
 
 class LinksClusterHandler(BaseHandler):
     """
     general handler
     """
-
     def init_process(self, save):
         self.process =  {
             "request": self.DEFAULT_PROCESS,
             "parse": None,
             "page": None
         }
+
+    def newtask(self, message):
+        """
+        接收任务并重新分组
+        """
+        #self.queue['web2cluster'].put_nowait(message)
+        urlsdb = self.db['UrlsDB']
+        #print(message)
+        where = {'tid': message['tid']}
+        hits = 50
+        count = urlsdb.get_count(where = where)
+        arrTmp = []
+        for i in range(math.ceil(count / hits)):
+            offset = 0 if i == 0 else i * hits
+            ret = urlsdb.get_list(where = where, select={'uuid': True, 'url': True, 'title': True}, offset = offset, hits = hits)
+            for i in list(ret):
+                arrTmp.append(i)
+
+        arrUuid = {}
+        arrUrl   = []
+        urlInfo  = []
+        outarr   = {}
+        sortArr  = []
+        for item in arrTmp:
+            arrUrl.append(item['url'])
+
+        for url in arrUrl:
+            queryArr = []
+            # 解析 path query
+            urlInfo  = urlparse(url)
+            urlpath  = urlInfo.path
+            urlquery = urlInfo.query
+            # 分割并计算值
+            urlpath_ = re.split(r'/|\.',urlpath)
+            paths    = [tok.lower() for tok in urlpath_ if len(tok) > 0]
+            urlquery_= re.split(r'&',urlquery)
+            querys   = [tok.lower() for tok in urlquery_ if len(tok) > 0]
+            for q in querys:
+                queryArr.append(q.split('='))
+
+            pnum = len(paths) if len(paths)<=9 else 9
+            qnum = len(queryArr) if len(queryArr)<=9 else 9
+            # 以url为key num为值
+            outarr[url] = str(pnum)+str(qnum)
+        # 按值分堆
+        arrtmp = sorted(outarr.items(), key=lambda d:d[1], reverse = True)
+        # 开始对堆进行排序
+        n = arrtmp[0][1]
+        arr = {}
+        for i in range(len(arrtmp)):
+            if n == arrtmp[i][1]:
+                arr[arrtmp[i][0]] = arrtmp[i][1]
+            else:
+                # 找到一堆，排序，暂存
+                sortTmp = sorted(arr.items(), key=lambda d:d[0], reverse = True)
+                sortArr.append(sortTmp)
+                # 重新再来
+                arr = {}
+                n = arrtmp[i][1]
+                arr[arrtmp[i][0]] = arrtmp[i][1]
+
+        # 循环退出，arr还有数据，排序，暂存
+        sortTmp = sorted(arr.items(), key=lambda d:d[0], reverse = True)
+        sortArr.append(sortTmp)
+
+        for item in arrTmp:
+            arrUuid[item['url']] = item['uuid']
+
+        # 更新数据
+        if sortArr:
+            for item in sortArr:
+                for it in item:
+                    # 防止重复，去掉最后的/
+                    url = it[0].rstrip('/')
+                    try:
+                        urlpath  = urlparse(url).path
+                        urlquery = urlparse(url).query
+                        urlsdb.update(id = arrUuid[it[0]], obj = {"url": url, "cluster": it[1]})
+                        print('update success!')
+                    except Exception as e:
+                        print(e)
 
     def run_parse(self, rule):
         # 根据sid取站点域名
@@ -41,18 +123,6 @@ class LinksClusterHandler(BaseHandler):
         re_type = 'subdomains'
         self.response['parsed'] = extractor.infos[re_type]
 
-    # def run_result(self, save):
-    #     if self.response['parsed']:
-    #         arrtmp = sorted(self.response['parsed'], key=lambda url:url['url'])
-    #         for item in arrtmp:
-    #             print(item)
-
-    # def run_result(self, save):
-    #     urlsdb = self.db['UrlsDB']
-    #     for item in urlsdb.get_list('urls'):
-    #         print(item)
-        # pageRuledb = self.db['pageRule']
-        # print(pageRuledb.find())
 
     def run_result(self, save):
         arrTmp   = self.response['parsed']
@@ -120,7 +190,7 @@ class LinksClusterHandler(BaseHandler):
                 for it in item:
                     # 防止重复，去掉最后的/
                     url = it[0].rstrip('/')
-                    urlmd5 = hashlib.md5(url.encode(encoding='UTF-8')).hexdigest()
+                    #urlmd5 = hashlib.md5(url.encode(encoding='UTF-8')).hexdigest()
                     try:
                         # urlsUniquedb.insert({"urlmd5": urlmd5, "url": url})
                         urlpath  = urlparse(url).path
@@ -129,12 +199,11 @@ class LinksClusterHandler(BaseHandler):
                             baseUrl = 1
                         else:
                             baseUrl = 0
-
+                        print(url)
                         urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl, 'ruleStatus': 0})
                         print('write success!')
                     except Exception as e:
                         print('url is exist!')
-
         # urlsdb = self.db['UrlsDB']
         # if self.response['parsed']:
         #     arrtmp = sorted(self.response['parsed'], key=lambda url:url['url'])
