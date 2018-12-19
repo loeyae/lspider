@@ -201,8 +201,8 @@ class BaseHandler(Component):
             if 'save' in task and task['save'] and 'hard_code' in task['save']:
                 save['hard_code'] = task['save']['hard_code']
         self.init_process(save)
-        if not save['init_url']:
-            save['init_url'] = self.task['url']
+        if not save['base_url']:
+            save['base_url'] = self.task['url']
         self.handler_run(HANDLER_FUN_PROCESS, {"process": self.process, "save": save})
         self.request = self._get_request(save)
         self.proxy_mode = self.request.pop('proxy', 'never')
@@ -294,8 +294,8 @@ class BaseHandler(Component):
             if isinstance(request['data'], six.text_type):
                 request['data'] = utils.quertstr2dict(request['data'])
             elif not 'hard_code' in save or not save['hard_code']:
-                rule = utils.array2rule(request.pop('data'), save['init_url'])
-                parsed = utils.rule2parse(CustomParser, DEFAULT_SOURCE, save['init_url'], rule, self.log_level)
+                rule = utils.array2rule(request.pop('data'), save['base_url'])
+                parsed = utils.rule2parse(CustomParser, DEFAULT_SOURCE, save['base_url'], rule, self.log_level)
                 hard_code = []
                 for k, r in parsed.items():
                     hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
