@@ -24,6 +24,8 @@ class WemediaListHandler(BaseHandler):
                    当测试该handler，数据应为 {"mode": "wemedia-list", "author": 自媒体号设置，参考自媒体号, "authorListRule": 自媒体列表规则，参考自媒体列表规则}
     """
 
+    NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO)
+
     def route(self, mode, save):
         """
         schedule 分发
@@ -79,7 +81,7 @@ class WemediaListHandler(BaseHandler):
             for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
                 while True:
                     has_item = False
-                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": [MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO]}}, select=["uuid"]):
+                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": self.NIN_MEDIA_TYPE}}, select=["uuid"]):
                         has_item = True
                         if each['uuid'] > save['id']:
                             save['id'] = each['uuid']
@@ -95,7 +97,7 @@ class WemediaListHandler(BaseHandler):
         :param message route传递过来的消息
         :param save 传递的上下文
         :return 包含uuid, url的字典迭代器，为SpiderTaskDB中数据
-        :notice 该方法返回的迭代器用于plantask生成queue消息，以便fetch听取，消息格式为
+        :notice 该方法返回的迭代��用于plantask生成queue消息，以便fetch听取，消息格式为
         {"mode": handler mode, "uuid": SpiderTask uuid, "url": SpiderTask url}
         """
         mode = message['mode']
@@ -113,7 +115,7 @@ class WemediaListHandler(BaseHandler):
                 初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": [MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO]}}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": self.NIN_MEDIA_TYPE}}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
@@ -135,7 +137,7 @@ class WemediaListHandler(BaseHandler):
                 初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": [MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO]}}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": self.NIN_MEDIA_TYPE}}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 #获取该站点计划中的爬虫任务
                 while True:
