@@ -350,6 +350,7 @@ class WechatListHandler(BaseHandler):
         self.crawl_info['crawl_count']['page'] += 1
         self.crawl_info['crawl_count']['total'] = len(self.response['parsed'])
         self.update_crawl_info(save)
+        save['update_crawlinfo'] = True
         if self.response['parsed']:
             #格式化url
             item_save = {"base_url": self.response['last_url']}
@@ -434,8 +435,12 @@ class WechatListHandler(BaseHandler):
         记录抓取日志
         """
         super(WechatListHandler, self).finish(save)
-        s = self.task.get("save")
-        if not s:
-            s = {}
-        s.update(save)
-        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "save": s})
+        _u = save.pop('update_crawlinfo', False)
+        if not _u:
+            self.update_crawl_info(save)
+        else:
+            s = self.task.get("save")
+            if not s:
+                s = {}
+            s.update(save)
+            self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "save": s})
