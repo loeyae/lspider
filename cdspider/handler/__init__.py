@@ -299,7 +299,8 @@ class BaseHandler(Component):
                 hard_code = []
                 for k, r in parsed.items():
                     hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
-                request['hard_code'] = hard_code
+                if hard_code:
+                    request['hard_code'] = hard_code
         else:
             request['data'] = {}
         return request
