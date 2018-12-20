@@ -196,6 +196,7 @@ class WeiboHandler(BaseHandler):
                 author = self.db['WeiboAuthorDB'].get_detail(item['uid'])
                 if not author:
                     self.db['SpiderTaskDB'].delete(item['uuid'], mode)
+                    continue
                 plantime = int(save['now']) + int(self.ratemap[str(author.get('frequency', self.DEFAULT_RATE))][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
             if item['uuid'] > save['id']:
