@@ -56,7 +56,7 @@ class CommentHandler(BaseHandler):
                 raise CDSpiderNotUrlMatched()
             self.task['url'] = url
             save['base_url'] = url
-            self.task['save'] = {"data": data}
+            self.task['commentRule']['request']['hard_code'] = data
         else:
             article = self.db['ArticlesDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])
             if not article:
