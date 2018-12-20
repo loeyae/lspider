@@ -135,7 +135,7 @@ class JsonParser(BaseParser):
                 parser = PyqueryParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
                 parsed = parser.parse()
                 return parsed.get('json', []) if parsed else None
-            elif 'filter' in ruleset and ruleset['filter'].startswith('@xpath:'):
+            elif 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@xpath:'):
                 for k, v in rule['item'].items():
                     if v['filter']:
                         v['filter'] = v['filter'][7:]
