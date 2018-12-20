@@ -167,7 +167,7 @@ class WemediaListHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'uid']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
