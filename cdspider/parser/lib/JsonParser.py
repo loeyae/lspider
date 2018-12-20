@@ -128,7 +128,7 @@ class JsonParser(BaseParser):
             return rst
         else:
             ruleset = rule['item']['url'] if 'url' in rule['item'] else list(rule['item'].values())[0]
-            if 'filter' in ruleset and ruleset['filter'].startswith('@css:'):
+            if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@css:'):
                 for k, v in rule['item'].items():
                     if v['filter']:
                         v['filter'] = v['filter'][5:]
@@ -142,7 +142,7 @@ class JsonParser(BaseParser):
                 parser = XpathParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
                 parsed = parser.parse()
                 return parsed.get('json', []) if parsed else None
-            elif 'filter' in ruleset and ruleset['filter'].startswith('@reg:'):
+            elif 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@reg:'):
                 for k, v in rule['item'].items():
                     v['filter'] = v['filter'][5:]
                 parser = RegularParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
