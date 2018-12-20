@@ -206,7 +206,8 @@ class UrlBuilder(Component):
         if data:
             self.debug("UrlBuilder parse hard code data: %s" % str(data))
             for item in data:
-                self._append_kwargs_data(kwargs, item['type'], item['name'], item['value'])
+                if item['name']:
+                    self._append_kwargs_data(kwargs, item['type'], item['name'], item['value'])
 
     def _parse_cookie_data(self, kwargs, crawler, save):
         """
@@ -247,7 +248,8 @@ class UrlBuilder(Component):
         if 'random' in kwargs and kwargs['random']:
             self.debug("UrlBuilder parse random data rule: %s" % str(kwargs['random']))
             for item in kwargs['random']:
-                assert 'name' in item and item['name'], "invalid setting name of random data"
+                if not item['name']:
+                    continue
                 assert 'value' in item, "invalid setting value of random data"
                 if 'mode' in item and item['mode']:
                     if item['mode'] == 'get':
