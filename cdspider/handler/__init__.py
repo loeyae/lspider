@@ -453,9 +453,12 @@ class BaseHandler(Component):
             if not rule['incr_data']:
                 return None
             return rule
-        if not paging['rule']:
-            return None
-        return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}, "patch": paging.get('patch', None)}}
+        elif int(paging.get('pattern') or 1) == 2:
+            if not paging['rule']:
+                return None
+            return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}, "patch": paging.get('patch', None)}}
+        else:
+            return paging
 
     def get_unique_setting(self, url, data):
         """
