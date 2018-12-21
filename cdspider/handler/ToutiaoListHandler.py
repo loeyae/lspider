@@ -199,7 +199,7 @@ class ToutiaoListHandler(WemediaListHandler):
                 task['kid'] = 1
                 task['save']['tab'] = self.TAB_VIDEO
                 self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
-                task['save']['tab'] = TAB_TOUTIAO
+                task['save']['tab'] = self.TAB_TOUTIAO
                 task['kid'] = 2
                 self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
 
