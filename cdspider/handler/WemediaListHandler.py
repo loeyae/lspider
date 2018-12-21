@@ -350,6 +350,7 @@ class WemediaListHandler(BaseHandler):
             'spreadNum': result.get('repost', kwargs.get('spreadNum', 0)),
             'commentNum': result.get('comment', kwargs.get('commentNum', 0)),
             'likeNum': result.get('praise', kwargs.get('likeNum', 0)),
+            'playNum': result.get('play_count', kwargs.get('playNum', 0)),
             'rid': kwargs['rid'],
             'acid': kwargs['unid'],                                            # unique str
             'ctime': kwargs.get('ctime', self.crawl_id),
