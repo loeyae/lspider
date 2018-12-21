@@ -201,7 +201,7 @@ class BaseHandler(Component):
             if 'save' in task and task['save'] and 'hard_code' in task['save']:
                 save['hard_code'] = task['save']['hard_code']
             if 'tid' in task and task['tid']:
-                t = self.db['TaskDB'].get_detai(task['tid'])
+                t = self.db['TaskDB'].get_detail(task['tid'])
                 self.task['task'] = t or {}
         self.init_process(save)
         if not save['base_url']:
