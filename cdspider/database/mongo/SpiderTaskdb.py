@@ -202,7 +202,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({"uid": int(uid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
-    def delete(self, id, mode, obj, where = {}):
+    def delete(self, id, mode, where = {}):
         table = self._table_name(mode)
         obj={"status": self.STATUS_DELETED}
         obj['utime'] = int(time.time())

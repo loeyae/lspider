@@ -4,7 +4,7 @@
 
 """
 :author:  Zhang Yi <loeyae@gmail.com>
-:date:    2018-12-2 15:16:34
+:date:    2018-12-16 14:34:28
 """
 import copy
 import time
@@ -12,14 +12,14 @@ from . import BaseHandler
 from cdspider.database.base import *
 from cdspider.libs.constants import *
 from cdspider.libs import utils
-from cdspider.parser import CustomParser
+from cdspider.parser import ListParser
 from cdspider.parser.lib import TimeParser
 
-class CommentHandler(BaseHandler):
+class WeiboHandler(BaseHandler):
     """
-    comment handler
-    :property task 爬虫任务信息 {"mode": "comment", "uuid": SpiderTask.comment uuid}
-                   当测试该handler，数据应为 {"mode": "comment", "url": url, "commentRule": 评论规则，参考评论规则}
+    weibo handler
+    :property task 爬虫任务信息 {"mode": "comment", "uuid": SpiderTask.weibo uuid}
+                   当测试该handler，数据应为 {"mode": "weibo", "url": url, "authorListRule": 评论规则，参考评论规则}
     """
 
     def get_scripts(self):
@@ -32,7 +32,7 @@ class CommentHandler(BaseHandler):
                 if not task:
                     raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
                 self.task.update(task)
-            rule = self.match_rule() or {}
+            rule = self.match_rule({}) or {}
             return rule.get("scripts", None)
         except:
             return None
@@ -42,47 +42,42 @@ class CommentHandler(BaseHandler):
         初始化爬虫流程
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
         """
-        if "commentRule" in self.task:
-            self.task['parent_url'] = self.task['url']
-            self.task['acid'] = "testing_mode"
-            typeinfo = utils.typeinfo(self.task['parent_url'])
-            if typeinfo['domain'] != self.task['commentRule']['domain'] or typeinfo['subdomain'] != self.task['commentRule']['subdomain']:
-                raise CDSpiderNotUrlMatched()
-            crawler = self.get_crawler(self.task.get('commentRule', {}).get('request'))
-            crawler.crawl(url=self.task['parent_url'])
-            url, data = utils.build_attach_url(CustomParser, crawler.page_source, crawler.final_url, self.task.get('commentRule', {}), self.log_level)
-            del crawler
-            if not url:
-                raise CDSpiderNotUrlMatched()
-            self.task['url'] = url
-            save['base_url'] = url
-            self.task['commentRule']['request']['hard_code'] = data
-        else:
-            article = self.db['ArticlesDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])
-            if not article:
-                raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
-            self.task['parent_url'] = article['url']
-            self.task['acid'] = article['acid']
-        self.process = self.match_rule()  or {"unique": {"data": None}}
-        if not 'data' in self.process['unique'] or not self.process['unique']['data']:
-            self.process['unique']['data'] = ','. join(self.process['parse']['item'].keys())
-        save['paging'] = True
+        self.process = self.match_rule(save)
 
-    def match_rule(self):
+    def match_rule(self, save):
         """
         获取匹配的规则
         """
-        parse_rule = self.task.get("commentRule", {})
-        if not parse_rule:
+        if "authorListRule" in self.task:
+            parse_rule = self.task.get("authorListRule")
+            author = copy.deepcopy(self.task['author'])
+            if not author:
+                raise CDSpiderError("author not exists")
+        else:
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
             '''
-            ruleId = self.task.get('kid', 0)
-            parse_rule = self.db['CommentRuleDB'].get_detail(ruleId)
+            author = self.db['WeiboAuthorDB'].get_detail(self.task['uid'])
+            if not author:
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
+                raise CDSpiderDBDataNotFound("author: %s not exists" % self.task['uid'])
+            if author['status'] != WeiboAuthorDB.STATUS_ACTIVE:
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                raise CDSpiderHandlerError("author: %s not active" % self.task['uid'])
+            parse_rule = self.db['AuthorListRuleDB'].get_detail_by_tid(author['tid'])
             if not parse_rule:
-                raise CDSpiderDBDataNotFound("CommentRule: %s not exists" % self.task['kid'])
-            if parse_rule['status'] != CommentRuleDB.STATUS_ACTIVE:
-                raise CDSpiderHandlerError("comment rule not active")
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                raise CDSpiderDBDataNotFound("author rule by tid: %s not exists" % author['tid'])
+            if parse_rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
+                raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
+        save['request'] = {
+            "hard_code": [{
+                "mode": "format",
+                "name": "uid",
+                "value": author['uid'],
+            }],
+        }
+        self.task['url'] = parse_rule['baseUrl']
         return parse_rule
 
     def route(self, mode, save):
@@ -128,7 +123,7 @@ class CommentHandler(BaseHandler):
             for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
                 while True:
                     has_item = False
-                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid']}, select=["uuid"]):
+                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$in": [MEDIA_TYPE_WEIBO]}}, select=["uuid"]):
                         has_item = True
                         if each['uuid'] > save['id']:
                             save['id'] = each['uuid']
@@ -153,7 +148,7 @@ class CommentHandler(BaseHandler):
         if mode == ROUTER_MODE_PROJECT:
             if not 'tid' in save:
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item']}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$in": [MEDIA_TYPE_WEIBO]}}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
@@ -168,7 +163,7 @@ class CommentHandler(BaseHandler):
         elif mode == ROUTER_MODE_SITE:
             if not 'tid' in save:
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"sid": message['item']}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"sid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$in": [MEDIA_TYPE_WEIBO]}}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
@@ -193,25 +188,52 @@ class CommentHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
-        rules = {}
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'kid']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'uid']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
                 '''
-                ruleId = item.pop('kid', 0)
-                if str(ruleId) in rules:
-                    rule = rules[str(ruleId)]
-                else:
-                    rule = self.db['CommentRuleDB'].get_detail(ruleId)
-                    rules[str(ruleId)] = rule
-                if not rule:
+                author = self.db['WeiboAuthorDB'].get_detail(item['uid'])
+                if not author:
+                    self.db['SpiderTaskDB'].delete(item['uuid'], mode)
                     continue
-                plantime = int(save['now']) + int(self.ratemap[str(rule.get('frequency', self.DEFAULT_RATE))][0])
+                plantime = int(save['now']) + int(self.ratemap[str(author.get('frequency', self.DEFAULT_RATE))][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
+
+    def newtask(self, message):
+        """
+        新建爬虫任务
+        :param message [{"uid": url uuid, "mode": handler mode}]
+        """
+        uid = message['uid']
+        if not isinstance(uid, (list, tuple)):
+            uid = [uid]
+        for each in uid:
+            spiderTasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
+            if len(list(spiderTasks)) > 0:
+                continue
+            author = self.db['WeiboAuthorDB'].get_detail(each)
+            if not author:
+                raise CDSpiderDBDataNotFound("author: %s not found" % each)
+            task = {
+                'mode': message['mode'],     # handler mode
+                'pid': author['pid'],        # project uuid
+                'sid': author['sid'],        # site uuid
+                'tid': author['tid'],        # task uuid
+                'uid': each,                 # url uuid
+                'kid': 0,                    # keyword id
+                'url': "base_url",           # url
+                'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+            }
+            self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
+            if not self.testing_mode:
+                '''
+                testing_mode打开时，数据不入库
+                '''
+                self.db['SpiderTaskDB'].insert(task)
 
     def run_parse(self, rule):
         """
@@ -220,7 +242,7 @@ class CommentHandler(BaseHandler):
         :input self.response 爬虫结果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
         :output self.response {"parsed": 解析结果}
         """
-        parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
+        parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
         self.response['parsed'] = parser.parse()
 
     def run_result(self, save):
@@ -244,16 +266,16 @@ class CommentHandler(BaseHandler):
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
                 else:
                     #生成唯一ID, 并判断是否已存在
-                    inserted, unid = self.db['CommentsUniqueDB'].insert(self.get_unique_setting(self.task['parent_url'], each), ctime)
+                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(each ['url'], {}), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
-                    result = self.build_comment_info(result=each, final_url=self.response['final_url'], **unid)
+                    result = self.build_weibo_info(result=each, final_url=self.response['final_url'], **unid)
                     self.debug("%s result: %s" % (self.__class__.__name__, result))
                     if not self.testing_mode:
                         '''
                         testing_mode打开时，数据不入库
                         '''
-                        result_id = self.db['CommentsDB'].insert(result)
+                        result_id = self.db['WeiboInfoDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
                     self.crawl_info['crawl_count']['new_count'] += 1
@@ -263,7 +285,7 @@ class CommentHandler(BaseHandler):
                 self.crawl_info['crawl_count']['repeat_page'] += 1
                 self.on_repetition(save)
 
-    def build_comment_info(self, **kwargs):
+    def build_weibo_info(self, **kwargs):
         """
         构造评论数据
         """
@@ -279,13 +301,11 @@ class CommentHandler(BaseHandler):
             'sid': self.task['sid'],                        # site id
             'tid': self.task['tid'],                        # task id
             'uid': self.task['uid'],                        # url id
-            'ruleId': self.task['kid'],                     # commentRule id
-            'list_url': kwargs.pop('final_url'),            # 列表url
+            'kid': self.task['kid'],                        # url id
+            'ruleId': self.process['uuid'],                 # authorListRule id
+            'list_url': self.task['url'],            # 列表url
         }
-        result['pubtime'] = pubtime                             # pubtime
-        result['acid'] = self.task['acid']                      # article acid
-        result['rid'] = self.task['parentid']                   # article rid
-        result['unid'] = kwargs.pop('unid')
+        result['acid'] = kwargs.pop('unid')
         result['ctime'] = kwargs.pop('ctime')
         return result
 
@@ -293,7 +313,7 @@ class CommentHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(CommentHandler, self).finish(save)
+        super(WeiboHandler, self).finish(save)
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
         crawlinfo[str(self.crawl_id)] = self.crawl_info

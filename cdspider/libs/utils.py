@@ -943,7 +943,7 @@ def build_attach_url(parser_cls, source, final_url, rule, log_level):
             params = {}
             for k, r in parsed.items():
                 if 'mode' in _rule[k]:
-                    hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
+                    hard_code.append({"mode": _rule[k]['mode'], "name": k, "value": r})
                 else:
                     params[k] = r
             urlrule = rule['preparse'].get('url', {})

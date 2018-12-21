@@ -167,12 +167,16 @@ class WemediaListHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
-        plantime = int(save['now']) + int(self.ratemap[str(task.get('frequency', self.DEFAULT_RATE))][0])
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'uid']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
                 '''
+                author = self.db['AuthorDB'].get_detail(item['uid'])
+                if not author:
+                    self.db['SpiderTaskDB'].delete(item['uuid'], mode)
+                    continue
+                plantime = int(save['now']) + int(self.ratemap[str(author.get('frequency', self.DEFAULT_RATE))][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']

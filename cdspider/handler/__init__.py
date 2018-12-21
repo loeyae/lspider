@@ -299,7 +299,8 @@ class BaseHandler(Component):
                 hard_code = []
                 for k, r in parsed.items():
                     hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
-                request['hard_code'] = hard_code
+                if hard_code:
+                    request['hard_code'] = hard_code
         else:
             request['data'] = {}
         return request
@@ -452,9 +453,12 @@ class BaseHandler(Component):
             if not rule['incr_data']:
                 return None
             return rule
-        if not paging['rule']:
-            return None
-        return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}, "patch": paging.get('patch', None)}}
+        elif int(paging.get('pattern') or 1) == 2:
+            if not paging['rule']:
+                return None
+            return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}, "patch": paging.get('patch', None)}}
+        else:
+            return paging
 
     def get_unique_setting(self, url, data):
         """

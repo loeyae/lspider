@@ -112,7 +112,7 @@ HANDLER_MODE_HANDLER_MAPPING = {
     HANDLER_MODE_BBS_ITEM: 'BbsItemHandler',
 #    HANDLER_MODE_WEMEDIA_ITEM: 'WemediaItemHandler',
     HANDLER_MODE_LINKS_CLUSTER: 'LinksClusterHandler',
-#    HANDLER_MODE_WEIBO: 'WeiboHandler',
+    HANDLER_MODE_WEIBO: 'WeiboHandler',
     HANDLER_MODE_COMMENT: 'CommentHandler',
     HANDLER_MODE_INTERACT: 'InteractHandler',
 }

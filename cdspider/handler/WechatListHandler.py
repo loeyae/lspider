@@ -167,7 +167,7 @@ class WechatListHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'uid']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
@@ -175,6 +175,7 @@ class WechatListHandler(BaseHandler):
                 author = self.db['WechatDB'].get_detail(item['uid'])
                 if not author:
                     self.db['SpiderTaskDB'].delete(item['uuid'], mode)
+                    continue
                 plantime = int(save['now']) + int(self.ratemap[str(author.get('frequency', self.DEFAULT_RATE))][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
             if item['uuid'] > save['id']:
@@ -349,6 +350,7 @@ class WechatListHandler(BaseHandler):
         self.crawl_info['crawl_count']['page'] += 1
         self.crawl_info['crawl_count']['total'] = len(self.response['parsed'])
         self.update_crawl_info(save)
+        save['update_crawlinfo'] = True
         if self.response['parsed']:
             #格式化url
             item_save = {"base_url": self.response['last_url']}
@@ -433,8 +435,12 @@ class WechatListHandler(BaseHandler):
         记录抓取日志
         """
         super(WechatListHandler, self).finish(save)
-        s = self.task.get("save")
-        if not s:
-            s = {}
-        s.update(save)
-        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "save": s})
+        _u = save.pop('update_crawlinfo', False)
+        if not _u:
+            self.update_crawl_info(save)
+        else:
+            s = self.task.get("save")
+            if not s:
+                s = {}
+            s.update(save)
+            self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "save": s})
