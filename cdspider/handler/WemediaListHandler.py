@@ -24,7 +24,7 @@ class WemediaListHandler(BaseHandler):
                    当测试该handler，数据应为 {"mode": "wemedia-list", "author": 自媒体号设置，参考自媒体号, "authorListRule": 自媒体列表规则，参考自媒体列表规则}
     """
 
-    NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO)
+    NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WECHAT, MEDIA_TYPE_TOUTIAO)
 
     def route(self, mode, save):
         """
