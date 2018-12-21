@@ -334,8 +334,8 @@ class ToutiaoListHandler(WemediaListHandler):
                         result_id = self.db['ArticlesDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
+                        self.add_interact(rid=result_id, result=item, **unid)
                         if tab != self.TAB_TOUTIAO:
-                            self.add_interact(rid=result_id, result=item, **unid)
                             self.build_item_task(result_id)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
