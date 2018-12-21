@@ -260,12 +260,9 @@ class GeneralListHandler(BaseHandler):
             if not 'ruleId' in urls or not urls['ruleId']:
                 raise CDSpiderHandlerError("url not has list rule")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
-            if not rule:
-                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
-                raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
-            if rule['status'] != ListRuleDB.STATUS_ACTIVE:
+            if rule and rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
-        if 'jsonUrl' in rule and rule['jsonUrl']:
+        if rule and 'jsonUrl' in rule and rule['jsonUrl']:
             self.task['url'] = rule['jsonUrl']
 
         return rule
@@ -322,6 +319,7 @@ class GeneralListHandler(BaseHandler):
             'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
             'title': result.pop('title', None),                                # 标题
             'author': result.pop('author', None),                              # 作者
+            'mediaType': self.task['urls'].get(''),
             'pubtime': pubtime,                                                # 发布时间
             'channel': result.pop('channel', None),                            # 频道信息
             'result': result,
