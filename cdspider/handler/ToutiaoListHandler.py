@@ -390,6 +390,7 @@ class ToutiaoListHandler(WemediaListHandler):
         if self.page > 10:
             raise  CDSpiderCrawlerMoreThanMaximum()
         self.page += 1
+        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
         rule = {
             "has_more": {
                 "filter": "@json:has_more"
