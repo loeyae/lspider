@@ -634,6 +634,7 @@ class BbsItemHandler(BaseHandler):
         :param rule 评论任务规则
         """
         task = {
+            'mediaType': MEDIA_TYPE_BBS,
             'mode': HANDLER_MODE_COMMENT,                           # handler mode
             'pid': self.task['article']['crawlinfo'].get('pid', 0),            # project id
             'sid': self.task['article']['crawlinfo'].get('sid', 0),            # site id
@@ -668,6 +669,7 @@ class BbsItemHandler(BaseHandler):
         :param rule 互动数任务规则
         """
         task = {
+            'mediaType': MEDIA_TYPE_BBS,
             'mode': HANDLER_MODE_INTERACT,                          # handler mode
             'pid': self.task['article']['crawlinfo'].get('pid', 0),            # project id
             'sid': self.task['article']['crawlinfo'].get('sid', 0),            # site id
