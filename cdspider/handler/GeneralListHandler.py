@@ -315,7 +315,7 @@ class GeneralListHandler(BaseHandler):
             'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
             'title': result.pop('title', None),                                # 标题
             'author': result.pop('author', None),                              # 作者
-            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType')),
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER)),
             'pubtime': pubtime,                                                # 发布时间
             'channel': result.pop('channel', None),                            # 频道信息
             'result': result,
@@ -409,6 +409,7 @@ class GeneralListHandler(BaseHandler):
         message = {
             'mode': HANDLER_MODE_BBS_ITEM if self.task['urls'].get('mediaType') in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
             'rid': rid,
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         }
         self.queue['scheduler2spider'].put_nowait(message)
 
