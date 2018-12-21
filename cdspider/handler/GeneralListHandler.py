@@ -242,6 +242,7 @@ class GeneralListHandler(BaseHandler):
         """
         获取匹配的规则
         """
+        rule = {}
         if "listRule" in self.task and self.task['listRule']:
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
