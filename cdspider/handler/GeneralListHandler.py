@@ -256,6 +256,9 @@ class GeneralListHandler(BaseHandler):
             if not 'ruleId' in urls or not urls['ruleId']:
                 raise CDSpiderHandlerError("url not has list rule")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
+            if not rule:
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
+                raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
             if rule and rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
         if rule and 'jsonUrl' in rule and rule['jsonUrl']:
