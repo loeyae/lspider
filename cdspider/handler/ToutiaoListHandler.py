@@ -15,6 +15,7 @@ from cdspider.database.base import *
 from cdspider.libs.constants import *
 from cdspider.parser import ListParser, CustomParser
 from cdspider.libs import utils
+from cdspider.parser.lib import TimeParser
 
 class ToutiaoListHandler(WemediaListHandler):
     """
