@@ -88,7 +88,7 @@ class JsonParser(BaseParser):
                     return self._item_filter(data, rule, onlyOne)
                 else:
                     callback = rule.get('callback', None)
-                    return self.patch_result(data, rule, callback)
+                    return self.patch_result(utils.extract_result(data, rule, None), rule, callback)
             elif 'item' in rule:
                 onlyOne = bool(int(rule.get('onlyOne', 0)))
                 return self._item_filter(data, rule, onlyOne, noLeaf = True)
