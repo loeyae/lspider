@@ -320,6 +320,7 @@ class BbsItemHandler(BaseHandler):
         if pubtime and pubtime > now:
             pubtime = now
         r = {
+            'mediaType': MEDIA_TYPE_BBS,
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'title': result.pop('title', None),                                # 标题
@@ -357,6 +358,7 @@ class BbsItemHandler(BaseHandler):
             'ruleId': self.process['uuid'],                            # forumRule id
             'list_url': kwargs.pop('final_url'),                       # 列表url
         }
+        result['mediaType'] = MEDIA_TYPE_BBS,
         result['acid'] = self.task['article']['acid']                  # article acid
         result['rid'] = self.task['article']['rid']                    # article rid
         result['unid'] = kwargs.pop('unid')
@@ -368,6 +370,7 @@ class BbsItemHandler(BaseHandler):
         构造回复任务
         """
         task = {
+            'mediaType': MEDIA_TYPE_BBS,
             'mode': HANDLER_MODE_BBS_ITEM,                           # handler mode
             'pid': self.task['article']['crawlinfo'].get('pid', 0), # project id
             'sid': self.task['article']['crawlinfo'].get('sid', 0), # site id
