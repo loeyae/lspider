@@ -33,7 +33,7 @@ class Parser(object):
 
     @classmethod
     def xpath_re(cls, node, expression):
-        expression = re.sub('\/tbody(\[\d+\])?\/', '/', expression)
+        expression = re.sub('\/tbody(\[.+?\])?\/', '/', expression)
         regexp_namespace = "http://exslt.org/regular-expressions"
         items = node.xpath(expression, namespaces={'re': regexp_namespace})
         return items
@@ -238,7 +238,10 @@ class Parser(object):
 
     @classmethod
     def outerHtml(cls, node):
-        tmp = node
+        if isinstance(node, etree._ElementUnicodeResult):
+            tmp = cls.getParent(node)
+        else:
+            tmp = node
         if tmp.tail:
             tmp = deepcopy(tmp)
             tmp.tail = None
