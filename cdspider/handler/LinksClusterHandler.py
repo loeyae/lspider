@@ -103,6 +103,7 @@ class LinksClusterHandler(BaseHandler):
         else:
             print('find no data!')
 
+'''
     def prepare(self, save):
         super(LinksClusterHandler, self).prepare(save)
         uid = save['request']['hard_code'][0]['value']
@@ -127,6 +128,7 @@ class LinksClusterHandler(BaseHandler):
         else:
             self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0, **self.task['save']['honey'])
         self.request_params['headers'] = {'Host': 'www.toutiao.com', 'User-Agent': 'Mozilla/5.0'}
+'''
 
     def run_parse(self, rule):
         # 根据sid取站点域名
