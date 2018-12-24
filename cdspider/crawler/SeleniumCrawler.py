@@ -436,6 +436,8 @@ class SeleniumCrawler(BaseCrawler):
         """
         获取Response cookie，不指定name时，获取全部cookie
         """
+        if not self._driver:
+            return None
         if not name:
             self._driver.get_cookies()
         return self._driver.get_cookie(name)
