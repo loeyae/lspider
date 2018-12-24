@@ -106,10 +106,13 @@ class LinksClusterHandler(BaseHandler):
 
     def prepare(self, save):
         super(LinksClusterHandler, self).prepare(save)
-        crawler = self.get_crawler({"crawler": "selenium"})
+        crawler = self.get_crawler({"crawler": "selenium", "method": "open"})
         request_params = copy.deepcopy(self.request_params)
         request_params['method'] = 'open'
+        #print(request_params)
         crawler.crawl(**request_params)
+        #self.request_params['url'] = 'https://www.toutiao.com/index.htm'
+        self.request_params['headers'] = {'Host': 'www.toutiao.com', 'User-Agent': 'Mozilla/5.0'}
 
 
     def run_parse(self, rule):
