@@ -14,9 +14,9 @@ from .Mongo import Mongo
 
 class KeywordsDB(Mongo, BaseKeywordsDB):
 
-    __tablename__ = 'keywords'
+    __tablename__ = 'word'
 
-    incr_key = 'keyword'
+    incr_key = 'word'
 
     def __init__(self, connector, table=None, **kwargs):
         super(KeywordsDB, self).__init__(connector, table = table, **kwargs)
