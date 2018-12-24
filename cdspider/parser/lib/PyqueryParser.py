@@ -13,6 +13,7 @@ from . import BaseParser
 from cdspider.libs.utils import pcre2re
 from cdspider.libs.utils import callback_result
 from cdspider.libs.utils import decode
+from cdspider.libs.utils import extract_result
 
 class PyqueryParser(BaseParser):
     """
@@ -133,14 +134,14 @@ class PyqueryParser(BaseParser):
                 if 'mkey' in rule:
                     rst = ((rule['mkey'] in redata.groups()) and redata.group(rule['mkey']) or None)
                     if isinstance(rst, six.string_types):
-                        return self.patch_result(rst, rule, None)
+                        return self.patch_result(extract_result(rst, rule, None), rule, None)
                     return rst
                 rst = redata.group(1)
                 if isinstance(rst, six.string_types):
-                    return self.patch_result(rst, rule, None)
+                    return self.patch_result(extract_result(rst, rule, None), rule, None)
                 return rst
             if isinstance(content, six.string_types):
-                return self.patch_result(rst, rule, None)
+                return self.patch_result(extract_result(rst, rule, None), rule, None)
             return content
         elif 'item' in rule:
             onlyOne = int(rule.get('onlyOne', 0))

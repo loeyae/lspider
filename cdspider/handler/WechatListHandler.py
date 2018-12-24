@@ -81,7 +81,7 @@ class WechatListHandler(BaseHandler):
             for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
                 while True:
                     has_item = False
-                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WEWCHAT}, select=["uuid"]):
+                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WECHAT}, select=["uuid"]):
                         has_item = True
                         if each['uuid'] > save['id']:
                             save['id'] = each['uuid']
@@ -115,7 +115,7 @@ class WechatListHandler(BaseHandler):
                 初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WEWCHAT}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WECHAT}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
@@ -137,7 +137,7 @@ class WechatListHandler(BaseHandler):
                 初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WEWCHAT}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WECHAT}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 #获取该站点计划中的爬虫任务
                 while True:

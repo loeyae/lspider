@@ -10,7 +10,7 @@
 import lxml
 from .goose3.parsers import Parser
 from . import BaseParser
-from cdspider.libs.utils import table2kvlist, decode
+from cdspider.libs.utils import table2kvlist, decode, extract_result
 
 class XpathParser(BaseParser):
     """
@@ -53,8 +53,8 @@ class XpathParser(BaseParser):
                     rule.setdefault('type', 'text')
                     callback = rule.get('callback', None)
                     if isinstance(data, list):
-                        return [self.patch_result(self.f(item, rule), rule, callback) for item in data]
-                    return self.patch_result(self.f(data, rule), rule, callback)
+                        return [self.patch_result(extract_result(self.f(item, rule), rule, None), rule, callback) for item in data]
+                    return self.patch_result(extract_result(self.f(data, rule), rule, None), rule, callback)
             elif 'item' in rule:
                 onlyOne = bool(int(rule.get('onlyOne', 0)))
                 return self._item_filter(doc, rule, onlyOne)

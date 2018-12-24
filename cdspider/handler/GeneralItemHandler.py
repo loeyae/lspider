@@ -65,6 +65,7 @@ class GeneralItemHandler(BaseHandler):
             article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo'])
             if not article:
                 raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
+            self.task.setdefault('mediaType', article.get('mediaType', MEDIA_TYPE_OTHER))
             if not 'ulr' in self.task or not self.task['url']:
                 self.task["url"] = article['url']
             self.task.setdefault('crawlinfo', article.get('crawlinfo', {}))
@@ -377,6 +378,7 @@ class GeneralItemHandler(BaseHandler):
         :param rule 评论任务规则
         """
         task = {
+            'mediaType': self.task['mediaType'],
             'mode': HANDLER_MODE_COMMENT,                           # handler mode
             'pid': self.task['crawlinfo'].get('pid', 0),            # project id
             'sid': self.task['crawlinfo'].get('sid', 0),            # site id
@@ -411,6 +413,7 @@ class GeneralItemHandler(BaseHandler):
         :param rule 互动数任务规则
         """
         task = {
+            'mediaType': self.task['mediaType'],
             'mode': HANDLER_MODE_INTERACT,                          # handler mode
             'pid': self.task['crawlinfo'].get('pid', 0),            # project id
             'sid': self.task['crawlinfo'].get('sid', 0),            # site id

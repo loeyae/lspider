@@ -24,7 +24,7 @@ class WemediaListHandler(BaseHandler):
                    当测试该handler，数据应为 {"mode": "wemedia-list", "author": 自媒体号设置，参考自媒体号, "authorListRule": 自媒体列表规则，参考自媒体列表规则}
     """
 
-    NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WEWCHAT, MEDIA_TYPE_TOUTIAO)
+    NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WECHAT, MEDIA_TYPE_TOUTIAO)
 
     def route(self, mode, save):
         """
@@ -350,6 +350,7 @@ class WemediaListHandler(BaseHandler):
             'spreadNum': result.get('repost', kwargs.get('spreadNum', 0)),
             'commentNum': result.get('comment', kwargs.get('commentNum', 0)),
             'likeNum': result.get('praise', kwargs.get('likeNum', 0)),
+            'playNum': result.get('play_count', kwargs.get('playNum', 0)),
             'rid': kwargs['rid'],
             'acid': kwargs['unid'],                                            # unique str
             'ctime': kwargs.get('ctime', self.crawl_id),

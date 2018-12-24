@@ -17,9 +17,9 @@ class RepliesDB(Mongo, BaseRepliesDB, SplitTableMixin):
     attach_data data object
     """
 
-    __tablename__ = 'comments'
+    __tablename__ = 'replies'
 
-    incr_key = 'comments'
+    incr_key = 'replies'
 
     def __init__(self, connector, table=None, **kwargs):
         super(RepliesDB, self).__init__(connector, table = table, **kwargs)

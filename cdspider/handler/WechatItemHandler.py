@@ -195,6 +195,7 @@ class WechatItemHandler(BaseHandler):
         if pubtime and pubtime > now:
             pubtime = now
         r = {
+            'mediaType': MEDIA_TYPE_WECHAT,
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'title': result.pop('title', None),                                # 标题
@@ -434,6 +435,7 @@ class WechatItemHandler(BaseHandler):
         :param rule 评论任务规则
         """
         task = {
+            'mediaType': MEDIA_TYPE_WECHAT,
             'mode': HANDLER_MODE_COMMENT,                           # handler mode
             'pid': self.task['crawlinfo'].get('pid', 0),            # project id
             'sid': self.task['crawlinfo'].get('sid', 0),            # site id
@@ -468,6 +470,7 @@ class WechatItemHandler(BaseHandler):
         :param rule 互动数任务规则
         """
         task = {
+            'mediaType': MEDIA_TYPE_WECHAT,
             'mode': HANDLER_MODE_INTERACT,                          # handler mode
             'pid': self.task['crawlinfo'].get('pid', 0),            # project id
             'sid': self.task['crawlinfo'].get('sid', 0),            # site id

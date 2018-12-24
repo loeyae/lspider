@@ -282,6 +282,7 @@ class CommentHandler(BaseHandler):
             'ruleId': self.task['kid'],                     # commentRule id
             'list_url': kwargs.pop('final_url'),            # 列表url
         }
+        result['mediaType'] = self.task.get('mediaType', MEDIA_TYPE_OTHER)
         result['pubtime'] = pubtime                             # pubtime
         result['acid'] = self.task['acid']                      # article acid
         result['rid'] = self.task['parentid']                   # article rid

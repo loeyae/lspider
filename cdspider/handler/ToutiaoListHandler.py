@@ -11,19 +11,11 @@ import time
 import traceback
 import re
 from . import WemediaListHandler
-from urllib.parse import urljoin
 from cdspider.database.base import *
-from cdspider.libs import utils
 from cdspider.libs.constants import *
-from cdspider.parser import ListParser
+from cdspider.parser import ListParser, CustomParser
+from cdspider.libs import utils
 from cdspider.parser.lib import TimeParser
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium import webdriver
-from selenium import webdriver
-from selenium.common.exceptions import *
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 
 class ToutiaoListHandler(WemediaListHandler):
     """
@@ -32,7 +24,13 @@ class ToutiaoListHandler(WemediaListHandler):
                    当测试该handler，数据应为 {"mode": "list", "url": url, "listRule": 列表规则，参考列表规则}
     """
 
-    LIST_URL = 'https://www.toutiao.com/pgc/ma/?page_type=1&max_behot_time=0&uid={uid}&media_id={mediaId}&output=json&is_json=1&count=20&from=user_profile_app&version=2&as={as}&cp={cp}&callback=jsonp4'
+    TAB_ARTICLE = 'article'
+    TAB_VIDEO = 'video'
+    TAB_TOUTIAO = 'toutiao'
+
+    LIST_URL = 'https://www.toutiao.com/pgc/ma/?page_type=1&max_behot_time={max_behot_time}&uid={uid}&media_id={mediaId}&output=json&is_json=1&count=20&from=user_profile_app&version=2&as={as}&cp={cp}&callback=jsonp4'
+    VIDEO_URL = 'https://www.toutiao.com/pgc/ma/?page_type=0&max_behot_time={max_behot_time}&uid={uid}&media_id={mediaId}&output=json&is_json=1&count=20&from=user_profile_app&version=2&as={as}&cp={cp}&callback=jsonp4'
+    TOUTIAO_URL = 'https://www.toutiao.com/api/pc/feed/?category=pc_profile_ugc&utm_source=toutiao&visit_user_id={uid}&max_behot_time={max_behot_time}'
 
     def route(self, mode, save):
         """
@@ -168,6 +166,96 @@ class ToutiaoListHandler(WemediaListHandler):
             for each in self.schedule_by_task(task, message['h-mode'], save):
                 yield each
 
+    def newtask(self, message):
+        """
+        新建爬虫任务
+        :param message [{"uid": url uuid, "mode": handler mode}]
+        """
+        uid = message['uid']
+        if not isinstance(uid, (list, tuple)):
+            uid = [uid]
+        for each in uid:
+            spiderTasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
+            if len(list(spiderTasks)) > 0:
+                continue
+            author = self.db['AuthorDB'].get_detail(each)
+            if not author:
+                raise CDSpiderDBDataNotFound("author: %s not found" % each)
+            task = {
+                'mode': message['mode'],     # handler mode
+                'pid': author['pid'],        # project uuid
+                'sid': author['sid'],        # site uuid
+                'tid': author['tid'],        # task uuid
+                'uid': each,                 # url uuid
+                'kid': 0,                    # keyword id
+                'url': "base_url",           # url
+                'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+                'save': {'tab': self.TAB_ARTICLE}
+            }
+            self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
+            if not self.testing_mode:
+                '''
+                testing_mode打开时，数据不入库
+                '''
+                self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
+                task['kid'] = 1
+                task['save']['tab'] = self.TAB_VIDEO
+                self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
+                task['save']['tab'] = self.TAB_TOUTIAO
+                task['kid'] = 2
+                self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
+
+    def init_process(self, save):
+        """
+        初始化爬虫流程
+        :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
+        """
+        rule = self.match_rule(save)
+        self.process = rule
+        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
+        if tab == self.TAB_VIDEO:
+            self.process['parse']['item']['play_count'] = {
+                "filter": "@json:detail_play_effective_count"
+            }
+        elif tab == self.TAB_TOUTIAO:
+            self.process['parse'] = {
+                "filter" : "@json:data",
+                "item" : {
+                    "title" : {
+                        "filter" : "@json:concern_talk_cell.packed_json_str",
+                        "extract" : "\"share_title\":\"[r=title].+?[/r]\""
+                    },
+                    "url" : {
+                        "filter" : "@json:concern_talk_cell.id",
+                        "patch" : "http://www.toutiao.com/item/[url]"
+                    },
+                    "author" : {
+                        "filter" : "@json:concern_talk_cell.packed_json_str",
+                        "extract" : "\"name\":\"[r=author].+?[/r]\""
+                    },
+                    "content" : {
+                        "filter" : "@json:concern_talk_cell.packed_json_str",
+                        "extract" : "\"content\":\"[r=content].+?[/r]\""
+                    },
+                    "pubtime" : {
+                        "filter" : "@json:base_cell.behot_time",
+                        "extract" : None
+                    },
+                    "comment" : {
+                        "filter" : "@json:concern_talk_cell.packed_json_str",
+                        "extract" : "\"comment_count\":[r=comment]\d+[/r]"
+                    },
+                    "praise" : {
+                        "filter" : "@json:concern_talk_cell.packed_json_str",
+                        "extract" : "\"digg_count\":[r=praise]\d+[/r]"
+                    },
+                    "view" : {
+                        "filter" : "@json:concern_talk_cell.packed_json_str",
+                        "extract" : "\"read_count\":[r=view]\d+[/r]"
+                    }
+                }
+            }
+
     def prepare(self, save):
         super(ToutiaoListHandler, self).prepare(save)
         uid = save['request']['hard_code'][0]['value']
@@ -180,16 +268,146 @@ class ToutiaoListHandler(WemediaListHandler):
             crawler.crawl(**request_params)
             getHoneyjs='return (ascp.getHoney())'
             honey = dict(crawler._driver.execute_script(getHoneyjs))
-            save['honey'] = honey
     #        _signatureJs='return TAC.sign('+ uid +')'
     #        self.debug("%s sign js: %s" % (self.__class__.__name__, _signatureJs))
     #        _signature = crawler._driver.execute_script(_signatureJs)
     #        save['_signature'] = _signature
             mediaIdJs = 'return userInfo.mediaId'
             mediaId = crawler._driver.execute_script(mediaIdJs)
-            save['mediaId'] = mediaId
-            self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=mediaId, **honey)
+            self.task['save']['mediaId'] = mediaId
+            self.task['save']['honey'] = honey
 #        self.request_params['url'] = 'https://www.toutiao.com/c/user/article/?page_type=1&user_id=' + uid + '&max_behot_time=0&count=20&as='+ honey['as'] +'&cp='+ honey['cp'] +'&_signature='+ _signature
+        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
+        if tab == self.TAB_VIDEO:
+            self.request_params['url'] = self.VIDEO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0, **self.task['save']['honey'])
+        elif tab == self.TAB_TOUTIAO:
+            self.request_params['url'] = self.TOUTIAO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0)
         else:
-            self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], **self.task['save']['honey'])
+            self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0, **self.task['save']['honey'])
         self.request_params['headers'] = {'Host': 'www.toutiao.com', 'User-Agent': 'Mozilla/5.0'}
+
+    def run_parse(self, rule):
+        """
+        根据解析规则解析源码，获取相应数据
+        :param rule 解析规则
+        :input self.response 爬虫结果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
+        :output self.response {"parsed": 解析结果}
+        """
+        parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
+        parsed = parser.parse()
+        if not parsed:
+            raise CDSpiderCrawlerNoResponse()
+        self.response['parsed'] = parsed
+
+    def run_result(self, save):
+        """
+        爬虫结果处理
+        :param save 保存的上下文信息
+        :input self.response {"parsed": 解析结果, "final_url": 请求的url}
+        """
+        self.crawl_info['crawl_urls'][str(self.page)] = self.response['last_url']
+        self.crawl_info['crawl_count']['page'] += 1
+        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
+        if self.response['parsed']:
+            ctime = self.crawl_id
+            new_count = self.crawl_info['crawl_count']['new_count']
+            #格式化url
+            formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
+            for item in formated:
+                self.crawl_info['crawl_count']['total'] += 1
+                if self.testing_mode:
+                    '''
+                    testing_mode打开时，数据不入库
+                    '''
+                    inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
+                    self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
+                else:
+                    #生成文章唯一索引并判断文章是否已经存在
+                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
+                    self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
+                if inserted:
+                    crawlinfo =  self._build_crawl_info(self.response['final_url'])
+                    typeinfo = utils.typeinfo(item['url'])
+                    result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
+                    if self.testing_mode:
+                        '''
+                        testing_mode打开时，数据不入库
+                        '''
+                        self.debug("%s result: %s" % (self.__class__.__name__, result))
+                    else:
+                        result_id = self.db['ArticlesDB'].insert(result)
+                        if not result_id:
+                            raise CDSpiderDBError("Result insert failed")
+                        self.add_interact(rid=result_id, result=item, **unid)
+                        if tab != self.TAB_TOUTIAO:
+                            self.build_item_task(result_id)
+                    self.crawl_info['crawl_count']['new_count'] += 1
+                else:
+                    self.crawl_info['crawl_count']['repeat_count'] += 1
+            if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
+                self.crawl_info['crawl_count']['repeat_page'] += 1
+                self.on_repetition(save)
+
+    def _build_result_info(self, **kwargs):
+        """
+        构造文章数据
+        :param result 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
+        :param final_url 请求的url
+        :param typeinfo 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
+        :param crawlinfo 爬虫信息
+        :param unid 文章唯一索引
+        :param ctime 抓取时间
+        :param status 状态
+        :input self.crawl_id 爬取时刻
+        """
+        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
+        now = int(time.time())
+        result = kwargs.get('result', {})
+        pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
+        if pubtime and pubtime > now:
+            pubtime = now
+        r = {
+            'status': kwargs.get('status', ArticlesDB.STATUS_INIT),
+            'url': kwargs['final_url'],
+            'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
+            'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
+            'title': result.pop('title', None),                                # 标题
+            'author': result.pop('author', None),                              # 作者
+            'pubtime': pubtime,                                                # 发布时间
+            'channel': result.pop('channel', None),                            # 频道信息
+            'crawlinfo': kwargs.get('crawlinfo'),
+            'acid': kwargs['unid'],                                            # unique str
+            'ctime': kwargs.get('ctime', self.crawl_id),
+            }
+        if tab == self.TAB_TOUTIAO:
+            r['content'] = result['content']
+        return r
+
+    def on_next(self, save):
+        """
+        下一页解析
+        """
+        if self.page > 10:
+            raise  CDSpiderCrawlerMoreThanMaximum()
+        self.page += 1
+        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
+        rule = {
+            "has_more": {
+                "filter": "@json:has_more"
+            },
+            "max_behot_time": {
+                "filter": "@json:next.max_behot_time"
+            }
+        }
+        parser = CustomParser(source=self.response['last_source'], ruleset=rule, log_level=self.log_level, url=self.response['final_url'])
+        parsed = parser.parse()
+        if 'has_more' in parsed and parsed['has_more'] == '1':
+            uid = save['request']['hard_code'][0]['value']
+            if tab == self.TAB_VIDEO:
+                save['next_url'] = self.request_params['url'] = self.VIDEO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'], **self.task['save']['honey'])
+            elif tab == self.TAB_TOUTIAO:
+                save['next_url'] = self.request_params['url'] = self.TOUTIAO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'])
+            else:
+                save['next_url'] = self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'], **self.task['save']['honey'])
+        else:
+            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))

@@ -250,6 +250,7 @@ class InteractHandler(BaseHandler):
                     crawlinfo['ruleId'] = self.task['uid']
                     result['crawlinfo'] = crawlinfo
                 result['utime'] = int(time.time())
+                result['mediaType'] = self.task.get('mediaType', MEDIA_TYPE_OTHER)
                 self.debug("%s result: %s" % (self.__class__.__name__, result))
                 if not self.testing_mode:
                     '''

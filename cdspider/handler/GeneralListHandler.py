@@ -231,17 +231,13 @@ class GeneralListHandler(BaseHandler):
         :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
         """
         rule = self.match_rule(save)
-        self.process =  {
-            "request": rule.get("request", self.DEFAULT_PROCESS),
-            "parse": rule.get("parse", None),
-            "paging": rule.get("paging", None),
-            "unique": rule.get("unique", None),
-        }
+        self.process =  rule
 
     def match_rule(self, save):
         """
         获取匹配的规则
         """
+        rule = {}
         if "listRule" in self.task and self.task['listRule']:
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
@@ -261,11 +257,11 @@ class GeneralListHandler(BaseHandler):
                 raise CDSpiderHandlerError("url not has list rule")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
             if not rule:
-                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
                 raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
-            if rule['status'] != ListRuleDB.STATUS_ACTIVE:
+            if rule and rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
-        if 'jsonUrl' in rule and rule['jsonUrl']:
+        if rule and 'jsonUrl' in rule and rule['jsonUrl']:
             self.task['url'] = rule['jsonUrl']
 
         return rule
@@ -322,6 +318,7 @@ class GeneralListHandler(BaseHandler):
             'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
             'title': result.pop('title', None),                                # 标题
             'author': result.pop('author', None),                              # 作者
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER)),
             'pubtime': pubtime,                                                # 发布时间
             'channel': result.pop('channel', None),                            # 频道信息
             'result': result,
@@ -415,6 +412,7 @@ class GeneralListHandler(BaseHandler):
         message = {
             'mode': HANDLER_MODE_BBS_ITEM if self.task['urls'].get('mediaType') in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
             'rid': rid,
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         }
         self.queue['scheduler2spider'].put_nowait(message)
 
