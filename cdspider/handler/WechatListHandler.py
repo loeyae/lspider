@@ -321,7 +321,10 @@ class WechatListHandler(BaseHandler):
         :output self.response {"parsed": 解析结果}
         """
         parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
-        self.response['parsed'] = parser.parse()
+        parsed = parser.parse()
+        if not parsed:
+            raise CDSpiderCrawlerForbidden()
+        self.response['parsed'] = parsed
 
     def update_crawl_info(self, save):
         """
