@@ -13,6 +13,7 @@ import re
 import sys
 import hashlib
 import math
+import copy
 
 class LinksClusterHandler(BaseHandler):
     """
@@ -103,32 +104,13 @@ class LinksClusterHandler(BaseHandler):
         else:
             print('find no data!')
 
-'''
     def prepare(self, save):
         super(LinksClusterHandler, self).prepare(save)
-        uid = save['request']['hard_code'][0]['value']
-        if not 'save' in self.task or not self.task['save']:
-            self.task['save'] = {}
-        if not self.task['save'].get('honey') or not self.task['save'].get('mediaId'):
-            crawler = self.get_crawler({"crawler": "selenium", "method": "open", "proxy": "never"})
-            request_params = copy.deepcopy(self.request_params)
-            request_params['method'] = 'open'
-            crawler.crawl(**request_params)
-            getHoneyjs='return (ascp.getHoney())'
-            honey = dict(crawler._driver.execute_script(getHoneyjs))
-            mediaIdJs = 'return userInfo.mediaId'
-            mediaId = crawler._driver.execute_script(mediaIdJs)
-            self.task['save']['mediaId'] = mediaId
-            self.task['save']['honey'] = honey
-        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
-        if tab == self.TAB_VIDEO:
-            self.request_params['url'] = self.VIDEO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0, **self.task['save']['honey'])
-        elif tab == self.TAB_TOUTIAO:
-            self.request_params['url'] = self.TOUTIAO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0)
-        else:
-            self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0, **self.task['save']['honey'])
-        self.request_params['headers'] = {'Host': 'www.toutiao.com', 'User-Agent': 'Mozilla/5.0'}
-'''
+        crawler = self.get_crawler({"crawler": "selenium"})
+        request_params = copy.deepcopy(self.request_params)
+        request_params['method'] = 'open'
+        crawler.crawl(**request_params)
+
 
     def run_parse(self, rule):
         # 根据sid取站点域名
