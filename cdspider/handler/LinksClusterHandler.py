@@ -20,11 +20,22 @@ class LinksClusterHandler(BaseHandler):
     general handler
     """
     def init_process(self, save):
-        self.process =  {
-            "request": self.DEFAULT_PROCESS,
-            "parse": None,
-            "page": None
-        }
+        if "crawler" in self.task and self.task["crawler"] == "selenium":
+            self.process =  {
+                "request": {
+                    'crawler': self.task['crawler'],
+                    'method': "open",
+                    'proxy': "auto"
+                },
+                "parse": None,
+                "page": None,
+            }
+        else:
+            self.process =  {
+                "request": self.DEFAULT_PROCESS,
+                "parse": None,
+                "page": None,
+            }
 
     def newtask(self, message):
         """
@@ -104,17 +115,6 @@ class LinksClusterHandler(BaseHandler):
         else:
             print('find no data!')
 
-    def prepare(self, save):
-        super(LinksClusterHandler, self).prepare(save)
-        crawler = self.get_crawler({"crawler": "selenium", "method": "open"})
-        request_params = copy.deepcopy(self.request_params)
-        request_params['method'] = 'open'
-        #print(request_params)
-        crawler.crawl(**request_params)
-        #self.request_params['url'] = 'https://www.toutiao.com/index.htm'
-        self.request_params['headers'] = {'Host': 'www.toutiao.com', 'User-Agent': 'Mozilla/5.0'}
-
-
     def run_parse(self, rule):
         # 根据sid取站点域名
         sitedb = self.db['SitesDB']
@@ -190,7 +190,6 @@ class LinksClusterHandler(BaseHandler):
         # 准备 title
         for item in arrTmp:
             arrTitle[item['url']] = item['title']
-
         # 准备写库
         if sortArr:
             urlsdb = self.db['UrlsDB']
