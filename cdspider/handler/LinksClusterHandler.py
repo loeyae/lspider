@@ -41,7 +41,6 @@ class LinksClusterHandler(BaseHandler):
         """
         接收任务并重新分组
         """
-        #self.queue['web2cluster'].put_nowait(message)
         urlsdb = self.db['UrlsDB']
         where = {'tid': message['tid'], 'tier' : message['tier']}
         hits = 50
@@ -197,10 +196,9 @@ class LinksClusterHandler(BaseHandler):
             for item in sortArr:
                 for it in item:
                     # 防止重复，去掉最后的/
-                    url = it[0].rstrip('/')
-                    #urlmd5 = hashlib.md5(url.encode(encoding='UTF-8')).hexdigest()
+                    #url = it[0].rstrip('/')
+                    url = it[0]
                     try:
-                        # urlsUniquedb.insert({"urlmd5": urlmd5, "url": url})
                         urlpath  = urlparse(url).path
                         urlquery = urlparse(url).query
                         if len(urlpath) <= 1 and len(urlquery) == 0:
