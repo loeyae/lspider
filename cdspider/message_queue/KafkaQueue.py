@@ -13,18 +13,19 @@ from cdspider.message_queue import BaseQueue as CDBaseQueue
 import time
 import logging
 import json
+import sys
 
 connection_pool = {}
 
 class KafkaQueue(CDBaseQueue):
 
-    def __init__(self, name, zookeeper_hosts,user=None, password=None, host="localhost", port=6379, path='0',
+    def __init__(self, name, user=None, password=None, host="101.201.148.88:9092", path='0',
                  maxsize=0, lazy_limit=True, log_level = logging.WARN):
         """
         init
         """
-        self.zookeeper_hosts=zookeeper_hosts
-        super(KafkaQueue, self).__init__(name=name, user=user, password=password, host=host, port=port, path=path,
+        #self.zookeeper_hosts=zookeeper_hosts
+        super(KafkaQueue, self).__init__(name=name, user=user, password=password, host=host, path=path,
                  maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
 
     def connect(self):

@@ -37,6 +37,8 @@
     "attach_storage": "data/attach",
     "bloomfilter_redis_url": "redis://:08BcCWLe5Lmc7Rqp@117.79.146.156:6379",
     "sync_kafka": {
+        "topic": "spider2",
+        "host": "101.201.154.223:9092"
     },
     "mail": {
         "mailer": "smtp",
