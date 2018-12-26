@@ -37,7 +37,7 @@ class UrlBuilder(Component):
             return kwargs
         self.info("UrlBuilder parse params: %s" % kwargs)
         _max = int(kwargs.pop('max', 0))
-        page = int(save['page'])
+        page = int(save.get('page', 1))
         if _max > 0 and page > _max:
             raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % _max, base_url = save['base_url'])
         data = save.get("post_data", None)
