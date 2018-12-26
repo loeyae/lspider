@@ -6,12 +6,13 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-12-22 10:28:27
 """
+import re
 import copy
 import time
 import traceback
 import urllib.request
 from . import BaseHandler
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, quote_plus
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
@@ -305,7 +306,7 @@ class GeneralSearchHandler(BaseHandler):
             "hard_code": [{
                 "mode": "format",
                 "name": "keyword",
-                "value": keyword['name'],
+                "value": quote_plus(keyword['name']),
             }],
         }
         self.task['url'] = rule['baseUrl']
@@ -320,6 +321,7 @@ class GeneralSearchHandler(BaseHandler):
         """
         parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
         parsed = parser.parse()
+        self.debug("%s parsed: %s" % (self.__class__.__name__, parsed))
         if parsed:
             self.response['parsed'] = self.build_url_by_rule(parsed, self.response['final_url'])
 
@@ -485,14 +487,14 @@ class GeneralSearchHandler(BaseHandler):
         req = urllib.request.Request(url = url, headers = headers, method = 'GET')
         response = urllib.request.urlopen(req)
         furl = response.geturl()
-        if furl != url:
+        if urlparse(furl).netloc != urlparse(url).netloc:
             return furl
         else:
             content = response.read()
             urllist = re.findall(b'window\.location\.replace\("([^"]+)"\)', content)
             if urllist:
-                return urllist[0]
-        return url
+                return urllist[0].decode()
+        return furl
 
     def build_url_by_rule(self, data, base_url = None):
         """
@@ -509,6 +511,7 @@ class GeneralSearchHandler(BaseHandler):
                 raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(self.task)))
             if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
+            print(item)
             try:
                 item['url'] = self.url_prepare(item['url'])
             except:
@@ -518,6 +521,7 @@ class GeneralSearchHandler(BaseHandler):
                 parsed = {urlrule['name']: item['url']}
                 item['url'] = utils.build_url_by_rule(urlrule, parsed)
             else:
+                print(base_url, item['url'])
                 item['url'] = urljoin(base_url, item['url'])
             formated.append(item)
         return formated
