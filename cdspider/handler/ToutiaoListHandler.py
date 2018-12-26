@@ -368,6 +368,7 @@ class ToutiaoListHandler(WemediaListHandler):
             pubtime = now
         r = {
             'status': kwargs.get('status', ArticlesDB.STATUS_INIT),
+            'mediaType': MEDIA_TYPE_TOUTIAO,
             'url': kwargs['final_url'],
             'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
             'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
