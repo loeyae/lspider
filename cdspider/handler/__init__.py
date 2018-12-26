@@ -425,7 +425,7 @@ class BaseHandler(Component):
             return paging
 
         def build_rule(rule, item):
-            _type = item.pop('type', 'match_data')
+            _type = item.pop('type', 'incr_data')
             if _type == 'match_data':
                 rule['match_data'].update({item.pop('name'): item})
             else:
