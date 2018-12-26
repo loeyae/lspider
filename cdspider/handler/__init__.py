@@ -206,6 +206,7 @@ class BaseHandler(Component):
         self.init_process(save)
         if not save['base_url']:
             save['base_url'] = self.task['url']
+        save['page'] = self.page
         self.handler_run(HANDLER_FUN_PROCESS, {"process": self.process, "save": save})
         self.request = self._get_request(save)
         self.proxy_mode = self.request.pop('proxy', 'never')
@@ -217,7 +218,6 @@ class BaseHandler(Component):
             self.debug("%s other request parameters: %s" % (self.__class__.__name__, save['request']))
             request.update(save['request'])
         if 'paging' in save and save['paging']:
-            save['page'] = self.page
             rule = self.process.get("paging")
             self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
             rule = self.format_paging(rule)
@@ -494,6 +494,7 @@ class BaseHandler(Component):
 from .Loader import Loader
 from .GeneralHandler import GeneralHandler
 from .GeneralListHandler import GeneralListHandler
+from .GeneralSearchHandler import GeneralSearchHandler
 from .GeneralItemHandler import GeneralItemHandler
 from .CommentHandler import CommentHandler
 from .InteractHandler import InteractHandler
