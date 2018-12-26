@@ -17,6 +17,7 @@ from cdspider import Component
 from urllib.parse import urljoin
 from cdspider.libs import utils
 from cdspider.exceptions import *
+from cdspider.parser import CustomParser
 
 class UrlBuilder(Component):
     """
@@ -24,6 +25,7 @@ class UrlBuilder(Component):
     """
     def __init__(self, logger = None, log_level=logging.DEBUG):
         logger = logger or logging.getLogger('spider')
+        self._max = 0
         self.log_level = log_level
         super(UrlBuilder, self).__init__(logger, log_level)
 
@@ -34,23 +36,18 @@ class UrlBuilder(Component):
         if not kwargs or not 'url' in kwargs:
             return kwargs
         self.info("UrlBuilder parse params: %s" % kwargs)
-        data = save.get("view_data", None)
-        if not data and 'view_data' in kwargs:
-            data = self._run_parse(kwargs['view_data'], source, save.get('base_url'))
+        self._max = kwargs.pop('max', 0)
+        data = save.get("post_data", None)
+        if data:
             if 'data' in kwargs:
                 kwargs['data'].update(data)
             else:
                 kwargs['data'] = data
-        elif data and 'view_data' in kwargs:
-            data = utils.dictunion(data, kwargs['view_data'])
-            if 'data' in kwargs:
-                kwargs['data'].update(data)
-            else:
-                kwargs['data'] = data
-
         kwargs['pas'] = []
         kwargs['sub'] = []
         kwargs['fmtdata']= {}
+
+        self._parse_match_code(kwargs, source, save)
         #自增变量设置
         self._parse_incr_data(kwargs, save)
         #随机数变量设置
@@ -81,23 +78,6 @@ class UrlBuilder(Component):
         self.info("UrlBuilder parsed params: %s" % params)
         return params
 
-    def _run_parse(self, rule, source, url=None):
-        self.info("UrlBuilder run parse start")
-        try:
-            data = {}
-            for k, item in rule.items():
-                self.info("UrlBuilder run parse: %s => %s" % (k, item))
-                for parser_name, r in item.items():
-                    parser = utils.load_parser(parser_name, source=source, ruleset={k: r}, log_level=self.log_level, url=url)
-                    parsed = parser.parse()
-                    self.info("UrlBuilder run parse matched data: %s" % str(parsed))
-                    if parsed:
-                        data.update(parsed)
-                        break
-        finally:
-            self.info("UrlBuilder run parse end")
-        return data
-
     def _parse_url(self, kwargs, source, save):
         """
         """
@@ -112,68 +92,45 @@ class UrlBuilder(Component):
                 url = kwargs['url']
         elif isinstance(kwargs['url'], dict):
             setting = kwargs['url']
-            view_data = save.get('view_data', None)
-            if not view_data and 'view_data' in setting:
-                view_data = self._run_parse(setting['view_data'], source, base_url)
-                view_data = utils.filter(view_data)
-                if not view_data:
-                    raise CDSpiderNotUrlMatched('Invalid view data', base_url, kwargs['url']['base'])
-                save['view_data'] = view_data
-            elif view_data and 'view_data' in setting:
-                view_data = utils.dictunion(view_data, setting['view_data'])
-            match_data = save.get('match_data', None)
-            if not match_data and 'match' in setting:
-                match_data = {}
-                for k,v in setting['match'].items():
-                    pattern, key = utils.rule2pattern(v)
-                    mat = re.search(pattern, base_url)
-                    if not mat:
-                        raise CDSpiderNotUrlMatched('Invalid match data', base_url, url)
-                    match_data[k] = mat.group(key)
-                save['match_data'] = match_data
-            if 'base' in setting:
-                if setting['base'] == 'base_url':
-                    url = base_url
-                else:
-                    url = setting['base']
-                if view_data:
-                    for k,v in view_data.items():
-                        self._append_kwargs_data(kwargs, 'format', k, v)
-                if match_data:
-                    for k,v in match_data.items():
-                        self._append_kwargs_data(kwargs, 'format', k, v)
-            elif 'element' in setting:
-                elementdata = self._run_parse({'element': setting['element']}, source, base_url)
-                if elementdata and elementdata['element']:
-                    url = elementdata['element']
-                else:
-                    raise CDSpiderNotUrlMatched('Invalid element data', base_url, rule={'element': setting['element']})
-                if view_data:
-                    for k,v in view_data.items():
-                        self._append_kwargs_data(kwargs, 'url', k, v)
-                if match_data:
-                    for k,v in match_data.items():
-                        self._append_kwargs_data(kwargs, 'url', k, v)
+            _type = setting.get('type')
+            if _type == 'base':
+                url = base_url
+            elif _type == 'parent':
+                url = save.get('parent_url')
             else:
-                raise CDSpiderNotUrlMatched('Invalid url setting', base_url, rule={'url': kwargs['url']})
-
-            if 'response_data' in setting:
-                try:
-                    response_data = self._run_parse(setting['response_data'], source, base_url)
-                    response_data = utils.filter(response_data)
-                    if response_data:
-                        for k,v in response_data.items():
-                            self._append_kwargs_data(kwargs, 'url', k, v)
-                except:
-                    pass
-
-            url = utils.patch_result(url, setting)
+                parser = CustomParser(source=source, ruleset={"url": {"filter": setting['filter']}}, log_level=self.log_level, url=save['base_url'])
+                parsed = parser.parse()
+                url = parsed['url']
         elif isinstance(kwargs['url'], list):
             setting = kwargs['url']
             url = setting[0].format(self._run_parse(setting[1], source, base_url))
         if not url:
             raise CDSpiderNotUrlMatched('Url not exists', base_url, rule=kwargs)
         return self._complate_url(url, kwargs, save)
+
+    def _parse_match_code(self, kwargs, source, save):
+        rule = kwargs.get('match_data')
+        if not rule:
+            return
+        self.info("UrlBuilder run parse start")
+        self.debug("UrlBuilder parse match code rule: %s" % str(rule))
+        try:
+            parser = CustomParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=save['base_url'])
+            parsed = parser.parse()
+            self.debug("UrlBuilder parse match code data: %s" % str(parsed))
+            if parsed:
+                for k, v in parsed.items():
+                    item = rule[k]
+                if 'mode' in item and item['mode']:
+                    if item['mode'] == 'get':
+                        item.setdefault('type', 'url')
+                    elif item['mode'] == 'post':
+                        item.setdefault('type', 'data')
+                    else:
+                        item.setdefault('type', item['mode'])
+                self._append_kwargs_data(kwargs, item['type'], k, v)
+        finally:
+            self.info("UrlBuilder run parse end")
 
     def _parse_hard_code(self, kwargs, save):
         """
@@ -230,10 +187,7 @@ class UrlBuilder(Component):
                 else:
                     cookie_value = crawler.get_cookie(item['value'])
                 value = str(cookie_value)
-                if 'prefix' in item and item['prefix']:
-                    value = item['prefix'] + value
-                if 'suffix' in item and item['suffix']:
-                    value += item['suffix']
+                value = utils.patch_result(value, item)
                 data.append({"name": item['name'], "type": item['type'], "value": value})
             save['cookie_data'] = data
         if data:
@@ -270,12 +224,7 @@ class UrlBuilder(Component):
                 else:
                     len = int(rndtype)
                     rndval = ("%.0f" % (time.time() * (len >= 10 and 10 ** (len - 10) or 10000)))[(0-len):]
-                if 'base' in item:
-                    rndval = "%s%s" % (item['base'], rndval)
-                if 'prefix' in item and item['prefix']:
-                    rndval = "%s%s" % (item['prefix'], str(rndval))
-                if 'suffix' in item and item['suffix']:
-                    rndval =  "%s%s" % (str(rndval), item['suffix'])
+                rndval = utils.patch_result(rndval, item)
                 self._append_kwargs_data(kwargs, item['type'], rndkey, rndval)
 
     def _parse_incr_data(self, kwargs, save):
@@ -299,10 +248,7 @@ class UrlBuilder(Component):
                     raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % item['max'],
                                 base_url = save['base_url'], incr_data = item)
                 value = str(int(item['value']) + (page - 1) * step)
-                if 'prefix' in item and item['prefix']:
-                    value = item['prefix'] + value
-                if 'suffix' in item and item['suffix']:
-                    value += item['suffix']
+                value = utils.patch_result(value, item)
                 if 'mode' in item and item['mode']:
                     if item['mode'] == 'get':
                         item.setdefault('type', 'url')
