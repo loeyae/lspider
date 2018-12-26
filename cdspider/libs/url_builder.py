@@ -36,7 +36,10 @@ class UrlBuilder(Component):
         if not kwargs or not 'url' in kwargs:
             return kwargs
         self.info("UrlBuilder parse params: %s" % kwargs)
-        self._max = kwargs.pop('max', 0)
+        _max = int(kwargs.pop('max', 0))
+        page = int(save['page'])
+        if _max > 0 and page > _max:
+            raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % _max, base_url = save['base_url'])
         data = save.get("post_data", None)
         if data:
             if 'data' in kwargs:
@@ -241,12 +244,7 @@ class UrlBuilder(Component):
                 assert 'name' in incr_data[i] and incr_data[i]['name'], "invalid setting name of incr_data"
                 assert 'value' in incr_data[i], "invalid setting value of incr_data"
                 item = copy.deepcopy(incr_data[i])
-                if not 'max' in item or not item['max']:
-                    item['max'] = 0
                 step = int(item.get('step', 1))
-                if int(item["max"]) > 0 and page > int(item['max']):
-                    raise CDSpiderCrawlerMoreThanMaximum("Crawler more than max page: %s" % item['max'],
-                                base_url = save['base_url'], incr_data = item)
                 value = str(int(item['value']) + (page - 1) * step)
                 value = utils.patch_result(value, item)
                 if 'mode' in item and item['mode']:
