@@ -37,6 +37,8 @@ class SyncKafkaWorker(BaseWorker):
             res = self.db[message['db']].get_detail(message['rid'])
             if '_id' in res:
                 res.pop('_id')
+            if 'mediaType' not in res:
+                res['mediaType'] = 0
             self.info("message: %s " % res)
             if 'rowkey' not in res:
                 print(res)
@@ -62,7 +64,7 @@ class SyncKafkaWorker(BaseWorker):
         """
         rand = random.randint(100,999)
 
-        mediatype = res['mediaType'] if 'mediaType' in res else 0
+        #mediatype = res['mediaType'] if 'mediaType' in res else 0
 
         timeArray = time.localtime(res['pubtime'])
         otherStyleTime = time.strftime("%Y%m%d", timeArray)
@@ -71,5 +73,5 @@ class SyncKafkaWorker(BaseWorker):
         
         #print(str(rand) + str(mediatype).zfill(2) + str(otherStyleTime) + str(nowtime()))
 
-        rowkey = str(rand) + str(mediatype).zfill(2) + str(otherStyleTime) + str(nowtime())
+        rowkey = str(rand) + str(res['mediaType']).zfill(2) + str(otherStyleTime) + str(nowtime())
         return rowkey
