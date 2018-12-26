@@ -423,45 +423,28 @@ class BaseHandler(Component):
     def format_paging(self, paging):
         if not paging:
             return paging
-        if int(paging.get('pattern') or 1) == 1:
-            if not "pageUrl" in paging or not paging['pageUrl']:
-                return None
-            rule = {"url": paging['pageUrl'], 'incr_data': []}
-            if isinstance(paging['rule'], (list, tuple)):
-                for item in paging['rule']:
-                    if not 'word' in item or not item['word']:
-                        continue
-                    rule['incr_data'].append({
-                        "mode": item['method'],
-                        "name": item['word'],
-                        "value": item['value'],
-                        "step": item['step'],
-                        "max": item['max'],
-                        "value": item['value'],
-                        "first": item.get('first', '0')
-                    })
-            elif isinstance(paging['rule'], dict):
-                for item in paging['rule'].values():
-                    if not 'word' in item or not item['word']:
-                        continue
-                    rule['incr_data'].append({
-                        "mode": item['method'],
-                        "name": item['word'],
-                        "value": item['value'],
-                        "step": item['step'],
-                        "max": item['max'],
-                        "value": item['value'],
-                        "first": item.get('first', '0')
-                    })
-            if not rule['incr_data']:
-                return None
-            return rule
-        elif int(paging.get('pattern') or 1) == 2:
-            if not paging['rule']:
-                return None
-            return {"url": {"element": {"xpath": {"filter": paging['rule'], "type": "attr", "target": "href"}}, "patch": paging.get('patch', None)}}
-        else:
-            return paging
+
+        def build_rule(rule, item):
+            _type = item.pop('type', 'incr_data')
+            if _type == 'match_data':
+                rule['match_data'].update({item.pop('name'): item})
+            else:
+                rule[_type].append(item)
+
+        rule = {"url": paging['url'], 'max': paging['max'], 'incr_data': [], 'random': [], 'cookie': [], 'hard_code': [], 'match_data': {}}
+        if isinstance(paging['rule'], (list, tuple)):
+            for item in paging['rule']:
+                if not 'name' in item or not item['name']:
+                    continue
+                build_rule(rule, item)
+        elif isinstance(paging['rule'], dict):
+            for item in paging['rule'].values():
+                if not 'word' in item or not item['word']:
+                    continue
+                build_rule(rule, item)
+        if not rule['incr_data'] and not rule['match_data'] and rule['url']['type'] != 'match':
+            return None
+        return rule
 
     def get_unique_setting(self, url, data):
         """

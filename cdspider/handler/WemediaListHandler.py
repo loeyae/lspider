@@ -324,6 +324,7 @@ class WemediaListHandler(BaseHandler):
             'url': kwargs['final_url'],
             'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
             'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER)),
             'title': result.pop('title', None),                                # 标题
             'author': result.pop('author', None),                              # 作者
             'pubtime': pubtime,                                                # 发布时间
@@ -449,6 +450,7 @@ class WemediaListHandler(BaseHandler):
         """
         message = {
             'mode': HANDLER_MODE_DEFAULT_ITEM,
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER)),
             'rid': rid,
         }
         self.queue['scheduler2spider'].put_nowait(message)
