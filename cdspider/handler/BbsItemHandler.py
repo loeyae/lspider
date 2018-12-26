@@ -523,6 +523,7 @@ class BbsItemHandler(BaseHandler):
         if self.page == 1:
             if self.task.get('rid') and self.task['article'].get('crawlinfo') and not self.testing_mode:
                 self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['article']['crawlinfo']})
+                self.build_sync_task(self.task['rid'], 'ArticlesDB')
         if "uuid" in self.task and self.task['uuid']:
             crawlinfo = self.task.get('crawlinfo', {}) or {}
             self.crawl_info['crawl_end'] = int(time.time())
@@ -699,3 +700,10 @@ class BbsItemHandler(BaseHandler):
                 return None
         else:
             return 'testing_mode'
+
+    def build_sync_task(self, rid, db):
+        """
+        生成同步任务并入队
+        """
+        message = {'rid': rid, 'db': db}
+        self.queue['result2kafka'].put_nowait(message)

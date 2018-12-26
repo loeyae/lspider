@@ -329,6 +329,7 @@ class WechatItemHandler(BaseHandler):
         super(WechatItemHandler, self).finish(save)
         if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
             self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
+            self.build_sync_task(self.task['rid'], 'ArticlesDB')
         if self.task.get('stid') and self.task.get('crawlid') and not self.testing_mode:
             if self.crawl_info['crawl_count']['repeat_count'] == self.crawl_info['crawl_count']['total']:
                 self.crawl_info['crawl_count']['repeat_page'] += 1
@@ -497,3 +498,10 @@ class WechatItemHandler(BaseHandler):
                 return None
         else:
             return 'testing_mode'
+
+    def build_sync_task(self, rid, db):
+        """
+        生成同步任务并入队
+        """
+        message = {'rid': rid, 'db': db}
+        self.queue['result2kafka'].put_nowait(message)

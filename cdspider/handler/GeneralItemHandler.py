@@ -277,6 +277,7 @@ class GeneralItemHandler(BaseHandler):
         super(GeneralItemHandler, self).finish(save)
         if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
             self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
+            self.build_sync_task(self.task['rid'], 'ArticlesDB')
 
     def result2attach(self, save, domain, subdomain=None):
         """
@@ -441,3 +442,10 @@ class GeneralItemHandler(BaseHandler):
                 return None
         else:
             return 'testing_mode'
+
+    def build_sync_task(self, rid, db):
+        """
+        生成同步任务并入队
+        """
+        message = {'rid': rid, 'db': db}
+        self.queue['result2kafka'].put_nowait(message)

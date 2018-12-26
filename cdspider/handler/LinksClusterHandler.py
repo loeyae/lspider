@@ -20,17 +20,27 @@ class LinksClusterHandler(BaseHandler):
     general handler
     """
     def init_process(self, save):
-        self.process =  {
-            "request": self.DEFAULT_PROCESS,
-            "parse": None,
-            "page": None
-        }
+        if "crawler" in self.task and self.task["crawler"] == "selenium":
+            self.process =  {
+                "request": {
+                    'crawler': self.task['crawler'],
+                    'method': "open",
+                    'proxy': "auto"
+                },
+                "parse": None,
+                "page": None,
+            }
+        else:
+            self.process =  {
+                "request": self.DEFAULT_PROCESS,
+                "parse": None,
+                "page": None,
+            }
 
     def newtask(self, message):
         """
         接收任务并重新分组
         """
-        #self.queue['web2cluster'].put_nowait(message)
         urlsdb = self.db['UrlsDB']
         where = {'tid': message['tid'], 'tier' : message['tier']}
         hits = 50
@@ -103,17 +113,6 @@ class LinksClusterHandler(BaseHandler):
                             print('update error!')
         else:
             print('find no data!')
-
-    def prepare(self, save):
-        super(LinksClusterHandler, self).prepare(save)
-        crawler = self.get_crawler({"crawler": "selenium", "method": "open"})
-        request_params = copy.deepcopy(self.request_params)
-        request_params['method'] = 'open'
-        #print(request_params)
-        crawler.crawl(**request_params)
-        #self.request_params['url'] = 'https://www.toutiao.com/index.htm'
-        self.request_params['headers'] = {'Host': 'www.toutiao.com', 'User-Agent': 'Mozilla/5.0'}
-
 
     def run_parse(self, rule):
         # 根据sid取站点域名
@@ -190,7 +189,6 @@ class LinksClusterHandler(BaseHandler):
         # 准备 title
         for item in arrTmp:
             arrTitle[item['url']] = item['title']
-
         # 准备写库
         if sortArr:
             urlsdb = self.db['UrlsDB']
@@ -198,10 +196,9 @@ class LinksClusterHandler(BaseHandler):
             for item in sortArr:
                 for it in item:
                     # 防止重复，去掉最后的/
-                    url = it[0].rstrip('/')
-                    #urlmd5 = hashlib.md5(url.encode(encoding='UTF-8')).hexdigest()
+                    #url = it[0].rstrip('/')
+                    url = it[0]
                     try:
-                        # urlsUniquedb.insert({"urlmd5": urlmd5, "url": url})
                         urlpath  = urlparse(url).path
                         urlquery = urlparse(url).query
                         if len(urlpath) <= 1 and len(urlquery) == 0:
