@@ -22,9 +22,9 @@ from cdspider.parser.lib import TimeParser
 
 class GeneralSearchHandler(BaseHandler):
     """
-    general list handler
-    :property task 爬虫任务信息 {"mode": "list", "uuid": SpiderTask.list uuid}
-                   当测试该handler，数据应为 {"mode": "list", "url": url, "listRule": 列表规则，参考列表规则}
+    general search handler
+    :property task 爬虫任务信息 {"mode": "search", "uuid": SpiderTask.list uuid}
+                   当测试该handler，数据应为 {"mode": "search", "keyword": 关键词规则, "authorListRule": 列表规则，参考列表规则}
     """
 
     NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WECHAT, MEDIA_TYPE_TOUTIAO)
