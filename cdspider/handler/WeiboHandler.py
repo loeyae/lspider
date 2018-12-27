@@ -266,7 +266,7 @@ class WeiboHandler(BaseHandler):
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
                 else:
                     #生成唯一ID, 并判断是否已存在
-                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(each ['url'], {}), ctime)
+                    inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(each['url'], {}), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     result = self.build_weibo_info(result=each, final_url=self.response['final_url'], **unid)
