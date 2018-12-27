@@ -257,6 +257,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
         if self.response['parsed']:
             ctime = self.crawl_id
             new_count = self.crawl_info['crawl_count']['new_count']
+            typeinfo = utils.typeinfo(self.response['final_url'])
             for each in self.response['parsed']:
                 if not each['url']:
                     continue
@@ -281,11 +282,10 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
                         result_id = self.db['WeiboInfoDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
+                    self.result2attach(save, data=each, **typeinfo)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1
-            typeinfo = utils.typeinfo(self.response['final_url'])
-            self.result2attach(save, **typeinfo)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_page'] += 1
                 self.on_repetition(save)
