@@ -511,7 +511,6 @@ class GeneralSearchHandler(BaseHandler):
                 raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(self.task)))
             if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
-            print(item)
             try:
                 item['url'] = self.url_prepare(item['url'])
             except:
@@ -521,7 +520,6 @@ class GeneralSearchHandler(BaseHandler):
                 parsed = {urlrule['name']: item['url']}
                 item['url'] = utils.build_url_by_rule(urlrule, parsed)
             else:
-                print(base_url, item['url'])
                 item['url'] = urljoin(base_url, item['url'])
             formated.append(item)
         return formated
