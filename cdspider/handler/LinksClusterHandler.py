@@ -120,7 +120,7 @@ class LinksClusterHandler(BaseHandler):
         site = sitedb.get_site(self.task['sid'])
 
         extractor = LinksExtractor(url=site['url'])
-        extractor.exctract(self.response['last_source'])
+        extractor.exctract(self.response['last_source'], errors = 'ignore')
 
         # if '://www.' in site['url']:
         #     re_type = 'domains'
