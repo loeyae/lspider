@@ -926,8 +926,6 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
     return parsed
 
 def get_attach_data(parser_cls, source, final_url, rule, log_level):
-    params = {}
-    hard_code = []
     if 'preparse' in rule and rule['preparse']:
         parse = rule['preparse'].get('parse', None)
         parsed = {}
@@ -935,26 +933,33 @@ def get_attach_data(parser_cls, source, final_url, rule, log_level):
             _rule = array2rule(parse, final_url)
             parsed = attach_preparse(parser_cls, source, final_url, _rule, log_level)
             if parsed == False:
-                return (None, None)
-        hard_code = []
-        for k, r in parsed.items():
-            if 'mode' in _rule[k]:
-                hard_code.append({"mode": _rule[k]['mode'], "name": k, "value": r})
-            else:
-                params[k] = r
-    return params, hard_code
+                return False
+        return parsed
+    return {}
 
-def build_attach_url(params, rule, final_url):
+def build_attach_url(data, rule, final_url):
     """
     根据规则构造附加任务url
     :param rule 附加任务url生成规则
     """
     if 'preparse' in rule and rule['preparse']:
         #根据解析规则匹配解析内容
+        parse = rule['preparse'].get('parse', None)
+        if parse:
+            _rule = array2rule(parse, final_url)
+        params = {}
+        hard_code = []
+        for k, r in _rule.items():
+            if k not in data:
+                return (None, None)
+            if 'mode' in r:
+                hard_code.append({"mode": r['mode'], "name": k, "value": data[k]})
+            else:
+                params[k] = data[k]
         urlrule = rule['preparse'].get('url', {})
         if urlrule:
             #格式化url设置，将parent_rul替换为详情页url
             if urlrule['base'] == 'parent_url':
                 urlrule['base'] = final_url
-        return build_url_by_rule(urlrule, params)
-    return None
+        return (build_url_by_rule(urlrule, params), hard_code)
+    return (None, None)
