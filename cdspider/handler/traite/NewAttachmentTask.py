@@ -50,14 +50,14 @@ class NewAttachmentTask(object):
             try:
                 if data is None:
                     params, data = utils.get_attach_data(CustomParser, self.response['last_source'], self.response['final_url'], rule, self.log_level)
-                else:
-                    params = data
-                url = utils.build_attach_url(params, rule, self.response['final_url'], rule)
+                if data == False:
+                    return None
+                url, params = utils.build_attach_url(data, rule, self.response['final_url'])
                 if url:
                     '''
                     根据规则生成出任务url，则为成功
                     '''
-                    cid = self.build_comment_task(url, data, rule)
+                    cid = self.build_comment_task(url, params, rule)
                     if cid:
                         self.task['crawlinfo']['commentRule'] = rule['uuid']
                         self.task['crawlinfo']['commentTaskId'] = cid
@@ -90,15 +90,15 @@ class NewAttachmentTask(object):
         def buid_task(rule, data = None):
             try:
                 if data is None:
-                    params, data = utils.get_attach_data(CustomParser, self.response['last_source'], self.response['final_url'], rule, self.log_level)
-                else:
-                    params = data
-                url = utils.build_attach_url(params, rule, self.response['final_url'], rule)
+                    data = utils.get_attach_data(CustomParser, self.response['last_source'], self.response['final_url'], rule, self.log_level)
+                if data == False:
+                    return None
+                url, params = utils.build_attach_url(data, rule, self.response['final_url'])
                 if url:
                     '''
                     根据规则生成出任务url，则为成功
                     '''
-                    cid = self.build_interact_task(url, data, rule)
+                    cid = self.build_interact_task(url, params, rule)
                     if cid:
                         self.task['crawlinfo']['interactRule'] = rule['uuid']
                         self.task['crawlinfo']['interactTaskId'] = cid
