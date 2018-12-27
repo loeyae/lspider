@@ -321,7 +321,7 @@ class BaseHandler(Component):
             rule = self.process.get("parse")
         self.debug("%s parse rule: %s" % (self.__class__.__name__, rule))
         rule = self.preparse(rule)
-        self.debug("%s preparseed rule: %s" % (self.__class__.__name__, rule))
+        self.debug("%s preparsed rule: %s" % (self.__class__.__name__, rule))
 
         if HANDLER_FUN_CRAWL in self.handle:
             self.handler_run(HANDLER_FUN_PARSE, {"rule": rule, "response": self.response, "handler": self})
@@ -503,3 +503,4 @@ from .WemediaListHandler import WemediaListHandler
 from .BbsItemHandler import BbsItemHandler
 from .WechatListHandler import WechatListHandler
 from .WechatItemHandler import WechatItemHandler
+from .WeiboSearchHandler import WeiboSearchHandler
