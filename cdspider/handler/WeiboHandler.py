@@ -257,6 +257,8 @@ class WeiboHandler(BaseHandler):
             ctime = self.crawl_id
             new_count = self.crawl_info['crawl_count']['new_count']
             for each in self.response['parsed']:
+                if not each['url']:
+                    continue
                 self.crawl_info['crawl_count']['total'] += 1
                 if self.testing_mode:
                     '''
