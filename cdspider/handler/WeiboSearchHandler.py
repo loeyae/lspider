@@ -12,6 +12,7 @@ import time
 import traceback
 import urllib.request
 from . import GeneralSearchHandler
+from .traite import NewAttachmentTask
 from urllib.parse import urljoin, urlparse, quote_plus
 from cdspider.database.base import *
 from cdspider.libs import utils
@@ -195,6 +196,8 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1
+            typeinfo = utils.typeinfo(self.response['final_url'])
+            self.result2attach(save, **typeinfo)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_page'] += 1
                 self.on_repetition(save)
@@ -223,11 +226,14 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
         result['ctime'] = kwargs.pop('ctime')
         return result
 
+    def url_prepare(self, url):
+        return url
+
     def finish(self, save):
         """
         记录抓取日志
         """
-        super(WeiboHandler, self).finish(save)
+        super(WeiboSearchHandler, self).finish(save)
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
         crawlinfo[str(self.crawl_id)] = self.crawl_info
