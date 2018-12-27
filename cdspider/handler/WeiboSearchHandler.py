@@ -194,10 +194,10 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
                         result_id = self.db['WeiboInfoDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
+                    self.result2attach(save, data=each, **typeinfo)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1
-                self.result2attach(save, data=each, **typeinfo)
             if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
                 self.crawl_info['crawl_count']['repeat_page'] += 1
                 self.on_repetition(save)
