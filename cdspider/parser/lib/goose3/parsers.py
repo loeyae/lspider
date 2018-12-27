@@ -51,7 +51,7 @@ class Parser(object):
         return node.cssselect(selector)
 
     @classmethod
-    def fromstring(cls, html, encoding=None):
+    def fromstring(cls, html, encoding=None, errors = 'strict'):
         if not encoding:
             encoding = get_encodings_from_content(html)
             encoding = encoding and encoding[0] or None
@@ -59,7 +59,7 @@ class Parser(object):
             html = encodeValue(html)
             doc = lxml.html.fromstring(html)
         else:
-            html = smart_str(html, encoding=encoding)
+            html = smart_str(html, encoding=encoding, errors = errors)
             parser = lxml.html.HTMLParser(encoding=encoding)
             doc = lxml.html.fromstring(html, parser=parser)
         return doc
