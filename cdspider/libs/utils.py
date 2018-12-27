@@ -925,31 +925,36 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
         return False
     return parsed
 
-def build_attach_url(parser_cls, source, final_url, rule, log_level):
-        """
-        根据规则构造附加任务url
-        :param rule 附加任务url生成规则
-        """
-        if 'preparse' in rule and rule['preparse']:
-            #根据解析规则匹配解析内容
-            parse = rule['preparse'].get('parse', None)
-            parsed = {}
-            if parse:
-                _rule = array2rule(parse, final_url)
-                parsed = attach_preparse(parser_cls, source, final_url, _rule, log_level)
-                if parsed == False:
-                    return (None, None)
-            hard_code = []
-            params = {}
-            for k, r in parsed.items():
-                if 'mode' in _rule[k]:
-                    hard_code.append({"mode": _rule[k]['mode'], "name": k, "value": r})
-                else:
-                    params[k] = r
-            urlrule = rule['preparse'].get('url', {})
-            if urlrule:
-                #格式化url设置，将parent_rul替换为详情页url
-                if urlrule['base'] == 'parent_url':
-                    urlrule['base'] = final_url
-            return (build_url_by_rule(urlrule, params), hard_code)
-        return (None, None)
+def get_attach_data(parser_cls, source, final_url, rule, log_level):
+    params = {}
+    hard_code = []
+    if 'preparse' in rule and rule['preparse']:
+        parse = rule['preparse'].get('parse', None)
+        parsed = {}
+        if parse:
+            _rule = array2rule(parse, final_url)
+            parsed = attach_preparse(parser_cls, source, final_url, _rule, log_level)
+            if parsed == False:
+                return (None, None)
+        hard_code = []
+        for k, r in parsed.items():
+            if 'mode' in _rule[k]:
+                hard_code.append({"mode": _rule[k]['mode'], "name": k, "value": r})
+            else:
+                params[k] = r
+    return params, hard_code
+
+def build_attach_url(params, rule, final_url):
+    """
+    根据规则构造附加任务url
+    :param rule 附加任务url生成规则
+    """
+    if 'preparse' in rule and rule['preparse']:
+        #根据解析规则匹配解析内容
+        urlrule = rule['preparse'].get('url', {})
+        if urlrule:
+            #格式化url设置，将parent_rul替换为详情页url
+            if urlrule['base'] == 'parent_url':
+                urlrule['base'] = final_url
+        return build_url_by_rule(urlrule, params)
+    return None
