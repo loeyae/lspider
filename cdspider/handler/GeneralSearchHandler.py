@@ -221,6 +221,10 @@ class GeneralSearchHandler(BaseHandler):
                             testing_mode打开时，数据不入库
                             '''
                             self.db['SpiderTaskDB'].insert(t)
+                        uuid = item['uuid']
+                        has_word = True
+                    if not has_word:
+                        break
         else:
             kid = message['kid']
             if not isinstance(kid, (list, tuple)):
@@ -251,6 +255,10 @@ class GeneralSearchHandler(BaseHandler):
                             testing_mode打开时，数据不入库
                             '''
                             self.db['SpiderTaskDB'].insert(t)
+                        uuid = item['uuid']
+                        has_word = True
+                    if not has_word:
+                        break
 
     def get_scripts(self):
         """
