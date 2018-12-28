@@ -50,12 +50,16 @@ class CommentHandler(BaseHandler):
                 raise CDSpiderNotUrlMatched()
             crawler = self.get_crawler(self.task.get('commentRule', {}).get('request'))
             crawler.crawl(url=self.task['parent_url'])
-            url, data = utils.build_attach_url(CustomParser, crawler.page_source, crawler.final_url, self.task.get('commentRule', {}), self.log_level)
+            data = utils.get_attach_data(CustomParser, crawler.page_source, self.task['parent_url'], self.task['commentRule'], self.log_level)
+            if data == False:
+                return None
+            url, params = utils.build_attach_url(data, self.task['commentRule'], self.task['parent_url'])
             del crawler
             if not url:
                 raise CDSpiderNotUrlMatched()
             self.task['url'] = url
             save['base_url'] = url
+            save["hard_code"] = params
             self.task['commentRule']['request']['hard_code'] = data
         else:
             article = self.db['ArticlesDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])

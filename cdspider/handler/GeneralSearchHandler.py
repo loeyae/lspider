@@ -214,6 +214,7 @@ class GeneralSearchHandler(BaseHandler):
                             'uid': 0,                 # url uuid
                             'kid': item['uuid'],                    # keyword id
                             'url': 'base_url',          # url
+                            'status': SpiderTaskDB.STATUS_ACTIVE
                         }
                         self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
                         if not self.testing_mode:
@@ -221,6 +222,10 @@ class GeneralSearchHandler(BaseHandler):
                             testing_mode打开时，数据不入库
                             '''
                             self.db['SpiderTaskDB'].insert(t)
+                        uuid = item['uuid']
+                        has_word = True
+                    if not has_word:
+                        break
         else:
             kid = message['kid']
             if not isinstance(kid, (list, tuple)):
@@ -230,8 +235,8 @@ class GeneralSearchHandler(BaseHandler):
                 if len(list(tasks)) > 0:
                     continue
                 word = self.db['KeywordsDB'].get_detail(each)
-                if not task:
-                    raise CDSpiderDBDataNotFound("task: %s not found" % each)
+                if not word:
+                    raise CDSpiderDBDataNotFound("word: %s not found" % each)
                 uuid = 0
                 while True:
                     has_word = False
@@ -240,10 +245,11 @@ class GeneralSearchHandler(BaseHandler):
                             'mode': self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), HANDLER_MODE_DEFAULT_SEARCH),     # handler mode
                             'pid': item['pid'],          # project uuid
                             'sid': item['sid'],          # site uuid
-                            'tid': item['uuid'],   # task uuid
-                            'uid': 0,                 # url uuid
-                            'kid': each,                    # keyword id
-                            'url': 'base_url',          # url
+                            'tid': item['uuid'],         # task uuid
+                            'uid': 0,                    # url uuid
+                            'kid': each,                 # keyword id
+                            'url': 'base_url',           # url
+                            'status': SpiderTaskDB.STATUS_ACTIVE
                         }
                         self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
                         if not self.testing_mode:
@@ -251,6 +257,10 @@ class GeneralSearchHandler(BaseHandler):
                             testing_mode打开时，数据不入库
                             '''
                             self.db['SpiderTaskDB'].insert(t)
+                        uuid = item['uuid']
+                        has_word = True
+                    if not has_word:
+                        break
 
     def get_scripts(self):
         """
@@ -296,10 +306,10 @@ class GeneralSearchHandler(BaseHandler):
             if keyword['status'] != KeywordsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderHandlerError("keyword: %s not active" % self.task['kid'])
-            rule = self.db['AuthorListRuleDB'].get_detail_by_tid(author['tid'])
+            rule = self.db['AuthorListRuleDB'].get_detail_by_tid(self.task['tid'])
             if not rule:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
-                raise CDSpiderDBDataNotFound("author rule by tid: %s not exists" % author['tid'])
+                raise CDSpiderDBDataNotFound("task rule by tid: %s not exists" % self.task['tid'])
             if rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
         save['request'] = {
@@ -539,7 +549,7 @@ class GeneralSearchHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(GeneralListHandler, self).finish(save)
+        super(GeneralSearchHandler, self).finish(save)
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
         crawlinfo[str(self.crawl_id)] = self.crawl_info

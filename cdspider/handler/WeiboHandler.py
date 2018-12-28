@@ -282,9 +282,8 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
                         result_id = self.db['WeiboInfoDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
-                        else:
-                            self.build_sync_task(result_id, 'WeiboInfoDB')
-                    self.result2attach(save, data=each, **typeinfo)
+                        self.build_sync_task(result_id, 'WeiboInfoDB')
+                    self.result2attach(save, url=each['url'], **typeinfo)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1
@@ -303,6 +302,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
         if pubtime and pubtime > now:
             pubtime = now
         #爬虫信息记录
+        result['pubtime'] = pubtime
         result['crawlinfo'] = {
             'pid': self.task['pid'],                        # project id
             'sid': self.task['sid'],                        # site id

@@ -18,7 +18,7 @@ class NewAttachmentTask(object):
     生成附加任务
     """
 
-    def result2attach(self, save, domain, subdomain=None, data = None):
+    def result2attach(self, save, domain, subdomain=None, data = None, url = None):
         """
         根据详情页生成附加任务
         :param save 传递的上下文信息
@@ -32,24 +32,26 @@ class NewAttachmentTask(object):
             '''
             return
         self.debug("%s new comment task starting" % (self.__class__.__name__))
-        self.result2comment(save, domain, subdomain, data)
+        self.result2comment(save, domain, subdomain, data, url)
         self.debug("%s new comment task end" % (self.__class__.__name__))
         self.debug("%s new interact task starting" % (self.__class__.__name__))
-        self.result2interact(save, domain, subdomain, data)
+        self.result2interact(save, domain, subdomain, data, url)
         self.debug("%s new interact task end" % (self.__class__.__name__))
         self.debug("%s new attach task end" % (self.__class__.__name__))
 
-    def result2comment(self, save, domain, subdomain = None, data = None):
+    def result2comment(self, save, domain, subdomain = None, data = None, url = None):
         """
         根据详情页生成评论任务
         :param save 传递的上下文信息
         :param domain 域名
         :param subdomain 子域名
         """
-        def build_task(rule, data = None):
+        def build_task(rule, data = None, final_url = None):
             try:
+                if final_url is None:
+                    final_url = self.response['final_url']
                 if data is None:
-                    params, data = utils.get_attach_data(CustomParser, self.response['last_source'], self.response['final_url'], rule, self.log_level)
+                    data = utils.get_attach_data(CustomParser, self.response['last_source'], final_url, rule, self.log_level)
                 if data == False:
                     return None
                 url, params = utils.build_attach_url(data, rule, self.response['final_url'])
@@ -71,26 +73,28 @@ class NewAttachmentTask(object):
         ruleset = self.db['CommentRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s comment task rule: %s" % (self.__class__.__name__, str(rule)))
-            if build_task(rule):
+            if build_task(rule, data, url):
                 return
         #通过域名获取评论任务
         ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s comment task rule: %s" % (self.__class__.__name__, str(rule)))
-            if build_task(rule, data):
+            if build_task(rule, data, url):
                 return
 
-    def result2interact(self, save, domain, subdomain = None, data = None):
+    def result2interact(self, save, domain, subdomain = None, data = None, url = None):
         """
         根据详情页生成互动数任务
         :param save 传递的上下文信息
         :param domain 域名
         :param subdomain 子域名
         """
-        def buid_task(rule, data = None):
+        def buid_task(rule, data = None, final_url = None):
             try:
+                if final_url is None:
+                    final_url = self.response['final_url']
                 if data is None:
-                    data = utils.get_attach_data(CustomParser, self.response['last_source'], self.response['final_url'], rule, self.log_level)
+                    data = utils.get_attach_data(CustomParser, self.response['last_source'], final_url, rule, self.log_level)
                 if data == False:
                     return None
                 url, params = utils.build_attach_url(data, rule, self.response['final_url'])
@@ -113,12 +117,12 @@ class NewAttachmentTask(object):
         ruleset = self.db['AttachmentDB'].get_list_by_subdomain(subdomain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
-            buid_task(rule)
+            buid_task(rule, data, url)
         #通过域名获取互动数任务
         ruleset = self.db['AttachmentDB'].get_list_by_domain(domain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
-            buid_task(rule, data)
+            buid_task(rule, data, url)
 
     def build_comment_task(self, url, data, rule):
         """

@@ -96,7 +96,7 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
         :param message route传递过来的消息
         :param save 传递的上下文
         :return 包含uuid, url的字典迭代器，为SpiderTaskDB中数据
-        :notice 该方法返回的迭代器用于plantask生成queue消息，以便fetch听取，消息格式为
+        :notice �方法返回的迭代器用于plantask生成queue消息，以便fetch听取，消息格式为
         {"mode": handler mode, "uuid": SpiderTask uuid, "url": SpiderTask url}
         """
         mode = message['mode']
@@ -194,9 +194,8 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
                         result_id = self.db['WeiboInfoDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
-                        else:
-                            self.build_sync_task(result_id, 'WeiboInfoDB')
-                    self.result2attach(save, data=each, **typeinfo)
+                        self.build_sync_task(result_id, 'WeiboInfoDB')
+                    self.result2attach(save, url=each['url'], **typeinfo)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1
@@ -215,6 +214,7 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
         if pubtime and pubtime > now:
             pubtime = now
         #爬虫信息记录
+        result['pubtime'] = pubtime
         result['crawlinfo'] = {
             'pid': self.task['pid'],                        # project id
             'sid': self.task['sid'],                        # site id
@@ -254,4 +254,3 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
         """
         message = {'rid': rid, 'db': db}
         self.queue['result2kafka'].put_nowait(message)
-        

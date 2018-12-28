@@ -43,12 +43,16 @@ class InteractHandler(BaseHandler):
                 raise CDSpiderNotUrlMatched()
             crawler = self.get_crawler(self.task.get('interactionNumRule', {}).get('request'))
             crawler.crawl(url=self.task['parent_url'])
-            url, data = utils.build_attach_url(CustomParser, crawler.page_source, crawler.final_url, self.task.get('interactionNumRule', {}), self.log_level)
+            data = utils.get_attach_data(CustomParser, crawler.page_source, self.task['parent_url'], self.task['interactionNumRule'], self.log_level)
+            if data == False:
+                return None
+            url, params = utils.build_attach_url(data, self.task['interactionNumRule'], self.task['parent_url'])
             del crawler
             if not url:
                 raise CDSpiderNotUrlMatched()
             self.task['url'] = url
             save['base_url'] = url
+            save["hard_code"] = params
             self.task['interactionNumRule']['request']['hard_code'] = data
         else:
             article = self.db['ArticlesDB'].get_detail(self.task['parentid'], select=['url', 'acid'])

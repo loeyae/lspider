@@ -44,3 +44,4 @@ from .Wechatdb import WechatDB
 from .WechatRuledb import WechatRuleDB
 from .WeiboAuthordb import WeiboAuthorDB
 from .WeiboInfodb import WeiboInfoDB
+from .ForumRuledb import ForumRuleDB
