@@ -104,7 +104,7 @@ from . import Base
     }
 }
 
-class ParseRuleDB(Base):
+class ForumRuleDB(Base):
     """
     parse_rule data object
     """
