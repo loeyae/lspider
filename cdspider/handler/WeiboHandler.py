@@ -301,6 +301,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
         if pubtime and pubtime > now:
             pubtime = now
         #爬虫信息记录
+        result['pubtime'] = pubtime
         result['crawlinfo'] = {
             'pid': self.task['pid'],                        # project id
             'sid': self.task['sid'],                        # site id
