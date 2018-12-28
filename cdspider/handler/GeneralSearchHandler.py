@@ -231,7 +231,7 @@ class GeneralSearchHandler(BaseHandler):
                     continue
                 word = self.db['KeywordsDB'].get_detail(each)
                 if not word:
-                    raise CDSpiderDBDataNotFound("task: %s not found" % each)
+                    raise CDSpiderDBDataNotFound("word: %s not found" % each)
                 uuid = 0
                 while True:
                     has_word = False
