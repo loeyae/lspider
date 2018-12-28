@@ -43,7 +43,10 @@ class InteractHandler(BaseHandler):
                 raise CDSpiderNotUrlMatched()
             crawler = self.get_crawler(self.task.get('interactionNumRule', {}).get('request'))
             crawler.crawl(url=self.task['parent_url'])
-            url, data = utils.build_attach_url(CustomParser, crawler.page_source, crawler.final_url, self.task.get('interactionNumRule', {}), self.log_level)
+            data = utils.get_attach_data(CustomParser, crawler.page_source, self.task['parent_url'], rule, self.log_level)
+            if data == False:
+                return None
+            url, params = utils.build_attach_url(data, rule, self.task['parent_url'])
             del crawler
             if not url:
                 raise CDSpiderNotUrlMatched()
