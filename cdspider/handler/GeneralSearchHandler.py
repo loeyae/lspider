@@ -245,7 +245,7 @@ class GeneralSearchHandler(BaseHandler):
                             'kid': each,                 # keyword id
                             'url': 'base_url',           # url
                         }
-                        self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
+                        self.warn("%s newtask: %s" % (self.__class__.__name__, str(t)))
                         if not self.testing_mode:
                             '''
                             testing_mode打开时，数据不入库
