@@ -22,8 +22,8 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
         super(KeywordsDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'kwid' in indexes:
-            collection.create_index('kwid', unique=True, name='kwid')
+        if not 'uuid' in indexes:
+            collection.create_index('uuid', unique=True, name='uuid')
         if not 'word' in indexes:
             collection.create_index('word', unique=True, name='word')
         if not 'status' in indexes:
