@@ -46,7 +46,7 @@ class InteractHandler(BaseHandler):
             data = utils.get_attach_data(CustomParser, crawler.page_source, self.task['parent_url'], rule, self.log_level)
             if data == False:
                 return None
-            url, params = utils.build_attach_url(data, rule, self.task['parent_url'])
+            url, params = utils.build_attach_url(data, self.task['interactionNumRule'], self.task['parent_url'])
             del crawler
             if not url:
                 raise CDSpiderNotUrlMatched()
