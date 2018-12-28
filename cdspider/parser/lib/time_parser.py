@@ -93,28 +93,28 @@ class Parser(object):
         elif re.findall(r'刚刚',timestring):
             return int(time.time()) - 3
         elif re.findall(r'秒前',timestring):
-            dd=re.match(r'\d',timestring)
+            dd=re.search(r'\d',timestring)
             w=int(dd.group())
             d = (datetime.date.today() - datetime.timedelta(seconds = w)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'分钟前',timestring):
-            dd=re.match(r'\d',timestring)
+            dd=re.search(r'\d',timestring)
             w=int(dd.group())
             d = (datetime.date.today() - datetime.timedelta(minutes = w)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'小时前',timestring):
-            dd=re.match(r'\d',timestring)
+            dd=re.search(r'\d',timestring)
             w=int(dd.group())
             d = (datetime.date.today() - datetime.timedelta(hours = w)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'天前',timestring):
-            dd=re.match(r'\d',timestring)
+            dd=re.search(r'\d',timestring)
             w=int(dd.group())
             d = (datetime.date.today() - datetime.timedelta(days = w)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
             return timeStamp
         elif re.findall(r'周前',timestring):
-            dd=re.match(r'\d',timestring)
+            dd=re.search(r'\d',timestring)
             w=int(dd.group())
             d = (datetime.date.today() - datetime.timedelta(weeks = w)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
