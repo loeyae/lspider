@@ -31,27 +31,25 @@ class SyncKafkaWorker(BaseWorker):
 
     def on_result(self, message):
         #message['db'] = 'ArticlesDB'
-        print(message)
         if 'rid' in message and 'db' in message:
             self.info("got message: %s" % message)
             res = self.db[message['db']].get_detail(message['rid'])
             if '_id' in res:
                 res.pop('_id')
+            if message['db'] == 'WeiboInfoDB':
+                res['mediaType'] = 12
             if 'mediaType' not in res:
                 res['mediaType'] = 0
             self.info("message: %s " % res)
             if 'rowkey' not in res:
-                print(res)
                 rowkey = self.generate_rowkey(res)
                 res['rowkey'] = rowkey
                 try:
-                    print(res)
                     self.kafka.put_nowait(res)
                     self.db[message['db']].update(message['rid'], {'rowkey': rowkey})
                 except Exception as e:
                     print(e)
             else:
-                print(res)
                 try:
                     self.kafka.put_nowait(res)
                 except Exception as e:
@@ -62,16 +60,10 @@ class SyncKafkaWorker(BaseWorker):
         """
         生成唯一key，生成规则：三位随机数（100-999）+mediatype（2位）+puime（年月日，8位）+时间戳（13位)
         """
-        rand = random.randint(100,999)
-
-        #mediatype = res['mediaType'] if 'mediaType' in res else 0
+        #rand = random.randint(100,999)
 
         timeArray = time.localtime(res['pubtime'])
         otherStyleTime = time.strftime("%Y%m%d", timeArray)
-
         nowtime = lambda:int(round(time.time() * 1000))
-        
-        #print(str(rand) + str(mediatype).zfill(2) + str(otherStyleTime) + str(nowtime()))
-
-        rowkey = str(rand) + str(res['mediaType']).zfill(2) + str(otherStyleTime) + str(nowtime())
+        rowkey = str(res['mediaType']).zfill(2) + str(otherStyleTime) + str(nowtime())
         return rowkey

@@ -194,6 +194,8 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
                         result_id = self.db['WeiboInfoDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
+                        else:
+                            self.build_sync_task(result_id, 'WeiboInfoDB')
                     self.result2attach(save, data=each, **typeinfo)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
@@ -245,3 +247,11 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
             s = {}
         s.update(save)
         self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
+
+    def build_sync_task(self, rid, db):
+        """
+        生成同步任务并入队
+        """
+        message = {'rid': rid, 'db': db}
+        self.queue['result2kafka'].put_nowait(message)
+        
