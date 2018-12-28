@@ -230,7 +230,7 @@ class GeneralSearchHandler(BaseHandler):
                 if len(list(tasks)) > 0:
                     continue
                 word = self.db['KeywordsDB'].get_detail(each)
-                if not task:
+                if not word:
                     raise CDSpiderDBDataNotFound("task: %s not found" % each)
                 uuid = 0
                 while True:
@@ -240,10 +240,10 @@ class GeneralSearchHandler(BaseHandler):
                             'mode': self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), HANDLER_MODE_DEFAULT_SEARCH),     # handler mode
                             'pid': item['pid'],          # project uuid
                             'sid': item['sid'],          # site uuid
-                            'tid': item['uuid'],   # task uuid
-                            'uid': 0,                 # url uuid
-                            'kid': each,                    # keyword id
-                            'url': 'base_url',          # url
+                            'tid': item['uuid'],         # task uuid
+                            'uid': 0,                    # url uuid
+                            'kid': each,                 # keyword id
+                            'url': 'base_url',           # url
                         }
                         self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
                         if not self.testing_mode:
