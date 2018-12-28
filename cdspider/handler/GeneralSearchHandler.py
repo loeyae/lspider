@@ -214,6 +214,7 @@ class GeneralSearchHandler(BaseHandler):
                             'uid': 0,                 # url uuid
                             'kid': item['uuid'],                    # keyword id
                             'url': 'base_url',          # url
+                            'status': SpiderTaskDB.STATUS_ACTIVE
                         }
                         self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
                         if not self.testing_mode:
@@ -248,6 +249,7 @@ class GeneralSearchHandler(BaseHandler):
                             'uid': 0,                    # url uuid
                             'kid': each,                 # keyword id
                             'url': 'base_url',           # url
+                            'status': SpiderTaskDB.STATUS_ACTIVE
                         }
                         self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
                         if not self.testing_mode:
