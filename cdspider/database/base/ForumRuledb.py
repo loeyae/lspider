@@ -23,36 +23,36 @@ from . import Base
         "preparse" : {
             "url" : {
                 "mode" : "get",
-                "base" : null
+                "base" : None
             },
             "parse" : [
                 {
-                    "key" : null,
-                    "filter" : null,
-                    "patch" : null
+                    "key" : None,
+                    "filter" : None,
+                    "patch" : None
                 }
             ]
         },
         "unique" : {
-            "data" : null
+            "data" : None
         },
         "request" : {
             "proxy" : "auto",
             "method" : "get",
-            "cookie" : null,
-            "header" : null,
-            "data" : null
+            "cookie" : None,
+            "header" : None,
+            "data" : None
         },
         "paging" : {
             "pattern" : 1,
             "pageUrl" : "base_url",
             "rule" : [
                 {
-                    "method" : null,
-                    "word" : null,
-                    "value" : null,
-                    "step" : null,
-                    "max" : null,
+                    "method" : None,
+                    "word" : None,
+                    "value" : None,
+                    "step" : None,
+                    "max" : None,
                     "first" : "1"
                 }
             ]
@@ -60,42 +60,42 @@ from . import Base
         "parse" : {
             "one" : {
                 "title" : {
-                    "filter" : null,
-                    "extract" : null
+                    "filter" : None,
+                    "extract" : None
                 },
                 "author" : {
-                    "filter" : null,
-                    "extract" : null
+                    "filter" : None,
+                    "extract" : None
                 },
                 "pubtime" : {
-                    "filter" : null,
-                    "extract" : null
+                    "filter" : None,
+                    "extract" : None
                 },
                 "content" : {
-                    "filter" : null
+                    "filter" : None
                 },
                 "channel" : {
-                    "filter" : null,
-                    "extract" : null
+                    "filter" : None,
+                    "extract" : None
                 }
             },
-            "filter" : null,
+            "filter" : None,
             "item" : {
                 "id" : {
-                    "filter" : null,
-                    "extract" : null
+                    "filter" : None,
+                    "extract" : None
                 },
                 "content" : {
-                    "filter" : null,
-                    "extract" : null
+                    "filter" : None,
+                    "extract" : None
                 },
                 "author" : {
-                    "filter" : null,
-                    "extract" : null
+                    "filter" : None,
+                    "extract" : None
                 },
                 "pubtime" : {
-                    "filter" : null,
-                    "extract" : null
+                    "filter" : None,
+                    "extract" : None
                 }
             }
         },
