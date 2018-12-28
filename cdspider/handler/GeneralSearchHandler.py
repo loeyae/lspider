@@ -549,7 +549,7 @@ class GeneralSearchHandler(BaseHandler):
         """
         记录抓取日志
         """
-        super(GeneralListHandler, self).finish(save)
+        super(GeneralSearchHandler, self).finish(save)
         crawlinfo = self.task.get('crawlinfo', {}) or {}
         self.crawl_info['crawl_end'] = int(time.time())
         crawlinfo[str(self.crawl_id)] = self.crawl_info
