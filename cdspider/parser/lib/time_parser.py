@@ -91,7 +91,7 @@ class Parser(object):
             timestring = "%s %s" % (time.strftime("%Y-%m-%d"), timestring)
             return Parser.get_timestamp(timestring, 'global1')
         elif re.findall(r'刚刚',timestring):
-            return int(time.time()-3)
+            return int(time.time()) - 3
         elif re.findall(r'秒前',timestring):
             dd=re.match(r'\d',timestring)
             w=int(dd.group())
