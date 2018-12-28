@@ -6,6 +6,7 @@ import os
 import re
 import logging
 import traceback
+import copy
 import base64
 import json
 import hashlib
@@ -930,7 +931,7 @@ def get_attach_data(parser_cls, source, final_url, rule, log_level):
         parse = rule['preparse'].get('parse', None)
         parsed = {}
         if parse:
-            _rule = array2rule(parse, final_url)
+            _rule = array2rule(copy.deepcopy(parse), final_url)
             parsed = attach_preparse(parser_cls, source, final_url, _rule, log_level)
             if parsed == False:
                 return False
@@ -946,7 +947,7 @@ def build_attach_url(data, rule, final_url):
         #根据解析规则匹配解析内容
         parse = rule['preparse'].get('parse', None)
         if parse:
-            _rule = array2rule(parse, final_url)
+            _rule = array2rule(copy.deepcopy(parse), final_url)
         params = {}
         hard_code = []
         for k, r in _rule.items():
