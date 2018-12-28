@@ -18,7 +18,7 @@ class NewAttachmentTask(object):
     生成附加任务
     """
 
-    def result2attach(self, save, domain, subdomain=None, data = None, url = None):
+    def result2attach(self, save, rid, domain, subdomain=None, data = None, url = None):
         """
         根据详情页生成附加任务
         :param save 传递的上下文信息
@@ -32,21 +32,21 @@ class NewAttachmentTask(object):
             '''
             return
         self.debug("%s new comment task starting" % (self.__class__.__name__))
-        self.result2comment(save, domain, subdomain, data, url)
+        self.result2comment(save, rid, domain, subdomain, data, url)
         self.debug("%s new comment task end" % (self.__class__.__name__))
         self.debug("%s new interact task starting" % (self.__class__.__name__))
-        self.result2interact(save, domain, subdomain, data, url)
+        self.result2interact(save, rid, domain, subdomain, data, url)
         self.debug("%s new interact task end" % (self.__class__.__name__))
         self.debug("%s new attach task end" % (self.__class__.__name__))
 
-    def result2comment(self, save, domain, subdomain = None, data = None, url = None):
+    def result2comment(self, save, rid, domain, subdomain = None, data = None, url = None):
         """
         根据详情页生成评论任务
         :param save 传递的上下文信息
         :param domain 域名
         :param subdomain 子域名
         """
-        def build_task(rule, data = None, final_url = None):
+        def build_task(rule, rid, data = None, final_url = None):
             try:
                 if final_url is None:
                     final_url = self.response['final_url']
@@ -59,7 +59,7 @@ class NewAttachmentTask(object):
                     '''
                     根据规则生成出任务url，则为成功
                     '''
-                    cid = self.build_comment_task(url, params, rule)
+                    cid = self.build_comment_task(url, params, rule, rid)
                     if cid:
                         self.task['crawlinfo']['commentRule'] = rule['uuid']
                         self.task['crawlinfo']['commentTaskId'] = cid
@@ -73,23 +73,23 @@ class NewAttachmentTask(object):
         ruleset = self.db['CommentRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s comment task rule: %s" % (self.__class__.__name__, str(rule)))
-            if build_task(rule, data, url):
+            if build_task(rule, rid, data, url):
                 return
         #通过域名获取评论任务
         ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s comment task rule: %s" % (self.__class__.__name__, str(rule)))
-            if build_task(rule, data, url):
+            if build_task(rule, rid, data, url):
                 return
 
-    def result2interact(self, save, domain, subdomain = None, data = None, url = None):
+    def result2interact(self, save, rid, domain, subdomain = None, data = None, url = None):
         """
         根据详情页生成互动数任务
         :param save 传递的上下文信息
         :param domain 域名
         :param subdomain 子域名
         """
-        def buid_task(rule, data = None, final_url = None):
+        def buid_task(rule, rid, data = None, final_url = None):
             try:
                 if final_url is None:
                     final_url = self.response['final_url']
@@ -102,7 +102,7 @@ class NewAttachmentTask(object):
                     '''
                     根据规则生成出任务url，则为成功
                     '''
-                    cid = self.build_interact_task(url, params, rule)
+                    cid = self.build_interact_task(url, params, rule, rid)
                     if cid:
                         self.task['crawlinfo']['interactRule'] = rule['uuid']
                         self.task['crawlinfo']['interactTaskId'] = cid
@@ -117,14 +117,14 @@ class NewAttachmentTask(object):
         ruleset = self.db['AttachmentDB'].get_list_by_subdomain(subdomain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
-            buid_task(rule, data, url)
+            buid_task(rule, rid, data, url)
         #通过域名获取互动数任务
         ruleset = self.db['AttachmentDB'].get_list_by_domain(domain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
-            buid_task(rule, data, url)
+            buid_task(rule, rid, data, url)
 
-    def build_comment_task(self, url, data, rule):
+    def build_comment_task(self, url, data, rule, rid):
         """
         构造评论任务
         :param url taks url
@@ -139,7 +139,7 @@ class NewAttachmentTask(object):
             'uid': self.task['crawlinfo'].get('uid', 0),            # url id
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
-            'parentid': self.task['rid'],                           # article id
+            'parentid': rid,                           # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
             'save': {"hard_code": data}
@@ -159,7 +159,7 @@ class NewAttachmentTask(object):
         else:
             return 'testing_mode'
 
-    def build_interact_task(self, url, data, rule):
+    def build_interact_task(self, url, data, rule, rid):
         """
         构造互动数任务
         :param url taks url
@@ -174,7 +174,7 @@ class NewAttachmentTask(object):
             'uid': self.task['crawlinfo'].get('uid', 0),            # url id
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
-            'parentid': self.task['rid'],                           # article id
+            'parentid': rid,                                        # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
             'save': {"hard_code": data}
