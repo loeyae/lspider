@@ -51,7 +51,7 @@ class NewAttachmentTask(object):
                 if final_url is None:
                     final_url = self.response['final_url']
                 if data is None:
-                    params, data = utils.get_attach_data(CustomParser, self.response['last_source'], final_url, rule, self.log_level)
+                    data = utils.get_attach_data(CustomParser, self.response['last_source'], final_url, rule, self.log_level)
                 if data == False:
                     return None
                 url, params = utils.build_attach_url(data, rule, self.response['final_url'])
