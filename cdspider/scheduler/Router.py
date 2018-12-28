@@ -76,12 +76,14 @@ class Router(BaseScheduler):
         name = message.get('mode', HANDLER_MODE_DEFAULT)
 
         handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        self.info("Spider loaded handler: %s" % handler)
         handler.newtask(message)
         del handler
 
     def status(self, message):
         name = message.get('mode', HANDLER_MODE_DEFAULT)
         handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        self.info("Spider loaded handler: %s" % handler)
         handler.status(message)
         del handler
 
