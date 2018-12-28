@@ -52,6 +52,7 @@ class InteractHandler(BaseHandler):
                 raise CDSpiderNotUrlMatched()
             self.task['url'] = url
             save['base_url'] = url
+            save["hard_code"] = params
             self.task['interactionNumRule']['request']['hard_code'] = data
         else:
             article = self.db['ArticlesDB'].get_detail(self.task['parentid'], select=['url', 'acid'])
