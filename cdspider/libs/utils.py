@@ -954,7 +954,7 @@ def build_attach_url(data, rule, final_url):
             if k not in data:
                 return (None, None)
             if 'mode' in r:
-                hard_code.append({"mode": r['mode'], "name": k, "value": data[k]})
+                hard_code.append({"type": r['mode'], "name": k, "value": data[k]})
             else:
                 params[k] = data[k]
         urlrule = rule['preparse'].get('url', {})
