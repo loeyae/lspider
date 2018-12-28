@@ -24,8 +24,8 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
         indexes = collection.index_information()
         if not 'uuid' in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
-        if not 'word' in indexes:
-            collection.create_index('word', unique=True, name='word')
+        if not 'name' in indexes:
+            collection.create_index('name', unique=True, name='name')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
         if not 'ctime' in indexes:
