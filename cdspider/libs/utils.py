@@ -946,17 +946,17 @@ def build_attach_url(data, rule, final_url):
     if 'preparse' in rule and rule['preparse']:
         #根据解析规则匹配解析内容
         parse = rule['preparse'].get('parse', None)
-        if parse:
-            _rule = array2rule(copy.deepcopy(parse), final_url)
         params = {}
         hard_code = []
-        for k, r in _rule.items():
-            if k not in data:
-                return (None, None)
-            if 'mode' in r:
-                hard_code.append({"type": r['mode'], "name": k, "value": data[k]})
-            else:
-                params[k] = data[k]
+        if parse:
+            _rule = array2rule(copy.deepcopy(parse), final_url)
+            for k, r in _rule.items():
+                if k not in data:
+                    return (None, None)
+                if 'mode' in r:
+                    hard_code.append({"type": r['mode'], "name": k, "value": data[k]})
+                else:
+                    params[k] = data[k]
         urlrule = rule['preparse'].get('url', {})
         if urlrule:
             #格式化url设置，将parent_rul替换为详情页url
