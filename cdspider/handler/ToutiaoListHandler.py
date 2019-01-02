@@ -181,29 +181,25 @@ class ToutiaoListHandler(WemediaListHandler):
             author = self.db['AuthorDB'].get_detail(each)
             if not author:
                 raise CDSpiderDBDataNotFound("author: %s not found" % each)
-            task = {
-                'mode': message['mode'],     # handler mode
-                'pid': author['pid'],        # project uuid
-                'sid': author['sid'],        # site uuid
-                'tid': author['tid'],        # task uuid
-                'uid': each,                 # url uuid
-                'kid': 0,                    # keyword id
-                'url': "base_url",           # url
-                'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
-                'save': {'tab': self.TAB_ARTICLE}
-            }
-            self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
-            if not self.testing_mode:
-                '''
-                testing_mode打开时，数据不入库
-                '''
-                self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
-                task['kid'] = 1
-                task['save']['tab'] = self.TAB_VIDEO
-                self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
-                task['save']['tab'] = self.TAB_TOUTIAO
-                task['kid'] = 2
-                self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
+            ruleList = self.db['AuthorListRuleDB'].get_list(where={"tid": author['tid']}, select=["uuid"])
+            for rule in ruleList:
+                task = {
+                    'mode': message['mode'],     # handler mode
+                    'pid': author['pid'],        # project uuid
+                    'sid': author['sid'],        # site uuid
+                    'tid': author['tid'],        # task uuid
+                    'uid': each,                 # url uuid
+                    'kid': rule['uuid'],         # keyword id
+                    'url': "base_url",           # url
+                    'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+                    'save': {'tab': self.TAB_ARTICLE}
+                }
+                self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
+                if not self.testing_mode:
+                    '''
+                    testing_mode打开时，数据不入库
+                    '''
+                    self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
 
     def init_process(self, save):
         """
@@ -212,49 +208,41 @@ class ToutiaoListHandler(WemediaListHandler):
         """
         rule = self.match_rule(save)
         self.process = rule
-        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
-        if tab == self.TAB_VIDEO:
-            self.process['parse']['item']['play_count'] = {
-                "filter": "@json:detail_play_effective_count"
+
+    def match_rule(self, save):
+        """
+        获取匹配的规则
+        """
+        if "authorListRule" in self.task:
+            '''
+            如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
+            '''
+            rule = copy.deepcopy(self.task['authorListRule'])
+            author = copy.deepcopy(self.task['author'])
+            if not author:
+                raise CDSpiderError("author not exists")
+        else:
+            author = self.db['AuthorDB'].get_detail(self.task['uid'])
+            if not author:
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
+                raise CDSpiderDBDataNotFound("author: %s not exists" % self.task['uid'])
+            if author['status'] != AuthorDB.STATUS_ACTIVE:
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                raise CDSpiderHandlerError("author: %s not active" % self.task['uid'])
+            rule = self.db['AuthorListRuleDB'].get_detail(self.task['kid'])
+            if not rule:
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                raise CDSpiderDBDataNotFound("author rule by tid: %s not exists" % author['tid'])
+            if rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
+                raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
+        parameters = author.get('parameters')
+        if parameters:
+            save['request'] = {
+                "hard_code": parameters.get('hard'),
+                "random": parameters.get('randoms'),
             }
-        elif tab == self.TAB_TOUTIAO:
-            self.process['parse'] = {
-                "filter" : "@json:data",
-                "item" : {
-                    "title" : {
-                        "filter" : "@json:concern_talk_cell.packed_json_str",
-                        "extract" : "\"share_title\":\"[r=title].+?[/r]\""
-                    },
-                    "url" : {
-                        "filter" : "@json:concern_talk_cell.id",
-                        "patch" : "http://www.toutiao.com/item/[url]"
-                    },
-                    "author" : {
-                        "filter" : "@json:concern_talk_cell.packed_json_str",
-                        "extract" : "\"name\":\"[r=author].+?[/r]\""
-                    },
-                    "content" : {
-                        "filter" : "@json:concern_talk_cell.packed_json_str",
-                        "extract" : "\"content\":\"[r=content].+?[/r]\""
-                    },
-                    "pubtime" : {
-                        "filter" : "@json:base_cell.behot_time",
-                        "extract" : None
-                    },
-                    "comment" : {
-                        "filter" : "@json:concern_talk_cell.packed_json_str",
-                        "extract" : "\"comment_count\":[r=comment]\d+[/r]"
-                    },
-                    "praise" : {
-                        "filter" : "@json:concern_talk_cell.packed_json_str",
-                        "extract" : "\"digg_count\":[r=praise]\d+[/r]"
-                    },
-                    "view" : {
-                        "filter" : "@json:concern_talk_cell.packed_json_str",
-                        "extract" : "\"read_count\":[r=view]\d+[/r]"
-                    }
-                }
-            }
+        self.task['url'] = rule['baseUrl']
+        return rule
 
     def prepare(self, save):
         super(ToutiaoListHandler, self).prepare(save)
@@ -339,8 +327,7 @@ class ToutiaoListHandler(WemediaListHandler):
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
                         self.add_interact(rid=result_id, result=item, **unid)
-                        if tab != self.TAB_TOUTIAO:
-                            self.build_item_task(result_id)
+                        self.build_item_task(result_id)
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1
