@@ -347,7 +347,6 @@ class ToutiaoListHandler(WemediaListHandler):
         :param status 状态
         :input self.crawl_id 爬取时刻
         """
-        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
         now = int(time.time())
         result = kwargs.get('result', {})
         pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
@@ -367,8 +366,6 @@ class ToutiaoListHandler(WemediaListHandler):
             'acid': kwargs['unid'],                                            # unique str
             'ctime': kwargs.get('ctime', self.crawl_id),
             }
-        if tab == self.TAB_TOUTIAO:
-            r['content'] = result['content']
         return r
 
     def on_next(self, save):
