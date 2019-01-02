@@ -321,7 +321,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         if pubtime and pubtime > now:
             pubtime = now
         r = {
-            'mediaType': MEDIA_TYPE_BBS,
+            'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_BBS)),
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'title': result.pop('title', None),                                # 标题
