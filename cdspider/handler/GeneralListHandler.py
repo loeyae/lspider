@@ -24,7 +24,7 @@ class GeneralListHandler(BaseHandler):
                    当测试该handler，数据应为 {"mode": "list", "url": url, "listRule": 列表规则，参考列表规则}
     """
 
-    BBS_TYPES = (MEDIA_TYPE_BBS,)
+    BBS_TYPES = (MEDIA_TYPE_BBS, MEDIA_TYPE_ASK)
 
     def route(self, mode, save):
         """
