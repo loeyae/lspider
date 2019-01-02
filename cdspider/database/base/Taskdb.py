@@ -34,6 +34,9 @@ from . import Base
 
 class TaskDB(Base):
 
+    SEARCH_TYPE_ENGINE = '1'
+    SEARCH_TYPE_SITE = '2'
+
     def insert(self, obj={}):
         raise NotImplementedError
 
