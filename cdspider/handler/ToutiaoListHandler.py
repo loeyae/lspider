@@ -368,31 +368,31 @@ class ToutiaoListHandler(WemediaListHandler):
             }
         return r
 
-    def on_next(self, save):
-        """
+#    def on_next(self, save):
+#        """
         下一页解析
-        """
-        if self.page > 10:
-            raise  CDSpiderCrawlerMoreThanMaximum()
-        self.page += 1
-        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
-        rule = {
-            "has_more": {
-                "filter": "@json:has_more"
-            },
-            "max_behot_time": {
-                "filter": "@json:next.max_behot_time"
-            }
-        }
-        parser = CustomParser(source=self.response['last_source'], ruleset=rule, log_level=self.log_level, url=self.response['final_url'])
-        parsed = parser.parse()
-        if 'has_more' in parsed and parsed['has_more'] == '1':
-            uid = save['request']['hard_code'][0]['value']
-            if tab == self.TAB_VIDEO:
-                save['next_url'] = self.request_params['url'] = self.VIDEO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'], **self.task['save']['honey'])
-            elif tab == self.TAB_TOUTIAO:
-                save['next_url'] = self.request_params['url'] = self.TOUTIAO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'])
-            else:
-                save['next_url'] = self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'], **self.task['save']['honey'])
-        else:
-            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
+        #"""
+#        if self.page > 10:
+#            raise  CDSpiderCrawlerMoreThanMaximum()
+#        self.page += 1
+#        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
+#        rule = {
+#            "has_more": {
+#                "filter": "@json:has_more"
+#            },
+#            "max_behot_time": {
+#                "filter": "@json:next.max_behot_time"
+#            }
+#        }
+#        parser = CustomParser(source=self.response['last_source'], ruleset=rule, log_level=self.log_level, url=self.response['final_url'])
+#        parsed = parser.parse()
+#        if 'has_more' in parsed and parsed['has_more'] == '1':
+#            uid = save['request']['hard_code'][0]['value']
+#            if tab == self.TAB_VIDEO:
+#                save['next_url'] = self.request_params['url'] = self.VIDEO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'], **self.task['save']['honey'])
+#            elif tab == self.TAB_TOUTIAO:
+#                save['next_url'] = self.request_params['url'] = self.TOUTIAO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'])
+#            else:
+#                save['next_url'] = self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=parsed['max_behot_time'], **self.task['save']['honey'])
+#        else:
+#            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
