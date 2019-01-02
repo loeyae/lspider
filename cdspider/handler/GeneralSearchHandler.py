@@ -30,8 +30,12 @@ class GeneralSearchHandler(BaseHandler):
     NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WECHAT, MEDIA_TYPE_TOUTIAO)
     MEDIA_TYPE_TO_MODE = {
         str(MEDIA_TYPE_WEIBO): HANDLER_MODE_WEIBO_SEARCH,
-        str(MEDIA_TYPE_WECHAT): HANDLER_MODE_DEFAULT_SEARCH,
-        str(MEDIA_TYPE_TOUTIAO): HANDLER_MODE_DEFAULT_SEARCH,
+        str(MEDIA_TYPE_WECHAT): HANDLER_MODE_WECHAT_SEARCH,
+    }
+
+    SEARCH_TYPE_TO_MODE = {
+        TaksDB.SEARCH_TYPE_ENGINE: HANDLER_MODE_DEFAULT_SEARCH,
+        TaksDB.SEARCH_TYPE_SITE: HANDLER_MODE_SITE_SEARCH
     }
 
     def route(self, mode, save):
@@ -242,7 +246,7 @@ class GeneralSearchHandler(BaseHandler):
                     has_word = False
                     for item in self.db['TaskDB'].get_new_list(uuid, where={"type": TASK_TYPE_SEARCH}, select=['uuid', 'pid', 'sid', 'mediaType']):
                         t = {
-                            'mode': self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), HANDLER_MODE_DEFAULT_SEARCH),     # handler mode
+                            'mode': self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), self.SEARCH_TYPE_TO_MODE.get(str(item[' searchType'], HANDLER_MODE_DEFAULT_SEARCH))),     # handler mode
                             'pid': item['pid'],          # project uuid
                             'sid': item['sid'],          # site uuid
                             'tid': item['uuid'],         # task uuid
