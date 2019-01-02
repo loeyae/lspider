@@ -176,8 +176,9 @@ class WechatListHandler(BaseHandler):
                 if not author:
                     self.db['SpiderTaskDB'].delete(item['uuid'], mode)
                     continue
-                plantime = int(save['now']) + int(self.ratemap[str(author.get('frequency', self.DEFAULT_RATE))][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+                frequency = str(author.get('frequency', self.DEFAULT_RATE))
+                plantime = int(save['now']) + int(self.ratemap[frequency][0])
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
