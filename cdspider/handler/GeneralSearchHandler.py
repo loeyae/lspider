@@ -34,8 +34,8 @@ class GeneralSearchHandler(BaseHandler):
     }
 
     SEARCH_TYPE_TO_MODE = {
-        TaksDB.SEARCH_TYPE_ENGINE: HANDLER_MODE_DEFAULT_SEARCH,
-        TaksDB.SEARCH_TYPE_SITE: HANDLER_MODE_SITE_SEARCH
+        TaskDB.SEARCH_TYPE_ENGINE: HANDLER_MODE_DEFAULT_SEARCH,
+        TaskDB.SEARCH_TYPE_SITE: HANDLER_MODE_SITE_SEARCH
     }
 
     def route(self, mode, save):
