@@ -195,7 +195,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         if self.response['parsed']:
             typeinfo = utils.typeinfo(self.response['final_url'])
             self.result2db(save, copy.deepcopy(typeinfo))
-            self.result2attach(save, self.task['rid'], **typeinfo)
+            self.result2attach(self.task['crawlinfo'], save, self.task['rid'], **typeinfo)
 
     def result2db(self, save, typeinfo):
         """
