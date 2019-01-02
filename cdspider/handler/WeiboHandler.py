@@ -283,7 +283,8 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
                         self.build_sync_task(result_id, 'WeiboInfoDB')
-                    self.result2attach(save, result_id, url=each['url'], **typeinfo)
+                    self.result2attach(result['crawlinfo'], save, result_id, url=each['url'], **typeinfo)
+                    self.db['WeiboInfoDB'].update(result_id, {"crawlinfo": result['crawlinfo']})
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1
