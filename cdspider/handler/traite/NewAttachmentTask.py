@@ -18,7 +18,7 @@ class NewAttachmentTask(object):
     生成附加任务
     """
 
-    def result2attach(self, save, rid, domain, subdomain=None, data = None, url = None):
+    def result2attach(self, crawlinfo, save, rid, domain, subdomain=None, data = None, url = None):
         """
         根据详情页生成附加任务
         :param save 传递的上下文信息
@@ -31,23 +31,22 @@ class NewAttachmentTask(object):
             只在第一页时执行
             '''
             return
-        self.task.setdefault('crawlinfo', {})
         self.debug("%s new comment task starting" % (self.__class__.__name__))
-        self.result2comment(save, rid, domain, subdomain, data, url)
+        self.result2comment(crawlinfo, save, rid, domain, subdomain, data, url)
         self.debug("%s new comment task end" % (self.__class__.__name__))
         self.debug("%s new interact task starting" % (self.__class__.__name__))
-        self.result2interact(save, rid, domain, subdomain, data, url)
+        self.result2interact(crawlinfo, save, rid, domain, subdomain, data, url)
         self.debug("%s new interact task end" % (self.__class__.__name__))
         self.debug("%s new attach task end" % (self.__class__.__name__))
 
-    def result2comment(self, save, rid, domain, subdomain = None, data = None, url = None):
+    def result2comment(self, crawlinfo, save, rid, domain, subdomain = None, data = None, url = None):
         """
         根据详情页生成评论任务
         :param save 传递的上下文信息
         :param domain 域名
         :param subdomain 子域名
         """
-        def build_task(rule, rid, data = None, final_url = None):
+        def build_task(crawlinfo, rule, rid, data = None, final_url = None):
             try:
                 if final_url is None:
                     final_url = self.response['final_url']
@@ -60,10 +59,10 @@ class NewAttachmentTask(object):
                     '''
                     根据规则生成出任务url，则为成功
                     '''
-                    cid = self.build_comment_task(url, params, rule, rid)
+                    cid = self.build_comment_task(crawlinfo, url, params, rule, rid)
                     if cid:
-                        self.task['crawlinfo']['commentRule'] = rule['uuid']
-                        self.task['crawlinfo']['commentTaskId'] = cid
+                        crawlinfo['commentRule'] = rule['uuid']
+                        crawlinfo['commentTaskId'] = cid
                         self.debug("%s new comment task: %s" % (self.__class__.__name__, str(cid)))
                     return True
                 return False
@@ -74,23 +73,23 @@ class NewAttachmentTask(object):
         ruleset = self.db['CommentRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s comment task rule: %s" % (self.__class__.__name__, str(rule)))
-            if build_task(rule, rid, data, url):
+            if build_task(crawlinfo, rule, rid, data, url):
                 return
         #通过域名获取评论任务
         ruleset = self.db['CommentRuleDB'].get_list_by_domain(domain, where={"status": self.db['CommentRuleDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s comment task rule: %s" % (self.__class__.__name__, str(rule)))
-            if build_task(rule, rid, data, url):
+            if build_task(crawlinfo, rule, rid, data, url):
                 return
 
-    def result2interact(self, save, rid, domain, subdomain = None, data = None, url = None):
+    def result2interact(self, crawlinfo, save, rid, domain, subdomain = None, data = None, url = None):
         """
         根据详情页生成互动数任务
         :param save 传递的上下文信息
         :param domain 域名
         :param subdomain 子域名
         """
-        def buid_task(rule, rid, data = None, final_url = None):
+        def buid_task(crawlinfo, rule, rid, data = None, final_url = None):
             try:
                 if final_url is None:
                     final_url = self.response['final_url']
@@ -103,14 +102,14 @@ class NewAttachmentTask(object):
                     '''
                     根据规则生成出任务url，则为成功
                     '''
-                    cid = self.build_interact_task(url, params, rule, rid)
+                    cid = self.build_interact_task(crawlinfo, url, params, rule, rid)
                     if cid:
-                        self.task['crawlinfo']['interactRule'] = rule['uuid']
-                        self.task['crawlinfo']['interactTaskId'] = cid
-                        if 'interactRuleList' in  self.task['crawlinfo']:
-                             self.task['crawlinfo']['interactRuleList'][str(rule['uuid'])] = cid
+                        crawlinfo['interactRule'] = rule['uuid']
+                        crawlinfo['interactTaskId'] = cid
+                        if 'interactRuleList' in  crawlinfo:
+                             crawlinfo['interactRuleList'][str(rule['uuid'])] = cid
                         else:
-                            self.task['crawlinfo']['interactRuleList'] = {str(rule['uuid']): cid}
+                            crawlinfo['interactRuleList'] = {str(rule['uuid']): cid}
                         self.debug("%s new interact task: %s" % (self.__class__.__name__, str(cid)))
             except:
                 self.error(traceback.format_exc())
@@ -118,14 +117,14 @@ class NewAttachmentTask(object):
         ruleset = self.db['AttachmentDB'].get_list_by_subdomain(subdomain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
-            buid_task(rule, rid, data, url)
+            buid_task(crawlinfo, rule, rid, data, url)
         #通过域名获取互动数任务
         ruleset = self.db['AttachmentDB'].get_list_by_domain(domain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
-            buid_task(rule, rid, data, url)
+            buid_task(crawlinfo, rule, rid, data, url)
 
-    def build_comment_task(self, url, data, rule, rid):
+    def build_comment_task(self, crawlinfo, url, data, rule, rid):
         """
         构造评论任务
         :param url taks url
@@ -134,10 +133,10 @@ class NewAttachmentTask(object):
         task = {
             'mediaType': MEDIA_TYPE_WEIBO,
             'mode': HANDLER_MODE_COMMENT,                           # handler mode
-            'pid': self.task['crawlinfo'].get('pid', self.task.get('pid', 0)),            # project id
-            'sid': self.task['crawlinfo'].get('sid', self.task.get('sid', 0)),            # site id
-            'tid': self.task['crawlinfo'].get('tid', self.task.get('tid', 0)),            # task id
-            'uid': self.task['crawlinfo'].get('uid', self.task.get('uid', 0)),            # url id
+            'pid': crawlinfo.get('pid', self.task.get('pid', 0)),            # project id
+            'sid': crawlinfo.get('sid', self.task.get('sid', 0)),            # site id
+            'tid': crawlinfo.get('tid', self.task.get('tid', 0)),            # task id
+            'uid': crawlinfo.get('uid', self.task.get('uid', 0)),            # url id
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': rid,                           # article id
@@ -160,7 +159,7 @@ class NewAttachmentTask(object):
         else:
             return 'testing_mode'
 
-    def build_interact_task(self, url, data, rule, rid):
+    def build_interact_task(self, crawlinfo, url, data, rule, rid):
         """
         构造互动数任务
         :param url taks url
@@ -169,10 +168,10 @@ class NewAttachmentTask(object):
         task = {
             'mediaType': MEDIA_TYPE_WEIBO,
             'mode': HANDLER_MODE_INTERACT,                          # handler mode
-            'pid': self.task['crawlinfo'].get('pid', self.task.get('pid', 0)),            # project id
-            'sid': self.task['crawlinfo'].get('sid', self.task.get('sid', 0)),            # site id
-            'tid': self.task['crawlinfo'].get('tid', self.task.get('tid', 0)),            # task id
-            'uid': self.task['crawlinfo'].get('uid', self.task.get('uid', 0)),            # url id
+            'pid': crawlinfo.get('pid', self.task.get('pid', 0)),            # project id
+            'sid': crawlinfo.get('sid', self.task.get('sid', 0)),            # site id
+            'tid': crawlinfo.get('tid', self.task.get('tid', 0)),            # task id
+            'uid': crawlinfo.get('uid', self.task.get('uid', 0)),            # url id
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': rid,                                        # article id
