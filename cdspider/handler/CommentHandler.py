@@ -92,7 +92,7 @@ class CommentHandler(BaseHandler):
     def route(self, mode, save):
         """
         schedule 分发
-        :param mode  project|site 分发模式: 按项目|按站点
+        :param mode  project|site 分发模��: 按项目|按站点
         :param save 传递的上下文
         :return 包含uuid的迭代器，项目模式为项目的uuid，站点模式为站点的uuid
         :notice 该方法返回的迭代器用于router生成queue消息，以便plantask听取，消息格式为:
@@ -211,8 +211,9 @@ class CommentHandler(BaseHandler):
                     rules[str(ruleId)] = rule
                 if not rule:
                     continue
-                plantime = int(save['now']) + int(self.ratemap[str(rule.get('frequency', self.DEFAULT_RATE))][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+                frequency = str(rule.get('frequency', self.DEFAULT_RATE))
+                plantime = int(save['now']) + int(self.ratemap[frequency][0])
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
