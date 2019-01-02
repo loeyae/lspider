@@ -44,6 +44,7 @@ class SyncKafkaWorker(BaseWorker):
             if 'rowkey' not in res:
                 rowkey = self.generate_rowkey(res)
                 res['rowkey'] = rowkey
+                res['flag'] = 0
                 try:
                     self.kafka.put_nowait(res)
                     self.db[message['db']].update(message['rid'], {'rowkey': rowkey})
@@ -51,6 +52,7 @@ class SyncKafkaWorker(BaseWorker):
                     print(e)
             else:
                 try:
+                    res['flag'] = 1
                     self.kafka.put_nowait(res)
                 except Exception as e:
                     print(e)
