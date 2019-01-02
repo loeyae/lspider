@@ -37,9 +37,9 @@ class SyncKafkaWorker(BaseWorker):
             if '_id' in res:
                 res.pop('_id')
             if message['db'] == 'WeiboInfoDB':
-                res['mediaType'] = 12
+                res['mediaType'] = 12 #mediaType = 12 微博类型数据
             if 'mediaType' not in res:
-                res['mediaType'] = 0
+                res['mediaType'] = 99 #mediaType = 99 其他类型数据
             self.info("message: %s " % res)
             if 'rowkey' not in res:
                 rowkey = self.generate_rowkey(res)
@@ -56,7 +56,6 @@ class SyncKafkaWorker(BaseWorker):
                     self.kafka.put_nowait(res)
                 except Exception as e:
                     print(e)
-
 
     def generate_rowkey(self, res):
         """
