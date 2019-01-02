@@ -133,10 +133,10 @@ class NewAttachmentTask(object):
         task = {
             'mediaType': MEDIA_TYPE_WEIBO,
             'mode': HANDLER_MODE_COMMENT,                           # handler mode
-            'pid': self.task['crawlinfo'].get('pid', 0),            # project id
-            'sid': self.task['crawlinfo'].get('sid', 0),            # site id
-            'tid': self.task['crawlinfo'].get('tid', 0),            # task id
-            'uid': self.task['crawlinfo'].get('uid', 0),            # url id
+            'pid': self.task['crawlinfo'].get('pid', self.task.get('pid', 0)),            # project id
+            'sid': self.task['crawlinfo'].get('sid', self.task.get('sid', 0)),            # site id
+            'tid': self.task['crawlinfo'].get('tid', self.task.get('tid', 0)),            # task id
+            'uid': self.task['crawlinfo'].get('uid', self.task.get('uid', 0)),            # url id
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': rid,                           # article id
@@ -168,10 +168,10 @@ class NewAttachmentTask(object):
         task = {
             'mediaType': MEDIA_TYPE_WEIBO,
             'mode': HANDLER_MODE_INTERACT,                          # handler mode
-            'pid': self.task['crawlinfo'].get('pid', 0),            # project id
-            'sid': self.task['crawlinfo'].get('sid', 0),            # site id
-            'tid': self.task['crawlinfo'].get('tid', 0),            # task id
-            'uid': self.task['crawlinfo'].get('uid', 0),            # url id
+            'pid': self.task['crawlinfo'].get('pid', self.task.get('pid', 0)),            # project id
+            'sid': self.task['crawlinfo'].get('sid', self.task.get('sid', 0)),            # site id
+            'tid': self.task['crawlinfo'].get('tid', self.task.get('tid', 0)),            # task id
+            'uid': self.task['crawlinfo'].get('uid', self.task.get('uid', 0)),            # url id
             'kid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': rid,                                        # article id
