@@ -359,7 +359,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             'ruleId': self.process['uuid'],                            # forumRule id
             'list_url': kwargs.pop('final_url'),                       # 列表url
         }
-        result['mediaType'] = MEDIA_TYPE_BBS,
+        result['mediaType'] = self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_BBS)),
         result['acid'] = self.task['article']['acid']                  # article acid
         result['rid'] = self.task['article']['rid']                    # article rid
         result['unid'] = kwargs.pop('unid')
@@ -371,7 +371,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         构造回复任务
         """
         task = {
-            'mediaType': MEDIA_TYPE_BBS,
+            'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_BBS)),
             'mode': HANDLER_MODE_BBS_ITEM,                           # handler mode
             'pid': self.task['article']['crawlinfo'].get('pid', 0), # project id
             'sid': self.task['article']['crawlinfo'].get('sid', 0), # site id
