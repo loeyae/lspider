@@ -200,8 +200,9 @@ class InteractHandler(BaseHandler):
                     rules[str(ruleId)] = rule
                 if not rule:
                     continue
-                plantime = int(save['now']) + int(self.ratemap[str(rule.get('frequency', self.DEFAULT_RATE))][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+                frequency = str(rule.get('frequency', self.DEFAULT_RATE))
+                plantime = int(save['now']) + int(self.ratemap[frequency][0])
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
             yield item
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
