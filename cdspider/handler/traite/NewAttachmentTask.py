@@ -31,6 +31,7 @@ class NewAttachmentTask(object):
             只在第一页时执行
             '''
             return
+        self.task.setdefault('crawlinfo', {})
         self.debug("%s new comment task starting" % (self.__class__.__name__))
         self.result2comment(save, rid, domain, subdomain, data, url)
         self.debug("%s new comment task end" % (self.__class__.__name__))
