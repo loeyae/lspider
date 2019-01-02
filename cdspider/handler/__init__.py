@@ -505,3 +505,4 @@ from .WechatListHandler import WechatListHandler
 from .WechatItemHandler import WechatItemHandler
 from .WeiboSearchHandler import WeiboSearchHandler
 from .SiteSearchHandler import SiteSearchHandler
+from .WechatSearchHandler import WechatSearchHandler
