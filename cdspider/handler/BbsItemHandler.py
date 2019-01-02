@@ -145,8 +145,9 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                     rules[str(ruleId)] = rule
                 if not rule:
                     continue
-                plantime = int(save['now']) + int(self.ratemap[str(rule.get('rate', self.DEFAULT_RATE))][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+                frequency = str(rule.get('rate', self.DEFAULT_RATE))
+                plantime = int(save['now']) + int(self.ratemap[frequency][0])
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
