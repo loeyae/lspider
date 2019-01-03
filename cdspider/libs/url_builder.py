@@ -282,7 +282,7 @@ class UrlBuilder(Component):
         """
         url = self._join_url(url, save)
         if 'fmtdata' in kwargs and kwargs['fmtdata']:
-            url = utils.format_(url, kwargs['fmtdata'])
+            url = url.format(**kwargs['fmtdata'])
         if 'pas' in kwargs and kwargs['pas']:
             url = utils.build_query(url, '&'.join(kwargs['pas']))
         if 'path' in kwargs and kwargs['path']:
