@@ -431,7 +431,7 @@ class BaseHandler(Component):
             else:
                 rule[_type].append(item)
 
-        rule = {"url": paging['url'], 'max': paging['max'], 'incr_data': [], 'random': [], 'cookie': [], 'hard_code': [], 'match_data': {}}
+        rule = {"url": paging['url'], 'max': paging.get('max', 0), 'incr_data': [], 'random': [], 'cookie': [], 'hard_code': [], 'match_data': {}}
         if isinstance(paging['rule'], (list, tuple)):
             for item in paging['rule']:
                 if not 'name' in item or not item['name']:
