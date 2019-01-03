@@ -199,17 +199,6 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         url = self.task.get("url")
         if not url:
             raise CDSpiderHandlerError("url not exists")
-        if "forumRule" in self.task:
-            typeinfo = utils.typeinfo(self.task['url'])
-            if typeinfo['domain'] != self.task['forumRule']['domain'] or typeinfo['subdomain'] != self.task['forumRule']['subdomain']:
-                raise CDSpiderNotUrlMatched()
-            if  'urlPattern' in self.task['forumRule'] and self.task['forumRule']['urlPattern']:
-                '''
-                如果规则中存在url匹配规则，则进行url匹配规则验证
-                '''
-                u = utils.preg(url, item['urlPattern'])
-                if not u:
-                    raise CDSpiderNotUrlMatched()
         self.process = self.match_rule() or {"unique": {"data": None}}
         if not 'data' in self.process['unique'] or not self.process['unique']['data']:
             self.process['unique']['data'] = ','. join(self.process['parse']['item'].keys())
