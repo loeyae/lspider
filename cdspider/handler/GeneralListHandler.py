@@ -291,6 +291,7 @@ class GeneralListHandler(BaseHandler):
                 "pid": self.task.get('pid', 0),     # project id
                 "sid": self.task.get('sid', 0),     # site id
                 "tid": self.task.get('tid', 0),     # task id
+                "kid": self.task.get('kid', 0),     # keyword id
                 "list_url": final_url,              # 列表url
                 "list_crawl_id": self.crawl_id,     # 列表抓取时间
         }
