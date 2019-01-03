@@ -180,7 +180,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                 '''
                 如果规则中存在url匹配规则，则进行url匹配规则验证
                 '''
-                u = utils.preg(self.task['url'], item['urlPattern'])
+                u = utils.preg(self.task['url'], self.task['forumRule']['urlPattern'])
                 if not u:
                     raise CDSpiderNotUrlMatched()
         if "parentid" in self.task:
