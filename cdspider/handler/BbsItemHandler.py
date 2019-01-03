@@ -196,9 +196,6 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             self.task['article'] = article
         else:
             self.task.setdefault('crawlinfo', {})
-        url = self.task.get("url")
-        if not url:
-            raise CDSpiderHandlerError("url not exists")
         self.process = self.match_rule() or {"unique": {"data": None}}
         if not 'data' in self.process['unique'] or not self.process['unique']['data']:
             self.process['unique']['data'] = ','. join(self.process['parse']['item'].keys())
