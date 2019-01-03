@@ -357,6 +357,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             'sid': self.task['article']['crawlinfo'].get('sid', 0),    # site id
             'tid': self.task['article']['crawlinfo'].get('tid', 0),    # task id
             'uid': self.task['article']['crawlinfo'].get('uid', 0),    # url id
+            'kid': self.task['article']['crawlinfo'].get('kid', 0),    # keyword id
             'ruleId': self.process['uuid'],                            # forumRule id
             'list_url': kwargs.pop('final_url'),                       # 列表url
         }
