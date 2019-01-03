@@ -395,7 +395,7 @@ class BaseHandler(Component):
         request = copy.deepcopy(self.request)
         request.update(rule)
         self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
-        self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
+        self.handler_run(HANDLER_FUN_NEXT, {"response": self.response, "request_params": self.request_params, "save": save})
         save['next_url'] = self.request_params['url']
 
     def on_continue(self, broken_exc, save):
