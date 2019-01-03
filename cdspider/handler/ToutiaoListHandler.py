@@ -265,13 +265,7 @@ class ToutiaoListHandler(WemediaListHandler):
             self.task['save']['mediaId'] = mediaId
             self.task['save']['honey'] = honey
 #        self.request_params['url'] = 'https://www.toutiao.com/c/user/article/?page_type=1&user_id=' + uid + '&max_behot_time=0&count=20&as='+ honey['as'] +'&cp='+ honey['cp'] +'&_signature='+ _signature
-        tab = self.task.get('save', {}).get('tab', self.TAB_ARTICLE)
-        if tab == self.TAB_VIDEO:
-            self.request_params['url'] = self.VIDEO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0, **self.task['save']['honey'])
-        elif tab == self.TAB_TOUTIAO:
-            self.request_params['url'] = self.TOUTIAO_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0)
-        else:
-            self.request_params['url'] = self.LIST_URL.format(uid=uid, mediaId=self.task['save']['mediaId'], max_behot_time=0, **self.task['save']['honey'])
+        self.request_params['url'] = utils.format_(self.process['jsonUrl'], {"uid": uid, "mediaId": self.task['save']['mediaId'], "max_behot_time": 0, "as": self.task['save']['honey']['as'], "cp": self.task['save']['honey']['cp']})
         self.request_params['headers'] = {'Host': 'www.toutiao.com', 'User-Agent': 'Mozilla/5.0'}
 
     def run_parse(self, rule):
