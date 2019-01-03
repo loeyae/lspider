@@ -215,10 +215,10 @@ class GeneralSearchHandler(BaseHandler):
                             'mode': message['mode'],     # handler mode
                             'pid': task['pid'],          # project uuid
                             'sid': task['sid'],          # site uuid
-                            'tid': each,   # task uuid
-                            'uid': 0,                 # url uuid
-                            'kid': item['uuid'],                    # keyword id
-                            'url': 'base_url',          # url
+                            'tid': each,                 # task uuid
+                            'uid': 0,                    # url uuid
+                            'kid': item['uuid'],         # keyword id
+                            'url': 'base_url',           # url
                             'status': SpiderTaskDB.STATUS_ACTIVE
                         }
                         self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
@@ -354,6 +354,7 @@ class GeneralSearchHandler(BaseHandler):
                 "pid": self.task.get('pid', 0),     # project id
                 "sid": self.task.get('sid', 0),     # site id
                 "tid": self.task.get('tid', 0),     # task id
+                "kid": self.task.get('kid', 0),     # keyword id
                 "list_url": final_url,              # 列表url
                 "list_crawl_id": self.crawl_id,     # 列表抓取时间
         }
