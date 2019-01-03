@@ -411,8 +411,9 @@ class GeneralListHandler(BaseHandler):
         """
         生成详情抓取任务并入队
         """
+        mediaType = self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         message = {
-            'mode': HANDLER_MODE_BBS_ITEM if self.task['urls'].get('mediaType') in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
+            'mode': HANDLER_MODE_BBS_ITEM if mediaType in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
             'rid': rid,
             'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         }
