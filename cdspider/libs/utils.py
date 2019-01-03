@@ -35,7 +35,7 @@ def url_is_from_any_domain(url, domains):
     return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
 
 def format_(data, params):
-    keylist = re.findall('\{(\w+)\}', url)
+    keylist = re.findall('\{(\w+)\}', data)
     format_params = {}
     for key in keylist:
         if key in params:
