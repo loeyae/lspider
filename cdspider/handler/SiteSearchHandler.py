@@ -271,24 +271,6 @@ class SiteSearchHandler(GeneralSearchHandler):
         if parsed:
             self.response['parsed'] = self.build_url_by_rule(parsed, self.response['final_url'])
 
-    def _build_crawl_info(self, final_url, mode):
-        """
-        构造文章数据的爬虫信息
-        :param final_url 请求的url
-        :input self.task 爬虫任务信息
-        :input self.crawl_id 爬虫运行时刻
-        """
-        return {
-                'mode': mode,
-                "stid": self.task.get("uuid", 0),   # SpiderTask uuid
-                "uid": self.task.get("uid", 0),     # url id
-                "pid": self.task.get('pid', 0),     # project id
-                "sid": self.task.get('sid', 0),     # site id
-                "tid": self.task.get('tid', 0),     # task id
-                "list_url": final_url,              # 列表url
-                "list_crawl_id": self.crawl_id,     # 列表抓取时间
-        }
-
     def url_prepare(self, url):
         """
         获取真正的url
