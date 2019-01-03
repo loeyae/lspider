@@ -247,6 +247,7 @@ class InteractHandler(BaseHandler):
                         'sid': self.task['sid'],                        # site id
                         'tid': self.task['tid'],                        # task id
                         'uid': self.task['uid'],                        # url id
+                        'kid': self.task['kid'],                        # keyword id
                         'ruleId': self.task['kid'],                     # interactionNumRule id
                         'final_url': self.response['final_url'],        # 请求url
                     }
