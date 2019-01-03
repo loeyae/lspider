@@ -47,7 +47,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                 '''
                 如果规则中存在url匹配规则，则进行url匹配规则验证
                 '''
-                u = utils.preg(url, item['urlPattern'])
+                u = utils.preg(self.task['url'], self.task['detailRule']['urlPattern'])
                 if not u:
                     raise CDSpiderNotUrlMatched()
         self.process = self.match_rule()
