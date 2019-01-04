@@ -216,13 +216,14 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             if 'kid' in self.task and self.task['kid']:
                 return self.db['ForumRuleDB'].get_detail(self.task['kid'])
             url = self.task['url']
-            subdomain, domain = utils.parse_domain(url)
+            subdomain, domain = utils.domain_info(url)
             if subdomain:
                 '''
                 优先获取子域名对应的规则
                 '''
                 parserule_list = self.db['ForumRuleDB'].get_list_by_subdomain(subdomain)
                 for item in parserule_list:
+                    print(item)
                     if not parse_rule:
                         '''
                         将第一条规则选择为返回的默认值
@@ -282,11 +283,11 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         :input self.page 当前的页码
         """
         self.task['article']['crawlinfo']['mode'] = HANDLER_MODE_BBS_ITEM
-        if not 'final_url' in self.task['crawlinfo']:
+        if not 'final_url' in self.task['article']['crawlinfo']:
             self.task['article']['crawlinfo']['final_url'] = {str(self.page): final_url}
         else:
             self.task['article']['crawlinfo']['final_url'][str(self.page)] = final_url
-        if not 'forumRule' in self.task['crawlinfo']:
+        if not 'forumRule' in self.task['article']['crawlinfo']:
             self.task['article']['crawlinfo']['forumRule'] = self.process.get('uuid', 0)
         self.task['article']['crawlinfo']['page'] = 1
         self.task['article']['crawlinfo']['forumRule'] = self.prcoess.get('uuid', 0)
