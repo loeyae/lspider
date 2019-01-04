@@ -350,6 +350,7 @@ class WechatSearchHandler(GeneralSearchHandler):
         生成详情抓取任务并入队
         """
         message = {
+            'parent-mode': HANDLER_MODE_WECHAT_SEARCH,
             'mode': HANDLER_MODE_WECHAT_ITEM,
             'url': url,
             'crawlid': self.crawl_id,
