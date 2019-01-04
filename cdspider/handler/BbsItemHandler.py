@@ -199,8 +199,8 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         if not 'data' in self.process['unique'] or not self.process['unique']['data']:
             self.process['unique']['data'] = ','. join(self.process['parse']['item'].keys())
         save['paging'] = True
-        if 'save' in self.task and self.task['save'] and 'page' in self.taskt['save']:
-            self.page = save['page']
+        if 'save' in self.task and self.task['save'] and 'page' in self.task['save']:
+            self.page = self.task['save']['page']
 
     def match_rule(self):
         """
@@ -398,7 +398,8 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         if self.response['parsed']:
             typeinfo = utils.typeinfo(self.response['final_url'])
             self.result2db(save, copy.deepcopy(typeinfo))
-            self.result2attach(self.task['crawlinfo'], save, self.task['rid'], **typeinfo)
+            if not "uuid" in self.task:
+                self.result2attach(self.task['crawlinfo'], save, self.task['rid'], **typeinfo)
             if self.page == 1:
                 tid = self.build_replies_task(save)
                 if tid:
