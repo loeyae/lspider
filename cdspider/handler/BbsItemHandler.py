@@ -397,8 +397,8 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         self._build_crawl_info(final_url=self.response['final_url'])
         if self.response['parsed']:
             typeinfo = utils.typeinfo(self.response['final_url'])
-            self.result2db(save, copy.deepcopy(typeinfo))
             if not "uuid" in self.task:
+                self.result2db(save, copy.deepcopy(typeinfo))
                 self.result2attach(self.task['crawlinfo'], save, self.task['rid'], **typeinfo)
                 if self.page == 1:
                     tid = self.build_replies_task(save)
@@ -406,6 +406,8 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                         self.task['article']['crawlinfo']['forumRule'] = self.process['uuid']
                         self.task['article']['crawlinfo']['forumTaskId'] = tid
                         self.debug("%s new forum task: %s" % (self.__class__.__name__, str(tid)))
+
+            self.replies2result()
 
     def result2db(self, save, typeinfo):
         """
@@ -469,7 +471,6 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                     self.db['ArticlesDB'].update(result_id, result)
         if not result_id:
             raise CDSpiderDBError("Result insert failed")
-        self.replies2result()
 
     def replies2result(self):
         self.crawl_info['crawl_urls'][str(self.page)] = self.response['final_url']
