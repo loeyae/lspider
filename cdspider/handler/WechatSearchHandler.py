@@ -362,7 +362,7 @@ class WechatSearchHandler(GeneralSearchHandler):
         """
         记录抓取日志
         """
-        super(WechatListHandler, self).finish(save)
+        super(WechatSearchHandler, self).finish(save)
         _u = save.pop('update_crawlinfo', False)
         if not _u:
             self.update_crawl_info(save)
