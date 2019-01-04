@@ -304,7 +304,6 @@ class BaseHandler(Component):
                     hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
                 if hard_code:
                     request['hard_code'] = hard_code
-                del request['data']
             else:
                 del request['data']
         else:
