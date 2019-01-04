@@ -35,7 +35,7 @@ class BaseHandler(Component):
 
     DEFAULT_PROCESS = {
         "request": {
-            "crawler": "tornado",
+            "crawler": "requests",
             "method": "GET",
             "proxy": "auto",
         }
@@ -304,6 +304,9 @@ class BaseHandler(Component):
                     hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
                 if hard_code:
                     request['hard_code'] = hard_code
+                del request['data']
+            else:
+                del request['data']
         else:
             request['data'] = {}
         return request
@@ -408,7 +411,7 @@ class BaseHandler(Component):
             self.force_proxy = True
         if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CDSpiderCrawlerProxyExpired)):
             data = {"addr": self.crawler.proxy_str, 'ctime': int(time.time())}
-            typeinfo = self._typeinfo(self.task['url'])
+            typeinfo = utils.typeinfo(self.task['url'])
             data.update(typeinfo)
             self.db['proxy_log'].insert(data)
         else:
