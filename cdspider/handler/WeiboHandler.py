@@ -310,6 +310,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
             'sid': self.task['sid'],                        # site id
             'tid': self.task['tid'],                        # task id
             'uid': self.task['uid'],                        # url id
+            'stid': self.task['uuid'],                      # spider task id
             'kid': self.task['kid'],                        # url id
             'ruleId': self.process['uuid'],                 # authorListRule id
             'list_url': self.request_params['url'],         # 列表url
