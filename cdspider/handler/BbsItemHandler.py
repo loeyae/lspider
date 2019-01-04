@@ -215,6 +215,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             '''
             if 'kid' in self.task and self.task['kid']:
                 return self.db['ForumRuleDB'].get_detail(self.task['kid'])
+            url = self.task['url']
             subdomain, domain = utils.parse_domain(url)
             if subdomain:
                 '''
