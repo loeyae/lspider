@@ -390,7 +390,7 @@ class GeneralListHandler(BaseHandler):
         formated = []
         for item in data:
             if not 'url' in item or not item['url']:
-                raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(self.task)))
+                continue
             if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
             try:
