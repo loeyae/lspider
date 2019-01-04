@@ -268,6 +268,7 @@ class ToutiaoListHandler(WemediaListHandler):
             self.task['save']['honey'] = honey
 #        self.request_params['url'] = 'https://www.toutiao.com/c/user/article/?page_type=1&user_id=' + uid + '&max_behot_time=0&count=20&as='+ honey['as'] +'&cp='+ honey['cp'] +'&_signature='+ _signature
         self.request_params['url'] = utils.format_(self.process['jsonUrl'], {"uid": uid, "mediaId": self.task['save']['mediaId'], "max_behot_time": 0, "as": self.task['save']['honey']['as'], "cp": self.task['save']['honey']['cp']})
+        save['base_url'] = self.request_params['url']
         self.request_params['headers'] = {'Host': 'www.toutiao.com'}
 
     def run_parse(self, rule):
