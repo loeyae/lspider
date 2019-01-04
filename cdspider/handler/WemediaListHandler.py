@@ -95,7 +95,7 @@ class WemediaListHandler(BaseHandler):
         :param message route传递过来的消息
         :param save 传递的上下文
         :return 包含uuid, url的字典迭代器，为SpiderTaskDB中数据
-        :notice 该方法返回的迭代��用于plantask生成queue消息，以便fetch听取，消息格式为
+        :notice 该方法返回的�代��用于plantask生成queue消息，以便fetch听取，消息格式为
         {"mode": handler mode, "uuid": SpiderTask uuid, "url": SpiderTask url}
         """
         mode = message['mode']
@@ -427,7 +427,7 @@ class WemediaListHandler(BaseHandler):
         formated = []
         for item in data:
             if not 'url' in item or not item['url']:
-                raise CDSpiderError("url no exists: %s @ %s" % (str(item), str(self.task)))
+                continue
             if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
             try:
