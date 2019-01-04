@@ -400,12 +400,12 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             self.result2db(save, copy.deepcopy(typeinfo))
             if not "uuid" in self.task:
                 self.result2attach(self.task['crawlinfo'], save, self.task['rid'], **typeinfo)
-            if self.page == 1:
-                tid = self.build_replies_task(save)
-                if tid:
-                    self.task['article']['crawlinfo']['forumRule'] = self.process['uuid']
-                    self.task['article']['crawlinfo']['forumTaskId'] = tid
-                    self.debug("%s new forum task: %s" % (self.__class__.__name__, str(tid)))
+                if self.page == 1:
+                    tid = self.build_replies_task(save)
+                    if tid:
+                        self.task['article']['crawlinfo']['forumRule'] = self.process['uuid']
+                        self.task['article']['crawlinfo']['forumTaskId'] = tid
+                        self.debug("%s new forum task: %s" % (self.__class__.__name__, str(tid)))
 
     def result2db(self, save, typeinfo):
         """
