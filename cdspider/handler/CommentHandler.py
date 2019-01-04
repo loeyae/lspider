@@ -92,7 +92,7 @@ class CommentHandler(BaseHandler):
     def route(self, mode, save):
         """
         schedule 分发
-        :param mode  project|site 分发模��: 按项目|按站点
+        :param mode  project|site 分发模���: 按项目|按站点
         :param save 传递的上下文
         :return 包含uuid的迭代器，项目模式为项目的uuid，站点模式为站点的uuid
         :notice 该方法返回的迭代器用于router生成queue消息，以便plantask听取，消息格式为:
@@ -285,6 +285,7 @@ class CommentHandler(BaseHandler):
             'tid': self.task['tid'],                        # task id
             'uid': self.task['uid'],                        # url id
             'ruleId': self.task['kid'],                     # commentRule id
+            'stid': self.task['uuid'],                      # spider task id
             'list_url': kwargs.pop('final_url'),            # 列表url
         }
         result['mediaType'] = self.task.get('mediaType', MEDIA_TYPE_OTHER)
