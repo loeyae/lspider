@@ -28,6 +28,7 @@ class ToutiaoListHandler(WemediaListHandler):
     TAB_VIDEO = 'video'
     TAB_TOUTIAO = 'toutiao'
     MAX_RETRY = 10
+    EXPIRE = 7200
 
     LIST_URL = 'https://www.toutiao.com/pgc/ma/?page_type=1&max_behot_time={max_behot_time}&uid={uid}&media_id={mediaId}&output=json&is_json=1&count=20&from=user_profile_app&version=2&as={as}&cp={cp}&callback=jsonp4'
     VIDEO_URL = 'https://www.toutiao.com/pgc/ma/?page_type=0&max_behot_time={max_behot_time}&uid={uid}&media_id={mediaId}&output=json&is_json=1&count=20&from=user_profile_app&version=2&as={as}&cp={cp}&callback=jsonp4'
@@ -249,7 +250,8 @@ class ToutiaoListHandler(WemediaListHandler):
         uid = save['request']['hard_code'][0]['value']
         if not 'save' in self.task or not self.task['save']:
             self.task['save'] = {}
-        if not self.task['save'].get('honey') or not self.task['save'].get('mediaId'):
+        ctime = self.task['save'].get('timestamp', 0)
+        if not self.task['save'].get('honey') or not self.task['save'].get('mediaId') or self.crawl_id - int(ctime) > self.EXPIRE:
             crawler = self.get_crawler({"crawler": "selenium", "method": "open", "proxy": "never"})
             request_params = copy.deepcopy(self.request_params)
             request_params['method'] = 'open'
