@@ -303,7 +303,7 @@ class WechatListHandler(BaseHandler):
             accountInfo = parser.parse()
             self.debug("%s prepare parsed: %s" % (self.__class__.__name__, accountInfo))
             if not accountInfo or not accountInfo[0]['url']:
-                raise CDSpiderParserNoContent("Wechat account not found")
+                raise CDSpiderCrawlerNoResponse("Wechat account not found")
             only_account = self.task.get('only_account', False)
             if only_account:
                 self.response['parsed'] = accountInfo[0]
