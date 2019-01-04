@@ -416,7 +416,7 @@ class BaseHandler(Component):
         if save['retry'] < self.MAX_RETRY:
             save['retry'] += 1
             self.handler_run(HANDLER_FUN_CONTINUE, {"broken_exc": broken_exc, "save": save})
-            self.info('Retry to fetch: %s because of %s, current times: %s' % (self.task['url'], str(broken_exc), save['retry']))
+            self.info('Retry to fetch: %s because of %s, current times: %s' % (self.request_params['url'], str(broken_exc), save['retry']))
         else:
             raise broken_exc
 
