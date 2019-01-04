@@ -423,8 +423,8 @@ class BaseHandler(Component):
             raise broken_exc
 
     def format_paging(self, paging):
-        if not paging:
-            return paging
+        if not paging or not "url" in paging or not paging['url']:
+            return None
 
         def build_rule(rule, item):
             _type = item.pop('type', 'incr_data')
