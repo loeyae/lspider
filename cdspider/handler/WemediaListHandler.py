@@ -24,8 +24,6 @@ class WemediaListHandler(BaseHandler):
                    当测试该handler，数据应为 {"mode": "wemedia-list", "author": 自媒体号设置，参考自媒体号, "authorListRule": 自媒体列表规则，参考自媒体列表规则}
     """
 
-    NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WECHAT, MEDIA_TYPE_TOUTIAO)
-
     def route(self, mode, save):
         """
         schedule 分发
@@ -81,7 +79,7 @@ class WemediaListHandler(BaseHandler):
             for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
                 while True:
                     has_item = False
-                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": self.NIN_MEDIA_TYPE}}, select=["uuid"]):
+                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WEMEDIA, "wemediaType": WEMEDIA_TYPE_GENERAL}, select=["uuid"]):
                         has_item = True
                         if each['uuid'] > save['id']:
                             save['id'] = each['uuid']
@@ -115,7 +113,7 @@ class WemediaListHandler(BaseHandler):
                 初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": self.NIN_MEDIA_TYPE}}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WEMEDIA, "wemediaType": WEMEDIA_TYPE_GENERAL}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 while True:
                     has_item = False
@@ -137,7 +135,7 @@ class WemediaListHandler(BaseHandler):
                 初始化上下文中的tid参数,该参数用于站点数据查询
                 '''
                 save['tid'] = 0
-            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$nin": self.NIN_MEDIA_TYPE}}):
+            for item in self.db['TaskDB'].get_new_list(save['tid'], where={"pid": message['item'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": MEDIA_TYPE_WEMEDIA, "wemediaType": WEMEDIA_TYPE_GENERAL}):
                 self.debug("%s schedule task: %s" % (self.__class__.__name__, str(item)))
                 #获取该站点计划中的爬虫任务
                 while True:
