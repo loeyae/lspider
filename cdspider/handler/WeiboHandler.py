@@ -312,7 +312,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
             'uid': self.task['uid'],                        # url id
             'kid': self.task['kid'],                        # url id
             'ruleId': self.process['uuid'],                 # authorListRule id
-            'list_url': self.task['url'],            # 列表url
+            'list_url': self.request_params['url'],         # 列表url
         }
         result['acid'] = kwargs.pop('unid')
         result['ctime'] = kwargs.pop('ctime')
