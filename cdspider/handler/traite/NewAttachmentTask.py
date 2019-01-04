@@ -131,7 +131,7 @@ class NewAttachmentTask(object):
         :param rule 评论任务规则
         """
         task = {
-            'mediaType': MEDIA_TYPE_WEIBO,
+            'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
             'mode': HANDLER_MODE_COMMENT,                           # handler mode
             'pid': crawlinfo.get('pid', self.task.get('pid', 0)),            # project id
             'sid': crawlinfo.get('sid', self.task.get('sid', 0)),            # site id
@@ -167,7 +167,7 @@ class NewAttachmentTask(object):
         :param rule 互动数任务规则
         """
         task = {
-            'mediaType': MEDIA_TYPE_WEIBO,
+            'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
             'mode': HANDLER_MODE_INTERACT,                          # handler mode
             'pid': crawlinfo.get('pid', self.task.get('pid', 0)),            # project id
             'sid': crawlinfo.get('sid', self.task.get('sid', 0)),            # site id
