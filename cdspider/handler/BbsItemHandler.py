@@ -188,14 +188,13 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         #根据task中的rid获取文章信息
         rid = self.task.get('rid', None)
         if rid:
-            article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo'])
+            article = self.db['ArticlesDB'].get_detail(rid, select=['rid', 'url', 'crawlinfo'])
             if not article:
                 raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
             if not 'ulr' in self.task or not self.task['url']:
                 self.task["url"] = article['url']
             self.task['article'] = article
-        else:
-            self.task.setdefault('crawlinfo', {})
+        self.task.setdefault('crawlinfo', {})
         self.process = self.match_rule() or {"unique": {"data": None}}
         if not 'data' in self.process['unique'] or not self.process['unique']['data']:
             self.process['unique']['data'] = ','. join(self.process['parse']['item'].keys())
@@ -290,7 +289,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         if not 'forumRule' in self.task['article']['crawlinfo']:
             self.task['article']['crawlinfo']['forumRule'] = self.process.get('uuid', 0)
         self.task['article']['crawlinfo']['page'] = 1
-        self.task['article']['crawlinfo']['forumRule'] = self.prcoess.get('uuid', 0)
+        self.task['article']['crawlinfo']['forumRule'] = self.process.get('uuid', 0)
 
     def _build_result_info(self, **kwargs):
         """
