@@ -79,7 +79,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
             '''
             task中不存在详情规则，根据域名匹配规则库中的规则
             '''
-            subdomain, domain = utils.parse_domain(url)
+            subdomain, domain = utils.domain_info(url)
             if subdomain:
                 '''
                 优先获取子域名对应的规则
