@@ -78,7 +78,8 @@ class WechatItemHandler(BaseHandler):
         #根据task中的stid获取任务信息
         stid = self.task.get('stid', None)
         if stid:
-            spiderTask = self.db['SpiderTaskDB'].get_detail(stid, HANDLER_MODE_WECHAT_LIST)
+            parent_mode = self.task.get('parent-mode', HANDLER_MODE_WECHAT_LIST)
+            spiderTask = self.db['SpiderTaskDB'].get_detail(stid, parent_mode)
             if not spiderTask:
                 raise CDSpiderHandlerError("list task: %s not exists" % stid)
             crawlinfo = {
@@ -334,7 +335,8 @@ class WechatItemHandler(BaseHandler):
         if self.task.get('stid') and self.task.get('crawlid') and not self.testing_mode:
             if self.crawl_info['crawl_count']['repeat_count'] == self.crawl_info['crawl_count']['total']:
                 self.crawl_info['crawl_count']['repeat_page'] += 1
-            self.db['SpiderTaskDB'].update(self.task['stid'], HANDLER_MODE_WECHAT_LIST, {"crawlinfo.%s" % self.task['crawlid']: self.crawl_info})
+            parent_mode = self.task.get('parent-mode', HANDLER_MODE_WECHAT_LIST)
+            self.db['SpiderTaskDB'].update(self.task['stid'], parent_mode, {"crawlinfo.%s" % self.task['crawlid']: self.crawl_info})
 
     def result2attach(self, save, domain, subdomain=None):
         """
