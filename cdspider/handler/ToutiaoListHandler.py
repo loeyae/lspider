@@ -27,6 +27,7 @@ class ToutiaoListHandler(WemediaListHandler):
     TAB_ARTICLE = 'article'
     TAB_VIDEO = 'video'
     TAB_TOUTIAO = 'toutiao'
+    MAX_RETRY = 10
 
     LIST_URL = 'https://www.toutiao.com/pgc/ma/?page_type=1&max_behot_time={max_behot_time}&uid={uid}&media_id={mediaId}&output=json&is_json=1&count=20&from=user_profile_app&version=2&as={as}&cp={cp}&callback=jsonp4'
     VIDEO_URL = 'https://www.toutiao.com/pgc/ma/?page_type=0&max_behot_time={max_behot_time}&uid={uid}&media_id={mediaId}&output=json&is_json=1&count=20&from=user_profile_app&version=2&as={as}&cp={cp}&callback=jsonp4'
