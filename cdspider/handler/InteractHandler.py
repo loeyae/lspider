@@ -55,7 +55,11 @@ class InteractHandler(BaseHandler):
             save["hard_code"] = params
             self.task['interactionNumRule']['request']['hard_code'] = data
         else:
-            article = self.db['ArticlesDB'].get_detail(self.task['parentid'], select=['url', 'acid'])
+            mediaType = self.task.get('mediaType', MEDIA_TYPE_OTHER)
+            if mediaType == MEDIA_TYPE_WEIBO:
+                article = self.db['WeiboInfoDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])
+            else:
+                article = self.db['ArticlesDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])
             if not article:
                 raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
             self.task['acid'] = article['acid']
