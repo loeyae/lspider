@@ -417,6 +417,7 @@ class GeneralListHandler(BaseHandler):
             'rid': rid,
             'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         }
+        self.debug("%s new item task: %s" % (self.__class__.__name__, message))
         self.queue['scheduler2spider'].put_nowait(message)
 
     def finish(self, save):
