@@ -62,7 +62,11 @@ class CommentHandler(BaseHandler):
             save["hard_code"] = params
             self.task['commentRule']['request']['hard_code'] = data
         else:
-            article = self.db['ArticlesDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])
+            mediaType = self.task.get('mediaType', MEDIA_TYPE_OTHER)
+            if mediaType == MEDIA_TYPE_WEIBO:
+                article = self.db['WeiboInfoDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])
+            else:
+                article = self.db['ArticlesDB'].get_detail(self.task.get('parentid', '0'), select=['url', 'acid'])
             if not article:
                 raise CDSpiderHandlerError("aritcle: %s not exists" % self.task['parentid'])
             self.task['parent_url'] = article['url']
@@ -92,7 +96,7 @@ class CommentHandler(BaseHandler):
     def route(self, mode, save):
         """
         schedule 分发
-        :param mode  project|site 分发模���: 按项目|按站点
+        :param mode  project|site 分发模����: 按项目|按站点
         :param save 传递的上下文
         :return 包含uuid的迭代器，项目模式为项目的uuid，站点模式为站点的uuid
         :notice 该方法返回的迭代器用于router生成queue消息，以便plantask听取，消息格式为:
