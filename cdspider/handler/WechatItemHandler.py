@@ -336,7 +336,7 @@ class WechatItemHandler(BaseHandler):
             if self.crawl_info['crawl_count']['repeat_count'] == self.crawl_info['crawl_count']['total']:
                 self.crawl_info['crawl_count']['repeat_page'] += 1
             parent_mode = self.task.get('parent-mode', HANDLER_MODE_WECHAT_LIST)
-            self.db['SpiderTaskDB'].update(self.task['stid'], parent_mode, {"crawlinfo.%s" % self.task['crawlid']: self.crawl_info})
+            self.db['SpiderTaskDB'].update(self.task['stid'], parent_mode, {"crawlinfo.%s" % str(self.task['crawlid']): self.crawl_info})
 
     def result2attach(self, save, domain, subdomain=None):
         """
