@@ -329,6 +329,8 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             collection.create_index('pid', name='pid')
         if not 'uid' in indexes:
             collection.create_index('uid', name='uid')
+        if not 'rid' in indexes:
+            collection.create_index('rid', name='rid')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
         if not 'expire' in indexes:
