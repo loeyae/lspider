@@ -165,6 +165,7 @@ class WemediaListHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
+        rule = self.db['AuthorListRuleDB'].get_detail_by_tid(self.task['tid'])
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'uid']):
             if not self.testing_mode:
                 '''
@@ -176,7 +177,7 @@ class WemediaListHandler(BaseHandler):
                     continue
                 frequency = str(author.get('frequency', self.DEFAULT_RATE))
                 plantime = int(save['now']) + int(self.ratemap[frequency][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, 'rid': rule['uuid']})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
