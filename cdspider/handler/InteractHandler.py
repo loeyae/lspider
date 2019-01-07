@@ -258,7 +258,7 @@ class InteractHandler(BaseHandler):
                     }
                 elif not "ruleId" in attach_data['crawlinfo'] or not attach_data['crawlinfo']['ruleId']:
                     crawlinfo = attach_data['crawlinfo']
-                    crawlinfo['ruleId'] = self.task['uid']
+                    crawlinfo['ruleId'] = self.task['rid']
                     result['crawlinfo'] = crawlinfo
                 result['utime'] = int(time.time())
                 result['mediaType'] = self.task.get('mediaType', MEDIA_TYPE_OTHER)
