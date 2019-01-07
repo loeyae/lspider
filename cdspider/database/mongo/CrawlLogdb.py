@@ -23,29 +23,29 @@ class CrawlLogDB(Mongo, BaseCrawlLogDB):
         super(CrawlLogDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'id' in indexes:
-            collection.create_index('id', unique=True, name='id')
+        if not 'uuid' in indexes:
+            collection.create_index('uuid', unique=True, name='uuid')
         if not 'tid' in indexes:
             collection.create_index('tid', name='tid')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
-        obj['id'] = self._get_increment(self.table)
+        obj['uuid'] = self._get_increment(self.table)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
         _id = super(CrawlLogDB, self).insert(setting=obj)
-        return obj['id']
+        return obj['uuid']
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(CrawlLogDB, self).update(setting=obj, where={"prid": int(id)}, multi=False)
+        return super(CrawlLogDB, self).update(setting=obj, where={"uuid": int(id)}, multi=False)
 
     def delete(self, id, where = {}):
         if not where:
-            where = {'id': int(id)}
+            where = {'uuid': int(id)}
         else:
-            where.update({'id': int(id)})
+            where.update({'uuid': int(id)})
         return super(CrawlLogDB, self).update(setting={"status": self.STATUS_DELETED},
                 where=where, multi=False)
