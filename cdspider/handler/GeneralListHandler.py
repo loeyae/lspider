@@ -167,17 +167,35 @@ class GeneralListHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
-        frequency = str(task.get('frequency', self.DEFAULT_RATE))
-        plantime = int(save['now']) + int(self.ratemap[frequency][0])
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'uid', 'url']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
                 '''
+                uid = item.pop('uid')
+                url = self.db['UrlsDB'].get_detail(uid)
+                frequency = str(url.get('frequency', self.DEFAULT_RATE))
+                plantime = int(save['now']) + int(self.ratemap[frequency][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
+
+    def frequency(self, message):
+        mode = message['mode']
+        rid = message['rid']
+        frequency = message['frequency']
+        uid = 0
+        while True:
+            has_item = False
+            for url in self.db['UrlsDB'].get_new_list(uid, where={"ruleId": rid}, select=['uuid']):
+                for item in self.db['SpiderTaskDB'].get_list(mode, where={"uid": url['uuid']}, select=['uuid', 'uid', 'url']):
+                    plantime = int(time.time()) + int(self.ratemap[str(frequency)][0])
+                    self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
+                uid = url['uuid']
+                has_item = True
+            if not has_item:
+                break
 
     def newtask(self, message):
         """
