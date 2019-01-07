@@ -243,6 +243,7 @@ class ToutiaoListHandler(WemediaListHandler):
                 "random": parameters.get('randoms'),
             }
         self.task['url'] = rule['baseUrl']
+        save['base_url'] = rule['baseUrl']
         return rule
 
     def prepare(self, save):
