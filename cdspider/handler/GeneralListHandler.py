@@ -181,15 +181,6 @@ class GeneralListHandler(BaseHandler):
                 save['id'] = item['uuid']
             yield item
 
-    def frequency(self, message):
-        """
-        更新更新频率
-        """
-        mode = message['mode']
-        rid = message['rid']
-        frequency = message['frequency']
-        self.db['SpiderTaskDB'].update_many(mode, {"plantime": plantime, "frequency": frequency}, {"rid": rid})
-
     def newtask(self, message):
         """
         新建爬虫任务
