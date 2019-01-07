@@ -99,8 +99,8 @@ HANDLER_MODE_COMMENT = 'comment'                      # 评论handler
 HANDLER_MODE_INTERACT = 'interact'                    # 互动数（阅读数、点赞数...）handler
 HANDLER_MODE_DEFAULT_SEARCH = 'search'                # 默认搜索handler
 HANDLER_MODE_WEIBO_SEARCH = 'weibo-search'            # 微博搜索
-HANDLER_MODE_SITE_SEARCH = 'site-search'            # 站内搜索
-HANDLER_MODE_WECHAT_SEARCH = 'wechat-search'            # 微信搜索
+HANDLER_MODE_SITE_SEARCH = 'site-search'              # 站内搜索
+HANDLER_MODE_WECHAT_SEARCH = 'wechat-search'          # 微信搜索
 
 #handler mode mapping HANDLER
 HANDLER_MODE_HANDLER_MAPPING = {
