@@ -180,7 +180,7 @@ class GeneralSearchHandler(BaseHandler):
         :return 包含爬虫任务uuid, url的字典迭代器
         """
         rule = self.db['AuthorListRuleDB'].get_detail_by_tid(self.task['tid'])
-        frequency = str(rule.get('frequency', self.DEFAULT_RATE))
+        frequency = str(task.get('frequency', self.DEFAULT_RATE))
         plantime = int(save['now']) + int(self.ratemap[frequency][0])
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
             if not self.testing_mode:
