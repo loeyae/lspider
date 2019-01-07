@@ -257,7 +257,7 @@ class InteractHandler(BaseHandler):
                         'final_url': self.response['final_url'],        # 请求url
                     }
                 elif not "ruleId" in attach_data['crawlinfo'] or not attach_data['crawlinfo']['ruleId']:
-                    crawlinfo = attach_data['attach_data']
+                    crawlinfo = attach_data['crawlinfo']
                     crawlinfo['ruleId'] = self.task['uid']
                     result['crawlinfo'] = crawlinfo
                 result['utime'] = int(time.time())
