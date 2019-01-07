@@ -361,7 +361,23 @@ class BaseHandler(Component):
         """
         self.debug("%s on error" % (self.__class__.__name__))
         self.exception(exc)
-        self.crawl_info['traceback'] = str(traceback.format_exc())
+        elid = 0
+        if 'uuid' in self.task and self.task['uuid']:
+            data = {
+                'tid': self.task['uuid'],                           # spider task id
+                'mode': self.task['mode'],
+                'frequency': self.task.get('frequency', None),      # process info
+                'url': save['request_url'],                         # error message
+                'error': str(exc),                                  # create time
+                'msg': str(traceback.format_exc()),                 # trace log
+                'class': exc.__class__.__name__,                    # error class
+            }
+            elid = self.db['ErrorLogDB'].insert(data)
+        if elid == 0:
+            self.crawl_info['exc'] = exc.__class__.__name__
+            self.crawl_info['traceback'] = str(traceback.format_exc())
+        else:
+            self.crawl_info['errid'] = elid
         self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info, "save": save})
 
     def on_result(self, save):
