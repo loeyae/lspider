@@ -79,6 +79,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
             }],
         }
         self.task['url'] = parse_rule['baseUrl']
+        save['base_url'] = parse_rule['baseUrl']
         return parse_rule
 
     def route(self, mode, save):
