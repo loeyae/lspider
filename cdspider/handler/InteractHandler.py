@@ -253,7 +253,7 @@ class InteractHandler(BaseHandler):
                         'uid': self.task['uid'],                        # url id
                         'kid': self.task['kid'],                        # keyword id
                         'stid': self.task['uuid'],                      # spider task id
-                        'ruleId': self.task['kid'],                     # interactionNumRule id
+                        'ruleId': self.task['rid'],                     # interactionNumRule id
                         'final_url': self.response['final_url'],        # 请求url
                     }
                 elif not "ruleId" in attach_data['crawlinfo'] or not attach_data['crawlinfo']['ruleId']:
