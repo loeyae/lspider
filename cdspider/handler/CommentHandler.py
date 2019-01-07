@@ -288,7 +288,8 @@ class CommentHandler(BaseHandler):
             'sid': self.task['sid'],                        # site id
             'tid': self.task['tid'],                        # task id
             'uid': self.task['uid'],                        # url id
-            'ruleId': self.task['kid'],                     # commentRule id
+            'kid': self.task['kid'],                        # url id
+            'ruleId': self.task['rid'],                     # commentRule id
             'stid': self.task['uuid'],                      # spider task id
             'list_url': kwargs.pop('final_url'),            # 列表url
         }
