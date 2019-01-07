@@ -12,7 +12,7 @@ from . import Base
 
 {
     "crawl_log": {
-        'id': int,      # log id
+        'uuid': int,      # log id
         'machine': str, # matchine info
         'process': str, # process info
         'message': str, # error message
@@ -25,7 +25,7 @@ class CrawlLogDB(Base):
     """
     craw_log data object
     """
-    
+
     def insert(self, obj = {}):
         raise NotImplementedError
 
@@ -34,4 +34,3 @@ class CrawlLogDB(Base):
 
     def delete(self, id):
         raise NotImplementedError
-
