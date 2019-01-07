@@ -212,8 +212,8 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             '''
             task中不存在详情规则，根据域名匹配规则库中的规则
             '''
-            if 'kid' in self.task and self.task['kid']:
-                return self.db['ForumRuleDB'].get_detail(self.task['kid'])
+            if 'rid' in self.task and self.task['rid']:
+                return self.db['ForumRuleDB'].get_detail(self.task['rid'])
             url = self.task['url']
             subdomain, domain = utils.domain_info(url)
             if subdomain:
