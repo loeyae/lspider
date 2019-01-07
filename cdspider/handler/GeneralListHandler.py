@@ -176,26 +176,19 @@ class GeneralListHandler(BaseHandler):
                 url = self.db['UrlsDB'].get_detail(uid)
                 frequency = str(url.get('frequency', self.DEFAULT_RATE))
                 plantime = int(save['now']) + int(self.ratemap[frequency][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, 'rid': url['ruleId']})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
 
     def frequency(self, message):
+        """
+        更新更新频率
+        """
         mode = message['mode']
         rid = message['rid']
         frequency = message['frequency']
-        uid = 0
-        while True:
-            has_item = False
-            for url in self.db['UrlsDB'].get_new_list(uid, where={"ruleId": rid}, select=['uuid']):
-                for item in self.db['SpiderTaskDB'].get_list(mode, where={"uid": url['uuid']}, select=['uuid', 'uid', 'url']):
-                    plantime = int(time.time()) + int(self.ratemap[str(frequency)][0])
-                    self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
-                uid = url['uuid']
-                has_item = True
-            if not has_item:
-                break
+        self.db['SpiderTaskDB'].update_many(mode, {"plantime": plantime, "frequency": frequency}, {"rid": rid})
 
     def newtask(self, message):
         """
