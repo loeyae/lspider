@@ -114,8 +114,13 @@ class BaseHandler(Component):
         pass
 
     def frequency(self, message):
-        pass
-
+        """
+        更新更新频率
+        """
+        mode = message['mode']
+        rid = message['rid']
+        frequency = message['frequency']
+        self.db['SpiderTaskDB'].update_many(mode, {"plantime": plantime, "frequency": frequency}, {"rid": rid})
     def status(self, message):
         mode = message['mode']
         status = message['status']
