@@ -138,7 +138,7 @@ class NewAttachmentTask(object):
             'tid': crawlinfo.get('tid', self.task.get('tid', 0)),            # task id
             'uid': crawlinfo.get('uid', self.task.get('uid', 0)),            # url id
             'kid': crawlinfo.get('kid', self.task.get('kid', 0)),            # keyword id
-            'kid': rule['uuid'],                                    # rule id
+            'rid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': rid,                           # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
@@ -174,7 +174,7 @@ class NewAttachmentTask(object):
             'tid': crawlinfo.get('tid', self.task.get('tid', 0)),            # task id
             'uid': crawlinfo.get('uid', self.task.get('uid', 0)),            # url id
             'kid': crawlinfo.get('kid', self.task.get('kid', 0)),            # keyword id
-            'kid': rule['uuid'],                                    # rule id
+            'rid': rule['uuid'],                                    # rule id
             'url': url,                                             # url
             'parentid': rid,                                        # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
