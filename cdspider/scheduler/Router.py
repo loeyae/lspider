@@ -188,7 +188,7 @@ class Router(BaseScheduler):
             result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
 
             return json.dumps(result)
-        application.register_function(status, 'status')
+        application.register_function(frequency, 'frequency')
 
         import tornado.wsgi
         import tornado.ioloop
