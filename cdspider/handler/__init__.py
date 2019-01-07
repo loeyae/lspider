@@ -118,9 +118,16 @@ class BaseHandler(Component):
         更新更新频率
         """
         mode = message['mode']
-        rid = message['rid']
         frequency = message['frequency']
-        self.db['SpiderTaskDB'].update_many(mode, {"plantime": plantime, "frequency": frequency}, {"rid": rid})
+        if 'rid' in message and message['rid']:
+            where = {"rid": message['rid']}
+        elif 'tid' in message and message['tid']:
+            where = {"tid": message['tid']}
+        else:
+            where = {"uid": message['uid']}
+        plantime = int(save['now']) + int(self.ratemap[str(frequency)][0])
+        self.db['SpiderTaskDB'].update_many(mode, {"plantime": plantime, "frequency": frequency}, where=where)
+
     def status(self, message):
         mode = message['mode']
         status = message['status']
