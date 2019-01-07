@@ -225,8 +225,10 @@ class UrlBuilder(Component):
                 elif rndtype == 's':
                     rndval = "%.0f" % time.time()
                 else:
-                    len = int(rndtype)
-                    rndval = ("%.0f" % (time.time() * (len >= 10 and 10 ** (len - 10) or 10000)))[(0-len):]
+                    len_ = int(rndtype)
+                    if len_ > 20:
+                        len_ = 20
+                    rndval = ("%.0f" % (time.time() * (len_ >= 10 and 10 ** (len_ - 10) or 10000)))[(0-len_):]
                 rndval = utils.patch_result(rndval, item)
                 self._append_kwargs_data(kwargs, item['type'], rndkey, rndval)
 
