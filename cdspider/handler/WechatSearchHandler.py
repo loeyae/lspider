@@ -160,25 +160,6 @@ class WechatSearchHandler(GeneralSearchHandler):
             for each in self.schedule_by_task(task, message['h-mode'], save):
                 yield each
 
-    def schedule_by_task(self, task, mode, save):
-        """
-        获取站点下计划中的爬虫任务
-        :param site 站点信息
-        :param mode handler mode
-        :param save 上下文参数
-        :return 包含爬虫任务uuid, url的字典迭代器
-        """
-        plantime = int(save['now']) + int(self.ratemap[str(task.get('frequency', self.DEFAULT_RATE))][0])
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
-            if not self.testing_mode:
-                '''
-                testing_mode打开时，数据不入库
-                '''
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
-            if item['uuid'] > save['id']:
-                save['id'] = item['uuid']
-            yield item
-
     def newtask(self, message):
         """
         新建爬虫任务
