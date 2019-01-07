@@ -125,7 +125,7 @@ class BaseHandler(Component):
             where = {"tid": message['tid']}
         else:
             where = {"uid": message['uid']}
-        plantime = int(save['now']) + int(self.ratemap[str(frequency)][0])
+        plantime = int(time.time()) + int(self.ratemap[str(frequency)][0])
         self.db['SpiderTaskDB'].update_many(mode, {"plantime": plantime, "frequency": frequency}, where=where)
 
     def status(self, message):
