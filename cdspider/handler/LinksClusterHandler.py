@@ -118,17 +118,14 @@ class LinksClusterHandler(BaseHandler):
         # 根据sid取站点域名
         sitedb = self.db['SitesDB']
         site = sitedb.get_site(self.task['sid'])
-
         extractor = LinksExtractor(url=site['url'])
         extractor.exctract(self.response['last_source'], errors = 'ignore')
-
         # if '://www.' in site['url']:
         #     re_type = 'domains'
         # else:
         #     re_type = 'subdomains'
-
         # domain 改成 subdomains试试
-        re_type = 'subdomains'
+        re_type = 'subdomain'
         self.response['parsed'] = extractor.infos[re_type]
 
 
