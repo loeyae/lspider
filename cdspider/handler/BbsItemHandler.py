@@ -193,6 +193,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                 raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
             if not 'ulr' in self.task or not self.task['url']:
                 self.task["url"] = article['url']
+                save['base_url'] = article['url']
             self.task['article'] = article
         self.task.setdefault('crawlinfo', {})
         self.process = self.match_rule() or {"unique": {"data": None}}
