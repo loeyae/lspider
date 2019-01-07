@@ -287,7 +287,6 @@ class WechatListHandler(BaseHandler):
             }
         self.task['prepare_rule'] = wechatRule
         self.task['url'] = wechatRule['baseUrl']
-        save['base_url'] = wechatRule['baseUrl']
         return rule
 
     def prepare(self, save):
@@ -323,6 +322,7 @@ class WechatListHandler(BaseHandler):
             self.proxy_mode = proxy_mode
         else:
             self.request_params['url'] = self.task['save'].get('request_url')
+        save['base_url'] = self.request_params['url']
 
     def run_parse(self, rule):
         """
