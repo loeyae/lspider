@@ -302,12 +302,20 @@ class WechatListHandler(BaseHandler):
             parser = CustomParser(source=self.crawler.page_source, ruleset=copy.deepcopy(self.task['prepare_rule']['parse']))
             accountInfo = parser.parse()
             self.debug("%s prepare parsed: %s" % (self.__class__.__name__, accountInfo))
-            if not accountInfo or not accountInfo[0]['url']:
-                raise CDSpiderCrawlerNoResponse("Wechat account not found")
             only_account = self.task.get('only_account', False)
             if only_account:
-                self.response['parsed'] = accountInfo[0]
+                if not accountInfo or not accountInfo[0]['url']:
+                    if u"noresult_part1_container" in self.crawler.page_source:
+                        save['status'] = 0
+                    else:
+                        save['status'] = -1
+                else:
+                    self.response['parsed'] = accountInfo[0]
+                    save['status'] = 1
                 raise CDSpiderCrawlerReturnBroken()
+            else:
+                if not accountInfo or not accountInfo[0]['url']:
+                    raise CDSpiderCrawlerNoResponse("Wechat account not found")
             save['timestamp'] = self.crawl_id
             self.request_params['url'] = html.unescape(accountInfo[0]['url'])
             self.proxy_mode = proxy_mode
