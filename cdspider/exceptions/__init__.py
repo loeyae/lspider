@@ -27,6 +27,9 @@ class CDSpiderError(Exception):
         self.params = kwargs
 
     def __str__(self):
+        return self.msg
+
+    def getMessage(self):
         exception_msg = 'Message: %s\r\n' % self.msg
         if self.hostname is not None:
             exception_msg += 'HostName: %s\r\n' % self.hostname
@@ -169,7 +172,7 @@ class CDSpiderCrawlerReturnBroken(CDSpiderCrawlerBroken):
 
 class CDSpiderCrawlerDoLogin(CDSpiderCrawlerBroken):
     """
-    抓取时需要登录验证
+    抓取时需要登�验证
     """
 
     msg = "CDSpider Crawler Need Dologin"
