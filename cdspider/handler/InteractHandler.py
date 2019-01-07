@@ -77,7 +77,7 @@ class InteractHandler(BaseHandler):
             ruleId = self.task.get('rid', 0)
             parse_rule = self.db['AttachmentDB'].get_detail(ruleId)
             if not parse_rule:
-                raise CDSpiderDBDataNotFound("interactionNumRule: %s not exists" % self.task['kid'])
+                raise CDSpiderDBDataNotFound("interactionNumRule: %s not exists" % ruleId)
             if parse_rule['status'] != AttachmentDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("interaction num rule not active")
         return parse_rule
@@ -276,7 +276,8 @@ class InteractHandler(BaseHandler):
                     'sid': self.task['sid'],                        # site id
                     'tid': self.task['tid'],                        # task id
                     'uid': self.task['uid'],                        # url id
-                    'ruleId': self.task['kid'],                     # interactionNumRule id
+                    'kid': self.task['kid'],                        # keyword id
+                    'ruleId': self.task['rid'],                     # interactionNumRule id
                     'list_url': self.response['final_url'],         # 列表url
                 }
                 result['ctime'] = self.crawl_id
