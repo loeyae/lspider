@@ -179,14 +179,15 @@ class GeneralSearchHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
-        frequency = str(task.get('frequency', self.DEFAULT_RATE))
         plantime = int(save['now']) + int(self.ratemap[frequency][0])
+        rule = self.db['AuthorListRuleDB'].get_detail_by_tid(self.task['tid'])
+        frequency = str(rule.get('frequency', self.DEFAULT_RATE))
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
                 '''
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, "rid": rule['uuid']})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
