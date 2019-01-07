@@ -64,6 +64,7 @@ class SeleniumCrawler(BaseCrawler):
 
     def __del__(self):
         self.quit()
+        self.close()
         self._driver = None
 
     def close(self):
