@@ -25,7 +25,7 @@ from cdspider.exceptions import *
 
 CONTINUE_EXCEPTIONS = (CDSpiderCrawlerProxyError, CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout, CDSpiderCrawlerNoResponse, CDSpiderCrawlerForbidden)
 
-IGNORE_EXCEPTIONS = (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerProxyExpired, CDSpiderCrawlerNoExists, CDSpiderCrawlerNoSource)
+IGNORE_EXCEPTIONS = (CDSpiderCrawlerNoNextPage, CDSpiderCrawlerMoreThanMaximum, CDSpiderCrawlerNoExists, CDSpiderCrawlerNoSource, CDSpiderCrawlerReturnBroken)
 
 RETRY_EXCEPTIONS = (CDSpiderCrawlerConnectionError, CDSpiderCrawlerTimeout)
 
