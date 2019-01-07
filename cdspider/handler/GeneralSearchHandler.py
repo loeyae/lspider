@@ -326,6 +326,7 @@ class GeneralSearchHandler(BaseHandler):
             }],
         }
         self.task['url'] = rule['baseUrl']
+        save['base_url'] = rule['baseUrl']
         return rule
 
     def run_parse(self, rule):
