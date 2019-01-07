@@ -366,7 +366,8 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             'sid': self.task['article']['crawlinfo'].get('sid', 0), # site id
             'tid': self.task['article']['crawlinfo'].get('tid', 0), # task id
             'uid': self.task['article']['crawlinfo'].get('uid', 0), # url id
-            'kid': self.process['uuid'],                            # rule id
+            'uid': self.task['article']['crawlinfo'].get('kid', 0), # keyword id
+            'rid': self.process['uuid'],                            # rule id
             'url': self.task['url'],                                # url
             'parentid': self.task['article']['rid'],                # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
