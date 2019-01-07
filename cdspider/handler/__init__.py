@@ -113,6 +113,9 @@ class BaseHandler(Component):
     def newtask(self, message):
         pass
 
+    def frequency(self, message):
+        pass
+
     def status(self, message):
         mode = message['mode']
         status = message['status']
