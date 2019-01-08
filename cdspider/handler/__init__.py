@@ -382,7 +382,7 @@ class BaseHandler(Component):
         if HANDLER_FUN_REPETITION in self.handle:
             self.handler_run(HANDLER_FUN_REPETITION, {"response": self.response, "save": save})
         else:
-            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get("request_url", ''))
+            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", self.task['url']), current_url=save.get("request_url", self.task['url']))
 
     def on_error(self, exc, save):
         """
@@ -397,7 +397,7 @@ class BaseHandler(Component):
                 'mode': self.task['mode'],
                 'create_at': self.crawl_id,
                 'frequency': self.task.get('frequency', None),      # process info
-                'url': save['request_url'],                         # error message
+                'url': save.get('request_url', self.task['url']),                         # error message
                 'error': str(exc),                                  # create time
                 'msg': str(traceback.format_exc()),                 # trace log
                 'class': exc.__class__.__name__,                    # error class
