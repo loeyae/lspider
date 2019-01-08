@@ -37,3 +37,13 @@ class ErrorLogDB(Base):
 
     def delete(self, id):
         raise NotImplementedError
+
+    @staticmethod
+    def build_id(createtime, id):
+        prefix = time.strftime("%Y%m", time.localtime(createtime))
+        return base64encode("%s%d" % (prefix, id))
+
+    @staticmethod
+    def unbuild_id(rid):
+        s = base64decode(rid)
+        return s[0:6], s[6:]
