@@ -10,9 +10,9 @@
 import time
 import pymongo
 from cdspider.database.base import ErrorLogDB as BaseErrorLogDB
-from .Mongo import Mongo
+from .Mongo import Mongo, SplitTableMixin
 
-class ErrorLogDB(Mongo, BaseErrorLogDB):
+class ErrorLogDB(Mongo, BaseErrorLogDB, SplitTableMixin):
     """
     crawl_log data object
     """
@@ -34,17 +34,56 @@ class ErrorLogDB(Mongo, BaseErrorLogDB):
         obj['uuid'] = self._get_increment(self.table)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('create_at', int(time.time()))
-        _id = super(ErrorLogDB, self).insert(setting=obj)
-        return obj['uuid']
+        table = self._get_collection(obj['ctime'])
+        obj['lid'] = BaseErrorLogDB.build_id(obj['create_at'], obj['uuid'])
+        obj.setdefault('status', self.STATUS_INIT)
+        super(ErrorLogDB, self).insert(setting=obj, table=table)
+        return obj['lid']
 
     def update(self, id, obj = {}):
+        table = self._table_name(id)
         obj['utime'] = int(time.time())
-        return super(ErrorLogDB, self).update(setting=obj, where={"uuid": int(id)}, multi=False)
+        return super(ErrorLogDB, self).update(setting=obj, where={"lid": id}, table=table, multi=False)
 
     def delete(self, id, where = {}):
+        table = self._table_name(id)
         if not where:
-            where = {'uuid': int(id)}
+            where = {'lid': id}
         else:
-            where.update({'uuid': int(id)})
+            where.update({'lid': id})
         return super(ErrorLogDB, self).update(setting={"status": self.STATUS_DELETED},
-                where=where, multi=False)
+                table=table, where=where, multi=False)
+
+    def _get_collection(self, ctime):
+        suffix = time.strftime("%Y%m", time.localtime(ctime))
+        name = super(ErrorLogDB, self)._collection_name(suffix)
+        if not name in self._collections:
+            self._create_collection(name)
+        return name
+
+    def _table_name(self, id):
+        suffix, _ = BaseErrorLogDB.unbuild_id(id)
+        name = super(ErrorLogDB, self)._collection_name(suffix)
+        if not name in self._collections:
+            self._create_collection(name)
+        return name
+
+    def _check_collection(self):
+        self._list_collection()
+        suffix = time.strftime("%Y%m")
+        name = super(ErrorLogDB, self)._collection_name(suffix)
+        if not name in self._collections:
+            self._create_collection(name)
+
+    def _create_collection(self, table):
+        collection = self._db.get_collection(table)
+        indexes = collection.index_information()
+        if not 'uuid' in indexes:
+            collection.create_index('uuid', unique=True, name='uuid')
+        if not 'lid' in indexes:
+            collection.create_index('lid', unique=True, name='lid')
+        if not 'create_ad' in indexes:
+            collection.create_index('create_ad', name='create_ad')
+        if not 'tid' in indexes:
+            collection.create_index('tid', name='tid')
+        self._collections.add(table)
