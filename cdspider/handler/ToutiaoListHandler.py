@@ -191,7 +191,8 @@ class ToutiaoListHandler(WemediaListHandler):
                     'sid': author['sid'],        # site uuid
                     'tid': author['tid'],        # task uuid
                     'uid': each,                 # url uuid
-                    'kid': rule['uuid'],         # keyword id
+                    'kid': 0,                    # keyword id
+                    'rid': rule['uuid'],         # rule id
                     'url': "base_url",           # url
                     'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
                 }
@@ -230,7 +231,7 @@ class ToutiaoListHandler(WemediaListHandler):
             if author['status'] != AuthorDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderHandlerError("author: %s not active" % self.task['uid'])
-            rule = self.db['AuthorListRuleDB'].get_detail(self.task['kid'])
+            rule = self.db['AuthorListRuleDB'].get_detail(self.task['rid'])
             if not rule:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderDBDataNotFound("author rule by tid: %s not exists" % author['tid'])
