@@ -274,7 +274,7 @@ class WechatItemHandler(BaseHandler):
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
             #格式化文章信息
-            result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], **unid)
+            result = self._build_result_info(final_url=self.task['url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], **unid)
             if self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
