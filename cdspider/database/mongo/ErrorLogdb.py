@@ -27,7 +27,7 @@ class ErrorLogDB(Mongo, BaseErrorLogDB, SplitTableMixin):
         obj['uuid'] = self._get_increment(self.table)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('create_at', int(time.time()))
-        table = self._get_collection(obj['ctime'])
+        table = self._get_collection(obj['create_at'])
         obj['lid'] = BaseErrorLogDB.build_id(obj['create_at'], obj['uuid'])
         obj.setdefault('status', self.STATUS_INIT)
         super(ErrorLogDB, self).insert(setting=obj, table=table)
