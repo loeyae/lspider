@@ -20,6 +20,7 @@ from . import Base
         'uid': int,         # url id
         'kid': int,         # keyword id
         'rid': int,         # rule id
+        'mode': str,        # handler mode
         'crawl_urls': str,  # {page: request url, ...}
         'crawl_start': int, # crawl start time
         'crawl_end': int,   # crawl end time
