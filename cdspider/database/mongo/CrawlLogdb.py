@@ -22,14 +22,6 @@ class CrawlLogDB(Mongo, BaseCrawlLogDB, SplitTableMixin):
     def __init__(self, connector, table=None, **kwargs):
         super(CrawlLogDB, self).__init__(connector, table = table, **kwargs)
         self._check_collection()
-        collection = self._db.get_collection(self.table)
-        indexes = collection.index_information()
-        if not 'uuid' in indexes:
-            collection.create_index('uuid', unique=True, name='uuid')
-        if not 'stid' in indexes:
-            collection.create_index('stid', name='stid')
-        if not 'ctime' in indexes:
-            collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
         obj['uuid'] = self._get_increment(self.table)
