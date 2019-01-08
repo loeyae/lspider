@@ -6,14 +6,14 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-11-17 19:56:32
 """
-from . import BaseHandler
-from cdspider.parser.lib import LinksExtractor
-from urllib.parse import urlparse
 import re
 import sys
 import hashlib
 import math
 import copy
+from . import BaseHandler
+from cdspider.parser.lib import LinksExtractor
+from urllib.parse import urlparse
 
 class LinksClusterHandler(BaseHandler):
     """
@@ -125,7 +125,7 @@ class LinksClusterHandler(BaseHandler):
         # else:
         #     re_type = 'subdomains'
         # domain 改成 subdomains试试
-        re_type = 'subdomain'
+        re_type = 'subdomains'
         self.response['parsed'] = extractor.infos[re_type]
 
 
