@@ -12,7 +12,8 @@ from . import Base
 
 {
     "error": {
-        'uuid': str,        # log id
+        'uuid': int,        # log id
+        'lid': str,         # log id
         'tid': int,         # spider task id
         'level': str,       # process info
         'url': str,         # error message
