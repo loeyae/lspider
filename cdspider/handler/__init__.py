@@ -60,6 +60,7 @@ class BaseHandler(Component):
         self.queue = g.get('queue', None)
         self.ratemap = g.get('app_config', {}).get('ratemap', {})
         self.testing_mode = g.get('testing_mode', False)
+        self.log_id = None
         if self.task:
             attach_storage = g.get('app_config', {}).get('attach_storage', None)
             if attach_storage:
@@ -218,6 +219,19 @@ class BaseHandler(Component):
             if 'tid' in task and task['tid']:
                 t = self.db['TaskDB'].get_detail(task['tid'])
                 self.task['task'] = t or {}
+            log = {
+                'stid': self.task['uuid'],          # task id
+                'pid': self.task['pid'],            # project id
+                'sid': self.task['sid'],            # site id
+                'tid': self.task['tid'],            # task id
+                'uid': self.task.get('uid', 0),     # url id
+                'kid': self.task.get('kid', 0),     # keyword id
+                'rid': self.task.get('rid', 0),     # rule id
+                'mode': self.task['mode'],          # handler mode
+                'crawl_start': self.crawl_id,       # crawl start time
+            }
+            self.log_id = self.db['CrawlLogDB'].insert(log)
+
         self.init_process(save)
         if not save['base_url']:
             save['base_url'] = self.task['url']
@@ -517,6 +531,18 @@ class BaseHandler(Component):
         return u
 
     def finish(self, save):
+        if self.log_id:
+            log = {
+                'crawl_urls': self.crawl_info['crawl_urls'],                    # {page: request url, ...}
+                'crawl_end': int(time.time()),                                  # crawl end time
+                'total': self.crawl_info['crawl_count']['total'],               # 抓取到的数据总数
+                'new_count': self.crawl_info['crawl_count']['new_count'],       # 抓取到的数据入库数'
+                'repeat_count': self.crawl_info['crawl_count']['repeat_count'], # 抓取到的数据重复数
+                'page': self.crawl_info['crawl_count']['page'],                 # 抓取的页数
+                'repeat_page': self.crawl_info['crawl_count']['repeat_page'],   # 重复的页数
+                'errid': self.crawl_info.get('errid', 0),                       # 如果有错误，关联的错误日志ID
+            }
+            self.log_id = self.db['CrawlLogDB'].update(self.log_id, log)
         self.handler_run(HANDLER_FUN_FINISH, {"save": save, "response": self.response})
 
     def close(self):
