@@ -83,6 +83,7 @@ class WechatItemHandler(BaseHandler):
             if not spiderTask:
                 raise CDSpiderHandlerError("list task: %s not exists" % stid)
             crawlinfo = {
+                'listMode': HANDLER_MODE_WECHAT_LIST,
                 "mode": HANDLER_MODE_WECHAT_ITEM,  # mode
                 "stid": self.task.get("stid", 0),   # SpiderTask uuid
                 "uid": spiderTask.get("uid", 0),     # url id
