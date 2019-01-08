@@ -9,6 +9,7 @@
 """
 
 import time
+from cdspider.libs.utils import base64encode, base64decode
 from . import Base
 
 {
