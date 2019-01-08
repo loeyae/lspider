@@ -25,8 +25,8 @@ class CrawlLogDB(Mongo, BaseCrawlLogDB):
         indexes = collection.index_information()
         if not 'uuid' in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
-        if not 'tid' in indexes:
-            collection.create_index('tid', name='tid')
+        if not 'stid' in indexes:
+            collection.create_index('stid', name='stid')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
 
@@ -35,6 +35,7 @@ class CrawlLogDB(Mongo, BaseCrawlLogDB):
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
+        obj.setdefault('errid', 0)
         _id = super(CrawlLogDB, self).insert(setting=obj)
         return obj['uuid']
 
