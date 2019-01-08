@@ -175,12 +175,16 @@ class Spider(Component):
         def queue_loop():
             if not self.inqueue:
                 return
+            t = 0
             while not self._quit:
                 try:
+                    t += 1
                     message = self.inqueue.get_nowait()
                     self.debug("%s fetch got message %s" % (self.__class__.__name__, message))
                     task = self.get_task(message)
                     self.fetch(task)
+                    if t > 100:
+                        break
                     time.sleep(0.1)
                 except queue.Empty:
                     time.sleep(0.1)
@@ -188,6 +192,7 @@ class Spider(Component):
                 except KeyboardInterrupt:
                     break
                 except Exception as e:
+                    t = 0
                     self.exception(e)
                     break
 
