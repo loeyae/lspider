@@ -98,4 +98,6 @@ class WeiboInfoDB(Mongo, BaseWeiboInfoDB, SplitTableMixin):
             collection.create_index('crawlinfo.uid', name='uid')
         if not 'kid' in indexes:
             collection.create_index('crawlinfo.kid', name='kid')
+        if not 'listRule' in indexes:
+            collection.create_index({'crawlinfo.listMode': 1, 'crawlinfo.listRule': 1}, name='listRule')
         self._collections.add(table)
