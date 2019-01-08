@@ -308,13 +308,14 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
         #爬虫信息记录
         result['pubtime'] = pubtime
         result['crawlinfo'] = {
+            'listMode': self.task['mode'],
             'pid': self.task['pid'],                        # project id
             'sid': self.task['sid'],                        # site id
             'tid': self.task['tid'],                        # task id
             'uid': self.task['uid'],                        # url id
             'stid': self.task['uuid'],                      # spider task id
             'kid': self.task['kid'],                        # url id
-            'ruleId': self.process['uuid'],                 # authorListRule id
+            'listRule': self.process['uuid'],               # authorListRule id
             'list_url': self.request_params['url'],         # 列表url
         }
         result['acid'] = kwargs.pop('unid')
