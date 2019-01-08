@@ -13,6 +13,7 @@ from . import Base
 {
     "crawl_log": {
         'uuid': int,        # log id
+        'lid': str,         # log id
         'stid': int,        # task id
         'pid': int,         # project id
         'sid': int,         # site id
