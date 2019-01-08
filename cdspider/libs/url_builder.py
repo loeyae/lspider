@@ -17,16 +17,16 @@ from cdspider import Component
 from urllib.parse import urljoin
 from cdspider.libs import utils
 from cdspider.exceptions import *
-from cdspider.parser import CustomParser
 
 class UrlBuilder(Component):
     """
     url builder
     """
-    def __init__(self, logger = None, log_level=logging.DEBUG):
+    def __init__(self, parser, logger = None, log_level=logging.DEBUG):
         logger = logger or logging.getLogger('spider')
         self._max = 0
         self.log_level = log_level
+        self.parser = parser
         super(UrlBuilder, self).__init__(logger, log_level)
 
     def build(self, kwargs, source, crawler, save):
@@ -101,7 +101,7 @@ class UrlBuilder(Component):
             elif _type == 'parent':
                 url = save.get('parent_url')
             else:
-                parser = CustomParser(source=source, ruleset={"url": {"filter": setting['filter']}}, log_level=self.log_level, url=save['base_url'])
+                parser = self.parser(source=source, ruleset={"url": {"filter": setting['filter']}}, log_level=self.log_level, url=save['base_url'])
                 parsed = parser.parse()
                 url = parsed['url']
         elif isinstance(kwargs['url'], list):
@@ -118,7 +118,7 @@ class UrlBuilder(Component):
         self.info("UrlBuilder run parse start")
         self.debug("UrlBuilder parse match code rule: %s" % str(rule))
         try:
-            parser = CustomParser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=save['base_url'])
+            parser = self.parser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=save['base_url'])
             parsed = parser.parse()
             self.debug("UrlBuilder parse match code data: %s" % str(parsed))
             if parsed:
