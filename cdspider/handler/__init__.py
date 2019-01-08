@@ -256,7 +256,7 @@ class BaseHandler(Component):
             self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
             if rule:
                 request.update(rule)
-        builder = UrlBuilder(self.logger, self.log_level)
+        builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_INIT, {"request_params": self.request_params, "save": save})
 
@@ -441,7 +441,7 @@ class BaseHandler(Component):
         self.debug("%s on next formated rule: %s" % (self.__class__.__name__, rule))
         if not rule:
             raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
-        builder = UrlBuilder(self.logger, self.log_level)
+        builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         save['page'] = self.page
         request = copy.deepcopy(self.request)
         request.update(rule)
