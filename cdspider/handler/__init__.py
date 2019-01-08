@@ -229,6 +229,7 @@ class BaseHandler(Component):
                 'rid': self.task.get('rid', 0),     # rule id
                 'mode': self.task['mode'],          # handler mode
                 'crawl_start': self.crawl_id,       # crawl start time
+                'ctime': self.crawl_id              # create time
             }
             self.log_id = self.db['CrawlLogDB'].insert(log)
 
@@ -392,6 +393,7 @@ class BaseHandler(Component):
             data = {
                 'tid': self.task['uuid'],                           # spider task id
                 'mode': self.task['mode'],
+                'create_at': self.crawl_id,
                 'frequency': self.task.get('frequency', None),      # process info
                 'url': save['request_url'],                         # error message
                 'error': str(exc),                                  # create time
