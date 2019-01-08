@@ -74,35 +74,31 @@ class CrawlLogDB(Mongo, BaseCrawlLogDB, SplitTableMixin):
     def _check_collection(self):
         self._list_collection()
         suffix = time.strftime("%Y%m")
-        name = super(ArticlesDB, self)._collection_name(suffix)
+        name = super(CrawlLogDB, self)._collection_name(suffix)
         if not name in self._collections:
             self._create_collection(name)
 
     def _create_collection(self, table):
         collection = self._db.get_collection(table)
         indexes = collection.index_information()
+        if not 'uuid' in indexes:
+            collection.create_index('uuid', unique=True, name='uuid')
+        if not 'lid' in indexes:
+            collection.create_index('lid', unique=True, name='lid')
+        if not 'pid' in indexes:
+            collection.create_index('pid', name='pid')
+        if not 'sid' in indexes:
+            collection.create_index('sid', name='sid')
+        if not 'uid' in indexes:
+            collection.create_index('uid', name='uid')
+        if not 'kid' in indexes:
+            collection.create_index('kid', name='kid')
         if not 'rid' in indexes:
-            collection.create_index('rid', unique=True, name='rid')
-        if not 'acid' in indexes:
-            collection.create_index('acid', unique=True, name='acid')
-        if not 'domain' in indexes:
-            collection.create_index('domain', name='domain')
-        if not 'subdomain' in indexes:
-            collection.create_index('subdomain', name='subdomain')
+            collection.create_index('rid', name='rid')
+        if not 'stid' in indexes:
+            collection.create_index('stid', name='stid')
         if not 'status' in indexes:
             collection.create_index('status', name='status')
-        if not 'pubtime' in indexes:
-            collection.create_index('pubtime', name='pubtime')
         if not 'ctime' in indexes:
             collection.create_index('ctime', name='ctime')
-        if not 'pid' in indexes:
-            collection.create_index('crawlinfo.pid', name='pid')
-        if not 'sid' in indexes:
-            collection.create_index('crawlinfo.sid', name='sid')
-        if not 'tid' in indexes:
-            collection.create_index('crawlinfo.tid', name='tid')
-        if not 'uid' in indexes:
-            collection.create_index('crawlinfo.uid', name='uid')
-        if not 'kid' in indexes:
-            collection.create_index('crawlinfo.kid', name='kid')
         self._collections.add(table)
