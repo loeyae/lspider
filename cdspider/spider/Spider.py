@@ -184,7 +184,7 @@ class Spider(Component):
                     task = self.get_task(message)
                     self.fetch(task)
                     if t > 10:
-                        break
+                        raise
                     time.sleep(0.1)
                 except queue.Empty:
                     time.sleep(0.1)
