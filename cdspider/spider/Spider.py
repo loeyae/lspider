@@ -183,7 +183,7 @@ class Spider(Component):
                     self.debug("%s fetch got message %s" % (self.__class__.__name__, message))
                     task = self.get_task(message)
                     self.fetch(task)
-                    if t > 100:
+                    if t > 20:
                         raise SystemExit
                     time.sleep(0.1)
                 except queue.Empty:
