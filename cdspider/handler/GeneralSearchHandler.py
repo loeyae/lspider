@@ -350,6 +350,7 @@ class GeneralSearchHandler(BaseHandler):
         :input self.crawl_id 爬虫运行时刻
         """
         return {
+                'listMode': self.task['mode'],
                 'mode': mode,
                 "stid": self.task.get("uuid", 0),   # SpiderTask uuid
                 "uid": self.task.get("uid", 0),     # url id
