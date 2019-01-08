@@ -110,7 +110,7 @@ class Parser(object):
         elif re.findall(r'天前',timestring):
             dd=re.search(r'\d',timestring)
             w=int(dd.group())
-            d = (datetime.datetime.now() - datetime.timedelta(days = w)).strftime("%Y-%m-%d %H:%M:%S")
+            d = (datetime.date.today() - datetime.timedelta(days = w)).strftime("%Y-%m-%d %H:%M:%S")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
             return timeStamp
         elif re.findall(r'周前',timestring):
