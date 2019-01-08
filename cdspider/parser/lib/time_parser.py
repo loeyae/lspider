@@ -95,22 +95,22 @@ class Parser(object):
         elif re.findall(r'秒前',timestring):
             dd=re.search(r'\d',timestring)
             w=int(dd.group())
-            d = (datetime.date.today() - datetime.timedelta(seconds = w)).strftime("%Y-%m-%d 00:00:00")
+            d = (datetime.datetime.now() - datetime.timedelta(seconds = w)).strftime("%Y-%m-%d %H:%M:%S")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'分钟前',timestring):
             dd=re.search(r'\d',timestring)
             w=int(dd.group())
-            d = (datetime.date.today() - datetime.timedelta(minutes = w)).strftime("%Y-%m-%d 00:00:00")
+            d = (datetime.datetime.now() - datetime.timedelta(minutes = w)).strftime("%Y-%m-%d %H:%M:%S")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'小时前',timestring):
             dd=re.search(r'\d',timestring)
             w=int(dd.group())
-            d = (datetime.date.today() - datetime.timedelta(hours = w)).strftime("%Y-%m-%d 00:00:00")
+            d = (datetime.datetime.now() - datetime.timedelta(hours = w)).strftime("%Y-%m-%d %H:%M:%S")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'天前',timestring):
             dd=re.search(r'\d',timestring)
             w=int(dd.group())
-            d = (datetime.date.today() - datetime.timedelta(days = w)).strftime("%Y-%m-%d 00:00:00")
+            d = (datetime.datetime.now() - datetime.timedelta(days = w)).strftime("%Y-%m-%d %H:%M:%S")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
             return timeStamp
         elif re.findall(r'周前',timestring):
