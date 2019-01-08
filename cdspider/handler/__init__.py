@@ -219,6 +219,7 @@ class BaseHandler(Component):
             if 'tid' in task and task['tid']:
                 t = self.db['TaskDB'].get_detail(task['tid'])
                 self.task['task'] = t or {}
+            # 记录抓取日志
             log = {
                 'stid': self.task['uuid'],          # task id
                 'pid': self.task['pid'],            # project id
@@ -228,6 +229,7 @@ class BaseHandler(Component):
                 'kid': self.task.get('kid', 0),     # keyword id
                 'rid': self.task.get('rid', 0),     # rule id
                 'mode': self.task['mode'],          # handler mode
+                'frequency': self.task.get('frequency', None),
                 'crawl_start': self.crawl_id,       # crawl start time
                 'ctime': self.crawl_id              # create time
             }
