@@ -90,6 +90,7 @@ class WechatItemHandler(BaseHandler):
                 "sid": spiderTask.get('sid', 0),     # site id
                 "tid": spiderTask.get('tid', 0),     # task id
                 "kid": spiderTask.get('kid', 0),     # keyword id
+                "listRule": spiderTask.get('rid', 0),   # 规则ID
                 "list_url": spiderTask.get('save').get('base_url'),  # 列表url
                 "list_crawl_id": self.task.get('crawlid', spiderTask['crawltime']),     # 列表抓取时间
             }
