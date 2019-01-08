@@ -21,14 +21,7 @@ class ErrorLogDB(Mongo, BaseErrorLogDB, SplitTableMixin):
 
     def __init__(self, connector, table=None, **kwargs):
         super(ErrorLogDB, self).__init__(connector, table = table, **kwargs)
-        collection = self._db.get_collection(self.table)
-        indexes = collection.index_information()
-        if not 'uuid' in indexes:
-            collection.create_index('uuid', unique=True, name='uuid')
-        if not 'tid' in indexes:
-            collection.create_index('tid', name='tid')
-        if not 'ctime' in indexes:
-            collection.create_index('ctime', name='ctime')
+        self._check_collection()
 
     def insert(self, obj):
         obj['uuid'] = self._get_increment(self.table)
