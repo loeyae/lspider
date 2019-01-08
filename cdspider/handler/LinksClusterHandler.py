@@ -189,7 +189,6 @@ class LinksClusterHandler(BaseHandler):
         # 准备写库
         if sortArr:
             urlsdb = self.db['UrlsDB']
-            # urlsUniquedb = self.db['UrlsUniqueDB']
             for item in sortArr:
                 for it in item:
                     # 防止重复，去掉最后的/
@@ -199,16 +198,14 @@ class LinksClusterHandler(BaseHandler):
                         urlpath  = urlparse(url).path
                         urlquery = urlparse(url).query
                         if len(urlpath) <= 1 and len(urlquery) == 0:
-                            baseUrl = 1
+                            if '.' + urlparse(self.task['url']).netloc in url:
+                                baseUrl = 0
+                            else:
+                                baseUrl = 1
                         else:
                             baseUrl = 0
+                        print(url, baseUrl)
                         urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl, 'ruleStatus': 0})
                         print('write success!')
                     except Exception:
                         print('url is exist!')
-        # urlsdb = self.db['UrlsDB']
-        # if self.response['parsed']:
-        #     arrtmp = sorted(self.response['parsed'], key=lambda url:url['url'])
-        #     for item in arrtmp:
-        #         print(item)
-        #         urlsdb.insert({"url": item['url'], "title": item['title']})
