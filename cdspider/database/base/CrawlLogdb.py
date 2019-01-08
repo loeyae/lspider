@@ -12,12 +12,23 @@ from . import Base
 
 {
     "crawl_log": {
-        'uuid': int,      # log id
-        'machine': str, # matchine info
-        'process': str, # process info
-        'message': str, # error message
-        'ctime': int,   # create time
-        'tid': int,     # task id
+        'uuid': int,        # log id
+        'stid': int,        # task id
+        'pid': int,         # project id
+        'sid': int,         # site id
+        'tid': int,         # task id
+        'uid': int,         # url id
+        'kid': int,         # keyword id
+        'rid': int,         # rule id
+        'crawl_urls': str,  # {page: request url, ...}
+        'crawl_start': int, # crawl start time
+        'crawl_end': int,   # crawl end time
+        'total': int,       # 抓取到的数据总数
+        'new_count': int,   # 抓取到的数据入库数'
+        'repeat_count': int,# 抓取到的数据重复数
+        'page': int,        # 抓取的页数
+        'repeat_page': int, # 重复的页数
+        'errid': int,       # 如果有错误，关联的错误日志ID
     }
 }
 
