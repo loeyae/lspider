@@ -118,6 +118,16 @@ class Parser(object):
             w=int(dd.group())
             d = (datetime.date.today() - datetime.timedelta(weeks = w)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
+        elif re.findall(r'月前',timestring):
+            dd=re.search(r'\d',timestring)
+            w=int(dd.group())
+            d = (datetime.date.today() - datetime.timedelta(days = w * 30)).strftime("%Y-%m-%d 00:00:00")
+            return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
+        elif re.findall(r'年前',timestring):
+            dd=re.search(r'\d',timestring)
+            w=int(dd.group())
+            d = (datetime.date.today() - datetime.timedelta(days = w * 365)).strftime("%Y-%m-%d 00:00:00")
+            return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'今天',timestring):
             if re.findall('\d{1,2}:\d{1,2}(?:\:\d{1,2})?', timestring):
                 a = re.sub('今天', datetime.date.today().strftime("%Y-%m-%d "), timestring)
