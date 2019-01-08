@@ -167,6 +167,7 @@ class GeneralListHandler(BaseHandler):
         :param save 上下文参数
         :return 包含爬虫任务uuid, url的字典迭代器
         """
+        rules = {}
         for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'uid', 'url']):
             if not self.testing_mode:
                 '''
@@ -174,9 +175,17 @@ class GeneralListHandler(BaseHandler):
                 '''
                 uid = item.pop('uid')
                 url = self.db['UrlsDB'].get_detail(uid)
-                frequency = str(url.get('frequency', self.DEFAULT_RATE))
+                ruleId = url.pop('ruleId', 0)
+                if str(ruleId) in rules:
+                    rule = rules[str(ruleId)]
+                else:
+                    rule = self.db['ListRuleDB'].get_detail(ruleId)
+                    rules[str(ruleId)] = rule
+                if not rule:
+                    continue
+                frequency = str(rule.get('frequency', self.DEFAULT_RATE))
                 plantime = int(save['now']) + int(self.ratemap[frequency][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, 'rid': url['ruleId']})
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, 'rid': ruleId})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
