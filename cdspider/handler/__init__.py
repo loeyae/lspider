@@ -442,22 +442,23 @@ class BaseHandler(Component):
         下一页解析
         """
         self.page += 1
-        rule = self.process.get("paging")
-        self.debug("%s on next rule: %s" % (self.__class__.__name__, rule))
-        rule = self.format_paging(rule)
-        self.debug("%s on next formated rule: %s" % (self.__class__.__name__, rule))
-        if not rule:
-            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
-        builder = UrlBuilder(CustomParser, self.logger, self.log_level)
-        save['page'] = self.page
         request = copy.deepcopy(self.request)
-        for k, v in rule.items():
-            if k in request and isinstance(request[k], list):
-                request[k].append(v)
-            elif k in request and isinstance(request[k], dict):
-                request[k].update(v)
-            else:
-                request[k] = v
+        save['page'] = self.page
+        if not 'paging' in save or not save['paging']:
+            rule = self.process.get("paging")
+            self.debug("%s on next rule: %s" % (self.__class__.__name__, rule))
+            rule = self.format_paging(rule)
+            self.debug("%s on next formated rule: %s" % (self.__class__.__name__, rule))
+            if not rule:
+                raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
+            for k, v in rule.items():
+                if k in request and isinstance(request[k], list):
+                    request[k].append(v)
+                elif k in request and isinstance(request[k], dict):
+                    request[k].update(v)
+                else:
+                    request[k] = v
+        builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_NEXT, {"response": self.response, "request_params": self.request_params, "save": save})
         save['next_url'] = self.request_params['url']
