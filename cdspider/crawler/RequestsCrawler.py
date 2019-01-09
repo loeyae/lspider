@@ -52,6 +52,7 @@ class RequestsCrawler(BaseCrawler):
 
     def __del__(self):
         self.quit()
+        super(RequestsCrawler, self).__del__()
 
     def close(self):
         if isinstance(self._response, requests.Response):
