@@ -66,6 +66,7 @@ class SeleniumCrawler(BaseCrawler):
         self.close()
         self.quit()
         self._driver = None
+        super(SeleniumCrawler, self).__del__()
 
     def close(self):
         if isinstance(self._driver, webdriver.PhantomJS):
