@@ -19,7 +19,7 @@ class CDSpiderError(Exception):
             kwargs['base_url'] = args[1]
         if l >= 3:
             kwargs['current_url'] = args[2]
-        self.msg = kwargs.pop('msg', None) or self.msg
+        self.msg = str(kwargs.pop('msg', None)) or self.msg
         self.hostname = socket.gethostname()
         self.localip = socket.gethostbyname(self.hostname)
         self.base_url = kwargs.pop('base_url', None)
@@ -27,6 +27,7 @@ class CDSpiderError(Exception):
         self.params = kwargs
 
     def __str__(self):
+        print(self.msg)
         return self.msg
 
     def getMessage(self):
