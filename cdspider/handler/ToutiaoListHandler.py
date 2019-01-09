@@ -204,6 +204,7 @@ class ToutiaoListHandler(WemediaListHandler):
                     try:
                         self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
                     except:
+                        self.error(traceback.format_exc())
                         pass
 
     def init_process(self, save):
