@@ -452,9 +452,9 @@ class BaseHandler(Component):
         save['page'] = self.page
         request = copy.deepcopy(self.request)
         for k, v in rule.items():
-            if isinstance(request[k], list):
+            if k in request and isinstance(request[k], list):
                 request[k].append(v)
-            elif isinstance(request[k], dict):
+            elif k in request and isinstance(request[k], dict):
                 request[k].update(v)
             else:
                 request[k] = v
