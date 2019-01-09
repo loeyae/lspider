@@ -27,7 +27,6 @@ class CDSpiderError(Exception):
         self.params = kwargs
 
     def __str__(self):
-        print(self.msg)
         return self.msg
 
     def getMessage(self):
