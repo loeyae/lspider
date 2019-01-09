@@ -178,7 +178,7 @@ class ToutiaoListHandler(WemediaListHandler):
             uid = [uid]
         for each in uid:
             spiderTasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
-            if len(list(spiderTasks)) > 0:
+            if len(list(spiderTasks)) > 2:
                 continue
             author = self.db['AuthorDB'].get_detail(each)
             if not author:
