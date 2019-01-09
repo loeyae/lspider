@@ -318,10 +318,11 @@ class GeneralSearchHandler(BaseHandler):
                 raise CDSpiderDBDataNotFound("task rule by tid: %s not exists" % self.task['tid'])
             if rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
+        kset = rule['request'].pop('keyword', {})
         save['request'] = {
             "hard_code": [{
-                "mode": "format",
-                "name": "keyword",
+                "mode": kset.pop('mode', 'get'),
+                "name": kset.pop('key', 'w'),
                 "value": quote_plus(keyword['name']),
             }],
         }
