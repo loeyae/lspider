@@ -13,6 +13,9 @@ class Component(object):
         self.logger.setLevel(log_level)
         self.log_level = log_level
 
+    def __del__(self):
+        self.flush()
+
     def debug(self, message, *args, **kwargs):
         if self.log_level <= logging.DEBUG:
             self.logger.debug(message, *args, **kwargs)
@@ -42,3 +45,7 @@ class Component(object):
     def critical(self, message, *args, **kwargs):
         if self.log_level <= logging.CRITICAL:
             self.logger.critical(message, *args, **kwargs)
+
+    def flush(self):
+        for h in self.logger.handlers:
+            h.flush()
