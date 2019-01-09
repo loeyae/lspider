@@ -258,7 +258,7 @@ class BaseHandler(Component):
             if rule:
                 for k, v in rule.items():
                     if k in request and isinstance(request[k], list):
-                        request[k].append(v)
+                        request[k].extend(v)
                     elif k in request and isinstance(request[k], dict):
                         request[k].update(v)
                     else:
@@ -453,7 +453,7 @@ class BaseHandler(Component):
                 raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
             for k, v in rule.items():
                 if k in request and isinstance(request[k], list):
-                    request[k].append(v)
+                    request[k].extend(v)
                 elif k in request and isinstance(request[k], dict):
                     request[k].update(v)
                 else:
