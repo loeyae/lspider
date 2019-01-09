@@ -319,6 +319,8 @@ class GeneralSearchHandler(BaseHandler):
             if rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
         kset = rule['request'].pop('keyword', {})
+        if 'hard_code' in save:
+            del save['hard_code']
         save['request'] = {
             "hard_code": [{
                 "mode": kset.pop('mode', 'get'),
