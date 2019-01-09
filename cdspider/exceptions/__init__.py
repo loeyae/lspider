@@ -206,6 +206,13 @@ class CDSpiderCrawlerMoreThanMaximum(CDSpiderCrawlerBroken):
 
     msg = "CDSpider Crawler More Than Maximum"
 
+class CDSpiderCrawlerDebugBroken(CDSpiderCrawlerBroken):
+    """
+    抓取时超过规定页数
+    """
+
+    msg = "CDSpider debug broken"
+
 class CDSpiderParserError(CDSpiderError):
     """
     解析异常基类
