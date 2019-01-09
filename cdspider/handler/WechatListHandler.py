@@ -179,7 +179,7 @@ class WechatListHandler(BaseHandler):
                     continue
                 frequency = str(author.get('frequency', self.DEFAULT_RATE))
                 plantime = int(save['now']) + int(self.ratemap[frequency][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, 'rid': rule['id']})
+                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, 'rid': rule['uuid']})
             if item['uuid'] > save['id']:
                 save['id'] = item['uuid']
             yield item
