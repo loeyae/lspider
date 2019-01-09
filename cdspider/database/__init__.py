@@ -23,6 +23,10 @@ class BaseDataBase(object):
         self.logger.setLevel(log_level)
         self.setting = kwargs
 
+    def __del__(self):
+        for h in self.logger.handlers:
+            h.flush()
+
     @abc.abstractmethod
     def find(self, where, table = None, select = None, sort = None, offset = 0, hits = 10):
         """
