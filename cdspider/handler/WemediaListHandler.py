@@ -275,6 +275,7 @@ class WemediaListHandler(BaseHandler):
                 "random": parameters.get('randoms'),
             }
         self.task['url'] = rule['baseUrl']
+        save['base_url'] = rule['baseUrl']
         save['paging'] = True
         return rule
 
