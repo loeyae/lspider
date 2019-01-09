@@ -268,6 +268,8 @@ class WemediaListHandler(BaseHandler):
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
         parameters = author.get('parameters')
         if parameters:
+            if 'hard_code' in save:
+                del save['hard_code']
             save['request'] = {
                 "hard_code": parameters.get('hard'),
                 "random": parameters.get('randoms'),
