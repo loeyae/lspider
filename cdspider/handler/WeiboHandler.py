@@ -78,6 +78,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
                 "value": author['uid'],
             }],
         }
+        save['paging'] = True
         self.task['url'] = parse_rule['baseUrl']
         save['base_url'] = parse_rule['baseUrl']
         return parse_rule
