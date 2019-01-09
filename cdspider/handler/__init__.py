@@ -257,9 +257,9 @@ class BaseHandler(Component):
             self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
             if rule:
                 for k, v in rule.items():
-                    if isinstance(request[k], list):
+                    if k in request and isinstance(request[k], list):
                         request[k].append(v)
-                    elif isinstance(request[k], dict):
+                    elif k in request and isinstance(request[k], dict):
                         request[k].update(v)
                     else:
                         request[k] = v
