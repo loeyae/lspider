@@ -104,6 +104,7 @@ class BaseHandler(Component):
 
     def __del__(self):
         self.close()
+        super(BaseHandler, self).__del__()
 
     def route(self, mode, save):
         yield None
@@ -467,7 +468,7 @@ class BaseHandler(Component):
         if save['retry'] < self.MAX_RETRY:
             save['retry'] += 1
             self.handler_run(HANDLER_FUN_CONTINUE, {"broken_exc": broken_exc, "save": save})
-            self.info('Retry to fetch: %s because of %s, current times: %s' % (self.request_params['url'], str(broken_exc), save['retry']))
+            self.info('Retry to fetch: %s because of %s, current times: %s' % (self.request_params['url'], broken_exc, save['retry']))
         else:
             raise broken_exc
 
