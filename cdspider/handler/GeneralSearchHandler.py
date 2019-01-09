@@ -324,7 +324,7 @@ class GeneralSearchHandler(BaseHandler):
         save['request'] = {
             "hard_code": [{
                 "mode": kset.pop('mode', 'get'),
-                "name": kset.pop('key', 'w'),
+                "name": kset.pop('key', 'keyword'),
                 "value": quote_plus(keyword['name']),
             }],
         }
