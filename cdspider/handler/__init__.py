@@ -256,7 +256,13 @@ class BaseHandler(Component):
             rule = self.format_paging(rule)
             self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
             if rule:
-                request.update(rule)
+                for k, v in rule.items():
+                    if isinstance(request[k], list):
+                        request[k].append(v)
+                    elif isinstance(request[k], dict):
+                        request[k].update(v)
+                    else:
+                        request[k] = v
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_INIT, {"request_params": self.request_params, "save": save})
@@ -445,7 +451,13 @@ class BaseHandler(Component):
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         save['page'] = self.page
         request = copy.deepcopy(self.request)
-        request.update(rule)
+        for k, v in rule.items():
+            if isinstance(request[k], list):
+                request[k].append(v)
+            elif isinstance(request[k], dict):
+                request[k].update(v)
+            else:
+                request[k] = v
         self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
         self.handler_run(HANDLER_FUN_NEXT, {"response": self.response, "request_params": self.request_params, "save": save})
         save['next_url'] = self.request_params['url']
