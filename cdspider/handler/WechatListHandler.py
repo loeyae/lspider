@@ -287,6 +287,7 @@ class WechatListHandler(BaseHandler):
             }
         self.task['prepare_rule'] = wechatRule
         self.task['url'] = wechatRule['baseUrl']
+        save['paging'] = True
         return rule
 
     def prepare(self, save):
