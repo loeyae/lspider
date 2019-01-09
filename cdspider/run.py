@@ -138,7 +138,6 @@ def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
     g['instances'].append(scheduler)
     scheduler.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
-
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('--inqueue', default=None, help='监听的queue', show_default=True)
@@ -287,14 +286,15 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 @click.option('-i', '--id', help="与mode相关。project: project uuid, site: site uuid, task: task uuid")
 @click.option('-m', '--mode', default='project', help="mode id", show_default=True)
 @click.option('-h', '--handler-mode', default='list', help="mode id", show_default=True)
+@click.option('--outqueue', default=None, help='输出的queue', show_default=True)
 @click.pass_context
-def schedule_test(ctx, scheduler_cls, id, mode, handler_mode):
+def schedule_test(ctx, scheduler_cls, id, mode, handler_mode, outqueue):
     """
     计划任务测试
     """
     g = ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    scheduler = Scheduler(ctx)
+    scheduler = Scheduler(ctx, outqueue=outqueue)
     task = {
         "item": int(id),
         "mode": mode,
