@@ -19,7 +19,9 @@ class CDSpiderError(Exception):
             kwargs['base_url'] = args[1]
         if l >= 3:
             kwargs['current_url'] = args[2]
-        self.msg = str(kwargs.pop('msg', None)) or self.msg
+        self.msg = kwargs.pop('msg', None) or self.msg
+        if isinstance(self.msg, Exception):
+            self.msg = str(self.msg)
         self.hostname = socket.gethostname()
         self.localip = socket.gethostbyname(self.hostname)
         self.base_url = kwargs.pop('base_url', None)
