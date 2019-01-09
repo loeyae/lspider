@@ -71,6 +71,8 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
                 raise CDSpiderDBDataNotFound("author rule by tid: %s not exists" % author['tid'])
             if parse_rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
+        if 'hard_code' in save:
+            del save['hard_code']
         save['request'] = {
             "hard_code": [{
                 "mode": "format",
