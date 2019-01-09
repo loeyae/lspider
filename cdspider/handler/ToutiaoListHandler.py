@@ -201,7 +201,10 @@ class ToutiaoListHandler(WemediaListHandler):
                     '''
                     testing_mode打开时，数据不入库
                     '''
-                    self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
+                    try:
+                        self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
+                    except:
+                        pass
 
     def init_process(self, save):
         """
