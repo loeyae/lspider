@@ -113,7 +113,7 @@ class Spider(Component):
                     self.info("Spider next start")
                     handler.on_next(save)
                     self.info("Spider next end")
-                    raise CDSpiderCrawlerBroken("DEBUG MODE BROKEN")
+                    raise CDSpiderCrawlerDebugBroken("DEBUG MODE BROKEN")
 
                 self.info("Spider result start")
                 handler.on_result(save)
@@ -195,6 +195,8 @@ class Spider(Component):
                     t = 0
                     self.exception(e)
                     break
+                finally:
+                    self.flush()
 
         tornado.ioloop.PeriodicCallback(queue_loop, 100, io_loop=self.ioloop).start()
         self._running = True
