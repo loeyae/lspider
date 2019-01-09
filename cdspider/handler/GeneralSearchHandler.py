@@ -321,11 +321,12 @@ class GeneralSearchHandler(BaseHandler):
         kset = rule['request'].pop('keyword', {})
         if 'hard_code' in save:
             del save['hard_code']
+        mode = kset.pop('mode', 'format')
         save['request'] = {
             "hard_code": [{
-                "mode": kset.pop('mode', 'format'),
+                "mode": mode,
                 "name": kset.pop('key', 'keyword'),
-                "value": quote_plus(keyword['name']),
+                "value": quote_plus(keyword['name']) if mode != 'post' else keyword['name'],
             }],
         }
         self.task['url'] = rule['baseUrl']
