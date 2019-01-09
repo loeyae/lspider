@@ -278,6 +278,8 @@ class WechatListHandler(BaseHandler):
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
         account = author.get('account')
         if account:
+            if 'hard_code' in save:
+                del save['hard_code']
             save['request'] = {
                 "hard_code": [{
                     "mode": "format",
