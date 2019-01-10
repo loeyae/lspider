@@ -404,7 +404,7 @@ class BaseHandler(Component):
                 'mode': self.task['mode'],
                 'create_at': self.crawl_id,
                 'frequency': self.task.get('frequency', None),      # process info
-                'url': save.get('request_url', self.task['url']),                         # error message
+                'url': save.get('request_url', self.request_params.get('url', self.task['url'])),                         # error message
                 'error': str(exc),                                  # create time
                 'msg': str(traceback.format_exc()),                 # trace log
                 'class': exc.__class__.__name__,                    # error class
