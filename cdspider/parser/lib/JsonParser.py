@@ -155,12 +155,40 @@ class JsonParser(BaseParser):
                 return [rest]
 
     def _json_parse(self, data, kstring):
-        kstring = "[\"%s\"]" % kstring.replace(".", "\"][\"")
-        result = None
-        code = "data%s" % re.sub(r"\[\"(\d+)\"\]", r"[\1]", kstring)
-        try:
-            result = eval(code, None, locals())
-        except:
-            self.logger.error(traceback.format_exc())
-            pass
-        return result
+        idx = kstring.find("*")
+        if idx == -1:
+            kstring = "[\"%s\"]" % kstring.replace(".", "\"][\"")
+            result = None
+            code = "data%s" % re.sub(r"\[\"(\d+)\"\]", r"[\1]", kstring)
+            try:
+                result = eval(code, None, locals())
+            except:
+                self.logger.error(traceback.format_exc())
+                pass
+            return result
+        else:
+            klist = kstring.split("*")
+            for k in klist:
+                if not k:
+                    continue
+                rk = k.strip(".")
+                if not rk:
+                    return data
+                if k.startswith("."):
+                    if isinstance(data, list):
+                        r = None
+                        for item in data:
+                            r = self._json_parse(item, rk)
+                            print(r)
+                            if r:
+                                data = r
+                                break
+                        if r == None:
+                            return None
+                    else:
+                        return None
+                else:
+                    data = self._json_parse(data, rk)
+                    if data == None:
+                        return None
+            return data
