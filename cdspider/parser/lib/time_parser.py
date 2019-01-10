@@ -128,6 +128,26 @@ class Parser(object):
                 return Parser.get_timestamp(a, 'global1')
             d = (datetime.date.today() - datetime.timedelta(days = 2)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
+        elif re.findall(r'\w+ \w+ \d{1,2} \d{1,2}:\d{1,2}(?:\:\d{1,2})? \+\d+ \d{4}', timestring):
+            try:
+                return int(time.mktime(time.strptime(timestring, '%a %b %d %H:%M:%S %z %Y')))
+            except:
+                return int(time.mktime(time.strptime(timestring, '%A %B %d %H:%M:%S %z %Y')))
+        elif re.findall(r'\w+ \d{1,2} \d{1,2}:\d{1,2}(?:\:\d{1,2})? \+\d+ \d{4}', timestring):
+            try:
+                return int(time.mktime(time.strptime(timestring, '%b %d %H:%M:%S %z %Y')))
+            except:
+                return int(time.mktime(time.strptime(timestring, '%B %d %H:%M:%S %z %Y')))
+        elif re.findall(r'\w+ \w+ \d{1,2} \d{1,2}:\d{1,2}(?:\:\d{1,2})? \d{4}', timestring):
+            try:
+                return int(time.mktime(time.strptime(timestring, '%a %b %d %H:%M:%S %Y')))
+            except:
+                return int(time.mktime(time.strptime(timestring, '%A %B %d %H:%M:%S %Y')))
+        elif re.findall(r'\w+ \d{1,2} \d{1,2}:\d{1,2}(?:\:\d{1,2})? \d{4}', timestring):
+            try:
+                return int(time.mktime(time.strptime(timestring, '%b %d %H:%M:%S %Y')))
+            except:
+                return int(time.mktime(time.strptime(timestring, '%B %d %H:%M:%S %Y')))
         elif re.findall(r'\-',timestring):
             if re.findall(r'^\d{2}-\d{1,2}-\d{1,2}', timestring):
                 timestring = "%s%s" % (20, timestring)
