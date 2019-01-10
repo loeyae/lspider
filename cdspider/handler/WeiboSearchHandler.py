@@ -164,6 +164,7 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
         :param save 保存的上下文信息
         :input self.response {"parsed": 解析结果, "final_url": 请求的url}
         """
+        self.task['mediaType'] = MEDIA_TYPE_WEIBO
         self.crawl_info['crawl_urls'][str(self.page)] = self.response['final_url']
         self.crawl_info['crawl_count']['page'] += 1
         if self.response['parsed']:
@@ -226,6 +227,7 @@ class WeiboSearchHandler(GeneralSearchHandler, NewAttachmentTask):
             'listRle': self.process['uuid'],                # authorListRule id
             'list_url': self.task['url'],            # 列表url
         }
+        result['mediaType'] = MEDIA_TYPE_WEIBO
         result['acid'] = kwargs.pop('unid')
         result['ctime'] = kwargs.pop('ctime')
         return result
