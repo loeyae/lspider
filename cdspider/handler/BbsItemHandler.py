@@ -132,7 +132,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         :return 包含爬虫任务uuid, url的字典迭代器
         """
         rules = {}
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'rid']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid'], "rid": {"$gt": 0}}, select=['uuid', 'url', 'rid']):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
@@ -142,7 +142,8 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                     rule = rules[str(ruleId)]
                 else:
                     rule = self.db['ForumRuleDB'].get_detail(ruleId)
-                    rules[str(ruleId)] = rule
+                    if rule:
+                        rules[str(ruleId)] = rule
                 if not rule:
                     continue
                 frequency = str(rule.get('rate', self.DEFAULT_RATE))
