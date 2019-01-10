@@ -321,6 +321,7 @@ class WechatListHandler(BaseHandler):
             else:
                 if not accountInfo or not accountInfo[0]['url']:
                     if u"noresult_part1_container" in self.crawler.page_source:
+                        self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                         raise CDSpiderCrawlerNoExists("Wechat account not found")
                     raise CDSpiderCrawlerForbidden()
             save['timestamp'] = self.crawl_id
