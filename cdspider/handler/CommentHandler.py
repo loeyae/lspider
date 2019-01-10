@@ -207,12 +207,13 @@ class CommentHandler(BaseHandler):
                 '''
                 testing_mode打开时，数据不入库
                 '''
-                ruleId = item.pop('rid', 0)
+                ruleId = item.get('rid', 0)
                 if str(ruleId) in rules:
                     rule = rules[str(ruleId)]
                 else:
                     rule = self.db['CommentRuleDB'].get_detail(ruleId)
-                    rules[str(ruleId)] = rule
+                    if rule:
+                        rules[str(ruleId)] = rule
                 if not rule:
                     continue
                 frequency = str(rule.get('frequency', self.DEFAULT_RATE))
