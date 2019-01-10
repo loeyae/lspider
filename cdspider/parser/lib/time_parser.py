@@ -72,24 +72,6 @@ class Parser(object):
             timestring = re.sub('(\d{4}年)\s*(\d{1,2}月)\s*(\d{1,2}日.*)', r'\1\2\3', timestring)
             timestring = re.sub('(\d{4}年\d{1,2}月\d{1,2}日)\040*(\d{1,2}:\d{1,2}(?::\d{1,2})?)', r'\1\040\2', timestring)
             return Parser.get_timestamp(timestring, 'local')
-        elif re.findall(r'\-',timestring):
-            if re.findall(r'^\d{2}-\d{1,2}-\d{1,2}', timestring):
-                timestring = "%s%s" % (20, timestring)
-            timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
-            return Parser.get_timestamp(timestring, 'global1')
-        elif re.findall(r'\/',timestring):
-            if re.findall(r'^\d{2}\/\d{1,2}\/\d{1,2}', timestring):
-                timestring = "%s%s" % (20, timestring)
-            timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
-            return Parser.get_timestamp(timestring, 'global2')
-        elif re.findall(r'\.', timestring):
-            if re.findall(r'^\d{2}\.\d{1,2}\.\d{1,2}', timestring):
-                timestring = "%s%s" % (20, timestring)
-            timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
-            return Parser.get_timestamp(timestring, 'global3')
-        elif re.findall(r':',timestring):
-            timestring = "%s %s" % (time.strftime("%Y-%m-%d"), timestring)
-            return Parser.get_timestamp(timestring, 'global1')
         elif re.findall(r'刚刚',timestring):
             return int(time.time()) - 3
         elif re.findall(r'秒前',timestring):
@@ -130,22 +112,40 @@ class Parser(object):
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'今天',timestring):
             if re.findall('\d{1,2}:\d{1,2}(?:\:\d{1,2})?', timestring):
-                a = re.sub('今天', datetime.date.today().strftime("%Y-%m-%d "), timestring)
-                return Parser.get_timestamp(timestring, 'global1')
+                a = re.sub('今天\s*', datetime.date.today().strftime("%Y-%m-%d "), timestring)
+                return Parser.get_timestamp(a, 'global1')
             t = time.localtime(time.time())
             return int(time.mktime(time.strptime(time.strftime('%Y-%m-%d 00:00:00', t),'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'昨天',timestring):
             if re.findall('\d{1,2}:\d{1,2}(?:\:\d{1,2})?', timestring):
-                a = re.sub('昨天', (datetime.date.today() - datetime.timedelta(days = 1)).strftime("%Y-%m-%d "), timestring)
-                return Parser.get_timestamp(timestring, 'global1')
+                a = re.sub('昨天\s*', (datetime.date.today() - datetime.timedelta(days = 1)).strftime("%Y-%m-%d "), timestring)
+                return Parser.get_timestamp(a, 'global1')
             d = (datetime.date.today() - datetime.timedelta(days = 1)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
         elif re.findall(r'前天',timestring):
             if re.findall('\d{1,2}:\d{1,2}(?:\:\d{1,2})?', timestring):
-                a = re.sub('前天', (datetime.date.today() - datetime.timedelta(days = 2)).strftime("%Y-%m-%d "), timestring)
-                return Parser.get_timestamp(timestring, 'global1')
+                a = re.sub('前天\s', (datetime.date.today() - datetime.timedelta(days = 2)).strftime("%Y-%m-%d "), timestring)
+                return Parser.get_timestamp(a, 'global1')
             d = (datetime.date.today() - datetime.timedelta(days = 2)).strftime("%Y-%m-%d 00:00:00")
             return int(time.mktime(time.strptime(d,'%Y-%m-%d %H:%M:%S')))
+        elif re.findall(r'\-',timestring):
+            if re.findall(r'^\d{2}-\d{1,2}-\d{1,2}', timestring):
+                timestring = "%s%s" % (20, timestring)
+            timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
+            return Parser.get_timestamp(timestring, 'global1')
+        elif re.findall(r'\/',timestring):
+            if re.findall(r'^\d{2}\/\d{1,2}\/\d{1,2}', timestring):
+                timestring = "%s%s" % (20, timestring)
+            timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
+            return Parser.get_timestamp(timestring, 'global2')
+        elif re.findall(r'\.', timestring):
+            if re.findall(r'^\d{2}\.\d{1,2}\.\d{1,2}', timestring):
+                timestring = "%s%s" % (20, timestring)
+            timestring = re.sub("\+\d{2}(:\d+)?", "", re.sub("T", " ", timestring))
+            return Parser.get_timestamp(timestring, 'global3')
+        elif re.findall(r':',timestring):
+            timestring = "%s %s" % (time.strftime("%Y-%m-%d"), timestring)
+            return Parser.get_timestamp(timestring, 'global1')
         else:
             try:
                 return int(timestring)
