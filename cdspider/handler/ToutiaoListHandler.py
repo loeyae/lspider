@@ -391,6 +391,7 @@ class ToutiaoListHandler(WemediaListHandler):
             'pubtime': pubtime,                                                # 发布时间
             'channel': result.pop('channel', None),                            # 频道信息
             'crawlinfo': kwargs.get('crawlinfo'),
+            'result': result,
             'acid': kwargs['unid'],                                            # unique str
             'ctime': kwargs.get('ctime', self.crawl_id),
             }
