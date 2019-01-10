@@ -95,6 +95,7 @@ class WechatItemHandler(BaseHandler):
                 "list_url": spiderTask.get('save').get('base_url'),  # 列表url
                 "list_crawl_id": self.task.get('crawlid', spiderTask['crawltime']),     # 列表抓取时间
             }
+            self.task.setdefault('mediaType', MEDIA_TYPE_WECHAT)
             self.task.setdefault('listtask', spiderTask)
             self.task.setdefault('crawlinfo', crawlinfo)
             if 'crawlid' in self.task:
