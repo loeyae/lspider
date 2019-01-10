@@ -148,6 +148,11 @@ class Parser(object):
                 return int(time.mktime(time.strptime(timestring, '%b %d %H:%M:%S %Y')))
             except:
                 return int(time.mktime(time.strptime(timestring, '%B %d %H:%M:%S %Y')))
+        elif re.findall(r'\w+ \d{1,2} \d{4}', timestring):
+            try:
+                return int(time.mktime(time.strptime(timestring, '%b %d %Y')))
+            except:
+                return int(time.mktime(time.strptime(timestring, '%B %d %Y')))
         elif re.findall(r'\-',timestring):
             if re.findall(r'^\d{2}-\d{1,2}-\d{1,2}', timestring):
                 timestring = "%s%s" % (20, timestring)
