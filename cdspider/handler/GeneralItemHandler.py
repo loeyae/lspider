@@ -100,7 +100,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                             return item
             else:
                 '''
-                获取域名对应的规则
+                获取域名对��的规则
                 '''
                 parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
                 for item in parserule_list:
@@ -157,6 +157,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         """
         now = int(time.time())
         result = kwargs.pop('result')
+        item = kwargs.pop('item', None) or {}
         #格式化发布时间
         pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
         if pubtime and pubtime > now:
@@ -164,14 +165,15 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         r = {
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
-            'title': result.pop('title', None),                                # 标题
-            'author': result.pop('author', None),                              # 作者
-            'content': result.pop('content', None),
             'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
-            'pubtime': pubtime,                                                # 发布时间
-            'channel': result.pop('channel', None),                            # 频道信息
+            'title': result.pop('title', None) or item.get('title', None),              # 标题
+            'author': result.pop('author', None) or item.get('author', None),      # 作者
+            'content': result.pop('content', None) or item.get('content', None),
+            'pubtime': pubtime or item.get('pubtime', None),          # 发布时间
+            'channel': result.pop('channel', None)  or item.get('channel', None),       # 频道信息
             'crawlinfo': kwargs.get('crawlinfo')
         }
+
         if all((r['title'], r['author'], r['content'], r['pubtime'])):
             '''
             判断文章是否解析完全
@@ -239,13 +241,14 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                     self.db['ArticlesDB'].update(result_id, result)
             self.task['rid'] = result_id
         else:
+            result = self.db['ArticlesDB'].get_detail(result_id)
             if self.page == 1:
                 '''
                 对于已存在的文章，如果是第一页，则更新所有解析到的内容
                 否则只追加content的内容
                 '''
                 #格式化文章信息
-                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'])
+                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], item=result)
 
                 if self.testing_mode:
                     '''
@@ -262,7 +265,6 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                     '''
                     self.debug("%s on_result: %s" % (self.__class__.__name__, self.response['parsed']))
                 else:
-                    result = self.db['ArticlesDB'].get_detail(result_id)
                     content = result['content']
                     if 'content' in self.response['parsed'] and self.response['parsed']['content']:
                         content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
