@@ -48,8 +48,10 @@ class Mongo(BaseDataBase):
         多行查询
         """
         collection = self._db.get_collection(table or self.table)
-        self.logger.debug('find %s from %s where %s' % (select, table or self.table, where))
-        cursor = collection.find(filter=self._build_where(where), projection=self._build_projection(select), sort = sort, skip = offset, limit = hits)
+        where = self._build_where(where)
+        projection = self._build_projection(select)
+        self.logger.debug('find %s from %s where %s order %s' % (projection, table or self.table, where, sort))
+        cursor = collection.find(filter=where, projection=projection, sort = sort, skip = offset, limit = hits)
         for each in cursor:
             if each and '_id' in each and (select and not '_id' in select or not select):
                 del each['_id']
@@ -60,8 +62,10 @@ class Mongo(BaseDataBase):
         单行查询
         """
         collection = self._db.get_collection(table or self.table)
-        self.logger.debug('find %s from %s where %s' % (select, table or self.table, where))
-        doc = collection.find_one(filter=self._build_where(where), projection=self._build_projection(select), sort = sort)
+        where = self._build_where(where)
+        projection = self._build_projection(select)
+        self.logger.debug('find %s from %s where %s order %s' % (projection, table or self.table, where, sort))
+        doc = collection.find_one(filter=where, projection=projection, sort = sort)
         if doc and '_id' in doc and (select and not '_id' in select or not select):
             del doc['_id']
         return doc
@@ -80,11 +84,12 @@ class Mongo(BaseDataBase):
         修改数据
         """
         collection = self._db.get_collection(table or self.table)
+        where = self._build_where(where)
         self.logger.debug('update %s to %s with %s by multi %s' % (table or self.table, setting, where, multi))
         if multi:
-            cursor = collection.update_many(filter = self._build_where(where), update = {"$set": setting}, upsert = upsert)
+            cursor = collection.update_many(filter = where, update = {"$set": setting}, upsert = upsert)
         else:
-            cursor = collection.update_one(filter = self._build_where(where), update = {"$set": setting}, upsert = upsert)
+            cursor = collection.update_one(filter = where, update = {"$set": setting}, upsert = upsert)
         return cursor.modified_count
 
 
@@ -93,11 +98,12 @@ class Mongo(BaseDataBase):
         删除数据
         """
         collection = self._db.get_collection(table or self.table)
+        where = self._build_where(where)
         self.logger.debug('delete from %s with %s by multi %s' % (table or self.table, where, multi))
         if multi:
-            cursor = collection.delete_many(filter=self._build_where(where))
+            cursor = collection.delete_many(filter=where)
         else:
-            cursor = collection.delete_one(filter=self._build_where(where))
+            cursor = collection.delete_one(filter=where)
         return cursor.deleted_count
 
     def count(self, where, select = None, table = None):
@@ -105,8 +111,10 @@ class Mongo(BaseDataBase):
         count
         """
         collection = self._db.get_collection(table or self.table)
-        self.logger.debug('find %s from %s where %s' % (select, table or self.table, where))
-        cursor = collection.find(filter=self._build_where(where), projection=self._build_projection(select))
+        projection = self._build_projection(select)
+        where = self._build_where(where)
+        self.logger.debug('find %s from %s where %s' % (projection, table or self.table, where))
+        cursor = collection.find(filter=where, projection=projection)
         return cursor.count()
 
     def aggregate(self, pipeline, table=None):
@@ -119,7 +127,7 @@ class Mongo(BaseDataBase):
 
     def _build_projection(self, select):
         if isinstance(select, list) or isinstance(select, tuple) or select is None:
-            return dict.fromkeys(select, True) if select else None
+            return dict.fromkeys(select, 1) if select else None
         elif isinstance(select, dict):
             return select
         raise CDSpiderDBError("Projection setting error: %s" % select)
