@@ -81,6 +81,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
             }],
         }
         save['paging'] = True
+        self.task['mediaType'] = MEDIA_TYPE_WEIBO
         self.task['url'] = parse_rule['baseUrl']
         save['base_url'] = parse_rule['baseUrl']
         return parse_rule
@@ -321,6 +322,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
             'listRule': self.process['uuid'],               # authorListRule id
             'list_url': self.request_params['url'],         # 列表url
         }
+        result['mediaType'] = MEDIA_TYPE_WEIBO
         result['acid'] = kwargs.pop('unid')
         result['ctime'] = kwargs.pop('ctime')
         return result
