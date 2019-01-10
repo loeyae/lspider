@@ -298,9 +298,10 @@ class WechatListHandler(BaseHandler):
             self.task['save'] = {}
         ctime = self.task['save'].get('timestamp', 0)
         if not self.task['save'].get('request_url') or self.crawl_id - int(ctime) > self.EXPIRE:
+            self.proxy_mode = self.task['prepare_rule'].get('request', {}).get('proxy', 'never')
+            self.precrawl(save)
             params = copy.deepcopy(self.request_params)
             proxy_mode = self.proxy_mode
-            self.proxy_mode = self.task['prepare_rule'].get('request', {}).get('proxy', 'never')
             self.crawler.crawl(**params)
             self.debug("%s prepare crawl result: %s" % (self.__class__.__name__, utils.remove_whitespace(self.crawler.page_source)))
             parser = CustomParser(source=self.crawler.page_source, ruleset=copy.deepcopy(self.task['prepare_rule']['parse']))
