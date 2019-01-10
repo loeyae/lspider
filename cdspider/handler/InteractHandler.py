@@ -201,7 +201,8 @@ class InteractHandler(BaseHandler):
                     rule = rules[str(ruleId)]
                 else:
                     rule = self.db['AttachmentDB'].get_detail(ruleId)
-                    rules[str(ruleId)] = rule
+                    if rule:
+                        rules[str(ruleId)] = rule
                 if not rule:
                     continue
                 frequency = str(rule.get('frequency', self.DEFAULT_RATE))
