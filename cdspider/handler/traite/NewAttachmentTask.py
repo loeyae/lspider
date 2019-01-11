@@ -151,7 +151,7 @@ class NewAttachmentTask(object):
             testing_mode打开时，数据不入库
             '''
             try:
-                l = self.db['SpiderTaskDB'].get_list(HANDLER_MODE_COMMENT, where={"uid": task['uid'], "kid": task['kid'], "parentid": task['parentid']})
+                l = self.db['SpiderTaskDB'].get_list(HANDLER_MODE_COMMENT, where={"uid": task['uid'], "rid": task['rid'], "parentid": task['parentid']})
                 if len(list(l)) == 0:
                     return self.db['SpiderTaskDB'].insert(task)
                 return None
@@ -187,7 +187,7 @@ class NewAttachmentTask(object):
             testing_mode打开时，数据不入库
             '''
             try:
-                l = self.db['SpiderTaskDB'].get_list(HANDLER_MODE_COMMENT, where={"uid": task['uid'], "kid": task['kid'], "parentid": task['parentid']})
+                l = self.db['SpiderTaskDB'].get_list(HANDLER_MODE_COMMENT, where={"uid": task['uid'], "rid": task['rid'], "parentid": task['parentid']})
                 if len(list(l)) == 0:
                     return self.db['SpiderTaskDB'].insert(task)
                 return None
