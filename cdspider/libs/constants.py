@@ -97,6 +97,7 @@ HANDLER_MODE_LINKS_CLUSTER = 'links-cluster'          # Url聚类handler
 HANDLER_MODE_WEIBO = 'weibo'                          # 微博handler
 HANDLER_MODE_COMMENT = 'comment'                      # 评论handler
 HANDLER_MODE_INTERACT = 'interact'                    # 互动数（阅读数、点赞数...）handler
+HANDLER_MODE_EXTENDED = 'extend'                      # 扩展数据handler
 HANDLER_MODE_DEFAULT_SEARCH = 'search'                # 默认搜索handler
 HANDLER_MODE_WEIBO_SEARCH = 'weibo-search'            # 微博搜索
 HANDLER_MODE_SITE_SEARCH = 'site-search'              # 站内搜索
