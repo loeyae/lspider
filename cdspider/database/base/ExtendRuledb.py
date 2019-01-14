@@ -30,7 +30,7 @@ from . import Base
 
 class ExtendRuleDB(Base):
     """
-    comment rule database obejct
+    extend rule database obejct
     """
 
     def insert(self, obj = {}):
