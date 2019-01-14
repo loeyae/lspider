@@ -262,6 +262,7 @@ class NewAttachmentTask(object):
                 testing_mode打开时，数据不入库
                 '''
                 self.queue[QUEUE_NAME_SCHEDULER_TO_SPIDER].put_nowait(task)
+            return None
         task = {
             'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
             'mode': HANDLER_MODE_EXTEND,                          # handler mode
