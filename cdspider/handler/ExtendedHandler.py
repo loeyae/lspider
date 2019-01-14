@@ -13,7 +13,6 @@ from cdspider.database.base import *
 from cdspider.libs.constants import *
 from cdspider.libs import utils
 from cdspider.parser import CustomParser
-from cdspider.parser.lib import TimeParser
 
 class ExtendedHandler(BaseHandler):
     """
