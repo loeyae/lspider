@@ -120,6 +120,7 @@ HANDLER_MODE_HANDLER_MAPPING = {
     HANDLER_MODE_WEIBO: 'WeiboHandler',
     HANDLER_MODE_COMMENT: 'CommentHandler',
     HANDLER_MODE_INTERACT: 'InteractHandler',
+    HANDLER_MODE_EXTENDED: 'ExtendedHandler',
     HANDLER_MODE_DEFAULT_SEARCH: 'GeneralSearchHandler',
     HANDLER_MODE_WEIBO_SEARCH: 'WeiboSearchHandler',
     HANDLER_MODE_SITE_SEARCH: 'SiteSearchHandler',
