@@ -575,6 +575,7 @@ from .GeneralSearchHandler import GeneralSearchHandler
 from .GeneralItemHandler import GeneralItemHandler
 from .CommentHandler import CommentHandler
 from .InteractHandler import InteractHandler
+from .ExtendedHandler import ExtendedHandler
 from .LinksClusterHandler import LinksClusterHandler
 from .WemediaListHandler import WemediaListHandler
 from .BbsItemHandler import BbsItemHandler
