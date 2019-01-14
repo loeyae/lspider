@@ -32,6 +32,7 @@ from .WechatRobotMpsdb import WechatRobotMpsDB
 from .SpiderTaskdb import SpiderTaskDB
 from .ListRuledb import ListRuleDB
 from .CommentRuledb import CommentRuleDB
+from .ExtendRuledb import ExtendRuleDB
 from .Authordb import AuthorDB
 from .AuthorListRuledb import AuthorListRuleDB
 from .ParseRuledb import ParseRuleDB
