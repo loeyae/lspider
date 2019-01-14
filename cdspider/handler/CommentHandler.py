@@ -60,7 +60,7 @@ class CommentHandler(BaseHandler):
             self.task['url'] = url
             save['base_url'] = url
             save["hard_code"] = params
-            self.task['commentRule']['request']['hard_code'] = data
+            self.task['commentRule']['request']['hard_code'] = params
         else:
             mediaType = self.task.get('mediaType', MEDIA_TYPE_OTHER)
             if mediaType == MEDIA_TYPE_WEIBO:
