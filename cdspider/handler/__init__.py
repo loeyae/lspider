@@ -410,6 +410,18 @@ class BaseHandler(Component):
                 'class': exc.__class__.__name__,                    # error class
             }
             elid = self.db['ErrorLogDB'].insert(data)
+        elif 'parentid' in self.task and self.task['parentid']:
+            data = {
+                'tid': self.task['parentid'],                       # spider task id
+                'mode': self.task['mode'],
+                'create_at': self.crawl_id,
+                'frequency': self.task.get('frequency', None),      # process info
+                'url': save.get('request_url', self.request_params.get('url', self.task['url'])),                         # error message
+                'error': str(exc),                                  # create time
+                'msg': str(traceback.format_exc()),                 # trace log
+                'class': exc.__class__.__name__,                    # error class
+            }
+            elid = self.db['ErrorLogDB'].insert(data)
         if elid == 0:
             self.crawl_info['exc'] = exc.__class__.__name__
             self.crawl_info['traceback'] = str(traceback.format_exc())
