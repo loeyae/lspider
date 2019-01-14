@@ -37,6 +37,9 @@ class NewAttachmentTask(object):
         self.debug("%s new interact task starting" % (self.__class__.__name__))
         self.result2interact(crawlinfo, save, rid, domain, subdomain, data, url)
         self.debug("%s new interact task end" % (self.__class__.__name__))
+        self.debug("%s new extend task starting" % (self.__class__.__name__))
+        self.result2extend(crawlinfo, save, rid, domain, subdomain, data, url)
+        self.debug("%s new extend task end" % (self.__class__.__name__))
         self.debug("%s new attach task end" % (self.__class__.__name__))
 
     def result2comment(self, crawlinfo, save, rid, domain, subdomain = None, data = None, url = None):
@@ -124,6 +127,48 @@ class NewAttachmentTask(object):
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
             buid_task(crawlinfo, rule, rid, data, url)
 
+    def result2extend(self, crawlinfo, save, rid, domain, subdomain = None, data = None, url = None):
+        """
+        根据详情页生成互动数任务
+        :param save 传递的上下文信息
+        :param domain 域名
+        :param subdomain 子域名
+        """
+        def buid_task(crawlinfo, rule, rid, data = None, final_url = None):
+            try:
+                if final_url is None:
+                    final_url = self.response['final_url']
+                if data is None:
+                    data = utils.get_attach_data(CustomParser, self.response['last_source'], final_url, rule, self.log_level)
+                if data == False:
+                    return None
+                url, params = utils.build_attach_url(data, rule, self.response['final_url'])
+                if url:
+                    '''
+                    根据规则生成出任务url，则为成功
+                    '''
+                    cid = self.build_extend_task(crawlinfo, url, params, rule, rid)
+                    if cid:
+                        crawlinfo['extendRule'] = rule['uuid']
+                        crawlinfo['extendTaskId'] = cid
+                        if 'interactRuleList' in  crawlinfo:
+                             crawlinfo['extendRuleList'][str(rule['uuid'])] = cid
+                        else:
+                            crawlinfo['extendRuleList'] = {str(rule['uuid']): cid}
+                        self.debug("%s new extend task: %s" % (self.__class__.__name__, str(cid)))
+            except:
+                self.error(traceback.format_exc())
+        #通过子域名获取扩展任务
+        ruleset = self.db['ExtendRuleDB'].get_list_by_subdomain(subdomain, where={"status": self.db['ExtendRuleDB'].STATUS_ACTIVE})
+        for rule in ruleset:
+            self.debug("%s extend task rule: %s" % (self.__class__.__name__, str(rule)))
+            buid_task(crawlinfo, rule, rid, data, url)
+        #通过域名获取扩展任务
+        ruleset = self.db['ExtendRuleDB'].get_list_by_domain(domain, where={"status": self.db['ExtendRuleDB'].STATUS_ACTIVE})
+        for rule in ruleset:
+            self.debug("%s extend task rule: %s" % (self.__class__.__name__, str(rule)))
+            buid_task(crawlinfo, rule, rid, data, url)
+
     def build_comment_task(self, crawlinfo, url, data, rule, rid):
         """
         构造评论任务
@@ -169,6 +214,57 @@ class NewAttachmentTask(object):
         task = {
             'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
             'mode': HANDLER_MODE_INTERACT,                          # handler mode
+            'pid': crawlinfo.get('pid', self.task.get('pid', 0)),            # project id
+            'sid': crawlinfo.get('sid', self.task.get('sid', 0)),            # site id
+            'tid': crawlinfo.get('tid', self.task.get('tid', 0)),            # task id
+            'uid': crawlinfo.get('uid', self.task.get('uid', 0)),            # url id
+            'kid': crawlinfo.get('kid', self.task.get('kid', 0)),            # keyword id
+            'rid': rule['uuid'],                                    # rule id
+            'url': url,                                             # url
+            'parentid': rid,                                        # article id
+            'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+            'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
+            'save': {"hard_code": data}
+        }
+        self.debug("%s build interact task: %s" % (self.__class__.__name__, str(task)))
+        if not self.testing_mode:
+            '''
+            testing_mode打开时，数据不入库
+            '''
+            try:
+                l = self.db['SpiderTaskDB'].get_list(HANDLER_MODE_COMMENT, where={"uid": task['uid'], "rid": task['rid'], "parentid": task['parentid']})
+                if len(list(l)) == 0:
+                    return self.db['SpiderTaskDB'].insert(task)
+                return None
+            except:
+                return None
+        else:
+            return 'testing_mode'
+
+    def build_extend_task(self, crawlinfo, url, data, rule, rid):
+        """
+        构造扩展任务
+        :param url taks url
+        :param rule 互动数任务规则
+        """
+        if not 'loop' in rule or not rule['loop']:
+            task = {
+                'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
+                'mode': HANDLER_MODE_EXTEND,                          # handler mode
+                'rid': rule['uuid'],                                    # rule id
+                'url': url,                                             # url
+                'parentid': rid,                                        # article id
+                'save': {"hard_code": data}
+            }
+            self.debug("%s build interact task: %s" % (self.__class__.__name__, str(task)))
+            if not self.testing_mode:
+                '''
+                testing_mode打开时，数据不入库
+                '''
+                self.queue[QUEUE_NAME_SCHEDULER_TO_SPIDER].put_nowait(task)
+        task = {
+            'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
+            'mode': HANDLER_MODE_EXTEND,                          # handler mode
             'pid': crawlinfo.get('pid', self.task.get('pid', 0)),            # project id
             'sid': crawlinfo.get('sid', self.task.get('sid', 0)),            # site id
             'tid': crawlinfo.get('tid', self.task.get('tid', 0)),            # task id
