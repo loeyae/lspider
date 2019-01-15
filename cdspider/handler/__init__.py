@@ -255,17 +255,18 @@ class BaseHandler(Component):
             request.update(save['request'])
         if 'paging' in save and save['paging']:
             rule = self.process.get("paging")
-            self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
-            rule = self.format_paging(rule)
-            self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
-            if rule:
-                for k, v in rule.items():
-                    if k in request and isinstance(request[k], list):
-                        request[k].extend(v)
-                    elif k in request and isinstance(request[k], dict):
-                        request[k].update(v)
-                    else:
-                        request[k] = v
+            if int(rule.get('first', 0)) == 1:
+                self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
+                rule = self.format_paging(rule)
+                self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
+                if rule:
+                    for k, v in rule.items():
+                        if k in request and isinstance(request[k], list):
+                            request[k].extend(v)
+                        elif k in request and isinstance(request[k], dict):
+                            request[k].update(v)
+                        else:
+                            request[k] = v
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['last_source'] or DEFAULT_SOURCE, self.crawler, save)
         self.handler_run(HANDLER_FUN_INIT, {"request_params": self.request_params, "save": save})
@@ -511,7 +512,7 @@ class BaseHandler(Component):
                 rule[_type].append(item)
         if paging['url']['type'] == 'match' and not paging['url']['filter']:
             return None
-        rule = {"url": paging['url'], 'max': paging.get('max', 0), 'incr_data': [], 'random': [], 'cookie': [], 'hard_code': [], 'match_data': {}}
+        rule = {"url": paging['url'], 'max': paging.get('max', 0), 'first': paging.get('first', 0), 'incr_data': [], 'random': [], 'cookie': [], 'hard_code': [], 'match_data': {}}
         if isinstance(paging['rule'], (list, tuple)):
             for item in paging['rule']:
                 if not 'name' in item or not item['name']:
