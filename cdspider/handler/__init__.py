@@ -581,7 +581,7 @@ class BaseHandler(Component):
     def close(self):
         if hasattr(self, 'crawler') and isinstance(self.crawler, BaseCrawler):
             self.crawler.quit()
-            self.crawler = None
+            del self.crawler
 
 from .Loader import Loader
 from .GeneralHandler import GeneralHandler
