@@ -84,12 +84,10 @@ class BaseWorker(Component):
             except queue.Empty:
                 self.debug("empty queue")
                 time.sleep(5)
-                continue
             except KeyboardInterrupt:
-                break
+                pass
             except Exception as e:
                 self.on_error(e, message)
-                break
             finally:
                 self.flush()
                 gc.collect()
