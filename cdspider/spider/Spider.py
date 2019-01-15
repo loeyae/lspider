@@ -31,6 +31,7 @@ class Spider(Component):
     """
     爬虫流程实现
     """
+    interval = 0.1
 
     def __init__(self, context, no_sync = False, handler=None, inqueue = None):
         self._quit = False
@@ -199,7 +200,7 @@ class Spider(Component):
                 self.flush()
                 gc.collect()
 
-        tornado.ioloop.PeriodicCallback(queue_loop, 100, io_loop=self.ioloop).start()
+        tornado.ioloop.PeriodicCallback(queue_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True
 
         try:
