@@ -133,7 +133,11 @@ class UrlBuilder(Component):
                         item.setdefault('type', 'data')
                     else:
                         item.setdefault('type', item['mode'])
-                self._append_kwargs_data(kwargs, item['type'], k, v)
+
+                if page == 1 and bool(int(item.get('first') or 0)):
+                    self._append_kwargs_data(kwargs, item['type'], k, v)
+                else:
+                    self._append_kwargs_data(kwargs, item['type'], k, v)
         finally:
             self.info("UrlBuilder run parse end")
 
