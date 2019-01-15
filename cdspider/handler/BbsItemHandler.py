@@ -539,4 +539,4 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         生成同步任务并入队
         """
         message = {'rid': rid, 'db': db}
-        self.queue['result2kafka'].put_nowait(message)
+        self.queue['article2kafka'].put_nowait(message)

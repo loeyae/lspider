@@ -33,9 +33,9 @@ class AttachDataDB(Mongo, BaseAttachDataDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         return super(AttachDataDB, self).update(setting=obj, where={"rid": id}, table=table)
 
-    def get_detail(self, id):
+    def get_detail(self, id, select = None):
         table = self._table_name(id)
-        return self.get(where={"rid": id}, table=table)
+        return self.get(where={"rid": id}, table=table, select=select)
 
     def get_detail_by_unid(self, unid, ctime):
         table = self._get_collection(ctime)

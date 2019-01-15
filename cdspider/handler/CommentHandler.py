@@ -266,6 +266,7 @@ class CommentHandler(BaseHandler):
                         result_id = self.db['CommentsDB'].insert(result)
                         if not result_id:
                             raise CDSpiderDBError("Result insert failed")
+                        self.build_sync_task(result_id, self.task['parentid'])
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1
@@ -318,3 +319,10 @@ class CommentHandler(BaseHandler):
             s = {}
         s.update(save)
         self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
+
+    def build_sync_task(self, uuid, rid):
+        """
+        生成同步任务并入队
+        """
+        message = {'id': uuid, 'rid': rid}
+        self.queue['comment2kafka'].put_nowait(message)

@@ -33,7 +33,7 @@ class WeiboInfoDB(Mongo, BaseWeiboInfoDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         return super(WeiboInfoDB, self).update(setting=obj, where={"rid": id}, table=table)
 
-    def get_detail(self, id, select=None):
+    def get_detail(self, id, select = None):
         table = self._table_name(id)
         return self.get(where={"rid": id}, table=table, select=select)
 
