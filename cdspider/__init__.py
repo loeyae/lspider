@@ -15,6 +15,7 @@ class Component(object):
 
     def __del__(self):
         self.flush()
+        del self.logger
 
     def debug(self, message, *args, **kwargs):
         if self.log_level <= logging.DEBUG:
