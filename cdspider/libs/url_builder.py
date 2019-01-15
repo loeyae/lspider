@@ -85,7 +85,7 @@ class UrlBuilder(Component):
         """
         """
         base_url = save.get('base_url')
-        if self.page == 1 and int(kwargs.get('first', 0)) == 0:
+        if int(save.get('page', 1) or 1) == 1 and int(kwargs.get('first', 0)) == 0:
             url = base_url
         else:
             if isinstance(kwargs['url'], six.string_types):
@@ -134,7 +134,7 @@ class UrlBuilder(Component):
                     else:
                         item.setdefault('type', item['mode'])
 
-                if page == 1 and bool(int(item.get('first') or 0)):
+                if int(save.get('page', 1) or 1) == 1 and bool(int(item.get('first') or 0)):
                     self._append_kwargs_data(kwargs, item['type'], k, v)
                 else:
                     self._append_kwargs_data(kwargs, item['type'], k, v)
