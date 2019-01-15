@@ -168,30 +168,6 @@ class ToutiaoListHandler(WemediaListHandler):
             for each in self.schedule_by_task(task, message['h-mode'], save):
                 yield each
 
-    def schedule_by_task(self, task, mode, save):
-        """
-        获取站点下计划中的爬虫任务
-        :param site 站点信息
-        :param mode handler mode
-        :param save 上下文参数
-        :return 包含爬虫任务uuid, url的字典迭代器
-        """
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'uid']):
-            if not self.testing_mode:
-                '''
-                testing_mode打开时，数据不入库
-                '''
-                author = self.db['AuthorDB'].get_detail(item['uid'])
-                if not author:
-                    self.db['SpiderTaskDB'].delete(item['uuid'], mode)
-                    continue
-                frequency = str(author.get('frequency', self.DEFAULT_RATE))
-                plantime = int(save['now']) + int(self.ratemap[frequency][0])
-                self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency})
-            if item['uuid'] > save['id']:
-                save['id'] = item['uuid']
-            yield item
-
     def init_process(self, save):
         """
         初始化爬虫流程
