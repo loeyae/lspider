@@ -3,7 +3,7 @@
 @Author: wuhongchao
 @Date: 2018-12-17 19:09:24
 @LastEditors: wuhongchao
-@LastEditTime: 2019-01-15 09:57:29
+@LastEditTime: 2019-01-15 16:05:30
 @Description: 文章、微博内容数据同步到kafka
 '''
 import sys
@@ -20,7 +20,7 @@ class ArticleSyncKafkaWorker(BaseWorker):
 
     inqueue_key = QUEUE_NAME_ARTICLE_TO_KAFKA
 
-    fields = ['acid','title','author','mediaType','url','domain','subdomain','pubtime','ctime',\
+    fields = ['acid','title','author','mediaType','viewUrl','url','domain','subdomain','pubtime','ctime',\
     'utime','channel','status','industry','territory','content','crawlinfo.pid','crawlinfo.sid',\
     'crawlinfo.tid','crawlinfo.uid','crawlinfo.list_url','uid','id','praise','profile_image_url','gender','follow_count',\
     'statuses_count','reposts','verified','verified_type','comment','retweeted_statuses_count',\
@@ -52,6 +52,9 @@ class ArticleSyncKafkaWorker(BaseWorker):
                 res['mediaType'] = 12 #mediaType = 12 微博类型数据
             if 'mediaType' not in res:
                 res['mediaType'] = 99 #mediaType = 99 其他类型数据
+            if 'viewUrl' in res:      #如果viewUrl存在，删除url元素
+                res.pop('url')
+                res['url'] = res['viewUrl']
             self.info("message: %s " % res)
             if 'rowkey' not in res:
                 rowkey = self.generate_rowkey(res)
