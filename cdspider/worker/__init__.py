@@ -70,7 +70,7 @@ class BaseWorker(Component):
         scheduler运行方法
         """
         self.info("%s starting..." % self.__class__.__name__)
-
+        self.t = 0
         def queue_loop():
             if self._quit:
                 raise SystemExit
@@ -80,6 +80,8 @@ class BaseWorker(Component):
                     message = self.inqueue.get_nowait()
                     self.debug("%s got message: %s" % (self.__class__.__name__, message))
                 self.on_result(message)
+                if self.t > 5:
+                    raise SystemExit
             except queue.Empty:
                 self.debug("empty queue")
                 time.sleep(5)
