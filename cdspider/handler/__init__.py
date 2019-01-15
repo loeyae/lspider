@@ -512,7 +512,7 @@ class BaseHandler(Component):
                 rule[_type].append(item)
         if paging['url']['type'] == 'match' and not paging['url']['filter']:
             return None
-        rule = {"url": paging['url'], 'max': paging.get('max', 0), 'first': paging.get('first', 0), 'incr_data': [], 'random': [], 'cookie': [], 'hard_code': [], 'match_data': {}}
+        rule = {"url": paging['url'], 'max': paging.get('max', 0), 'first': paging.get('first', 1), 'incr_data': [], 'random': [], 'cookie': [], 'hard_code': [], 'match_data': {}}
         if isinstance(paging['rule'], (list, tuple)):
             for item in paging['rule']:
                 if not 'name' in item or not item['name']:
