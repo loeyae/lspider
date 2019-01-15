@@ -197,22 +197,29 @@ class WemediaListHandler(BaseHandler):
             author = self.db['AuthorDB'].get_detail(each)
             if not author:
                 raise CDSpiderDBDataNotFound("author: %s not found" % each)
-            task = {
-                'mode': message['mode'],     # handler mode
-                'pid': author['pid'],        # project uuid
-                'sid': author['sid'],        # site uuid
-                'tid': author['tid'],        # task uuid
-                'uid': each,                 # url uuid
-                'kid': 0,                    # keyword id
-                'url': "base_url",           # url
-                'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
-            }
-            self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
-            if not self.testing_mode:
-                '''
-                testing_mode打开时，数据不入库
-                '''
-                self.db['SpiderTaskDB'].insert(task)
+            ruleList = self.db['AuthorListRuleDB'].get_list(where={"tid": author['tid']}, select=["uuid"])
+            for rule in ruleList:
+                task = {
+                    'mode': message['mode'],     # handler mode
+                    'pid': author['pid'],        # project uuid
+                    'sid': author['sid'],        # site uuid
+                    'tid': author['tid'],        # task uuid
+                    'uid': each,                 # url uuid
+                    'kid': 0,                    # keyword id
+                    'rid': rule['uuid'],         # rule id
+                    'url': "base_url",           # url
+                    'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+                }
+                self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
+                if not self.testing_mode:
+                    '''
+                    testing_mode打开时，数据不入库
+                    '''
+                    try:
+                        self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
+                    except:
+                        self.error(traceback.format_exc())
+                        pass
 
     def get_scripts(self):
         """
@@ -260,7 +267,7 @@ class WemediaListHandler(BaseHandler):
             if author['status'] != AuthorDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderHandlerError("author: %s not active" % self.task['uid'])
-            rule = self.db['AuthorListRuleDB'].get_detail_by_tid(author['tid'])
+            rule = self.db['AuthorListRuleDB'].get_detail(self.task['rid'])
             if not rule:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderDBDataNotFound("author rule by tid: %s not exists" % author['tid'])
@@ -268,15 +275,12 @@ class WemediaListHandler(BaseHandler):
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
         parameters = author.get('parameters')
         if parameters:
-            if 'hard_code' in save:
-                del save['hard_code']
             save['request'] = {
                 "hard_code": parameters.get('hard'),
                 "random": parameters.get('randoms'),
             }
         self.task['url'] = rule['baseUrl']
         save['base_url'] = rule['baseUrl']
-        save['paging'] = True
         return rule
 
     def run_parse(self, rule):
