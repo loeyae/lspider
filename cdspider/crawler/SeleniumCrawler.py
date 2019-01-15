@@ -474,7 +474,7 @@ class SeleniumCrawler(BaseCrawler):
         设置header
         """
         self.info("Selenium set header: %s => %s" % (str(name), str(value)))
-        self._cap["phantomjs.page.customHeaders."+ name] = value
+        self._cap["phantomjs.page.customHeaders."+ name] = utils.quote_chinese(value)
 
     @property
     def page_source(self):
