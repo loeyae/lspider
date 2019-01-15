@@ -88,6 +88,8 @@ class BaseWorker(Component):
                 except Exception as e:
                     self.on_error(e, message)
                     break
+                finally:
+                    self.flush()
 
         tornado.ioloop.PeriodicCallback(queue_loop, 1000, io_loop=self.ioloop).start()
         self._running = True
