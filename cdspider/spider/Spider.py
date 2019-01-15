@@ -180,13 +180,13 @@ class Spider(Component):
                 return
             if self._quit:
                 raise SystemExit
+            self.t += 1
             try:
-                self.t += 1
                 message = self.inqueue.get_nowait()
                 self.debug("%s fetch got message %s" % (self.__class__.__name__, message))
                 task = self.get_task(message)
                 self.fetch(task)
-                if self.t > 5:
+                if self.t > 10:
                     raise SystemExit
             except queue.Empty:
                 time.sleep(0.1)
