@@ -20,7 +20,7 @@ class Loader(Component):
     """
     handler loader
     """
-    def __init__(self, context, task, spider = None, no_sync = False):
+    def __init__(self, context, task, no_sync = False):
         logger = logging.getLogger('handler')
         log_level = logging.WARN
         if context.obj.get('debug', False):
@@ -28,7 +28,7 @@ class Loader(Component):
         super(Loader, self).__init__(logger, log_level)
         mode = task.get('mode', HANDLER_MODE_DEFAULT)
         _class = get_object('cdspider.handler.%s' % HANDLER_MODE_HANDLER_MAPPING[mode])
-        self.params = {"context": context, "task": task, "spider": spider, "no_sync": no_sync}
+        self.params = {"context": context, "task": task, "no_sync": no_sync}
         self.handler = _class(**self.params)
 
     def get_moduler(self):
