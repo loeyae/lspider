@@ -256,7 +256,10 @@ class UrlBuilder(Component):
                         item.setdefault('type', 'data')
                     else:
                         item.setdefault('type', item['mode'])
-                self._append_kwargs_data(kwargs, item['type'], item['name'], value)
+                if page == 1 and bool(int(item.get('first') or 0)):
+                    self._append_kwargs_data(kwargs, item['type'], item['name'], value)
+                else:
+                    self._append_kwargs_data(kwargs, item['type'], item['name'], value)
 
     def _append_kwargs_data(self, kwargs, type, name, value):
         """
