@@ -298,7 +298,7 @@ class RequestsCrawler(BaseCrawler):
         """
         self.info("Requests set header: %s => %s" % (str(name), str(value)))
         try:
-            self._headers.update({name: str(value)})
+            self._headers.update({name:  utils.quote_chinese(value)})
         except:
             pass
 
