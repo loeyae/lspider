@@ -293,7 +293,7 @@ class WechatSearchHandler(GeneralSearchHandler):
             #格式化url
             item_save = {"base_url": self.response['last_url']}
             formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
-            item_handler = Loader(self.ctx, task = self.build_item_task(self.response['last_url']), spider = self.spider, no_sync = self.no_sync).load()
+            item_handler = Loader(self.ctx, task = self.build_item_task(self.response['last_url']), no_sync = self.no_sync).load()
             item_handler.init(item_save)
             for item in formated:
                 try:
