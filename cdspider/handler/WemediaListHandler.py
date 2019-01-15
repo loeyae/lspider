@@ -369,6 +369,7 @@ class WemediaListHandler(BaseHandler):
         r = self._build_interact_info(**kwargs)
         try:
             self.db['AttachDataDB'].insert(r)
+            self.build_sync_task(kwargs['rid'])
         except:
             pass
 
@@ -478,3 +479,10 @@ class WemediaListHandler(BaseHandler):
             s = {}
         s.update(save)
         self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
+
+    def build_sync_task(self, rid):
+        """
+        生成同步任务并入队
+        """
+        message = {'rid': rid}
+        self.queue['attach2kafka'].put_nowait(message)

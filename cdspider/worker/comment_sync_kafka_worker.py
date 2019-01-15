@@ -1,9 +1,10 @@
 #-*- coding: utf-8 -*-
-
 '''
-Created on 2018年8月6日
-
-@author: Wang Fengwei
+@Author: wuhongchao
+@Date: 2018-12-17 19:09:24
+@LastEditors: wuhongchao
+@LastEditTime: 2019-01-15 10:15:43
+@Description: 评论内容同步到kafka
 '''
 import sys
 import traceback
@@ -15,29 +16,24 @@ from cdspider.worker import BaseWorker
 from cdspider.message_queue import KafkaQueue
 from cdspider.exceptions import *
 
-class SyncKafkaWorker(BaseWorker):
+class CommentSyncKafkaWorker(BaseWorker):
 
-    inqueue_key = QUEUE_NAME_RESULT_TO_KAFKA
+    inqueue_key = QUEUE_NAME_COMMENT_TO_KAFKA
 
     def __init__(self, context):
-        super(SyncKafkaWorker, self).__init__(context)
+        super(CommentSyncKafkaWorker, self).__init__(context)
         self.conf = self.g['app_config'].get('sync_kafka')
         self.connection()
 
     def connection(self):
         if not self.conf:
             raise CDSpiderSettingError("Invalid Kafka Setting")
-        self.kafka=KafkaQueue(self.conf['topic'], host=self.conf['host'])
+        self.kafka=KafkaQueue(self.conf['comment_topic'], host=self.conf['host'])
 
     def on_result(self, message):
-        #message['db'] = 'ArticlesDB'
-        if 'rid' in message and 'db' in message:
+        if 'id' in message and 'rid' in message:
             self.info("got message: %s" % message)
-            res = self.db[message['db']].get_detail(message['rid'])
-            if '_id' in res:
-                res.pop('_id')
-            if message['db'] == 'WeiboInfoDB':
-                res['mediaType'] = 12 #mediaType = 12 微博类型数据
+            res = self.db['CommentsDB'].get_detail(message['id'], message['rid'], ['author', 'ctime', 'comment', 'pubtime', 'acid', 'rowkey', 'crawlinfo.list_url'])
             if 'mediaType' not in res:
                 res['mediaType'] = 99 #mediaType = 99 其他类型数据
             self.info("message: %s " % res)
@@ -45,12 +41,15 @@ class SyncKafkaWorker(BaseWorker):
                 rowkey = self.generate_rowkey(res)
                 res['rowkey'] = rowkey
                 res['flag'] = 0
-                try:
-                    self.kafka.put_nowait(res)
-                    self.db[message['db']].update(message['rid'], {'rowkey': rowkey})
-                except Exception as e:
-                    print(e)
+                #try:
+                print(res)
+                self.kafka.put_nowait(res)
+                #self.db['CommentsDB'].update(message['id'], message['rid'], {'rowkey': rowkey})
+                #except Exception as e:
+                #    print(e)
             else:
+                print(res)
+                self.kafka.put_nowait(res)
                 try:
                     res['flag'] = 1
                     self.kafka.put_nowait(res)

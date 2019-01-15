@@ -269,6 +269,7 @@ class InteractHandler(BaseHandler):
                     testing_mode打开时，数据不入库
                     '''
                     self.db['AttachDataDB'].update(rid, result)
+                    self.build_sync_task(rid)
                 self.crawl_info['crawl_count']['repeat_count'] += 1
             else:
                 #爬虫信息记录
@@ -291,6 +292,7 @@ class InteractHandler(BaseHandler):
                     testing_mode打开时，数据不入库
                     '''
                     self.db['AttachDataDB'].insert(result)
+                    self.build_sync_task(rid)
 
                 self.crawl_info['crawl_count']['new_count'] += 1
 
@@ -310,3 +312,10 @@ class InteractHandler(BaseHandler):
             s = {}
         s.update(save)
         self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
+
+    def build_sync_task(self, rid):
+        """
+        生成同步任务并入队
+        """
+        message = {'rid': rid}
+        self.queue['attach2kafka'].put_nowait(message)

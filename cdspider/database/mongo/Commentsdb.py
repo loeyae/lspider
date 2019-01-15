@@ -37,9 +37,9 @@ class CommentsDB(Mongo, BaseCommentsDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         return super(CommentsDB, self).update(setting=obj, where={"uuid": id}, table=table)
 
-    def get_detail(self, id, rid):
+    def get_detail(self, id, rid, select = None):
         table = self._table_name(rid)
-        return self.get(where={"uuid": id}, table=table)
+        return self.get(where={"uuid": id}, table=table, select=select)
 
     def get_list(self, rid, where = {}, select = None, **kwargs):
         table = self._table_name(rid)

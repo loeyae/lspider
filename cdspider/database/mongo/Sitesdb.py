@@ -88,8 +88,8 @@ class SitesDB(Mongo, BaseSitesDB):
         return super(SitesDB, self).update(setting={"status": self.STATUS_DELETED, 'utime': int(time.time())},
                 where=where, multi=True)
 
-    def get_detail(self, id):
-        return self.get(where={'uuid': int(id)})
+    def get_detail(self, id, select=None):
+        return self.get(where={'uuid': int(id)}, select = select)
 
     def get_site(self, id):
         return self.get(where={'uuid': int(id)})
