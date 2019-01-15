@@ -94,7 +94,7 @@ class BaseWorker(Component):
                 self.flush()
                 gc.collect()
 
-        tornado.ioloop.PeriodicCallback(queue_loop, 100, io_loop=self.ioloop).start()
+        tornado.ioloop.PeriodicCallback(queue_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True
 
         try:
