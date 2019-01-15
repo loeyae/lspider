@@ -261,13 +261,9 @@ class BaseHandler(Component):
             if rule:
                 for k, v in rule.items():
                     if k in request and isinstance(request[k], list):
-                        for it in v:
-                            if int(it.get('first', 0)) == 1:
-                                request[k].append(it)
+                        request[k].extend(v)
                     elif k in request and isinstance(request[k], dict):
-                        for it in request[k]:
-                            if int(request[k][it].get('first', 0)) == 1:
-                                request[k].update({it: request[k][it]})
+                        request[k].update(v)
                     else:
                         request[k] = v
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
