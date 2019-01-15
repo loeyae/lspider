@@ -192,45 +192,6 @@ class ToutiaoListHandler(WemediaListHandler):
                 save['id'] = item['uuid']
             yield item
 
-    def newtask(self, message):
-        """
-        新建爬虫任务
-        :param message [{"uid": url uuid, "mode": handler mode}]
-        """
-        uid = message['uid']
-        if not isinstance(uid, (list, tuple)):
-            uid = [uid]
-        for each in uid:
-            spiderTasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
-            if len(list(spiderTasks)) > 0:
-                continue
-            author = self.db['AuthorDB'].get_detail(each)
-            if not author:
-                raise CDSpiderDBDataNotFound("author: %s not found" % each)
-            ruleList = self.db['AuthorListRuleDB'].get_list(where={"tid": author['tid']}, select=["uuid"])
-            for rule in ruleList:
-                task = {
-                    'mode': message['mode'],     # handler mode
-                    'pid': author['pid'],        # project uuid
-                    'sid': author['sid'],        # site uuid
-                    'tid': author['tid'],        # task uuid
-                    'uid': each,                 # url uuid
-                    'kid': 0,                    # keyword id
-                    'rid': rule['uuid'],         # rule id
-                    'url': "base_url",           # url
-                    'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
-                }
-                self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
-                if not self.testing_mode:
-                    '''
-                    testing_mode打开时，数据不入库
-                    '''
-                    try:
-                        self.db['SpiderTaskDB'].insert(copy.deepcopy(task))
-                    except:
-                        self.error(traceback.format_exc())
-                        pass
-
     def init_process(self, save):
         """
         初始化爬虫流程
