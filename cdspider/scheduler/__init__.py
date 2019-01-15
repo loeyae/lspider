@@ -77,6 +77,8 @@ class BaseScheduler(Component):
                 except Exception as e:
                     self.exception(e)
                     break
+                finally:
+                    self.flush()
 
         tornado.ioloop.PeriodicCallback(queue_loop, 1000, io_loop=self.ioloop).start()
         self._running = True
