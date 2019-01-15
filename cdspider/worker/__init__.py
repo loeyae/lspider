@@ -80,7 +80,6 @@ class BaseWorker(Component):
                     message = self.inqueue.get_nowait()
                     self.debug("%s got message: %s" % (self.__class__.__name__, message))
                 self.on_result(message)
-                time.sleep(self.interval)
             except queue.Empty:
                 self.debug("empty queue")
                 time.sleep(5)
