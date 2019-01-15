@@ -61,8 +61,7 @@ class Spider(Component):
     def set_handler(self, handler):
         if handler and isinstance(handler, BaseHandler):
             self.handler = handler
-
-    @profile
+            
     def fetch(self, task, return_result = False):
         """
         抓取操作
@@ -169,7 +168,6 @@ class Spider(Component):
             del self.handler
         self.info("Spider once end")
 
-    @profile
     def run(self):
         """
         spider运行方法
