@@ -74,6 +74,7 @@ class BaseWorker(Component):
         def queue_loop():
             if self._quit:
                 raise SystemExit
+            self.t += 1
             message = None
             try:
                 if self.inqueue:
