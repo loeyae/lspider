@@ -106,6 +106,7 @@ class BaseHandler(Component):
         self.ctx = None
         self.task = None
         self.handle = None
+        self.response = None
         super(BaseHandler, self).__del__()
 
     def route(self, mode, save):
@@ -266,7 +267,7 @@ class BaseHandler(Component):
                     else:
                         request[k] = v
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
-        self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
+        self.request_params = builder.build(request, DEFAULT_SOURCE, self.crawler, save)
         self.handler_run(HANDLER_FUN_INIT, {"request_params": self.request_params, "save": save})
 
     @abc.abstractmethod
