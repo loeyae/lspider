@@ -1,6 +1,8 @@
 #-*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
+
+import gc
 import time
 import logging
 import traceback
@@ -57,28 +59,30 @@ class BaseScheduler(Component):
         self.info("%s starting..." % self.__class__.__name__)
 
         def queue_loop():
-            while not self._quit:
-                try:
-                    if not self.valid():
-                        time.sleep(2)
-                        continue
-                    message = None
-                    if self.inqueue:
-                        message = self.inqueue.get_nowait()
-                        self.debug("%s got message: %s" % (self.__class__.__name__, message))
-                    self.schedule(message)
-                    time.sleep(self.interval)
-                except queue.Empty:
-                    self.debug("empty queue")
-                    time.sleep(5)
+            if self._quit:
+                raise SystemExit
+            try:
+                if not self.valid():
+                    time.sleep(2)
                     continue
-                except KeyboardInterrupt:
-                    break
-                except Exception as e:
-                    self.exception(e)
-                    break
-                finally:
-                    self.flush()
+                message = None
+                if self.inqueue:
+                    message = self.inqueue.get_nowait()
+                    self.debug("%s got message: %s" % (self.__class__.__name__, message))
+                self.schedule(message)
+                time.sleep(self.interval)
+            except queue.Empty:
+                self.debug("empty queue")
+                time.sleep(5)
+                continue
+            except KeyboardInterrupt:
+                break
+            except Exception as e:
+                self.exception(e)
+                break
+            finally:
+                self.flush()
+                gc.collect()
 
         tornado.ioloop.PeriodicCallback(queue_loop, 1000, io_loop=self.ioloop).start()
         self._running = True
