@@ -186,18 +186,15 @@ class Spider(Component):
                 self.debug("%s fetch got message %s" % (self.__class__.__name__, message))
                 task = self.get_task(message)
                 self.fetch(task)
-                print(self.t)
                 if self.t > 5:
                     raise SystemExit
             except queue.Empty:
                 time.sleep(0.1)
-                pass
             except KeyboardInterrupt:
                 pass
             except Exception as e:
                 t = 0
                 self.exception(e)
-                pass
             finally:
                 self.flush()
                 gc.collect()
