@@ -81,7 +81,6 @@ class BaseHandler(Component):
                 "traceback": None
             }
             self.no_sync = kwargs.pop('no_sync', False)
-            self.spider = kwargs.pop('spider', None)
             self._settings = kwargs or {}
             self.crawler = None
             self.process = {}
@@ -104,6 +103,9 @@ class BaseHandler(Component):
 
     def __del__(self):
         self.close()
+        self.ctx = None
+        self.task = None
+        self.handle = None
         super(BaseHandler, self).__del__()
 
     def route(self, mode, save):
