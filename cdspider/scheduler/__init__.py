@@ -57,10 +57,11 @@ class BaseScheduler(Component):
         scheduler运行方法
         """
         self.info("%s starting..." % self.__class__.__name__)
-
+        self.t = 0
         def queue_loop():
             if self._quit:
                 raise SystemExit
+            self.t += 1
             try:
                 if not self.valid():
                     time.sleep(2)
@@ -70,16 +71,15 @@ class BaseScheduler(Component):
                     message = self.inqueue.get_nowait()
                     self.debug("%s got message: %s" % (self.__class__.__name__, message))
                 self.schedule(message)
-                time.sleep(self.interval)
+                if self.t > 5:
+                    raise SystemExit
             except queue.Empty:
                 self.debug("empty queue")
                 time.sleep(5)
-                continue
             except KeyboardInterrupt:
-                break
+                pass
             except Exception as e:
                 self.exception(e)
-                break
             finally:
                 self.flush()
                 gc.collect()
