@@ -3,6 +3,7 @@
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
 import sys
+import gc
 import time
 import logging
 import traceback
@@ -71,25 +72,27 @@ class BaseWorker(Component):
         self.info("%s starting..." % self.__class__.__name__)
 
         def queue_loop():
-            while not self._quit:
-                message = None
-                try:
-                    if self.inqueue:
-                        message = self.inqueue.get_nowait()
-                        self.debug("%s got message: %s" % (self.__class__.__name__, message))
-                    self.on_result(message)
-                    time.sleep(self.interval)
-                except queue.Empty:
-                    self.debug("empty queue")
-                    time.sleep(5)
-                    continue
-                except KeyboardInterrupt:
-                    break
-                except Exception as e:
-                    self.on_error(e, message)
-                    break
-                finally:
-                    self.flush()
+            if self._quit:
+                raise SystemExit
+            message = None
+            try:
+                if self.inqueue:
+                    message = self.inqueue.get_nowait()
+                    self.debug("%s got message: %s" % (self.__class__.__name__, message))
+                self.on_result(message)
+                time.sleep(self.interval)
+            except queue.Empty:
+                self.debug("empty queue")
+                time.sleep(5)
+                continue
+            except KeyboardInterrupt:
+                break
+            except Exception as e:
+                self.on_error(e, message)
+                break
+            finally:
+                self.flush()
+                gc.collect()
 
         tornado.ioloop.PeriodicCallback(queue_loop, 1000, io_loop=self.ioloop).start()
         self._running = True
