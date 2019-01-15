@@ -516,7 +516,7 @@ class BaseHandler(Component):
             for item in paging['rule']:
                 if not 'name' in item or not item['name']:
                     continue
-                build_rule(rule, item)
+                build_rule(rule, copy.deepcopy(item))
         elif isinstance(paging['rule'], dict):
             for item in paging['rule'].values():
                 if not 'word' in item or not item['word']:
