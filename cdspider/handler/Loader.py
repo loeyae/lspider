@@ -20,7 +20,7 @@ class Loader(Component):
     """
     handler loader
     """
-    def __init__(self, context, task, spider, no_sync = False):
+    def __init__(self, context, task, spider = None, no_sync = False):
         logger = logging.getLogger('handler')
         log_level = logging.WARN
         if context.obj.get('debug', False):
