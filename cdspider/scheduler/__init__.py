@@ -59,13 +59,13 @@ class BaseScheduler(Component):
         self.info("%s starting..." % self.__class__.__name__)
         self.t = 0
         def queue_loop():
+            if not self.valid():
+                time.sleep(2)
+                return
             if self._quit:
                 raise SystemExit
             self.t += 1
             try:
-                if not self.valid():
-                    time.sleep(2)
-                    continue
                 message = None
                 if self.inqueue:
                     message = self.inqueue.get_nowait()
