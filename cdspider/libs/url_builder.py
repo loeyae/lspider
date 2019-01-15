@@ -86,29 +86,29 @@ class UrlBuilder(Component):
         """
         base_url = save.get('base_url')
         if self.page == 1 and int(kwargs.get('first', 0)) == 0:
-            return base_url
-        url = None
-        if isinstance(kwargs['url'], six.string_types):
-            if kwargs['url'] == 'base_url':
-                url = base_url
-            elif kwargs['url'] == 'parent_url':
-                url = save.get('parent_url')
-            else:
-                url = kwargs['url']
-        elif isinstance(kwargs['url'], dict):
-            setting = kwargs['url']
-            _type = setting.get('type')
-            if _type == 'base':
-                url = base_url
-            elif _type == 'parent':
-                url = save.get('parent_url')
-            else:
-                parser = self.parser(source=source, ruleset={"url": {"filter": setting['filter']}}, log_level=self.log_level, url=save['base_url'])
-                parsed = parser.parse()
-                url = parsed['url']
-        elif isinstance(kwargs['url'], list):
-            setting = kwargs['url']
-            url = setting[0].format(self._run_parse(setting[1], source, base_url))
+            url = base_url
+        else:
+            if isinstance(kwargs['url'], six.string_types):
+                if kwargs['url'] == 'base_url':
+                    url = base_url
+                elif kwargs['url'] == 'parent_url':
+                    url = save.get('parent_url')
+                else:
+                    url = kwargs['url']
+            elif isinstance(kwargs['url'], dict):
+                setting = kwargs['url']
+                _type = setting.get('type')
+                if _type == 'base':
+                    url = base_url
+                elif _type == 'parent':
+                    url = save.get('parent_url')
+                else:
+                    parser = self.parser(source=source, ruleset={"url": {"filter": setting['filter']}}, log_level=self.log_level, url=save['base_url'])
+                    parsed = parser.parse()
+                    url = parsed['url']
+            elif isinstance(kwargs['url'], list):
+                setting = kwargs['url']
+                url = setting[0].format(self._run_parse(setting[1], source, base_url))
         if not url:
             raise CDSpiderNotUrlMatched('Url not exists', base_url, rule=kwargs)
         return self._complate_url(url, kwargs, save)
