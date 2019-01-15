@@ -142,7 +142,7 @@ class TornadoCrawler(BaseCrawler):
         return self.fetch['headers']
 
     def set_header(self, name, value):
-        self.fetch['headers'][name] = value
+        self.fetch['headers'][name] = utils.quote_chinese(value)
 
     def get_cookie(self, name = None):
         """
