@@ -200,42 +200,6 @@ class ToutiaoListHandler(WemediaListHandler):
         rule = self.match_rule(save)
         self.process = rule
 
-    def match_rule(self, save):
-        """
-        获取匹配的规则
-        """
-        if "authorListRule" in self.task:
-            '''
-            如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
-            '''
-            rule = copy.deepcopy(self.task['authorListRule'])
-            author = copy.deepcopy(self.task['author'])
-            if not author:
-                raise CDSpiderError("author not exists")
-        else:
-            author = self.db['AuthorDB'].get_detail(self.task['uid'])
-            if not author:
-                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
-                raise CDSpiderDBDataNotFound("author: %s not exists" % self.task['uid'])
-            if author['status'] != AuthorDB.STATUS_ACTIVE:
-                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
-                raise CDSpiderHandlerError("author: %s not active" % self.task['uid'])
-            rule = self.db['AuthorListRuleDB'].get_detail(self.task['rid'])
-            if not rule:
-                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
-                raise CDSpiderDBDataNotFound("author rule by tid: %s not exists" % author['tid'])
-            if rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
-                raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
-        parameters = author.get('parameters')
-        if parameters:
-            save['request'] = {
-                "hard_code": parameters.get('hard'),
-                "random": parameters.get('randoms'),
-            }
-        self.task['url'] = rule['baseUrl']
-        save['base_url'] = rule['baseUrl']
-        return rule
-
     def prepare(self, save):
         super(ToutiaoListHandler, self).prepare(save)
         uid = save['request']['hard_code'][0]['value']
