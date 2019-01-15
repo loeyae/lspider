@@ -71,7 +71,7 @@ class BaseScheduler(Component):
                     message = self.inqueue.get_nowait()
                     self.debug("%s got message: %s" % (self.__class__.__name__, message))
                 self.schedule(message)
-                if self.t > 5:
+                if self.t > 50:
                     raise SystemExit
             except queue.Empty:
                 self.debug("empty queue")
