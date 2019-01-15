@@ -8,9 +8,10 @@
 :date:    2018-1-9 18:01:26
 :version: SVN: $Id: Spider.py 2266 2018-07-06 06:50:15Z zhangyi $
 """
+import sys
+import gc
 import re
 import time
-import sys
 import logging
 import traceback
 import copy
@@ -60,6 +61,7 @@ class Spider(Component):
         if handler and isinstance(handler, BaseHandler):
             self.handler = handler
 
+    @profile
     def fetch(self, task, return_result = False):
         """
         抓取操作
@@ -166,37 +168,39 @@ class Spider(Component):
             del self.handler
         self.info("Spider once end")
 
+    @profile
     def run(self):
         """
         spider运行方法
         """
         self.info("Spider starting...")
-
+        self.t = 0
         def queue_loop():
             if not self.inqueue:
                 return
-            t = 0
-            while not self._quit:
-                try:
-                    t += 1
-                    message = self.inqueue.get_nowait()
-                    self.debug("%s fetch got message %s" % (self.__class__.__name__, message))
-                    task = self.get_task(message)
-                    self.fetch(task)
-                    if t > 20:
-                        raise SystemExit
-                    time.sleep(0.1)
-                except queue.Empty:
-                    time.sleep(0.1)
-                    continue
-                except KeyboardInterrupt:
-                    break
-                except Exception as e:
-                    t = 0
-                    self.exception(e)
-                    break
-                finally:
-                    self.flush()
+            if self._quit:
+                raise SystemExit
+            try:
+                self.t += 1
+                message = self.inqueue.get_nowait()
+                self.debug("%s fetch got message %s" % (self.__class__.__name__, message))
+                task = self.get_task(message)
+                self.fetch(task)
+                print(self.t)
+                if self.t > 5:
+                    raise SystemExit
+            except queue.Empty:
+                time.sleep(0.1)
+                pass
+            except KeyboardInterrupt:
+                pass
+            except Exception as e:
+                t = 0
+                self.exception(e)
+                pass
+            finally:
+                self.flush()
+                gc.collect()
 
         tornado.ioloop.PeriodicCallback(queue_loop, 100, io_loop=self.ioloop).start()
         self._running = True
