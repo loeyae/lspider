@@ -3,7 +3,7 @@
 @Author: wuhongchao
 @Date: 2018-12-17 19:09:24
 @LastEditors: wuhongchao
-@LastEditTime: 2019-01-15 10:15:52
+@LastEditTime: 2019-01-18 14:12:18
 @Description: 互动数同步到kafka
 '''
 import sys
@@ -33,7 +33,8 @@ class AttachSyncKafkaWorker(BaseWorker):
     def on_result(self, message):
         if 'rid' in message:
             self.info("got message: %s" % message)
-            res = self.db['AttachDataDB'].get_detail(message['rid'], ['acid', 'viewNum', 'utime', 'spreadNum', 'mediaType', 'commentNum', 'likeNum', 'crawlinfo.list_url'])
+            #res = self.db['AttachDataDB'].get_detail(message['rid'], ['acid', 'viewNum', 'ctime', 'utime', 'spreadNum', 'mediaType', 'commentNum', 'likeNum', 'crawlinfo.list_url'])
+            res = self.db['AttachDataDB'].get_detail(message['rid'])
             if 'mediaType' not in res:
                 res['mediaType'] = 99 #mediaType = 99 其他类型数据
             self.info("message: %s " % res)
