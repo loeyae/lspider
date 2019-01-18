@@ -46,7 +46,7 @@ class ExtendedHandler(BaseHandler):
             self.task['parent_url'] = self.task['url']
             self.task['acid'] = "testing_mode"
             typeinfo = utils.typeinfo(self.task['parent_url'])
-            if typeinfo['domain'] != self.task['extendRule']['domain'] or typeinfo['subdomain'] != self.task['extendRule']['subdomain']:
+            if typeinfo['domain'] != self.task['extendRule']['domain'] or (self.task['extendRule']['subdomain'] and typeinfo['subdomain'] != self.task['extendRule']['subdomain']):
                 raise CDSpiderNotUrlMatched()
             crawler = self.get_crawler(self.task.get('extendRule', {}).get('request'))
             crawler.crawl(url=self.task['parent_url'])

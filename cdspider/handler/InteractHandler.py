@@ -39,7 +39,7 @@ class InteractHandler(BaseHandler):
             self.task['parent_url'] = self.task['url']
             self.task['acid'] = "testing_mode"
             typeinfo = utils.typeinfo(self.task['parent_url'])
-            if typeinfo['domain'] != self.task['interactionNumRule']['domain'] or typeinfo['subdomain'] != self.task['interactionNumRule']['subdomain']:
+            if typeinfo['domain'] != self.task['interactionNumRule']['domain'] or (self.task['interactionNumRule']['subdomain'] and typeinfo['subdomain'] != self.task['interactionNumRule']['subdomain']):
                 raise CDSpiderNotUrlMatched()
             crawler = self.get_crawler(self.task.get('interactionNumRule', {}).get('request'))
             crawler.crawl(url=self.task['parent_url'])

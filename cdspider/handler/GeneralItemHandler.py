@@ -41,7 +41,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         """
         if "detailRule" in self.task:
             typeinfo = utils.typeinfo(self.task['url'])
-            if typeinfo['domain'] != self.task['detailRule']['domain'] or typeinfo['subdomain'] != self.task['detailRule']['subdomain']:
+            if typeinfo['domain'] != self.task['detailRule']['domain'] or (self.task['detailRule']['subdomain'] and typeinfo['subdomain'] != self.task['detailRule']['subdomain']):
                 raise CDSpiderNotUrlMatched()
             if  'urlPattern' in self.task['detailRule'] and self.task['detailRule']['urlPattern']:
                 '''
