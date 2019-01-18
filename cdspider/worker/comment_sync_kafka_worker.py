@@ -3,7 +3,7 @@
 @Author: wuhongchao
 @Date: 2018-12-17 19:09:24
 @LastEditors: wuhongchao
-@LastEditTime: 2019-01-15 10:15:43
+@LastEditTime: 2019-01-18 14:11:57
 @Description: 评论内容同步到kafka
 '''
 import sys
@@ -33,7 +33,8 @@ class CommentSyncKafkaWorker(BaseWorker):
     def on_result(self, message):
         if 'id' in message and 'rid' in message:
             self.info("got message: %s" % message)
-            res = self.db['CommentsDB'].get_detail(message['id'], message['rid'], ['author', 'ctime', 'comment', 'pubtime', 'acid', 'rowkey', 'crawlinfo.list_url'])
+            #res = self.db['CommentsDB'].get_detail(message['id'], message['rid'], ['author', 'ctime', 'comment', 'pubtime', 'acid', 'rowkey', 'crawlinfo.list_url'])
+            res = self.db['CommentsDB'].get_detail(message['id'], message['rid'])
             if 'mediaType' not in res:
                 res['mediaType'] = 99 #mediaType = 99 其他类型数据
             self.info("message: %s " % res)
