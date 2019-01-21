@@ -3,7 +3,7 @@
 @Author: wuhongchao
 @Date: 2018-12-17 19:09:24
 @LastEditors: wuhongchao
-@LastEditTime: 2019-01-21 12:34:10
+@LastEditTime: 2019-01-21 14:53:31
 @Description: 文章、微博内容数据同步到kafka
 '''
 import sys
@@ -47,12 +47,12 @@ class ArticleSyncKafkaWorker(BaseWorker):
             res = self.db[message['db']].get_detail(message['rid'])
             if res:
                 siteInfo = self.db['SitesDB'].get_detail(res['crawlinfo']['sid'], ['industry', 'territory', 'type', 'name'])
-                projectInfo = self.db['ProjectDB'].get_detail(res['crawlinfo']['pid'], ['name'])
+                projectInfo = self.db['ProjectsDB'].get_detail(res['crawlinfo']['pid'], ['name'])
                 res['industry'] = int(siteInfo['industry'])
                 res['territory'] = int(siteInfo['territory'])
                 res['sitetype'] = int(siteInfo['type'])
-                res['site_name'] - siteInfo['name']
-                res['website_name'] - projectInfo['name']
+                res['site_name'] = siteInfo['name']
+                res['website_name'] = projectInfo['name']
             if message['db'] == 'WeiboInfoDB':
                 res['mediaType'] = 12 #mediaType = 12 微博类型数据
             if 'mediaType' not in res:
