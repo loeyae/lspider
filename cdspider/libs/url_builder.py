@@ -35,7 +35,7 @@ class UrlBuilder(Component):
         """
         if not kwargs or not 'url' in kwargs:
             return kwargs
-        self.info("UrlBuilder parse params: %s" % kwargs)
+        self.info("UrlBuilder parse params: %s, save: %s" % (kwargs, save))
         _max = int(kwargs.pop('max', 0) or 0)
         page = int(save.get('page', 1) or 1)
         if _max > 0 and page > _max:
