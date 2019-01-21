@@ -157,15 +157,48 @@ class JsonParser(BaseParser):
     def _json_parse(self, data, kstring):
         idx = kstring.find("*")
         if idx == -1:
-            kstring = "[\"%s\"]" % kstring.replace(".", "\"][\"")
-            result = None
-            code = "data%s" % re.sub(r"\[\"(\d+)\"\]", r"[\1]", kstring)
-            try:
-                result = eval(code, None, locals())
-            except:
-                self.logger.error(traceback.format_exc())
-                pass
-            return result
+            idx = kstring.find("-1")
+            if idx == -1:
+                kstring = "[\"%s\"]" % kstring.replace(".", "\"][\"")
+                result = None
+                code = "data%s" % re.sub(r"\[\"(\d+)\"\]", r"[\1]", kstring)
+                try:
+                    result = eval(code, None, locals())
+                except:
+                    self.logger.error(traceback.format_exc())
+                    pass
+                return result
+            else:
+                klist = kstring.split("-1")
+                i = 0
+                l = len(klist)
+                for k in klist:
+                    i += 1
+                    if not k:
+                        continue
+                    rk = k.strip(".")
+                    if not rk:
+                        return data
+                    if k.startswith("."):
+                        if isinstance(data, list):
+                            r = None
+                            data = data.pop(-1)
+                            r = self._json_parse(data, rk)
+                            if r == None:
+                                return None
+                            data = r
+                        else:
+                            return None
+                    else:
+                        data = self._json_parse(data, rk)
+                        if data == None:
+                            return None
+                        if i == l:
+                            if isinstance(data, list):
+                                data = data.pop(-1)
+                            else:
+                                return None
+                return data
         else:
             klist = kstring.split("*")
             for k in klist:
@@ -179,7 +212,6 @@ class JsonParser(BaseParser):
                         r = None
                         for item in data:
                             r = self._json_parse(item, rk)
-                            print(r)
                             if r:
                                 data = r
                                 break
