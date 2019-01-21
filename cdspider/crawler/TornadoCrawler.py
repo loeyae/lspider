@@ -178,6 +178,28 @@ class TornadoCrawler(BaseCrawler):
         result = utils.dictunion(kwargs, allowed)
         return self._cookies.set(name, str(value), **result)
 
+    def _prepare_response(self):
+        """
+        预处理response
+        """
+        self._status_code = self.result['status_code']
+        self.info('Requests response status: %s' % self._status_code)
+        self.info('Requests response cookies: %s' % self.result['cookies'])
+        reason = self.result['error']
+        url = self.result['url']
+        if self._status_code == self.STATUS_CODE_NOT_FOUND:
+            raise CDSpiderCrawlerNotFound(reason, self._base_url, url)
+        elif self._status_code == self.STATUS_CODE_FORBIDDEN:
+            raise CDSpiderCrawlerForbidden(reason, self._base_url, url)
+        elif self._status_code == self.STATUS_CODE_INTERNAL_ERROR:
+            raise CDSpiderCrawlerRemoteServerError(reason, self._base_url, url)
+        elif self._status_code == self.STATUS_CODE_BAD_REQUEST:
+            raise CDSpiderCrawlerBadRequest(reason, self._base_url, url)
+        elif self._status_code == self.STATUS_CODE_GATEWAY_TIMEOUT:
+            raise CDSpiderCrawlerConnectTimeout(reason, self._base_url, url)
+        elif self._status_code != self.STATUS_CODE_OK:
+            raise CDSpiderCrawlerError(reason, self._base_url, url, status_code=self._status_code)
+
     def crawl(self, *args, **kwargs):
         l = len(args)
         if l > 0:
@@ -185,10 +207,12 @@ class TornadoCrawler(BaseCrawler):
         if l > 1:
             kwargs.setdefault('method', args[1])
         kwargs.setdefault('method', 'get')
+        self._base_url = kwargs['url']
         self._prepare_setting(**kwargs)
         fetch = self._prefetch(**kwargs)
         self.info("Requests crawl params: %s" % kwargs)
         self.result = self.sync_fetch(kwargs['url'], fetch)
+        self._prepare_response()
 
     def wait(self, *args, **kwargs):
         pass
@@ -198,7 +222,7 @@ class TornadoCrawler(BaseCrawler):
         """
         获取文章源码
         """
-        if self.result['status_code'] == 200:
+        if self.result['status_code'] == self.STATUS_CODE_OK:
             return utils.decode(self.result['content'])
         raise CDSpiderCrawlerNoResponse(base_url = self.result['orig_url'],
             response = self.result)
