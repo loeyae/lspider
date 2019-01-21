@@ -103,10 +103,10 @@ class BaseHandler(Component):
 
     def __del__(self):
         self.close()
-        self.ctx = None
-        self.task = None
-        self.handle = None
-        self.response = None
+        del self.ctx
+        del self.task
+        del self.handle
+        del self.response
         super(BaseHandler, self).__del__()
 
     def route(self, mode, save):
