@@ -275,6 +275,7 @@ class GeneralListHandler(BaseHandler):
                 raise CDSpiderHandlerError("list rule not active")
         if rule and 'jsonUrl' in rule and rule['jsonUrl']:
             self.task['url'] = rule['jsonUrl']
+            save['base_url'] = self.task['url']
 
         return rule
 
