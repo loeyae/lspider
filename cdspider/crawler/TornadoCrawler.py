@@ -185,7 +185,7 @@ class TornadoCrawler(BaseCrawler):
         self._status_code = self.result['status_code']
         self.info('Requests response status: %s' % self._status_code)
         self.info('Requests response cookies: %s' % self.result['cookies'])
-        reason = self.result['error']
+        reason = self.result.get('error', None)
         url = self.result['url']
         if self._status_code == self.STATUS_CODE_NOT_FOUND:
             raise CDSpiderCrawlerNotFound(reason, self._base_url, url)
