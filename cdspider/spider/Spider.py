@@ -48,6 +48,7 @@ class Spider(Component):
 
         self.queue = queue
         self.no_sync = no_sync
+        self.sdebug = g.get('sdebug', False)
         self.ioloop = tornado.ioloop.IOLoop()
         self.set_handler(handler)
 
@@ -61,7 +62,7 @@ class Spider(Component):
     def set_handler(self, handler):
         if handler and isinstance(handler, BaseHandler):
             self.handler = handler
-            
+
     def fetch(self, task, return_result = False):
         """
         抓取操作
@@ -106,7 +107,10 @@ class Spider(Component):
                     raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['last_url'])
                 last_source_unid = unid
                 last_url = handler.response['last_url']
-                self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["last_source"]))
+                if self.sdebug:
+                    self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["last_source"]))
+                else:
+                    self.info("Spider crawl end")
                 self.info("Spider parse start")
                 handler.parse()
                 self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
