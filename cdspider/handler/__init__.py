@@ -252,7 +252,14 @@ class BaseHandler(Component):
         request = copy.deepcopy(self.request)
         if "request" in save and save['request']:
             self.debug("%s other request parameters: %s" % (self.__class__.__name__, save['request']))
-            request.update(save['request'])
+            if save['request']:
+                for k, v in save['request'].items():
+                    if k in request and isinstance(request[k], list):
+                        request[k].extend(v)
+                    elif k in request and isinstance(request[k], dict):
+                        request[k].update(v)
+                    else:
+                        request[k] = v
         if 'paging' in save and save['paging']:
             rule = self.process.get("paging")
             self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
