@@ -28,8 +28,8 @@ class ProjectsDB(Mongo, BaseProjectsDB):
         if not 'status' in indexes:
             collection.create_index('status', name='status')
 
-    def get_detail(self, id):
-        return self.get(where={'uuid': int(id)})
+    def get_detail(self, id, select = None):
+        return self.get(where={'uuid': int(id)}, select = select)
 
     def insert(self, obj):
         obj['uuid'] = self._get_increment(self.incr_key)
