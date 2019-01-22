@@ -280,7 +280,6 @@ class WemediaListHandler(BaseHandler):
             }
         self.task['url'] = rule['baseUrl']
         save['base_url'] = rule['baseUrl']
-        save['paging'] = True
         return rule
 
     def run_parse(self, rule):
