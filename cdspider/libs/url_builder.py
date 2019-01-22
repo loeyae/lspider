@@ -119,24 +119,28 @@ class UrlBuilder(Component):
             return
         self.info("UrlBuilder run parse start")
         self.debug("UrlBuilder parse match code rule: %s" % str(rule))
+        prule = {}
+        for k, v in rule.items():
+            if int(save.get('page', 1) or 1) == 1:
+                if bool(int(v.get('first') or 0)):
+                    prule[k] = v
+            else:
+                prule[k] = v
         try:
-            parser = self.parser(source=source, ruleset=copy.deepcopy(rule), log_level=self.log_level, url=save['base_url'])
+            parser = self.parser(source=source, ruleset=copy.deepcopy(prule), log_level=self.log_level, url=save['base_url'])
             parsed = parser.parse()
             self.debug("UrlBuilder parse match code data: %s" % str(parsed))
             if parsed:
                 for k, v in parsed.items():
                     item = rule[k]
-                if 'mode' in item and item['mode']:
-                    if item['mode'] == 'get':
-                        item.setdefault('type', 'url')
-                    elif item['mode'] == 'post':
-                        item.setdefault('type', 'data')
-                    else:
-                        item.setdefault('type', item['mode'])
+                    if 'mode' in item and item['mode']:
+                        if item['mode'] == 'get':
+                            item.setdefault('type', 'url')
+                        elif item['mode'] == 'post':
+                            item.setdefault('type', 'data')
+                        else:
+                            item.setdefault('type', item['mode'])
 
-                if int(save.get('page', 1) or 1) == 1 and bool(int(item.get('first') or 0)):
-                    self._append_kwargs_data(kwargs, item['type'], k, v)
-                else:
                     self._append_kwargs_data(kwargs, item['type'], k, v)
         finally:
             self.info("UrlBuilder run parse end")
@@ -262,8 +266,9 @@ class UrlBuilder(Component):
                         item.setdefault('type', 'data')
                     else:
                         item.setdefault('type', item['mode'])
-                if page == 1 and bool(int(item.get('first') or 0)):
-                    self._append_kwargs_data(kwargs, item['type'], item['name'], value)
+                if page == 1:
+                    if bool(int(item.get('first') or 0)):
+                        self._append_kwargs_data(kwargs, item['type'], item['name'], value)
                 else:
                     self._append_kwargs_data(kwargs, item['type'], item['name'], value)
 
