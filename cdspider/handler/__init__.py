@@ -244,6 +244,7 @@ class BaseHandler(Component):
             }
             self.log_id = self.db['CrawlLogDB'].insert(log)
 
+        self.task.setdefault('task', {})
         self.init_process(save)
         if not save['base_url'] or save['base_url'] == 'base_url':
             save['base_url'] = self.task['url']
