@@ -453,7 +453,7 @@ class GeneralSearchHandler(BaseHandler):
         """
         匹配搜索结果详情页的mode
         """
-        subdomain, domain = utils.parse_domain(url)
+        subdomain, domain = utils.domain_info(url)
         has_bbs = False
         if subdomain:
             '''
