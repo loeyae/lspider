@@ -560,7 +560,8 @@ class GeneralSearchHandler(BaseHandler):
         """
         message = {
             'mode': mode,
-            'rid': rid
+            'rid': rid,
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         }
         self.queue['scheduler2spider'].put_nowait(message)
 
