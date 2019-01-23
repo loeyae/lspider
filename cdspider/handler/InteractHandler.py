@@ -75,10 +75,10 @@ class InteractHandler(BaseHandler):
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
             '''
             ruleId = self.task.get('rid', 0)
-            parse_rule = self.db['AttachmentDB'].get_detail(ruleId)
+            parse_rule = self.db['InteractDB'].get_detail(ruleId)
             if not parse_rule:
                 raise CDSpiderDBDataNotFound("interactionNumRule: %s not exists" % ruleId)
-            if parse_rule['status'] != AttachmentDB.STATUS_ACTIVE:
+            if parse_rule['status'] != InteractDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("interaction num rule not active")
         return parse_rule
 
@@ -200,7 +200,7 @@ class InteractHandler(BaseHandler):
                 if str(ruleId) in rules:
                     rule = rules[str(ruleId)]
                 else:
-                    rule = self.db['AttachmentDB'].get_detail(ruleId)
+                    rule = self.db['InteractDB'].get_detail(ruleId)
                     if rule:
                         rules[str(ruleId)] = rule
                 if not rule:
