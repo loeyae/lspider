@@ -312,7 +312,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         if pubtime and pubtime > now:
             pubtime = now
         r = {
-            'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_BBS)),
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_BBS)),
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'title': result.pop('title', None) or item.get('title', None),              # 标题
@@ -351,7 +351,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             'ruleId': self.process['uuid'],                            # forumRule id
             'list_url': kwargs.pop('final_url'),                       # 列表url
         }
-        result['mediaType'] = self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_BBS)),
+        result['mediaType'] = self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_BBS)),
         result['acid'] = self.task['article']['acid']                  # article acid
         result['rid'] = self.task['article']['rid']                    # article rid
         result['unid'] = kwargs.pop('unid')
