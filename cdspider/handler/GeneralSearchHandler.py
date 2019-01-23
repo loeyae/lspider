@@ -244,7 +244,7 @@ class GeneralSearchHandler(BaseHandler):
                 while True:
                     has_word = False
                     for item in self.db['TaskDB'].get_new_list(uuid, where={"type": TASK_TYPE_SEARCH}, select=['uuid', 'pid', 'sid', 'mediaType', 'searchType']):
-                        mode = self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), self.SEARCH_TYPE_TO_MODE.get(str(item['searchType'], HANDLER_MODE_DEFAULT_SEARCH)))
+                        mode = self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), self.SEARCH_TYPE_TO_MODE.get(str(item['searchType']), HANDLER_MODE_DEFAULT_SEARCH))
                         tasks = self.db['SpiderTaskDB'].get_list(mode, {"kid": each})
                         if len(list(tasks)) > 0:
                             continue
