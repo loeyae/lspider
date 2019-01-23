@@ -11,7 +11,7 @@
 from . import Base
 
 {
-    "attachments": {
+    "attachmentRule": {
         'uuid': int,           # 附加任务I
         'domain': str,        # 一级域名
         'subdomain': str,     # 二级域名
