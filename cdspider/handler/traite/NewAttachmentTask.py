@@ -13,7 +13,7 @@ from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import CustomParser
 
-class NewInteractTask(object):
+class NewAttachmentTask(object):
     """
     生成附加任务
     """
