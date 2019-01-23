@@ -331,7 +331,7 @@ class GeneralSearchHandler(BaseHandler):
         }
         now = int(time.time())
         params = {"lastmonth": now - 30 * 86400, "lastweek": now - 7 * 86400, "yesterday": now - 86400, "lasthour": now - 36000, "now": now}
-        self.task['url'] = utils.build_url_by_rule({"url": {"base": rule['baseUrl'], "mode": "format"}}, params)
+        self.task['url'] = utils.build_url_by_rule({"url": {"base": rule['baseUrl']}, "mode": "format"}, params)
         save['base_url'] = self.task['url']
         save['paging'] = True
         return rule
