@@ -28,7 +28,7 @@ class ItemParser(BaseParser):
             ruleset = self.ruleset
         if not ruleset:
             ruleset = {}
-        item_ruleset = dict([(k, item) for k, item in ruleset.items() if 'filter' in item and item['filter']]) if ruleset else {}
+        item_ruleset = dict([(k, item) for k, item in ruleset.items() if item and isinstance(item, dict) and 'filter' in item and item['filter']]) if ruleset else {}
         if item_ruleset:
             rule = list(item_ruleset.values())[0]
             if 'filter' in rule and rule['filter'] and rule['filter'].startswith('@json:'):
