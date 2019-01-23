@@ -237,9 +237,6 @@ class GeneralSearchHandler(BaseHandler):
             if not isinstance(kid, (list, tuple)):
                 kid = [kid]
             for each in kid:
-                tasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"kid": each})
-                if len(list(tasks)) > 0:
-                    continue
                 word = self.db['KeywordsDB'].get_detail(each)
                 if not word:
                     raise CDSpiderDBDataNotFound("word: %s not found" % each)
@@ -247,8 +244,12 @@ class GeneralSearchHandler(BaseHandler):
                 while True:
                     has_word = False
                     for item in self.db['TaskDB'].get_new_list(uuid, where={"type": TASK_TYPE_SEARCH}, select=['uuid', 'pid', 'sid', 'mediaType']):
+                        mode = self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), self.SEARCH_TYPE_TO_MODE.get(str(item[' searchType'], HANDLER_MODE_DEFAULT_SEARCH)))
+                        tasks = self.db['SpiderTaskDB'].get_list(mode, {"kid": each})
+                        if len(list(tasks)) > 0:
+                            continue
                         t = {
-                            'mode': self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), self.SEARCH_TYPE_TO_MODE.get(str(item[' searchType'], HANDLER_MODE_DEFAULT_SEARCH))),     # handler mode
+                            'mode': mode,     # handler mode
                             'pid': item['pid'],          # project uuid
                             'sid': item['sid'],          # site uuid
                             'tid': item['uuid'],         # task uuid
