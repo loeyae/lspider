@@ -263,7 +263,7 @@ class BaseHandler(Component):
         if 'paging' in save and save['paging']:
             rule = self.process.get("paging")
             self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
-            rule = self.format_paging(rule)
+            rule = self.format_paging(copy.deepcopy(rule))
             self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
             if rule:
                 for k, v in rule.items():
