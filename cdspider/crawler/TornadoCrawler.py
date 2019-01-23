@@ -183,8 +183,8 @@ class TornadoCrawler(BaseCrawler):
         预处理response
         """
         self._status_code = self.result['status_code']
-        self.info('Requests response status: %s' % self._status_code)
-        self.info('Requests response cookies: %s' % self.result['cookies'])
+        self.info('Tornado response status: %s' % self._status_code)
+        self.info('Tornado response cookies: %s' % self.result.get('cookies'))
         reason = self.result.get('error', None)
         url = self.result['url']
         if self._status_code == self.STATUS_CODE_NOT_FOUND:
