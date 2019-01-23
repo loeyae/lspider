@@ -258,6 +258,11 @@ class SiteSearchHandler(GeneralSearchHandler):
                     if not has_word:
                         break
 
+    def match_mode(self, url):
+        if self.task.get('task', {}).get('mediaType') == MEDIA_TYPE_BBS:
+            return HANDLER_MODE_BBS_ITEM
+        return HANDLER_MODE_DEFAULT_ITEM
+
     def run_parse(self, rule):
         """
         根据解析规则解析源码，获取相应数据
