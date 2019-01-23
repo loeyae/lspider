@@ -476,7 +476,7 @@ class BaseHandler(Component):
         save['page'] = self.page
         rule = self.process.get("paging")
         self.debug("%s on next rule: %s" % (self.__class__.__name__, rule))
-        rule = self.format_paging(rule)
+        rule = self.format_paging(copy.deepcopy(rule))
         self.debug("%s on next formated rule: %s" % (self.__class__.__name__, rule))
         if not rule:
             raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
