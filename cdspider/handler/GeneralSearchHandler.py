@@ -329,8 +329,10 @@ class GeneralSearchHandler(BaseHandler):
                 "value": quote_plus(keyword['name']) if mode != 'post' else keyword['name'],
             }],
         }
-        self.task['url'] = rule['baseUrl']
-        save['base_url'] = rule['baseUrl']
+        now = int(time.time())
+        params = {"lastmonth": now - 30 * 86400, "lastweek": now - 7 * 86400, "yesterday": now - 86400, "lasthour": now - 36000, "now": now}
+        self.task['url'] = utils.build_url_by_rule({"url": {"base": rule['baseUrl'], "mode": "format"}}, params)
+        save['base_url'] = self.task['url']
         save['paging'] = True
         return rule
 
