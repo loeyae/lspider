@@ -393,6 +393,7 @@ class GeneralSearchHandler(BaseHandler):
             'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
             'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
             'title': result.pop('title', None),                                # 标题
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER)),
             'author': result.pop('author', None),
             'pubtime': pubtime,                                                # 发布时间
             'channel': result.pop('channel', None),                            # 频道信息
