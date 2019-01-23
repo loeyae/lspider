@@ -363,7 +363,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         构造回复任务
         """
         task = {
-            'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_BBS)),
+            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_BBS)),
             'mode': HANDLER_MODE_BBS_ITEM,                           # handler mode
             'pid': self.task['article']['crawlinfo'].get('pid', 0), # project id
             'sid': self.task['article']['crawlinfo'].get('sid', 0), # site id
