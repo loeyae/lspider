@@ -13,7 +13,7 @@ from cdspider.libs import utils
 from cdspider.libs.constants import *
 from cdspider.parser import CustomParser
 
-class NewAttachmentTask(object):
+class NewInteractTask(object):
     """
     生成附加任务
     """
@@ -88,7 +88,7 @@ class NewAttachmentTask(object):
     def result2interact(self, crawlinfo, save, rid, domain, subdomain = None, data = None, url = None):
         """
         根据详情页生成互动数任务
-        :param save 传递的上下文信息
+        :param save 传递的�下文信息
         :param domain 域名
         :param subdomain 子域名
         """
@@ -117,12 +117,12 @@ class NewAttachmentTask(object):
             except:
                 self.error(traceback.format_exc())
         #通过子域名获取互动数任务
-        ruleset = self.db['AttachmentDB'].get_list_by_subdomain(subdomain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
+        ruleset = self.db['InteractDB'].get_list_by_subdomain(subdomain, where={"status": self.db['InteractDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
             buid_task(crawlinfo, rule, rid, data, url)
         #通过域名获取互动数任务
-        ruleset = self.db['AttachmentDB'].get_list_by_domain(domain, where={"status": self.db['AttachmentDB'].STATUS_ACTIVE})
+        ruleset = self.db['InteractDB'].get_list_by_domain(domain, where={"status": self.db['InteractDB'].STATUS_ACTIVE})
         for rule in ruleset:
             self.debug("%s interact task rule: %s" % (self.__class__.__name__, str(rule)))
             buid_task(crawlinfo, rule, rid, data, url)
