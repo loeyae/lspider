@@ -35,7 +35,7 @@ class BaseHandler(Component):
 
     DEFAULT_PROCESS = {
         "request": {
-            "crawler": "tornado",
+            "crawler": "requests",
             "method": "GET",
             "proxy": "auto",
         }
@@ -104,9 +104,14 @@ class BaseHandler(Component):
     def __del__(self):
         self.close()
         del self.ctx
-        del self.task
         del self.handle
-        del self.response
+        if self.task:
+            del self.process
+            del self.crawl_info
+            del self.request
+            del self.request_params
+            del self.response
+            del self.task
         super(BaseHandler, self).__del__()
 
     def route(self, mode, save):
