@@ -29,8 +29,8 @@ class GeneralSearchHandler(BaseHandler):
 
     NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WECHAT, MEDIA_TYPE_TOUTIAO)
     MEDIA_TYPE_TO_MODE = {
-        MEDIA_TYPE_WEIBO: HANDLER_MODE_WEIBO_SEARCH,
-        MEDIA_TYPE_WECHAT: HANDLER_MODE_WECHAT_SEARCH,
+        str(MEDIA_TYPE_WEIBO): HANDLER_MODE_WEIBO_SEARCH,
+        str(MEDIA_TYPE_WECHAT): HANDLER_MODE_WECHAT_SEARCH,
     }
 
     SEARCH_TYPE_TO_MODE = {
@@ -244,7 +244,7 @@ class GeneralSearchHandler(BaseHandler):
                 while True:
                     has_word = False
                     for item in self.db['TaskDB'].get_new_list(uuid, where={"type": TASK_TYPE_SEARCH}, select=['uuid', 'pid', 'sid', 'mediaType']):
-                        mode = self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), self.SEARCH_TYPE_TO_MODE.get(str(item[' searchType'], HANDLER_MODE_DEFAULT_SEARCH)))
+                        mode = self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), self.SEARCH_TYPE_TO_MODE.get(str(item['searchType'], HANDLER_MODE_DEFAULT_SEARCH)))
                         tasks = self.db['SpiderTaskDB'].get_list(mode, {"kid": each})
                         if len(list(tasks)) > 0:
                             continue
