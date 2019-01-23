@@ -19,7 +19,7 @@ class ExtendedHandler(BaseHandler):
     """
     extended handler
     :property task 爬虫任务信息 {"mode": "extend", "uuid": SpiderTask.extend uuid}
-                   当测试该handler，数据应为 {"mode": "comment", "url": url, "extendRule": 评论规则，参考评论规则}
+                   当测试该handler，数据应为 {"mode": "extend", "url": url, "extendRule": 扩展那规则，参考扩展规则}
     """
 
     def get_scripts(self):
