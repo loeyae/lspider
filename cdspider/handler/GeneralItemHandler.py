@@ -70,6 +70,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
             if not 'ulr' in self.task or not self.task['url']:
                 self.task["url"] = article['url']
             self.task.setdefault('crawlinfo', article.get('crawlinfo', {}))
+            self.task['article'] = article
         else:
             self.task.setdefault('crawlinfo', {})
         url = self.task.get("url")
@@ -157,7 +158,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         """
         now = int(time.time())
         result = kwargs.pop('result')
-        item = kwargs.pop('item', None) or {}
+        item = self.task.get('article', {}) or {}
         #格式化发布时间
         pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
         if pubtime and pubtime > now:
@@ -165,6 +166,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         r = {
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
+            'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
             'title': result.pop('title', None) or item.get('title', None),              # 标题
             'author': result.pop('author', None) or item.get('author', None),      # 作者
             'content': result.pop('content', None) or item.get('content', None),
@@ -240,14 +242,13 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                     self.db['ArticlesDB'].update(result_id, result)
             self.task['rid'] = result_id
         else:
-            result = self.db['ArticlesDB'].get_detail(result_id)
             if self.page == 1:
                 '''
                 对于已存在的文章，如果是第一页，则更新所有解析到的内容
                 否则只追加content的内容
                 '''
                 #格式化文章信息
-                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], item=result)
+                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'])
 
                 if self.testing_mode:
                     '''
