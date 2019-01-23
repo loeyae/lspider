@@ -303,7 +303,7 @@ class UrlBuilder(Component):
         if 'sub' in kwargs and kwargs['sub']:
             for item in kwargs['sub']:
                 url = re.sub(item['pattern'], item['repl'], url)
-        return url and utils.remove_whtiespace_plus(url) or url
+        return url
 
     def _join_url(self, url, save):
         """
