@@ -197,8 +197,8 @@ class Spider(Component):
             except KeyboardInterrupt:
                 pass
             except Exception as e:
-                t = 0
                 self.exception(e)
+                time.sleep(0.05)
             finally:
                 self.flush()
                 gc.collect()
