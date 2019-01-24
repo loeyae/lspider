@@ -15,7 +15,7 @@ from cdspider import Component
 
 class BaseWorker(Component):
 
-    interval = 500
+    interval = 100
 
     inqueue_key = None
     excqueue_key = None
