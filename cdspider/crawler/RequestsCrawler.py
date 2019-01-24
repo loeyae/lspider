@@ -58,12 +58,12 @@ class RequestsCrawler(BaseCrawler):
     def close(self):
         if hasattr(self._response, 'close'):
             self._response.close()
-        self._response = None
+            self._response = None
 
     def quit(self):
         if hasattr(self._ses, 'close'):
             self._ses.close()
-        self._ses = None
+            self._ses = None
 
     def _prepare_request(self, url):
         """
