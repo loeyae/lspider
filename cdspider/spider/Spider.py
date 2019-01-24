@@ -31,7 +31,7 @@ class Spider(Component):
     """
     爬虫流程实现
     """
-    interval = 100
+    interval = 500
 
     def __init__(self, context, no_sync = False, handler=None, inqueue = None):
         self._quit = False
