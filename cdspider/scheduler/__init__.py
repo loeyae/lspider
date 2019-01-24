@@ -45,11 +45,12 @@ class BaseScheduler(Component):
 
     def run_once(self):
         self.info("%s once starting..." % self.__class__.__name__)
-        message = None
-        if self.inqueue:
-            message = self.inqueue.get_nowait()
-            self.debug("%s got message: %s" % (self.__class__.__name__, message))
-        self.schedule(message)
+        if self.valid():
+            message = None
+            if self.inqueue:
+                message = self.inqueue.get_nowait()
+                self.debug("%s got message: %s" % (self.__class__.__name__, message))
+            self.schedule(message)
         self.info("%s once end" % self.__class__.__name__)
 
     def run(self):
