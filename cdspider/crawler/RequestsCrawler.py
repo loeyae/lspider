@@ -34,7 +34,7 @@ class RequestsCrawler(BaseCrawler):
         super(RequestsCrawler, self).__init__(*args, **kwargs)
         self._setting = {
             'auth':None,
-            'timeout': (60, 90),
+            'timeout': (30, 60),
             'allow_redirects': True,
             'proxies': None,
             'hooks': None,
