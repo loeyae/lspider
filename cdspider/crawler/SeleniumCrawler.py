@@ -108,7 +108,7 @@ class SeleniumCrawler(BaseCrawler):
         self._driver.start_session(self._cap)
         self._driver.set_window_size(1024, 768)
         self._driver.set_script_timeout(30)
-        self._driver.set_page_load_timeout(120)
+        self._driver.set_page_load_timeout(60)
 
     def _prepare_request(self, url):
         """
