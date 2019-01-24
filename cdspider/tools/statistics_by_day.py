@@ -23,9 +23,9 @@ class statistics_by_day(Base):
     def __init__(self, context, daemon = False):
         super(statistics_by_day, self).__init__(context, daemon)
         self.db = self.g['db']
-        self.config = g['app_config']
+        self.config = self.g['app_config']
         self.running = False
-        self.run_once = False
+        self._run_once = False
 
     def process(self, *args):
         running_time = int(args[0]) if len(args) > 0 else None
@@ -35,9 +35,9 @@ class statistics_by_day(Base):
                 self.running = True
             else:
                 self.running = False
-            if h > running_time and self.run_once == True:
-                self.run_once = False
-        if self.running == False or self.run_once == True:
+            if h > running_time and self._run_once == True:
+                self._run_once = False
+        if self.running == False or self._run_once == True:
             self.debug("statistics sleep")
             time.sleep(60)
             return
