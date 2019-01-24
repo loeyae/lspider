@@ -198,7 +198,7 @@ class Router(BaseScheduler):
         application.register_function(frequency, 'frequency')
 
         def expire(task):
-            self.debug("%s rpc frequency get message %s" % (self.__class__.__name__, task))
+            self.debug("%s rpc expire get message %s" % (self.__class__.__name__, task))
             r_obj = utils.__redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
