@@ -69,11 +69,11 @@ class SeleniumCrawler(BaseCrawler):
         super(SeleniumCrawler, self).__del__()
 
     def close(self):
-        if isinstance(self._driver, webdriver.PhantomJS):
+        if hasattr(self._driver, "close"):
             self._driver.close()
 
     def quit(self):
-        if isinstance(self._driver, webdriver.PhantomJS):
+        if hasattr(self._driver, "quit"):
             self._driver.quit()
 
     def _init_cap(self):
