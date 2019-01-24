@@ -138,6 +138,7 @@ class Spider(Component):
                     return_data.append((None, traceback.format_exc(), None, None, save))
                     self.error(traceback.format_exc())
         finally:
+            handler.close()
             self.info("Spider process end")
             if not return_result:
                 handler.finish(save)
