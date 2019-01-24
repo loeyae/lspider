@@ -183,7 +183,7 @@ class GeneralListHandler(BaseHandler):
                     rules[str(ruleId)] = rule
                 if not rule:
                     continue
-                frequency = str(rule.get('frequency', self.DEFAULT_RATE))
+                frequency = str(rule.get('rate', self.DEFAULT_RATE))
                 plantime = int(save['now']) + int(self.ratemap[frequency][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, 'rid': ruleId})
             if item['uuid'] > save['id']:
