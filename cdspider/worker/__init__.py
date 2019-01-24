@@ -83,13 +83,15 @@ class BaseWorker(Component):
                 self.on_result(message)
                 if self.t > 100:
                     raise SystemExit
+                time.sleep(0.05)
             except queue.Empty:
                 self.debug("empty queue")
-                time.sleep(5)
+                time.sleep(2)
             except KeyboardInterrupt:
                 pass
             except Exception as e:
                 self.on_error(e, message)
+                time.sleep(0.05)
             finally:
                 self.flush()
                 gc.collect()
