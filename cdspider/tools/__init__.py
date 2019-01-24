@@ -13,7 +13,7 @@ from cdspider import Component
 
 @six.add_metaclass(abc.ABCMeta)
 class Base(Component):
-    interval = 0.1
+    interval = 500
 
     def __init__(self, context, daemon = False):
         self.ctx = context
@@ -43,14 +43,14 @@ class Base(Component):
             while not self._quit:
                 try:
                     self.process(*args, **kwargs)
-                    time.sleep(self.interval)
+                    time.sleep(0.1)
                 except KeyboardInterrupt:
                     break
                 except:
                     self.error(traceback.format_exc())
                     break
 
-        tornado.ioloop.PeriodicCallback(process_loop, 1000, io_loop=self.ioloop).start()
+        tornado.ioloop.PeriodicCallback(process_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True
 
         try:
