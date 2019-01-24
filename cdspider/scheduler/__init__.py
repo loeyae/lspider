@@ -15,7 +15,7 @@ from cdspider import Component
 class BaseScheduler(Component):
 
     inqueue = None
-    interval = 0.05
+    interval = 500
 
     def __init__(self, context):
         self._running = False
