@@ -30,6 +30,12 @@ class PlantaskScheduler(BaseScheduler):
         rate_map = context.obj.get('rate_map')
         self.rate_map = rate_map
 
+    def valid(self):
+        if self.outqueue.qsize() > 100000:
+            self.debug("scheduler2spider is full")
+            return False
+        return True
+
     def schedule(self, message):
         self.debug("%s schedule got message: %s" % (self.__class__.__name__, str(message)))
         if not 'h-mode' in message or not message['h-mode']:
