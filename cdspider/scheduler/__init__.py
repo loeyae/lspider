@@ -73,13 +73,15 @@ class BaseScheduler(Component):
                 self.schedule(message)
                 if self.t > 50:
                     raise SystemExit
+                time.sleep(0.05)
             except queue.Empty:
                 self.debug("empty queue")
-                time.sleep(5)
+                time.sleep(2)
             except KeyboardInterrupt:
                 pass
             except Exception as e:
                 self.exception(e)
+                time.sleep(0.05)
             finally:
                 self.flush()
                 gc.collect()
