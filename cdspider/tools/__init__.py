@@ -46,10 +46,10 @@ class Base(Component):
                 self.process(*args, **kwargs)
                 time.sleep(0.1)
             except KeyboardInterrupt:
-                break
+                pass
             except:
                 self.error(traceback.format_exc())
-                break
+                raise SystemExit
 
         tornado.ioloop.PeriodicCallback(process_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True
