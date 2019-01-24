@@ -94,6 +94,13 @@ class Router(BaseScheduler):
         handler.frequency(message)
         del handler
 
+    def expire(self, message):
+        name = message.get('mode', HANDLER_MODE_DEFAULT)
+        handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        self.info("Spider loaded handler: %s" % handler)
+        handler.expire(message)
+        del handler
+
     def build_item_task(self, message):
         rid = message['rid']
         if not isinstance(rid, (list, tuple)):
@@ -189,6 +196,24 @@ class Router(BaseScheduler):
 
             return json.dumps(result)
         application.register_function(frequency, 'frequency')
+
+        def expire(task):
+            self.debug("%s rpc frequency get message %s" % (self.__class__.__name__, task))
+            r_obj = utils.__redirection__()
+            sys.stdout = r_obj
+            parsed = broken_exc = last_source = final_url = save = None
+            try:
+                task = json.loads(task)
+                self.expire(task)
+                parsed = True
+            except :
+                broken_exc = traceback.format_exc()
+                self.error(broken_exc)
+            output = sys.stdout.read()
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
+
+            return json.dumps(result)
+        application.register_function(expire, 'expire')
 
         import tornado.wsgi
         import tornado.ioloop
