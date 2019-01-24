@@ -84,6 +84,9 @@ class SpiderTaskDB(Base):
     def delete(self, id, mode, where):
         raise NotImplementedError
 
+    def delete_many(self, mode, where):
+        raise NotImplementedError
+
     def delete_by_pid(self, pid, mode, where):
         raise NotImplementedError
 
