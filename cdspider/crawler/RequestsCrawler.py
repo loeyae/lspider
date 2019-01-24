@@ -51,16 +51,17 @@ class RequestsCrawler(BaseCrawler):
         self._response = None
 
     def __del__(self):
+        self.close()
         self.quit()
         super(RequestsCrawler, self).__del__()
 
     def close(self):
-        if isinstance(self._response, requests.Response):
+        if hasattr(self._response, 'close'):
             self._response.close()
+        self._response = None
 
     def quit(self):
-        self.close()
-        if isinstance(self._ses, requests.Session):
+        if hasattr(self._ses, 'close'):
             self._ses.close()
         self._ses = None
 
