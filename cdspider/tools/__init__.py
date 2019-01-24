@@ -40,15 +40,16 @@ class Base(Component):
         self.info("%s starting..." % self.__class__.__name__)
 
         def process_loop():
-            while not self._quit:
-                try:
-                    self.process(*args, **kwargs)
-                    time.sleep(0.1)
-                except KeyboardInterrupt:
-                    break
-                except:
-                    self.error(traceback.format_exc())
-                    break
+            if self._quit:
+                raise SystemExit
+            try:
+                self.process(*args, **kwargs)
+                time.sleep(0.1)
+            except KeyboardInterrupt:
+                break
+            except:
+                self.error(traceback.format_exc())
+                break
 
         tornado.ioloop.PeriodicCallback(process_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True
