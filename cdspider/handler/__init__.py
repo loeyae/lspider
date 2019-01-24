@@ -129,14 +129,41 @@ class BaseHandler(Component):
         """
         mode = message['mode']
         frequency = message['frequency']
-        if 'rid' in message and message['rid']:
+        if 'pid' in message and message['pid']:
+            where = {"pid": message['pid']}
+        elif 'sid' in message and message['sid']:
+            where = {"sid": message['sid']}
+        elif 'rid' in message and message['rid']:
             where = {"rid": message['rid']}
         elif 'tid' in message and message['tid']:
             where = {"tid": message['tid']}
+        elif 'kid' in message and message['kid']:
+            where = {"kid": message['kid']}
         else:
             where = {"uid": message['uid']}
         plantime = int(time.time()) + int(self.ratemap[str(frequency)][0])
         self.db['SpiderTaskDB'].update_many(mode, {"plantime": plantime, "frequency": frequency}, where=where)
+
+    def expire(self, message):
+        """
+        更新更新频率
+        """
+        mode = message['mode']
+        expire = message['expire']
+        if 'pid' in message and message['pid']:
+            where = {"pid": message['pid']}
+        elif 'sid' in message and message['sid']:
+            where = {"sid": message['sid']}
+        elif 'rid' in message and message['rid']:
+            where = {"rid": message['rid']}
+        elif 'tid' in message and message['tid']:
+            where = {"tid": message['tid']}
+        elif 'kid' in message and message['kid']:
+            where = {"kid": message['kid']}
+        else:
+            where = {"uid": message['uid']}
+        expire = int(time.time()) + int(expire)
+        self.db['SpiderTaskDB'].update_many(mode, {"expire": expire}, where=where)
 
     def status(self, message):
         mode = message['mode']
