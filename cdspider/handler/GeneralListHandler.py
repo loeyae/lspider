@@ -180,9 +180,9 @@ class GeneralListHandler(BaseHandler):
                     rule = rules[str(ruleId)]
                 else:
                     rule = self.db['ListRuleDB'].get_detail(ruleId)
+                    if not rule:
+                        continue
                     rules[str(ruleId)] = rule
-                if not rule:
-                    continue
                 frequency = str(rule.get('rate', self.DEFAULT_RATE))
                 plantime = int(save['now']) + int(self.ratemap[frequency][0])
                 self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime, "frequency": frequency, 'rid': ruleId})
@@ -205,6 +205,15 @@ class GeneralListHandler(BaseHandler):
             urls = self.db['UrlsDB'].get_detail(each)
             if not urls:
                 raise CDSpiderDBDataNotFound("url: %s not found" % each)
+            ruleId = urls.pop('ruleId', 0)
+            if str(ruleId) in rules:
+                rule = rules[str(ruleId)]
+            else:
+                rule = self.db['ListRuleDB'].get_detail(ruleId)
+                if not rule:
+                    rule = {}
+                rules[str(ruleId)] = rule
+
             task = {
                 'mode': message['mode'],     # handler mode
                 'pid': urls['pid'],          # project uuid
@@ -212,6 +221,7 @@ class GeneralListHandler(BaseHandler):
                 'tid': urls.get('tid', 0),   # task uuid
                 'uid': each,                  # url uuid
                 'kid': 0,                    # keyword id
+                'frequency': str(rule.get('rate', self.DEFAULT_RATE)),
                 'url': urls['url'],          # url
             }
             self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
