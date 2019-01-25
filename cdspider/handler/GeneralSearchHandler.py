@@ -220,6 +220,7 @@ class GeneralSearchHandler(BaseHandler):
                             'uid': 0,                    # url uuid
                             'kid': item['uuid'],         # keyword id
                             'url': 'base_url',           # url
+                            'frequency': str(task.get('frequency', self.DEFAULT_RATE)),
                             'status': SpiderTaskDB.STATUS_ACTIVE
                         }
                         self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
@@ -255,6 +256,7 @@ class GeneralSearchHandler(BaseHandler):
                             'tid': item['uuid'],         # task uuid
                             'uid': 0,                    # url uuid
                             'kid': each,                 # keyword id
+                            'frequency': str(item.get('frequency', self.DEFAULT_RATE)),
                             'url': 'base_url',           # url
                             'status': SpiderTaskDB.STATUS_ACTIVE
                         }
