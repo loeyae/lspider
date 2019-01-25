@@ -374,6 +374,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             'url': self.task['url'],                                # url
             'parentid': self.task['article']['rid'],                # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+            'frequency': str(self.process.get('rate', self.DEFAULT_RATE)),
             'expire': 0 if int(self.process['expire']) == 0 else int(time.time()) + int(self.process['expire']),
         }
         self.debug("%s build replies task: %s" % (self.__class__.__name__, str(task)))
