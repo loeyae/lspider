@@ -192,7 +192,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             #根据task中的rid获取文章信息
             rid = self.task.get('parentid', None)
         if rid:
-            article = self.db['ArticlesDB'].get_detail(rid, select=['rid', 'url', 'crawlinfo'])
+            article = self.db['ArticlesDB'].get_detail(rid, select=['acid', 'rid', 'url', 'crawlinfo'])
             if not article:
                 raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
             if not 'ulr' in self.task or not self.task['url']:
@@ -497,7 +497,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                     self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
                 else:
                     #生成唯一ID, 并判断是否已存在
-                    inserted, unid = self.db['RepliesUniqueDB'].insert(self.get_unique_setting(self.task['last_url'], each), ctime)
+                    inserted, unid = self.db['RepliesUniqueDB'].insert(self.get_unique_setting(self.response['last_url'], each), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
                     result = self._build_replies_info(result=each, final_url=self.response['final_url'], **unid)
