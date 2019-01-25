@@ -207,6 +207,7 @@ class WechatListHandler(BaseHandler):
                 'uid': each,                 # url uuid
                 'kid': 0,                    # keyword id
                 'url': "base_url",           # url
+                'frequency': str(author.get('frequency', self.DEFAULT_RATE)),
                 'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
             }
             self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
