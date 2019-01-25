@@ -187,6 +187,7 @@ class NewAttachmentTask(object):
             'url': url,                                             # url
             'parentid': rid,                           # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+            'frequency': str(rule.get('rate', self.DEFAULT_RATE)),
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
             'save': {"hard_code": data}
         }
@@ -223,6 +224,7 @@ class NewAttachmentTask(object):
             'url': url,                                             # url
             'parentid': rid,                                        # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+            'frequency': str(rule.get('rate', self.DEFAULT_RATE)),
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
             'save': {"hard_code": data}
         }
@@ -275,6 +277,7 @@ class NewAttachmentTask(object):
             'url': url,                                             # url
             'parentid': rid,                                        # article id
             'status': self.db['SpiderTaskDB'].STATUS_ACTIVE,
+            'frequency': str(rule.get('rate', self.DEFAULT_RATE)),
             'expire': 0 if int(rule['expire']) == 0 else int(time.time()) + int(rule['expire']),
             'save': {"hard_code": data}
         }
