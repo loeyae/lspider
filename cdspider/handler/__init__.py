@@ -30,7 +30,7 @@ class BaseHandler(Component):
     BLOOMFILTER_KEY = '%(prefix)s_cdspider_$(project)s_%(key)s'
     CRAWL_INFO_LIMIT_COUNT = 10
     EXPIRE_STEP = 1
-    DEFAULT_RATE = 4
+    DEFAULT_RATE = 6
     ALLOWED_REPEAT = 1
 
     DEFAULT_PROCESS = {
