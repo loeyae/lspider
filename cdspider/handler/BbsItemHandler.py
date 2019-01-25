@@ -224,7 +224,6 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                 '''
                 parserule_list = self.db['ForumRuleDB'].get_list_by_subdomain(subdomain)
                 for item in parserule_list:
-                    print(item)
                     if not parse_rule:
                         '''
                         将第一条规则选择为返回的默认值
