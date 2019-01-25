@@ -184,10 +184,13 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                 u = utils.preg(self.task['url'], self.task['forumRule']['urlPattern'])
                 if not u:
                     raise CDSpiderNotUrlMatched()
-        if "parentid" in self.task:
-            self.task['rid'] = self.task['parentid']
-        #根据task中的rid获取文章信息
-        rid = self.task.get('rid', None)
+        if "rid" in self.task and not 'uuid' in self.task:
+            rid = self.task['rid']
+            del self.task['rid']
+            self.task['parentid'] = rid
+        else:
+            #根据task中的rid获取文章信息
+            rid = self.task.get('parentid', None)
         if rid:
             article = self.db['ArticlesDB'].get_detail(rid, select=['rid', 'url', 'crawlinfo'])
             if not article:
@@ -196,6 +199,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                 self.task["url"] = article['url']
                 save['base_url'] = article['url']
             self.task['article'] = article
+        self.task.setdefault('article', {})
         self.task.setdefault('crawlinfo', {})
         self.process = self.match_rule() or {"unique": {"data": None}}
         if not 'data' in self.process['unique'] or not self.process['unique']['data']:
@@ -403,7 +407,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
             typeinfo = utils.typeinfo(self.response['final_url'])
             if not "uuid" in self.task:
                 self.result2db(save, copy.deepcopy(typeinfo))
-                self.result2attach(self.task['crawlinfo'], save, self.task['rid'], **typeinfo)
+                self.result2attach(self.task['article']['crawlinfo'], save, self.task['article']['rid'], **typeinfo)
                 if self.page == 1:
                     tid = self.build_replies_task(save)
                     if tid:
@@ -419,7 +423,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         :param save 保存的上下文信息
         :param typeinfo 域名信息
         """
-        result_id = self.task.get("rid", None)
+        result_id = self.task.get("parentid", None)
         if not result_id:
             '''
             如果任务中没有文章id，则生成文章唯一索引，并判断是否已经存在。
@@ -437,7 +441,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
             if self.page == 1:
                 #格式化文章信息
-                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed']['main'], crawlinfo=self.task['crawlinfo'], **unid)
+                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed']['main'], crawlinfo=self.task['article']['crawlinfo'], **unid)
                 if self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
@@ -455,7 +459,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                         self.task['article'] = item
                         result_id = item['rid']
                         self.db['ArticlesDB'].update(result_id, result)
-                self.task['rid'] = result_id
+                self.task['parentid'] = result_id
         else:
             if self.page == 1:
                 result = self.db['ArticlesDB'].get_detail(result_id)
@@ -464,7 +468,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                 否则只追加content的内容
                 '''
                 #格式化文章信息
-                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed']['main'], crawlinfo=self.task['crawlinfo'], item = result)
+                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed']['main'], crawlinfo=self.task['article']['crawlinfo'], item = result)
 
                 if self.testing_mode:
                     '''
@@ -496,7 +500,7 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
                     inserted, unid = self.db['RepliesUniqueDB'].insert(self.get_unique_setting(self.task['last_url'], each), ctime)
                     self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
                 if inserted:
-                    result = self.build_comment_info(result=each, final_url=self.response['final_url'], **unid)
+                    result = self._build_replies_info(result=each, final_url=self.response['final_url'], **unid)
                     self.debug("%s result: %s" % (self.__class__.__name__, result))
                     if not self.testing_mode:
                         '''
@@ -518,9 +522,9 @@ class BbsItemHandler(BaseHandler, NewAttachmentTask):
         """
         super(BbsItemHandler, self).finish(save)
         if self.page == 1:
-            if self.task.get('rid') and self.task['article'].get('crawlinfo') and not self.testing_mode:
-                self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['article']['crawlinfo']})
-                self.build_sync_task(self.task['rid'], 'ArticlesDB')
+            if self.task.get('parentid') and self.task['article'].get('crawlinfo') and not self.testing_mode:
+                self.db['ArticlesDB'].update(self.task['parentid'], {"crawlinfo": self.task['article']['crawlinfo']})
+                self.build_sync_task(self.task['parentid'], 'ArticlesDB')
         if "uuid" in self.task and self.task['uuid']:
             crawlinfo = self.task.get('crawlinfo', {}) or {}
             self.crawl_info['crawl_end'] = int(time.time())
