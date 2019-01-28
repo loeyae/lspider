@@ -42,7 +42,7 @@
         "comment_topic": "comment_spider2",
         "attach_topic": "attach_spider2",
         "spider": "spider",
-        "host": "101.201.154.223:9092"
+        "host": "192.168.10.131:9092,192.168.10.132:9092,192.168.10.133:9092"
     },
     "mail": {
         "mailer": "smtp",
