@@ -195,7 +195,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
         :return 包含爬虫任务uuid, url的字典迭代器
         """
         rule = self.db['AuthorListRuleDB'].get_detail_by_tid(task['uuid'])
-        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'uid']):
+        for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where={"tid": task['uuid']}, select=['uuid', 'url', 'uid'], hits=1000):
             if not self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
