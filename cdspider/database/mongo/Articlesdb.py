@@ -99,5 +99,5 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
         if not 'kid' in indexes:
             collection.create_index('crawlinfo.kid', name='kid')
         if not 'listRule' in indexes:
-            collection.create_index({'crawlinfo.listMode': 1, 'crawlinfo.listRule': 1}, name='listRule')
+            collection.create_index([('crawlinfo.listMode', 1), ('crawlinfo.listRule', 1)], name='listRule')
         self._collections.add(table)
