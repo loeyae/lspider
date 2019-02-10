@@ -50,7 +50,7 @@ class Mongo(BaseDataBase):
         collection = self._db.get_collection(table or self.table)
         where = self._build_where(where)
         projection = self._build_projection(select)
-        self.logger.debug('find %s from %s where %s order %s' % (projection, table or self.table, where, sort))
+        self.logger.debug('find %s from %s where %s order %s limit %s, %s' % (projection, table or self.table, where, sort, offset, hits))
         cursor = collection.find(filter=where, projection=projection, sort = sort, skip = offset, limit = hits)
         for each in cursor:
             if each and '_id' in each and (select and not '_id' in select or not select):
