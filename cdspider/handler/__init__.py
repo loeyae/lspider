@@ -179,7 +179,7 @@ class BaseHandler(Component):
                 where = {"uid": int(message['item'])}
             else:
                 where = {"tid": int(message['item'])}
-            for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where=where, select=['uuid', 'url', 'frequency']):
+            for item in self.db['SpiderTaskDB'].get_plan_list(message['mode'], save['id'], plantime=save['now'], where=where, select=['uuid', 'url', 'frequency']):
                 if not self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
