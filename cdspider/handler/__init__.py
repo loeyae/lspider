@@ -144,7 +144,7 @@ class BaseHandler(Component):
         cm = CounterMananger(cmdir, (mode, rate))
         if not cm.get('stime') or cm.get('stime') + cm.get('ctime') <= now:
             cm.empty()
-            total = self.db['SpiderTaskDB'].get_active_count(mode, {"status": self.db['SpiderTaskDB'].STATUS_ACTIVE, "frequency": rate})
+            total = self.db['SpiderTaskDB'].get_active_count(mode, {"frequency": rate})
             cm.event(stime=now, itime=self.ROUTE_INTERVAL, ctime=setting[0], total=total)
         cm.event(now=now)
         offset = cm.get('offset')
@@ -191,7 +191,7 @@ class BaseHandler(Component):
                     save['id'] = item['uuid']
                 yield item
         elif 'rate' in message:
-            for item in self.db['SpiderTaskDB'].get_active_list(message['mode'], where={"frequency": str(message['rate']), "status": self.db['SpiderTaskDB'].STATUS_ACTIVE, "$and": {"$or": {""}}}, offset=int(message['offset']), hits=int(message['count']), sort=[('uuid', 1)], select=['uuid', 'url']):
+            for item in self.db['SpiderTaskDB'].get_active_list(message['mode'], where={"frequency": str(message['rate'])}, offset=int(message['offset']), hits=int(message['count']), sort=[('uuid', 1)], select=['uuid', 'url']):
                 if not self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
