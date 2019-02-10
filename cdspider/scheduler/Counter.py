@@ -12,7 +12,6 @@ import pickle
 import logging
 import six
 import math
-import time
 
 class Counter(object):
     """
@@ -100,11 +99,15 @@ class Counter(object):
             if self.total and self.ctime and self.itime:
                 self.data['avg'] = math.ceil(self.total / (self.ctime / self.itime))
                 return self.data['avg']
-        return None
+            raise Exception('total not exists or ctime not exists or itime not exists')
 
     @property
     def count(self):
         c = 0
+        if not self.now:
+            self.now = self.stime
+        if not self.now:
+            raise Exception('start time not exists')
         if self.ltime:
             itime = self.now - self.ltime
             p = round(itime / self.itime)
@@ -138,7 +141,6 @@ class CounterMananger(object):
         self.cls = cls
         if not self.load():
             self.counter = cls()
-        self.counter.now = int(time.time())
 
     def __del__(self):
         self.dump()
