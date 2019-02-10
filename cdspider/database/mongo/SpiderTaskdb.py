@@ -300,6 +300,16 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, table=table, select=select, **kwargs)
 
+    def get_active_list(self, mode, where = {}, select=None, **kwargs):
+        table = self._table_name(mode)
+        now = int(time.time())
+        where = self._build_where(where)
+        _where = {'$and':[{'status':self.STATUS_ACTIVE}, {'$or':[{'expire':0},{'expire':{'$gt': now}}]}]}
+        for k, v in where.items():
+            _where['$and'].extend([{k: v}])
+        kwargs.setdefault('sort', [('uuid', 1)])
+        return self.find(where=_where, table=table, select=select, **kwargs)
+
     def get_plan_list(self, mode, id, plantime = None, where = {}, select=None, **kwargs):
         table = self._table_name(mode)
         now = int(time.time())
