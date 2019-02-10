@@ -191,7 +191,7 @@ class BaseHandler(Component):
                     save['id'] = item['uuid']
                 yield item
         elif 'rate' in message:
-            for item in self.db['SpiderTaskDB'].get_list(message['mode'], where={"frequency": str(message['rate']), "status": self.db['SpiderTaskDB'].STATUS_ACTIVE}, offset=int(message['offset']), hits=int(message['count']), sort=[('uuid', 1)], select=['uuid', 'url']):
+            for item in self.db['SpiderTaskDB'].get_active_list(message['mode'], where={"frequency": str(message['rate']), "status": self.db['SpiderTaskDB'].STATUS_ACTIVE, "$and": {"$or": {""}}}, offset=int(message['offset']), hits=int(message['count']), sort=[('uuid', 1)], select=['uuid', 'url']):
                 if not self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
