@@ -41,7 +41,7 @@ class PlantaskScheduler(BaseScheduler):
         if not 'mode' in message or not message['mode']:
             raise CDSpiderError("%s handler mode is missing" % self.__class__.__name__)
         self.info("%s schedule starting..." % self.__class__.__name__)
-        handler_mode = message['h-mode']
+        handler_mode = message['mode']
         name = HANDLER_MODE_HANDLER_MAPPING[handler_mode]
         handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
         self.info("%s loaded handler: %s" % (self.__class__.__name__, handler))
