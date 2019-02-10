@@ -55,7 +55,7 @@ class PlantaskScheduler(BaseScheduler):
                     if not self.testing_mode:
                         self.send_task(item)
                     has_item = True
-            if not has_item:
+            if not has_item or 'count' in message:
                 break
             time.sleep(0.1)
         del handler
