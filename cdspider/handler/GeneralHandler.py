@@ -14,6 +14,9 @@ class GeneralHandler(BaseHandler):
     general handler
     """
 
+    def route(self, mode, rate, save):
+        pass
+
     def init_process(self):
         self.process =  {
             "request": self.DEFAULT_PROCESS,

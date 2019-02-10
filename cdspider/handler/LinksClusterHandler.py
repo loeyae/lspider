@@ -19,6 +19,10 @@ class LinksClusterHandler(BaseHandler):
     """
     general handler
     """
+
+    def route(self, mode, rate, save):
+        pass
+    
     def init_process(self, save):
         if "crawler" in self.task and self.task["crawler"] == "selenium":
             self.process =  {
@@ -115,7 +119,7 @@ class LinksClusterHandler(BaseHandler):
             print('find no data!')
 
     def run_parse(self, rule):
-        # 根据sid取站点域名
+        # 根据sid�站点域名
         sitedb = self.db['SitesDB']
         site = sitedb.get_site(self.task['sid'])
         extractor = LinksExtractor(url=site['url'])

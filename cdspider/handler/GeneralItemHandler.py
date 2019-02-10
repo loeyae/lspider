@@ -24,6 +24,9 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                    当测试该handler，数据应为 {"mode": "item", "url": url, "detailRule": 详情规则，参考详情规则}
     """
 
+    def route(self, mode, rate, save):
+        pass
+
     def get_scripts(self):
         """
         获取自定义脚本

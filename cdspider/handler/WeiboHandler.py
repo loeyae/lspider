@@ -86,59 +86,6 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
         save['base_url'] = parse_rule['baseUrl']
         return parse_rule
 
-    def route(self, mode, save):
-        """
-        schedule 分发
-        :param mode  project|site 分发模式: 按项目|按站点
-        :param save 传递的上下文
-        :return 包含uuid的迭代器，项目模式为项目的uuid，站点模式为站点的uuid
-        :notice 该方法返回的迭代器用于router生成queue消息，以便plantask听取，消息格式为:
-        {"mode": route mode, "h-mode": handler mode, "uuid": uuid}
-        """
-        if not "id" in save:
-            save["id"] = 0
-        if mode == ROUTER_MODE_PROJECT:
-            for item in self.db['ProjectsDB'].get_new_list(save['id'], select=["uuid"]):
-                if item['uuid'] > save['id']:
-                    save['id'] = item["uuid"]
-                yield item['uuid']
-        elif mode == ROUTER_MODE_SITE:
-            if not "pid" in save:
-                save["pid"] = 0
-            for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
-                while True:
-                    has_item = False
-                    for each in self.db['SitesDB'].get_new_list(save['id'], item['uuid'], select=["uuid"]):
-                        has_item = True
-                        if each['uuid'] > save['id']:
-                            save['id'] = each['uuid']
-                        yield each['uuid']
-                    if not has_item:
-                        break
-                if item['uuid'] > save['pid']:
-                    save['pid'] = item['uuid']
-        elif mode == ROUTER_MODE_TASK:
-            '''
-            按任务分发
-            '''
-            if not "pid" in save:
-                '''
-                初始化上下文中的pid参数,该参数用于项目数据查询
-                '''
-                save["pid"] = 0
-            for item in self.db['ProjectsDB'].get_new_list(save['pid'], select=["uuid"]):
-                while True:
-                    has_item = False
-                    for each in self.db['TaskDB'].get_new_list(save['id'], where={"pid": item['uuid'], "type": {"$in": [TASK_TYPE_AUTHOR]}, "mediaType": {"$in": [MEDIA_TYPE_WEIBO]}}, select=["uuid"]):
-                        has_item = True
-                        if each['uuid'] > save['id']:
-                            save['id'] = each['uuid']
-                        yield each['uuid']
-                    if not has_item:
-                        break
-                if item['uuid'] > save['pid']:
-                    save['pid'] = item['uuid']
-
     def schedule(self, message, save):
         """
         根据router的queue消息，计划爬虫任务
