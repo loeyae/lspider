@@ -198,8 +198,6 @@ class BaseHandler(Component):
                     '''
                     plantime = int(save['now']) + int(self.ratemap[str(message['rate'])][0])
                     self.db['SpiderTaskDB'].update(item['uuid'], message['mode'], {"plantime": plantime})
-                if item['uuid'] > save['id']:
-                    save['id'] = item['uuid']
                 yield item
 
     def newtask(self, message):
