@@ -16,7 +16,7 @@ from cdspider.libs import utils
 from cdspider.libs.tools import *
 from cdspider.database.base import *
 
-cpath = os.path.dirname(__file__)
+cpath = os.path.dirname(os.path.abspath(__file__))
 
 @click.group(invoke_without_command=True)
 @click.option('-c', '--config', default=os.path.join(cpath, "config", "main.json"),
@@ -48,9 +48,10 @@ def cli(ctx, **kwargs):
     kwargs['logger'] = logging.getLogger("root")
     if kwargs['debug']:
         kwargs['logger'].setLevel(logging.DEBUG)
-    if kwargs['runtime_dir']:
-        if not os.path.exists(kwargs['runtime_dir']):
-            os.makedirs(kwargs['runtime_dir'])
+    if not kwargs['runtime_dir']:
+        kwargs['runtime_dir'] = os.path.join(cpath, 'runtime')
+    if not os.path.exists(kwargs['runtime_dir']):
+        os.makedirs(kwargs['runtime_dir'])
 
     app_config = utils.load_config(kwargs['app_config'])
 
@@ -285,8 +286,8 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name', show_default=True)
 @click.option('-i', '--id', help="与mode相关。project: project uuid, site: site uuid, task: task uuid")
-@click.option('-m', '--mode', default='project', help="mode id", show_default=True)
-@click.option('-h', '--handler-mode', default='list', help="mode id", show_default=True)
+@click.option('-m', '--mode', default='list', help="handler mode", show_default=True)
+@click.option('-t', '--type', default='project', help="mode id", show_default=True)
 @click.option('--outqueue', default=None, help='输出的queue', show_default=True)
 @click.pass_context
 def schedule_test(ctx, scheduler_cls, id, mode, handler_mode, outqueue):
@@ -299,7 +300,7 @@ def schedule_test(ctx, scheduler_cls, id, mode, handler_mode, outqueue):
     task = {
         "item": int(id),
         "mode": mode,
-        "h-mode": handler_mode
+        "type": handler_mode
     }
     scheduler.schedule(task)
 
