@@ -31,7 +31,7 @@ class PlantaskScheduler(BaseScheduler):
         self.rate_map = rate_map
 
     def valid(self):
-        if self.outqueue.qsize() > 100000:
+        if self.outqueue.qsize() > 500000:
             self.debug("scheduler2spider is full")
             return False
         return True
