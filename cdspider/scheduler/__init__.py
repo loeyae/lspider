@@ -97,5 +97,7 @@ class BaseScheduler(Component):
 
         self.info("%s exiting..." % self.__class__.__name__)
 
+from .Counter import Counter
+from .Counter import CounterMananger
 from .Router import Router
 from .PlantaskScheduler import PlantaskScheduler
