@@ -38,7 +38,7 @@ class PlantaskScheduler(BaseScheduler):
 
     def schedule(self, message):
         self.debug("%s schedule got message: %s" % (self.__class__.__name__, str(message)))
-        if not 'h-mode' in message or not message['h-mode']:
+        if not 'mode' in message or not message['mode']:
             raise CDSpiderError("%s handler mode is missing" % self.__class__.__name__)
         self.info("%s schedule starting..." % self.__class__.__name__)
         handler_mode = message['h-mode']
