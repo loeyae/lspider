@@ -144,7 +144,7 @@ class BaseHandler(Component):
         cm = CounterMananger(cmdir, (mode, rate))
         if not cm.get('stime') or cm.get('stime') + cm.get('ctime') <= now:
             cm.empty()
-            total = self.db['SpiderTaskDB'].get_count(mode, {"status": self.db['SpiderTaskDB'].STATUS_ACTIVE, "frequency": rate})
+            total = self.db['SpiderTaskDB'].get_active_count(mode, {"status": self.db['SpiderTaskDB'].STATUS_ACTIVE, "frequency": rate})
             cm.event(stime=now, itime=self.ROUTE_INTERVAL, ctime=setting[0], total=total)
         cm.event(now=now)
         offset = cm.get('offset')
