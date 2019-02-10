@@ -186,7 +186,7 @@ class BaseHandler(Component):
                     '''
                     frequency = str(item.pop('frequency', self.DEFAULT_RATE))
                     plantime = int(save['now']) + int(self.ratemap[frequency][0])
-                    self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+                    self.db['SpiderTaskDB'].update(item['uuid'], message['mode'], {"plantime": plantime})
                 if item['uuid'] > save['id']:
                     save['id'] = item['uuid']
                 yield item
@@ -197,7 +197,7 @@ class BaseHandler(Component):
                     testing_mode打开时，数据不入库
                     '''
                     plantime = int(save['now']) + int(self.ratemap[str(message['rate'])][0])
-                    self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+                    self.db['SpiderTaskDB'].update(item['uuid'], message['mode'], {"plantime": plantime})
                 if item['uuid'] > save['id']:
                     save['id'] = item['uuid']
                 yield item
