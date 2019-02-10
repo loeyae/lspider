@@ -31,26 +31,27 @@ class Router(BaseScheduler):
         self._check_time = None
 
     def valid(self):
-        if self.outqueue.qsize() > 0:
+        if not self.testing_mode and int(time.strftime('%S')) < 10:
             self.debug("scheduler2task is running")
             return False
         return True
 
     def schedule(self, message = None):
         self.info("%s route starting..." % self.__class__.__name__)
-        def handler_schedule(key, name, mode, ctx):
+        def handler_schedule(mode, name, rate, ctx):
             handler = get_object("cdspider.handler.%s" % name)(ctx, None)
             self.info("%s loaded handler: %s" % (self.__class__.__name__, handler))
             save = {}
             while True:
                 has_item = False
-                for item in handler.route(mode, save):
+                for item in handler.route(mode, rate, save):
                     if item:
                         has_item = True
                         message = {
+                            "rate": rate,
                             "mode": mode,
-                            "h-mode": key,
-                            "item": item,
+                            "offset": item['offset'],
+                            "count": item['count'],
                         }
                         self.debug("%s route message: %s" % (self.__class__.__name__, str(message)))
                         if not self.testing_mode:
@@ -60,8 +61,10 @@ class Router(BaseScheduler):
                 time.sleep(0.1)
             del handler
         threads = []
+        ratemap = self.ctx.obj.get('app_config', {}).get('ratemap', {})
         for key, name in HANDLER_MODE_HANDLER_MAPPING.items():
-            threads.append(run_in_thread(handler_schedule, key, name, self.mode, self.ctx))
+            for rate in ratemap:
+                threads.append(run_in_thread(handler_schedule, key, name, rate, self.ctx))
 
         for each in threads:
             if not each.is_alive():
