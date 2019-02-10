@@ -26,7 +26,7 @@ class WechatItemHandler(BaseHandler, NewAttachmentTask):
     """
 
     def route(self, mode, rate, save):
-        pass
+        yield None
 
     def get_scripts(self):
         """
