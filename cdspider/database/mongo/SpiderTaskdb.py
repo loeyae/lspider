@@ -360,6 +360,6 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             collection.create_index('expire', name='expire')
         if not 'plantime' in indexes:
             collection.create_index('plantime', name='plantime')
-        if not 'ctime' in indexes:
-            collection.create_index('ctime', name='ctime')
+        if not 'frequency' in indexes:
+            collection.create_index('frequency', name='frequency')
         self._collections.add(table)
