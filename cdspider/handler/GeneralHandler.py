@@ -15,7 +15,7 @@ class GeneralHandler(BaseHandler):
     """
 
     def route(self, mode, rate, save):
-        pass
+        yield None
 
     def init_process(self):
         self.process =  {
