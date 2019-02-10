@@ -39,11 +39,11 @@ class clear_attachment_task(Base):
             time.sleep(60)
             return
         self.debug("clear_attachment_task starting")
-        comment_delete_count = self.db['SpiderTaskDB'].delete_many(HANDLER_MODE_COMMENT, where={"expire": {"$lt": int(time.time()) - 2592000}})
+        comment_delete_count = self.db['SpiderTaskDB'].delete_many(HANDLER_MODE_COMMENT, where={"expire": {"$lt": int(time.time()) - 259200}})
         self.debug("clear_attachment_task comment_delete_count: %s" % comment_delete_count)
-        interact_delete_count = self.db['SpiderTaskDB'].delete_many(HANDLER_MODE_INTERACT, where={"expire": {"$lt": int(time.time()) - 2592000}})
+        interact_delete_count = self.db['SpiderTaskDB'].delete_many(HANDLER_MODE_INTERACT, where={"expire": {"$lt": int(time.time()) - 259200}})
         self.debug("clear_attachment_task interact_delete_count: %s" % interact_delete_count)
-        extended_delete_count = self.db['SpiderTaskDB'].delete_many(HANDLER_MODE_EXTENDED, where={"expire": {"$lt": int(time.time()) - 2592000}})
+        extended_delete_count = self.db['SpiderTaskDB'].delete_many(HANDLER_MODE_EXTENDED, where={"expire": {"$lt": int(time.time()) - 259200}})
         self.debug("clear_attachment_task extended_delete_count: %s" % extended_delete_count)
         self.debug("clear_attachment_task end")
         self._run_once = True
