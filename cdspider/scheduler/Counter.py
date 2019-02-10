@@ -96,7 +96,7 @@ class Counter(object):
         if 'avg' in self.data:
             return self.data['avg']
         else:
-            if self.total and self.ctime and self.itime:
+            if not self.total is None and self.ctime and self.itime:
                 self.data['avg'] = math.ceil(self.total / (self.ctime / self.itime))
                 return self.data['avg']
             raise Exception('total not exists or ctime not exists or itime not exists')
@@ -127,7 +127,7 @@ class Counter(object):
         self.data['offset'] = value
 
     def empty(self):
-        self.data = []
+        self.data = {"offset": 0}
 
 class CounterMananger(object):
 
@@ -146,6 +146,9 @@ class CounterMananger(object):
         self.dump()
 
     def event(self, **kwargs):
+        now =kwargs.pop('now', None)
+        if not now is None:
+            setattr(self.counter, 'now', now)
         for key,val in kwargs.items():
             if not getattr(self.counter, key):
                 setattr(self.counter, key, val)
@@ -158,6 +161,9 @@ class CounterMananger(object):
         if value > 0:
             self.counter.ltime = self.counter.now
             self.counter.offset += value
+
+    def empty(self):
+        self.counter.empty()
 
     def counter(self):
         return self.counter
