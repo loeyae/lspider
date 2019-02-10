@@ -11,6 +11,7 @@ import traceback
 import copy
 from urllib.parse import urljoin, urlparse, urlunparse
 from cdspider import Component
+from cdspider.scheduler import CounterMananger
 from cdspider.crawler import BaseCrawler
 from cdspider.crawler import RequestsCrawler, SeleniumCrawler
 from cdspider.database.base import Base as BaseDB
@@ -32,6 +33,8 @@ class BaseHandler(Component):
     EXPIRE_STEP = 1
     DEFAULT_RATE = 6
     ALLOWED_REPEAT = 1
+    ROUTE_INTERVAL = 60
+    ROUTE_LIMIT = 100
 
     DEFAULT_PROCESS = {
         "request": {
@@ -56,6 +59,7 @@ class BaseHandler(Component):
         if g.get('debug', False):
             self.log_level = logging.DEBUG
         super(BaseHandler, self).__init__(self.logger, self.log_level)
+        self.runtime_dir = g.get('runtime_dir')
         self.db = g.get('db', None)
         self.queue = g.get('queue', None)
         self.ratemap = g.get('app_config', {}).get('ratemap', {})
@@ -114,11 +118,89 @@ class BaseHandler(Component):
             del self.task
         super(BaseHandler, self).__del__()
 
-    def route(self, mode, save):
-        yield None
+    def route(self, mode, rate, save):
+        """
+        schedule 分发
+        :param rate 频率
+        :param save 传递的上下文
+        :return 包含uuid的迭代器，项目模式为项目的uuid，站点模式为站点的uuid
+        :notice 该方法返回的�代器用于router生成queue消息，以便plantask听取，消息格式为:
+        {"mode": handler mode, "rate": rate, "offset": offset, "count": count}
+        """
+        if not "id" in save:
+            '''
+            初始化上下文中的id参数,该参数用于数据查询
+            '''
+            save["id"] = 0
+        if "now" in save:
+            now = save['now']
+        else:
+            now = int(time.time())
+            save['now'] = now
+
+        #按项目分发
+        cmdir = os.path.join(self.runtime_dir, 'cm')
+        setting = self.ratemap[rate]
+        cm = CounterMananger(cmdir, (mode, rate))
+        if not cm.get('stime') or cm.get('stime') + cm.get('ctime') <= now:
+            cm.empty()
+            total = self.db['SpiderTaskDB'].get_count(mode, {"status": self.db['SpiderTaskDB'].STATUS_ACTIVE, "frequency": rate})
+            cm.event(stime=now, itime=self.ROUTE_INTERVAL, ctime=setting[0], total=total)
+        cm.event(now=now)
+        offset = cm.get('offset')
+        count = cm.get('count')
+        total = cm.get('total')
+        cm.value(count)
+        if count > 0:
+            while count > 0 and offset < total:
+                yield {"offset": offset, "count": self.ROUTE_LIMIT if count > self.ROUTE_LIMIT else count}
+                count -= self.ROUTE_LIMIT
+                offset += self.ROUTE_LIMIT
+        cm.dump()
 
     def schedule(self, message, save):
-        yield None
+        """
+        任务分发
+        :params message ex: {
+                    "rate": rate,
+                    "mode": mode,
+                    "offset": offset,
+                    "count": count,
+                }
+        """
+        if 'type' in message:
+            if not 'id' in save:
+                save['id'] = 0
+            if message['type'] == 'project':
+                where = {"pid": int(message['item'])}
+            elif message['type'] == 'site':
+                where = {"sid": int(message['item'])}
+            elif message['type'] == 'url':
+                where = {"uid": int(message['item'])}
+            else:
+                where = {"tid": int(message['item'])}
+            for item in self.db['SpiderTaskDB'].get_plan_list(mode, save['id'], plantime=save['now'], where=where, select=['uuid', 'url', 'frequency']):
+                if not self.testing_mode:
+                    '''
+                    testing_mode打开时，数据不入库
+                    '''
+                    frequency = str(item.pop('frequency', self.DEFAULT_RATE))
+                    plantime = int(save['now']) + int(self.ratemap[frequency][0])
+                    self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+                if item['uuid'] > save['id']:
+                    save['id'] = item['uuid']
+                yield item
+        elif 'rate' in message:
+            for item in self.db['SpiderTaskDB'].get_list(message['mode'], where={"frequency": str(message['rate']), "status": self.db['SpiderTaskDB'].STATUS_ACTIVE}, offset=int(message['offset']), hits=int(message['count']), sort=[('uuid', 1)], select=['uuid', 'url']):
+                if not self.testing_mode:
+                    '''
+                    testing_mode打开时，数据不入库
+                    '''
+                    plantime = int(save['now']) + int(self.ratemap[str(message['rate'])][0])
+                    self.db['SpiderTaskDB'].update(item['uuid'], mode, {"plantime": plantime})
+                if item['uuid'] > save['id']:
+                    save['id'] = item['uuid']
+                yield item
 
     def newtask(self, message):
         pass
@@ -128,7 +210,7 @@ class BaseHandler(Component):
         更新更新频率
         """
         mode = message['mode']
-        frequency = message['frequency']
+        frequency = str(message['frequency'])
         if 'pid' in message and message['pid']:
             where = {"pid": message['pid']}
         elif 'sid' in message and message['sid']:
@@ -141,7 +223,7 @@ class BaseHandler(Component):
             where = {"kid": message['kid']}
         else:
             where = {"uid": message['uid']}
-        plantime = int(time.time()) + int(self.ratemap[str(frequency)][0])
+        plantime = int(time.time()) + int(self.ratemap[frequency][0])
         self.db['SpiderTaskDB'].update_many(mode, {"plantime": plantime, "frequency": frequency}, where=where)
 
     def expire(self, message):
