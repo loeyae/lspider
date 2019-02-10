@@ -21,8 +21,8 @@ class LinksClusterHandler(BaseHandler):
     """
 
     def route(self, mode, rate, save):
-        pass
-    
+        yield None
+
     def init_process(self, save):
         if "crawler" in self.task and self.task["crawler"] == "selenium":
             self.process =  {
