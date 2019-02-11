@@ -171,11 +171,11 @@ class BaseHandler(Component):
         if 'type' in message:
             if not 'id' in save:
                 save['id'] = 0
-            if message['type'] == 'project':
+            if message['type'] == ROUTER_MODE_PROJECT:
                 where = {"pid": int(message['item'])}
-            elif message['type'] == 'site':
+            elif message['type'] == ROUTER_MODE_SITE:
                 where = {"sid": int(message['item'])}
-            elif message['type'] == 'url':
+            elif message['type'] == ROUTER_MODE_URL:
                 where = {"uid": int(message['item'])}
             else:
                 where = {"tid": int(message['item'])}
