@@ -21,7 +21,7 @@ class Router(BaseScheduler):
     路由--初级任务分发
     """
 
-    def __init__(self, context, mode = ROUTER_MODE_PROJECT, outqueue = None):
+    def __init__(self, context, mode = None, outqueue = None):
         super(Router, self).__init__(context)
         if not outqueue:
             outqueue = QUEUE_NAME_SCHEDULER_TO_TASK
@@ -62,9 +62,16 @@ class Router(BaseScheduler):
             del handler
         threads = []
         ratemap = self.ctx.obj.get('app_config', {}).get('ratemap', {})
-        for key, name in HANDLER_MODE_HANDLER_MAPPING.items():
-            for rate in ratemap:
-                threads.append(run_in_thread(handler_schedule, key, name, rate, self.ctx))
+
+        if self.mode:
+            for key in self.mode:
+                name = HANDLER_MODE_HANDLER_MAPPING[key]
+                for rate in ratemap:
+                    threads.append(run_in_thread(handler_schedule, key, name, rate, self.ctx))
+        else:
+            for key, name in HANDLER_MODE_HANDLER_MAPPING.items():
+                for rate in ratemap:
+                    threads.append(run_in_thread(handler_schedule, key, name, rate, self.ctx))
 
         for each in threads:
             if not each.is_alive():
