@@ -83,14 +83,15 @@ def cli(ctx, **kwargs):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
-@click.option('--mode', default='project', type=click.Choice(['project', 'site', 'task']), help="分发模式", show_default=True)
-@click.option('--outqueue', default=None, help='输出的queue', show_default=True)
+@click.option('-m', '--mode', default=None, help="分发模式,handle mode,为空时执行全部handle", multiple=True,  show_default=True)
+@click.option('-o', '--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def route(ctx, scheduler_cls, mode, outqueue, no_loop, get_object=False):
     """
     路由: 按project、site、task其中一种方式分发计划任务
     """
+    mode = list(set(mode))
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
     scheduler = Scheduler(ctx, mode=mode, outqueue=outqueue)
@@ -104,8 +105,8 @@ def route(ctx, scheduler_cls, mode, outqueue, no_loop, get_object=False):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name')
-@click.option('--inqueue', default=None, help='监听的queue', show_default=True)
-@click.option('--outqueue', default=None, help='输出的queue', show_default=True)
+@click.option('-i', '--inqueue', default=None, help='监听的queue', show_default=True)
+@click.option('-o', '--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def plantask_schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop,  get_object=False):
@@ -142,7 +143,7 @@ def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
 
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
-@click.option('--inqueue', default=None, help='监听的queue', show_default=True)
+@click.option('-i', '--inqueue', default=None, help='监听的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.option('--no-sync', default=False, is_flag=True, help='不同步数据给kafka', show_default=True)
 @click.pass_context
@@ -287,7 +288,7 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 @click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name', show_default=True)
 @click.option('-i', '--id', help="与mode相关。project: project uuid, site: site uuid, task: task uuid")
 @click.option('-m', '--mode', default='list', help="handler mode", show_default=True)
-@click.option('-t', '--type', default='project', help="mode id", show_default=True)
+@click.option('-t', '--type', default='project', type=click.Choice(['project', 'site', 'task', 'url']), help="mode id", show_default=True)
 @click.option('--outqueue', default=None, help='输出的queue', show_default=True)
 @click.pass_context
 def schedule_test(ctx, scheduler_cls, id, mode, handler_mode, outqueue):
