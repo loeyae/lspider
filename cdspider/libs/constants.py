@@ -132,6 +132,7 @@ HANDLER_MODE_HANDLER_MAPPING = {
 ROUTER_MODE_PROJECT = 'project'
 ROUTER_MODE_SITE = 'site'
 ROUTER_MODE_TASK = 'task'
+ROUTER_MODE_URL = 'url'
 
 #task type
 TASK_TYPE_LIST = 1      # '列表类',
