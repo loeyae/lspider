@@ -70,7 +70,7 @@ class Base(Component):
         if not condition:
             self.show_message(message)
             if not self.daemon:
-                sys.exit(0)
+                raise SystemExit
             else:
                 raise Exception(message)
 
