@@ -191,6 +191,7 @@ class Spider(Component):
                 task = self.get_task(message)
                 self.fetch(task)
                 if self.t > 10:
+                    self.info("%s broken" % self.__class__.__name__)
                     raise SystemExit
                 time.sleep(0.05)
             except queue.Empty:
