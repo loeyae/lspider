@@ -34,7 +34,7 @@ class rebuild_result(Base):
                     continue
                 message = {
                     'mode': HANDLER_MODE_BBS_ITEM if item['mediaType'] in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
-                    'rid': rid,
+                    'rid': item['rid'],
                     'mediaType': item['mediaType']
                 }
                 self.info("message: %s" % message)
