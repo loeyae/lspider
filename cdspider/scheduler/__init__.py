@@ -73,6 +73,7 @@ class BaseScheduler(Component):
                     self.debug("%s got message: %s" % (self.__class__.__name__, message))
                 self.schedule(message)
                 if self.t > 50:
+                    self.info("%s broken" % self.__class__.__name__)
                     raise SystemExit
                 time.sleep(0.05)
             except queue.Empty:
