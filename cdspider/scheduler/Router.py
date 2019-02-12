@@ -31,9 +31,15 @@ class Router(BaseScheduler):
         self._check_time = None
 
     def valid(self):
-        if not self.testing_mode and int(time.strftime('%S')) > 3:
-            self.debug("scheduler2task is running @%s" % time.strftime('%S'))
+        s = time.strftime('%S')
+        if not self.testing_mode and not self._check_time is None:
+            self.debug("scheduler2task is running @%s" % s)
             return False
+        elif not self.testing_mode and int(s) > 3:
+            self._check_time = None
+            self.debug("scheduler2task is running @%s" % s)
+            return False
+        self._check_time = s
         return True
 
     def schedule(self, message = None):
