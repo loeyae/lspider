@@ -23,12 +23,14 @@ class rebuild_result(Base):
         ArticlesDB = self.g['db'].get('ArticlesDB')
         if not created:
             created = int(time.time())
-        sum = 0
+        _sum = 0
         acid = '0'
         while True:
             where = {"status": ArticlesDB.STATUS_INIT, "acid": {"$gt": acid}}
             i = 0
             for item in ArticlesDB.get_list(created, where = where, select={"rid": 1, "url": 1, "acid": 1, "mediaType": 1}, sort=[('acid', 1)], hits=100):
+                i += 1
+                _sum += 1
                 if item['url'].startswith('javascript'):
                     ArticlesDB.update(item['rid'], {"status": ArticlesDB.STATUS_DELETED})
                     continue
@@ -40,9 +42,8 @@ class rebuild_result(Base):
                 self.info("message: %s" % message)
                 outqueue.put_nowait(message)
                 acid = item['acid']
-                i += 1
             if i == 0:
                 self.info("no rebuid result")
                 break
-            self.debug("totle: %s" % sum)
             time.sleep(0.5)
+        self.debug("totle: %s" % _sum)
