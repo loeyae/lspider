@@ -46,7 +46,7 @@ class Base(Component):
             try:
                 self.process(*args, **kwargs)
                 self.t += 1
-                if self.t > 50:
+                if self.t > 20:
                     self.info("%s broken" % self.__class__.__name__)
                     raise SystemExit
                 time.sleep(0.1)
