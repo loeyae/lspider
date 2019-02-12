@@ -31,8 +31,8 @@ class Router(BaseScheduler):
         self._check_time = None
 
     def valid(self):
-        if not self.testing_mode and int(time.strftime('%S')) < 10:
-            self.debug("scheduler2task is running")
+        if not self.testing_mode and int(time.strftime('%S')) > 10:
+            self.debug("scheduler2task is running @%s" % time.strftime('%S'))
             return False
         return True
 
