@@ -81,7 +81,7 @@ class BaseWorker(Component):
                     message = self.inqueue.get_nowait()
                     self.debug("%s got message: %s" % (self.__class__.__name__, message))
                 self.on_result(message)
-                if self.t > 100:
+                if self.t > 20:
                     self.info("%s broken" % self.__class__.__name__)
                     raise SystemExit
                 time.sleep(0.05)
