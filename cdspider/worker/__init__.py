@@ -82,6 +82,7 @@ class BaseWorker(Component):
                     self.debug("%s got message: %s" % (self.__class__.__name__, message))
                 self.on_result(message)
                 if self.t > 100:
+                    self.info("%s broken" % self.__class__.__name__)
                     raise SystemExit
                 time.sleep(0.05)
             except queue.Empty:
