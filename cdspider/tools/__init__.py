@@ -38,12 +38,17 @@ class Base(Component):
         Deamon 运行
         """
         self.info("%s starting..." % self.__class__.__name__)
+        self.t = 0
 
         def process_loop():
             if self._quit:
                 raise SystemExit
             try:
                 self.process(*args, **kwargs)
+                self.t += 1
+                if self.t > 50:
+                    self.info("%s broken" % self.__class__.__name__)
+                    raise SystemExit
                 time.sleep(0.1)
             except KeyboardInterrupt:
                 pass
