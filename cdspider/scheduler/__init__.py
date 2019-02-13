@@ -72,9 +72,6 @@ class BaseScheduler(Component):
                     message = self.inqueue.get_nowait()
                     self.debug("%s got message: %s" % (self.__class__.__name__, message))
                 self.schedule(message)
-                if self.t > 50:
-                    self.info("%s broken" % self.__class__.__name__)
-                    raise SystemExit
                 time.sleep(0.05)
             except queue.Empty:
                 self.debug("empty queue")
@@ -87,6 +84,9 @@ class BaseScheduler(Component):
             finally:
                 self.flush()
                 gc.collect()
+                if self.t > 50:
+                    self.info("%s broken" % self.__class__.__name__)
+                    raise SystemExit
 
         tornado.ioloop.PeriodicCallback(queue_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True
