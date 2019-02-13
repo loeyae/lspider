@@ -209,7 +209,7 @@ class LinksClusterHandler(BaseHandler):
                         else:
                             baseUrl = 0
                         print(url, baseUrl)
-                        urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": self.task['pid'], "sid": self.task['sid'], "tid": self.task['tid'], "tier": self.task['tier'], "baseUrl": baseUrl, 'ruleStatus': 0})
+                        urlsdb.insert({"url": url, "title": arrTitle[it[0]], "cluster": it[1], "pid": int(self.task['pid']), "sid": int(self.task['sid']), "tid": int(self.task['tid']), "tier": int(self.task['tier']), "baseUrl": baseUrl, 'ruleStatus': 0})
                         print('write success!')
                     except Exception:
                         print('url is exist!')
