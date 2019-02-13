@@ -190,9 +190,6 @@ class Spider(Component):
                 self.debug("%s fetch got message %s" % (self.__class__.__name__, message))
                 task = self.get_task(message)
                 self.fetch(task)
-                if self.t > 10:
-                    self.info("%s broken" % self.__class__.__name__)
-                    raise SystemExit
                 time.sleep(0.05)
             except queue.Empty:
                 time.sleep(0.1)
@@ -204,6 +201,9 @@ class Spider(Component):
             finally:
                 self.flush()
                 gc.collect()
+                if self.t > 10:
+                    self.info("%s broken" % self.__class__.__name__)
+                    raise SystemExit
 
         tornado.ioloop.PeriodicCallback(queue_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True
