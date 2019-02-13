@@ -3,8 +3,8 @@
 @Author: wuhongchao
 @Date: 2018-12-17 19:09:24
 @LastEditors: wuhongchao
-@LastEditTime: 2019-01-21 14:53:31
-@Description: 文章、微博内容数据同步到kafka
+@LastEditTime: 2019-01-23 19:13:55
+@Description: 文章、微博数据同步到kafka
 '''
 import sys
 import traceback

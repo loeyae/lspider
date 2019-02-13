@@ -3,7 +3,7 @@
 @Author: wuhongchao
 @Date: 2018-12-17 19:09:24
 @LastEditors: wuhongchao
-@LastEditTime: 2019-01-18 14:12:18
+@LastEditTime: 2019-01-23 19:14:07
 @Description: 互动数同步到kafka
 '''
 import sys
