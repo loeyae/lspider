@@ -152,11 +152,10 @@ class BaseHandler(Component):
         total = cm.get('total')
         self.error("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, rate, now, total, offset, count))
         cm.value(count)
-        if count > 0:
-            while count > 0 and offset < total:
-                yield {"offset": offset, "count": self.ROUTE_LIMIT if count > self.ROUTE_LIMIT else count}
-                count -= self.ROUTE_LIMIT
-                offset += self.ROUTE_LIMIT
+        while count > 0 and offset < total:
+            yield {"offset": offset, "count": self.ROUTE_LIMIT if count > self.ROUTE_LIMIT else count}
+            count -= self.ROUTE_LIMIT
+            offset += self.ROUTE_LIMIT
         cm.dump()
 
     def schedule(self, message, save):
