@@ -21,12 +21,13 @@ class Router(BaseScheduler):
     路由--初级任务分发
     """
 
-    def __init__(self, context, mode = None, outqueue = None):
+    def __init__(self, context, mode = None, rate=None, outqueue = None):
         super(Router, self).__init__(context)
         if not outqueue:
             outqueue = QUEUE_NAME_SCHEDULER_TO_TASK
         self.outqueue = self.queue[outqueue]
         self.mode = mode
+        self.rate = rate
         self.interval = 5
         self._check_time = None
 
@@ -67,7 +68,7 @@ class Router(BaseScheduler):
                 time.sleep(0.1)
             del handler
         threads = []
-        ratemap = self.ctx.obj.get('app_config', {}).get('ratemap', {})
+        ratemap = self.rate if self.rate else self.ctx.obj.get('app_config', {}).get('ratemap', {})
 
         if self.mode:
             for key in self.mode:
