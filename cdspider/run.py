@@ -11,7 +11,7 @@ import os
 import traceback
 import click
 import logging.config
-import six
+import json
 from cdspider.libs import utils
 from cdspider.libs.tools import *
 from cdspider.database.base import *
@@ -286,23 +286,17 @@ def aichat_rpc_hello(ctx, aichat_rpc):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name', show_default=True)
-@click.option('-i', '--id', help="与mode相关。project: project uuid, site: site uuid, task: task uuid")
-@click.option('-m', '--mode', default='list', help="handler mode", show_default=True)
-@click.option('-t', '--type', default='project', type=click.Choice(['project', 'site', 'task', 'url']), help="mode id", show_default=True)
+@click.option('-m', '--message', help="handler mode", show_default=True)
 @click.option('--outqueue', default=None, help='输出的queue', show_default=True)
 @click.pass_context
-def schedule_test(ctx, scheduler_cls, id, mode, handler_mode, outqueue):
+def schedule_test(ctx, scheduler_cls, message, outqueue):
     """
     计划任务测试
     """
     g = ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
     scheduler = Scheduler(ctx, outqueue=outqueue)
-    task = {
-        "item": int(id),
-        "mode": mode,
-        "type": handler_mode
-    }
+    task = json.loads(message)
     scheduler.schedule(task)
 
 @cli.command()
@@ -393,7 +387,6 @@ def fetch_result(ctx, worker_cls, rid, output):
 @click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
 @click.pass_context
 def rpc_test(ctx, rpc, method, params, output):
-    import json
     rpc = connect_rpc(ctx, None, rpc)
     ret = None
     if hasattr(rpc, method):
