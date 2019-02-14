@@ -68,7 +68,7 @@ class Router(BaseScheduler):
                 time.sleep(0.1)
             del handler
         threads = []
-        ratemap = self.rate if self.rate else self.ctx.obj.get('app_config', {}).get('ratemap', {})
+        ratemap = self.rate if self.rate else self.ctx.obj.get('app_config', {}).get('ratemap', {}).keys()
 
         if self.mode:
             for key in self.mode:
