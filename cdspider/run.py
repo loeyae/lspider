@@ -84,17 +84,18 @@ def cli(ctx, **kwargs):
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
 @click.option('-m', '--mode', default=None, help="分发模式,handle mode,为空时执行全部handle", multiple=True,  show_default=True)
+@click.option('-r', '--rate', default=None, help="分发模式,rate,为空时执行全部rate", multiple=True,  show_default=True)
 @click.option('-o', '--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def route(ctx, scheduler_cls, mode, outqueue, no_loop, get_object=False):
+def route(ctx, scheduler_cls, mode, rate, outqueue, no_loop, get_object=False):
     """
     路由: 按project、site、task其中一种方式分发计划任务
     """
     mode = list(set(mode))
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
-    scheduler = Scheduler(ctx, mode=mode, outqueue=outqueue)
+    scheduler = Scheduler(ctx, mode=mode, rate=rate, outqueue=outqueue)
     g['instances'].append(scheduler)
     if get_object:
         return scheduler
