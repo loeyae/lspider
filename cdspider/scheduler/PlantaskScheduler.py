@@ -32,7 +32,7 @@ class PlantaskScheduler(BaseScheduler):
 
     def valid(self):
         if self.outqueue.qsize() > 500000:
-            self.debug("scheduler2spider is full")
+            self.debug("outqueue is full")
             return False
         return True
 
