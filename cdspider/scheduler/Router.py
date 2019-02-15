@@ -33,6 +33,9 @@ class Router(BaseScheduler):
 
     def valid(self):
         s = time.strftime('%S')
+        if self.outqueue.qsize() > 1000:
+            self.debug("outqueue is full")
+            return False
         if not self.testing_mode and int(s) > 3:
             self._check_time = None
 #            self.debug("scheduler2task is running @%s" % s)
