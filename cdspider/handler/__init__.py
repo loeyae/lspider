@@ -150,7 +150,7 @@ class BaseHandler(Component):
         offset = cm.get('offset')
         count = cm.get('count')
         total = cm.get('total')
-        self.error("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, rate, now, total, offset, count))
+#        self.error("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, rate, now, total, offset, count))
         cm.value(count)
         while count > 0 and offset < total:
             yield {"offset": offset, "count": self.ROUTE_LIMIT if count > self.ROUTE_LIMIT else count}
