@@ -32,7 +32,7 @@ class ItemParser(BaseParser):
         if item_ruleset:
             rule = list(item_ruleset.values())[0]
             if 'filter' in rule and rule['filter'] and rule['filter'].startswith('@json:'):
-                parser = JsonParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
+                parser = JsonParser(source=source, ruleset=item_ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
                 return parser.parse()
         local_storage_path = self._settings.get('attach_storage', None)
         g = Goose({"target_language": "zh", 'stopwords_class': StopWordsChinese, "enable_fewwords_paragraphs": True, "logger": self.logger, "domain": self.domain, "subdomain": self.subdomain, "custom_rule": item_ruleset if item_ruleset else {}, "local_storage_path": local_storage_path, "final_url": self.final_url})
