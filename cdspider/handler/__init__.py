@@ -628,7 +628,7 @@ class BaseHandler(Component):
             raise broken_exc
 
     def format_paging(self, paging):
-        if not paging or not "url" in paging or not paging['url']:
+        if not paging or not "url" in paging or not paging['url'] or not isinstance(paging['url'], dict):
             return None
 
         def build_rule(rule, item):
