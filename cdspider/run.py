@@ -21,13 +21,13 @@ cpath = os.path.dirname(os.path.abspath(__file__))
 @click.group(invoke_without_command=True)
 @click.option('-c', '--config', default=os.path.join(cpath, "config", "main.json"),
               callback=read_config, type=click.File(mode='r', encoding='utf-8'),
-              help='命令行配置文件. {"webui": {"port":5001}}', show_default=True)
+              help='命令行配置文件.配置文件格式: {"webui": {"port":5001}}', show_default=True)
 @click.option('--logging-config', default=os.path.join(cpath, "config", "logging.conf"),
               help="日志配置文件", show_default=True)
 @click.option('--app-config', default=os.path.join(cpath, "config", "app.json"),
-              help="配置文件", show_default=True)
+              help="应用配置文件", show_default=True)
 @click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
-@click.option('--db-debug', default=False, is_flag=True, help='data base debug模式', show_default=True)
+@click.option('--db-debug', default=False, is_flag=True, help='database debug模式', show_default=True)
 @click.option('--sdebug', default=False, is_flag=True, help='source debug模式', show_default=True)
 @click.option('--runtime-dir', default=None, help ='runtime文件夹', show_default=True)
 @click.option('--database', help='数据库设置, default: '
@@ -83,14 +83,14 @@ def cli(ctx, **kwargs):
 
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
-@click.option('-m', '--mode', default=None, help="分发模式,handle mode,为空时执行全部handle", multiple=True,  show_default=True)
-@click.option('-r', '--rate', default=None, help="分发模式,rate,为空时执行全部rate", multiple=True,  show_default=True)
+@click.option('-m', '--mode', default=None, help="分发模式：handle类型,为空时执行全部handle", multiple=True,  show_default=True)
+@click.option('-r', '--rate', default=None, help="分发模式：更新频率,为空时执行全部rate", multiple=True,  show_default=True)
 @click.option('-o', '--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def route(ctx, scheduler_cls, mode, rate, outqueue, no_loop, get_object=False):
     """
-    路由: 按project、site、task其中一种方式分发计划任务
+    路由: 按handle和频率分发任务
     """
     mode = list(set(mode))
     g=ctx.obj
@@ -112,7 +112,7 @@ def route(ctx, scheduler_cls, mode, rate, outqueue, no_loop, get_object=False):
 @click.pass_context
 def plantask_schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop,  get_object=False):
     """
-    按任务的plantime进行抓取队列入队
+    根据路由的分发，将爬虫任务入队
     """
     g=ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -133,7 +133,7 @@ def plantask_schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop,  get_objec
 @click.pass_context
 def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
     """
-    spider rpc
+    调度器rpc接口
     """
     g = ctx.obj
     Scheduler = load_cls(ctx, None, scheduler_cls)
@@ -150,7 +150,7 @@ def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
 @click.pass_context
 def fetch(ctx, fetch_cls, inqueue, no_loop, no_sync, get_object=False, no_input=False):
     """
-    Fetch: 监听任务并执行抓取
+    监听任务队列并执行抓取
     """
     g = ctx.obj
     Spider = load_cls(ctx, None, fetch_cls)
@@ -172,7 +172,7 @@ def fetch(ctx, fetch_cls, inqueue, no_loop, no_sync, get_object=False, no_input=
 @click.pass_context
 def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     """
-    spider rpc
+    采集器rpc接口
     """
     g = ctx.obj
     Spider = load_cls(ctx, None, spider_cls)
@@ -187,7 +187,7 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
 @click.pass_context
 def work(ctx, worker_cls, no_loop,  get_object=False):
     """
-    同步数据到kafka
+    worker
     """
     g = ctx.obj
     Worker = load_cls(ctx, None, worker_cls)
@@ -218,76 +218,8 @@ def tool(ctx, name, arg, daemon):
         c.run_once(*arg)
 
 @cli.command()
-@click.option('--rebot-cls', default='cdspider.robots.WxchatRobots', callback=load_cls, help='schedule name', show_default=True)
-@click.option('--aichat-rpc', default='http://127.0.0.1:27777', help='robot rpc server', show_default=True)
-@click.option('-u', '--uuid', help='唯一标识')
-@click.pass_context
-def wechat(ctx, rebot_cls, aichat_rpc, uuid):
-    """
-    web wechat
-    """
-    aichat_rpc = connect_rpc(ctx, None, aichat_rpc)
-    rebot_cls = load_cls(ctx, None, rebot_cls)
-    robot = rebot_cls(ctx, uuid=uuid)
-    reply = lambda m, s: aichat_rpc.reply(m, s)
-    def init_aichat(m, s):
-        info = m.search_friends()
-        k = {
-            'name': info['NickName'],
-            'age': 18,
-            'sex': '男' if info['Sex'] != 1 else '女'
-        }
-        aichat_rpc.init(k, s)
-    init = lambda m, s: init_aichat(m, s)
-    robot.add_prepare_reply(init)
-    robot.set_reply(reply)
-    robot.run()
-
-@cli.command()
-@click.option('--rebot-cls', default='cdspider.robots.AichatRobots', callback=load_cls, help='schedule name', show_default=True)
-@click.option('-u', '--uuid', default=None, help='唯一标识', show_default=True)
-@click.option('-b', '--bot-data', help='AI头脑文件目录')
-@click.option('-c', '--commands',  multiple=True, help='commands')
-@click.pass_context
-def aichat(ctx, rebot_cls, uuid, bot_data, commands):
-    """
-    Aiml bot
-    """
-    rebot_cls = load_cls(ctx, None, rebot_cls)
-    robot = rebot_cls(ctx, commands = commands, bot_data = bot_data)
-    robot.run(uuid)
-
-@cli.command()
-@click.option('--rebot-cls', default='cdspider.robots.AichatRobots', callback=load_cls, help='rebot name', show_default=True)
-@click.option('-b', '--bot-data', help='AI头脑文件目录')
-@click.option('-c', '--commands', default=[], multiple=True, help='commands')
-@click.option('-s', '--settings', default=None, multiple=True, help='bot settings: [name, sex, age, company]', show_default=True)
-@click.option('--xmlrpc-host', default='0.0.0.0', help="xmlrpc bind host", show_default=True)
-@click.option('--xmlrpc-port', default=27777, help="xmlrpc bind port", show_default=True)
-@click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
-@click.pass_context
-def aichat_rpc(ctx, rebot_cls, bot_data, commands, settings, xmlrpc_host, xmlrpc_port, debug):
-    """
-    Aiml bot rpc
-    """
-    rebot_cls = load_cls(ctx, None, rebot_cls)
-    robot = rebot_cls(ctx, commands = commands, bot_data = bot_data, settings = settings)
-    robot.xmlrpc_run(xmlrpc_port, xmlrpc_host)
-
-@cli.command()
-@click.option('--aichat-rpc', default='http://127.0.0.1:27777', help='robot rpc server')
-@click.pass_context
-def aichat_rpc_hello(ctx, aichat_rpc):
-    """
-    测试Aiml bot rpc
-    """
-    g = ctx.obj
-    aichat_rpc = connect_rpc(ctx, None, aichat_rpc)
-    print(aichat_rpc.hello())
-
-@cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name', show_default=True)
-@click.option('-m', '--message', help="handler mode", show_default=True)
+@click.option('-m', '--message', help="测试消息,JSON格式", show_default=True)
 @click.option('--outqueue', default=None, help='输出的queue', show_default=True)
 @click.pass_context
 def schedule_test(ctx, scheduler_cls, message, outqueue):
@@ -388,6 +320,9 @@ def fetch_result(ctx, worker_cls, rid, output):
 @click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
 @click.pass_context
 def rpc_test(ctx, rpc, method, params, output):
+    """
+    RPC接口测试
+    """
     rpc = connect_rpc(ctx, None, rpc)
     ret = None
     if hasattr(rpc, method):
