@@ -170,7 +170,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
-            'title': result.pop('title', None) or item.get('title', None),              # 标题
+            'title': item.get('title', None) or result.pop('title', None),              # 标题
             'author': result.pop('author', None) or item.get('author', None),      # 作者
             'content': result.pop('content', None),
             'pubtime': pubtime or item.get('pubtime', None),          # 发布时间
