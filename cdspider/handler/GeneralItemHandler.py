@@ -66,7 +66,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         #根据task中的rid获取文章信息
         rid = self.task.get('rid', None)
         if rid:
-            article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo', 'title', 'author', 'channel', 'pubtime'])
+            article = self.db['ArticlesDB'].get_detail(rid, select=['mediaType', 'url', 'crawlinfo', 'title', 'author', 'channel', 'pubtime'])
             if not article:
                 raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
             self.task.setdefault('mediaType', article.get('mediaType', MEDIA_TYPE_OTHER))
