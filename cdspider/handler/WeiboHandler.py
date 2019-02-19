@@ -167,6 +167,7 @@ class WeiboHandler(BaseHandler, NewAttachmentTask):
                         self.build_sync_task(result_id, 'WeiboInfoDB')
                     self.result2attach(result['crawlinfo'], save, result_id, url=each['url'], **typeinfo)
                     self.db['WeiboInfoDB'].update(result_id, {"crawlinfo": result['crawlinfo']})
+                    self.build_sync_task(result_id, 'WeiboInfoDB')
                     self.crawl_info['crawl_count']['new_count'] += 1
                 else:
                     self.crawl_info['crawl_count']['repeat_count'] += 1

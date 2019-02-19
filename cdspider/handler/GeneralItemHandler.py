@@ -237,12 +237,14 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                 self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
                 if inserted:
                     result_id = self.db['ArticlesDB'].insert(result)
+                    self.build_sync_task(result_id, 'ArticlesDB')
                     self.task['crawlinfo'] = result['crawlinfo']
                 else:
                     item = self.db['ArticlesDB'].get_detail_by_unid(**unid)
                     self.task['crawlinfo'] = item['crawlinfo']
                     result_id = item['rid']
                     self.db['ArticlesDB'].update(result_id, result)
+                    self.build_sync_task(result_id, 'ArticlesDB')
             self.task['rid'] = result_id
         else:
             if self.page == 1:
@@ -261,6 +263,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                 else:
                     self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
                     self.db['ArticlesDB'].update(result_id, result)
+                    self.build_sync_task(result_id, 'ArticlesDB')
             else:
                 if self.testing_mode:
                     '''
@@ -273,6 +276,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                         content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
                         self.debug("%s on_result content: %s" % (self.__class__.__name__, content))
                         self.db['ArticlesDB'].update(result_id, {"content": content})
+                        self.build_sync_task(result_id, 'ArticlesDB')
         if not result_id:
             raise CDSpiderDBError("Result insert failed")
 
