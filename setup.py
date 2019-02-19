@@ -61,8 +61,6 @@ setup(
             'config/logging.conf',
             'config/main.json',
             'config/app.json',
-            'config/aiml/*.aiml',
-            'config/aiml/*.xml',
             "parser/lib/goose3/resources/images/*.txt",
             "parser/lib/goose3/resources/text/*.txt",
         ],
@@ -79,10 +77,6 @@ setup(
             'tornado=cdspider.crawler:TornadoCrawler',
             'requests=cdspider.crawler:RequestsCrawler',
             'selenium=cdspider.crawler:SeleniumCrawler',
-        ],
-        'cdspider.robots': [
-            'wxchat=cdspider.robots:WxchatRobots',
-            'aichat=cdspider.robots:AichatRobots',
         ],
         'cdspider.parser': [
             'list=cdspider.parser:ListParser',
