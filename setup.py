@@ -34,7 +34,7 @@ require_packages = [
         'beautifulsoup4>=4.6.0',
         'tld>=0.7.9',
         'pykafka>=2.7.0',
-        'pycurl>=7.43.0.0'
+        'pycurl>=7.43.0.0',
     ]
 if sys.platform != 'win32':
     require_packages.append('gssapi>=1.5.0')
@@ -74,6 +74,37 @@ setup(
             'tornado=cdspider.crawler:TornadoCrawler',
             'requests=cdspider.crawler:RequestsCrawler',
             'selenium=cdspider.crawler:SeleniumCrawler',
+        ],
+        'cdspider.parser': [
+            'list=cdspider.parser:ListParser',
+            'item=cdspider.parser:ItemParser',
+            'custom=cdspider.parser:CustomParser',
+            'json=cdspider.parser.lib:JsonParser',
+            'pyqyery=cdspider.parser.lib:PyqueryParser',
+            'xpath=cdspider.parser.lib:XpathParser',
+            'regular=cdspider.parser.lib:RegularParser',
+        ],
+        'cdspider.handler': [
+            'default=cdspider.handler:GeneralHandler',
+            'list=cdspider.handler:GeneralListHandler',
+            'wechat-list=cdspider.handler:WechatListHandler',
+            'toutiao-list=cdspider.handler:ToutiaoListHandler',
+            'bbs-list=cdspider.handler:BbsListHandler',
+            'wemedia-list=cdspider.handler:WemediaListHandler',
+            'item=cdspider.handler:GeneralItemHandler',
+            'wechat-item=cdspider.handler:WechatItemHandler',
+            'toutiao-item=cdspider.handler:ToutiaoItemHandler',
+            'bbs-item=cdspider.handler:BbsItemHandler',
+            'wemedia-item=cdspider.handler:WemediaItemHandler',
+            'links-cluster=cdspider.handler:LinksClusterHandler',
+            'weibo=cdspider.handler:WeiboHandler',
+            'comment=cdspider.handler:CommentHandler',
+            'interact=cdspider.handler:InteractHandler',
+            'extend=cdspider.handler:ExtendedHandler',
+            'search=cdspider.handler:GeneralSearchHandler',
+            'weibo-search=cdspider.handler:WeiboSearchHandler',
+            'site-search=cdspider.handler:SiteSearchHandler',
+            'wechat-search=cdspider.handler:WechatSearchHandler',
         ],
         'cdspider.parser': [
             'list=cdspider.parser:ListParser',
