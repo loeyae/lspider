@@ -66,7 +66,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         #根据task中的rid获取文章信息
         rid = self.task.get('rid', None)
         if rid:
-            article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo'])
+            article = self.db['ArticlesDB'].get_detail(rid, select=['url', 'crawlinfo', 'title', 'author', 'channel', 'pubtime'])
             if not article:
                 raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
             self.task.setdefault('mediaType', article.get('mediaType', MEDIA_TYPE_OTHER))
@@ -170,20 +170,15 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
+            'title': result.pop('title', None) or item.get('title', None),              # 标题
+            'author': result.pop('author', None) or item.get('author', None),      # 作者
             'content': result.pop('content', None) or item.get('content', None),
+            'pubtime': pubtime or item.get('pubtime', None),          # 发布时间
             'channel': result.pop('channel', None)  or item.get('channel', None),       # 频道信息
             'crawlinfo': kwargs.get('crawlinfo')
         }
-        title = result.pop('title', None)
-        author = result.pop('author', None)
-        if title:
-            r['title'] = title
-        if author:
-            r['author'] = author
-        if pubtime:
-            r['pubtime'] = pubtime
 
-        if all((title, author, r['content'], pubtime)):
+        if all((r['title'], r['author'], r['content'], r['pubtime'])):
             '''
             判断文章是否解析完全
             '''
