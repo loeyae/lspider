@@ -13,7 +13,7 @@ from cdspider import Component
 from cdspider.exceptions import *
 from cdspider.handler import BaseHandler
 from cdspider.libs.tools import ModulerLoader
-from cdspider.libs.utils import get_object
+from cdspider.libs.utils import get_object, load_handler
 from cdspider.libs.constants import *
 
 class Loader(Component):
@@ -27,9 +27,12 @@ class Loader(Component):
             log_level = logging.DEBUG
         super(Loader, self).__init__(logger, log_level)
         mode = task.get('mode', HANDLER_MODE_DEFAULT)
-        _class = get_object('cdspider.handler.%s' % HANDLER_MODE_HANDLER_MAPPING[mode])
         self.params = {"context": context, "task": task, "no_sync": no_sync}
-        self.handler = _class(**self.params)
+        try:
+            self.handler = load_handler(mode, **self.params)
+        except:
+            _class = get_object('cdspider.handler.%s' % HANDLER_MODE_HANDLER_MAPPING[mode])
+            self.handler = _class(**self.params)
 
     def get_moduler(self):
         scripts = self.get_scripts()
