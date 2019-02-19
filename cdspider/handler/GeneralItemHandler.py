@@ -170,15 +170,20 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
             'url': kwargs['final_url'],
             'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
-            'title': result.pop('title', None) or item.get('title', None),              # 标题
-            'author': result.pop('author', None) or item.get('author', None),      # 作者
             'content': result.pop('content', None) or item.get('content', None),
-            'pubtime': pubtime or item.get('pubtime', None),          # 发布时间
             'channel': result.pop('channel', None)  or item.get('channel', None),       # 频道信息
             'crawlinfo': kwargs.get('crawlinfo')
         }
+        title = result.pop('title', None)
+        author = result.pop('author', None)
+        if title:
+            r['title'] = title
+        if author:
+            r['author'] = author
+        if pubtime:
+            r['pubtime'] = pubtime
 
-        if all((r['title'], r['author'], r['content'], r['pubtime'])):
+        if all((title, author, r['content'], pubtime)):
             '''
             判断文章是否解析完全
             '''
