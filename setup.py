@@ -27,8 +27,6 @@ require_packages = [
         'pymongo>=3.6.0',
         'pika>=0.11.2',
         'tornado>=3.2,<=4.5.3',
-        'flask>=0.12.2',
-        'flask_login>=0.4.1',
         'Pillow>=5.0.0',
         'cssselect>=1.0.1',
         'jieba3k>=0.35.1',
@@ -36,8 +34,7 @@ require_packages = [
         'beautifulsoup4>=4.6.0',
         'tld>=0.7.9',
         'pykafka>=2.7.0',
-        'pycurl>=7.43.0.0',
-        'itchat>=1.3.10',
+        'pycurl>=7.43.0.0'
     ]
 if sys.platform != 'win32':
     require_packages.append('gssapi>=1.5.0')
