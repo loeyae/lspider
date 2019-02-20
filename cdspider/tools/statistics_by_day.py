@@ -16,7 +16,7 @@ from cdspider.exceptions import *
 
 class statistics_by_day(Base):
     """
-    put you comment
+    按天统计文章数量，并发送给指定的人员
     """
     inqueue_key = None
 
@@ -29,6 +29,9 @@ class statistics_by_day(Base):
 
     def process(self, *args):
         running_time = int(args[0]) if len(args) > 0 else None
+        '''
+        运行时间
+        '''
         if running_time != None:
             h = int(time.strftime('%H'))
             if h == running_time:
@@ -52,12 +55,9 @@ class statistics_by_day(Base):
                 t = int(time.mktime(time.strptime(str(datetime.datetime.today().date() - datetime.timedelta(days=1)), "%Y-%m-%d")))
                 self.debug("statistics time: %s" % t)
                 total = self.db['ArticlesDB'].get_count(t, where={"ctime": {"$gte": t, "$lt": t + 24 * 3600}})
-                wtotal = self.db['ArticlesDB'].get_count(t, where={"ctime": {"$gte": t, "$lt": t + 24 * 3600}, "media_type": 4})
-                ktotal = self.db['ArticlesDB'].get_count(t, where={"ctime": {"$gte": t, "$lt": t + 24 * 3600}, "crawlinfo.sid": {"$in": [1, 8]}})
-                kwtotal = self.db['ArticlesDB'].get_count(t, where={"ctime": {"$gte": t, "$lt": t + 24 * 3600}, "crawlinfo.sid": 4})
 
-                self.debug("statistics total: %(total)s wecaht total: %(wtotal)s kexie total: %(ktotal)s kexie wechat total: %(kwtotal)s" % {"total": total, "wtotal": wtotal, "ktotal": ktotal, "kwtotal": kwtotal})
-                subject = "科协数据统计-%s" % str(datetime.datetime.today().date() - datetime.timedelta(days=1))
+                self.debug("statistics total: %(total)s" % {"total": total})
+                subject = "数据统计-%s" % str(datetime.datetime.today().date() - datetime.timedelta(days=1))
                 message = """<!DOCTYPE html>
 <html>
     <head>
@@ -67,16 +67,16 @@ class statistics_by_day(Base):
     <body>
         <table border=3>
             <tr>
-                <td></td><td>总计</td><td>科协官媒</td><td>微信</td><td>科协官微</td>
+                <td></td><td>总计</td>
             </tr>
             <tr>
-                <td>数量</td><td>{total}</td><td>{ktotal}</td><td>{wtotal}</td><td>{kwtotal}</td>
+                <td>数量</td><td>{total}</td>
             </tr>
         </table>
     </body>
 </html>
 """
-                message = message.format(subject=subject, total=total, wtotal=wtotal, ktotal=ktotal, kwtotal=kwtotal)
+                message = message.format(subject=subject, total=total)
                 self.mailer.send(subject=subject, message=message, type='html')
                 self.run_once = True
             except:
