@@ -13,7 +13,7 @@ from cdspider.libs.constants import *
 
 class clear_attachment_task(Base):
     """
-    put you comment
+    清理过期附加任务
     """
     inqueue_key = None
 
