@@ -201,7 +201,7 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
         worker.run()
 
 @cli.command()
-@click.option('-n', '--name', help='tool名')
+@click.option('-n', '--name', default="test_tool", help='tool名')
 @click.option('-a', '--arg', multiple=True, help='tool参数')
 @click.option('--daemon', default=False, is_flag=True, help='是否作为守护进程', show_default=True)
 @click.pass_context
