@@ -704,7 +704,7 @@ class BaseHandler(Component):
                 'errid': self.crawl_info.get('errid', 0),                       # 如果有错误，关联的错误日志ID
             }
             self.log_id = self.db['CrawlLogDB'].update(self.log_id, log)
-        self.handler_run(HANDLER_FUN_FINISH, {"save": save, "response": self.response})
+        self.handler_run(HANDLER_FUN_FINISH, {"crawl_info": self.crawl_info, "response": self.response, "save": save})
 
     def close(self):
         if hasattr(self, 'crawler') and isinstance(self.crawler, BaseCrawler):
