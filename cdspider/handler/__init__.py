@@ -226,7 +226,7 @@ class BaseHandler(Component):
 
     def expire(self, message):
         """
-        更新更新频率
+        更新过期时间
         """
         mode = message['mode']
         expire = message['expire']
@@ -518,7 +518,7 @@ class BaseHandler(Component):
         if self.crawl_info['crawl_count']['repeat_page'] < self.ALLOWED_REPEAT:
             return
         if HANDLER_FUN_REPETITION in self.handle:
-            self.handler_run(HANDLER_FUN_REPETITION, {"response": self.response, "save": save})
+            self.handler_run(HANDLER_FUN_REPETITION, {"crawl_info": self.crawl_info, "task": self.task, "save": save})
         else:
             raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", self.task['url']), current_url=save.get("request_url", self.task['url']))
 
