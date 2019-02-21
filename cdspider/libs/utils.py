@@ -318,7 +318,7 @@ def rule2subitem(rule, subject):
             subject = '%s%s%s' % ('\\1' if pt1 else '' , subject, '\\2' if pt1 and pt2 else ('\\1' if pt2 else ''))
     return (rule, subject)
 
-def load_driver(namespace, name, *argss, **kwargs):
+def load_driver(namespace, name, *args, **kwargs):
     """
     加载指定插件
     """
