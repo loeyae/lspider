@@ -37,7 +37,7 @@ cpath = os.path.dirname(os.path.abspath(__file__))
 @click.option('--queue-prefix', default=None, help='queue的前缀', show_default=True)
 @click.option('--message-queue', help='queue设置, default: '
               'message_queue: {protocol: amqp, host: host, port: 5672, user: guest, password: guest}')
-@click.option('--add-sys-path/--not-add-sys-path', default=True, is_flag=True,
+@click.option('--add-sys-path/--not-add-sys-path', default=False, is_flag=True,
               help='增加当前文件夹路径到系统路径', show_default=True)
 @click.option('--testing-mode', default=False, is_flag=True, help='debug mode', show_default=True)
 @click.pass_context
