@@ -318,83 +318,54 @@ def rule2subitem(rule, subject):
             subject = '%s%s%s' % ('\\1' if pt1 else '' , subject, '\\2' if pt1 and pt2 else ('\\1' if pt2 else ''))
     return (rule, subject)
 
-def load_crawler(crawler, *args, **kwargs):
+def load_driver(namespace, name, *argss, **kwargs):
     """
-    以插件模式加载crawler
-    """
-    mgr = stevedore.driver.DriverManager(
-        namespace='cdspider.crawler',
-        name=crawler,
-        invoke_args = args,
-        invoke_kwds = kwargs,
-        invoke_on_load=True,
-    )
-    return mgr.driver
-
-def load_parser(parser, *args, **kwargs):
-    """
-    以插件模式加载parser
+    加载指定插件
     """
     mgr = stevedore.driver.DriverManager(
-        namespace='cdspider.parser',
-        name=parser,
-        invoke_args = args,
-        invoke_kwds = kwargs,
-        invoke_on_load=True,
-    )
-    return mgr.driver
-
-def load_queue(queue, *args, **kwargs):
-    """
-    以插件模式加载queue
-    """
-    mgr = stevedore.driver.DriverManager(
-        namespace='cdspider.queue',
-        name=queue,
-        invoke_args = args,
-        invoke_kwds = kwargs,
-        invoke_on_load=True,
-    )
-    return mgr.driver
-
-def load_mailer(mailer, *args, **kwargs):
-    """
-    以插件模式加载mailer
-    """
-    mgr = stevedore.driver.DriverManager(
-        namespace='cdspider.mailer',
-        name=mailer,
-        invoke_args = args,
-        invoke_kwds = kwargs,
-        invoke_on_load=True,
-    )
-    return mgr.driver
-
-def load_db(driver_name, *args, **kwargs):
-    """
-    以插件模式加载db
-    """
-    mgr = stevedore.driver.DriverManager(
-        namespace='cdspider.db',
-        name=driver_name,
-        invoke_args = args,
-        invoke_kwds = kwargs,
-        invoke_on_load=True,
-    )
-    return mgr.driver
-
-def load_handler(name, *args, **kwargs):
-    """
-    以插件模式加载handler
-    """
-    mgr = stevedore.driver.DriverManager(
-        namespace='cdspider.handler',
+        namespace='cdspider.%s' % namespace,
         name=name,
         invoke_args = args,
         invoke_kwds = kwargs,
         invoke_on_load=True,
     )
     return mgr.driver
+
+def load_crawler(crawler, *args, **kwargs):
+    """
+    以插件模式加载crawler
+    """
+    return load_driver('crawler', crawler, *args, **kwargs)
+
+def load_parser(parser, *args, **kwargs):
+    """
+    以插件模式加载parser
+    """
+    return load_driver('parser', parser, *args, **kwargs)
+
+def load_queue(queue, *args, **kwargs):
+    """
+    以插件模式加载queue
+    """
+    return load_driver('queue', queue, *args, **kwargs)
+
+def load_mailer(mailer, *args, **kwargs):
+    """
+    以插件模式加载mailer
+    """
+    return load_driver('mailer', mailer, *args, **kwargs)
+
+def load_db(driver_name, *args, **kwargs):
+    """
+    以插件模式加载db
+    """
+    return load_driver('db', driver_name, *args, **kwargs)
+
+def load_handler(name, *args, **kwargs):
+    """
+    以插件模式加载handler
+    """
+    return load_driver('handler', name, *args, **kwargs)
 
 def run_in_thread(func, *args, **kwargs):
     """Run function in thread, return a Thread object"""
