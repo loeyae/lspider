@@ -43,7 +43,7 @@ cpath = os.path.dirname(os.path.abspath(__file__))
 @click.pass_context
 def cli(ctx, **kwargs):
     if kwargs['add_sys_path']:
-        sys.path.append(os.getcwd())
+        sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
     logging.config.fileConfig(kwargs['logging_config'])
     kwargs['logger'] = logging.getLogger("root")
     if kwargs['debug']:
