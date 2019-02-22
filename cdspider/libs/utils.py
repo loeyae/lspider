@@ -318,13 +318,13 @@ def rule2subitem(rule, subject):
             subject = '%s%s%s' % ('\\1' if pt1 else '' , subject, '\\2' if pt1 and pt2 else ('\\1' if pt2 else ''))
     return (rule, subject)
 
-def load_driver(namespace, name, *args, **kwargs):
+def load_driver(driver_ns, driver_nm, *args, **kwargs):
     """
     加载指定插件
     """
     mgr = stevedore.driver.DriverManager(
-        namespace='cdspider.%s' % namespace,
-        name=name,
+        namespace='cdspider.%s' % driver_ns,
+        name=driver_nm,
         invoke_args = args,
         invoke_kwds = kwargs,
         invoke_on_load=True,
