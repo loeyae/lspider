@@ -19,7 +19,7 @@ require_packages = [
         'redis>=2.10.6',
         'lxml>=4.1.1',
         'requests>=2.12.0',
-        'PySocks>-1.6.8',
+        'PySocks>=1.6.8',
         'selenium>=3.8.0',
         'pyquery>=1.3.0',
         'amqp>=2.2.2',
@@ -35,6 +35,7 @@ require_packages = [
         'tld>=0.7.9',
         'pykafka>=2.7.0',
         'pycurl>=7.43.0.0',
+        'jsonpath>=0.81'
     ]
 if sys.platform != 'win32':
     require_packages.append('gssapi>=1.5.0')
@@ -42,10 +43,10 @@ if sys.platform != 'win32':
 setup(
     name = "cdspider",
     version = "0.1",
-    description = "Color-Data数据采集框架",
+    description = "数据采集框架",
     author = "Zhang Yi",
     author_email = "loeyae@gmail.com",
-    url = "http://www.color-data.com/",
+    url = "https://github.com/loeyae/cdspider.git",
     license = "Apache License, Version 2.0",
 
     install_requires = require_packages,
@@ -63,9 +64,6 @@ setup(
         ],
     },
 
-#    include_package_data = True,
-
-#    exclude_package_data = { '': ['README.md'] },
     entry_points = {
         'console_scripts': [
             'cdspider = cdspider.run:main',
@@ -74,15 +72,6 @@ setup(
             'tornado=cdspider.crawler:TornadoCrawler',
             'requests=cdspider.crawler:RequestsCrawler',
             'selenium=cdspider.crawler:SeleniumCrawler',
-        ],
-        'cdspider.parser': [
-            'list=cdspider.parser:ListParser',
-            'item=cdspider.parser:ItemParser',
-            'custom=cdspider.parser:CustomParser',
-            'json=cdspider.parser.lib:JsonParser',
-            'pyqyery=cdspider.parser.lib:PyqueryParser',
-            'xpath=cdspider.parser.lib:XpathParser',
-            'regular=cdspider.parser.lib:RegularParser',
         ],
         'cdspider.handler': [
             'default=cdspider.handler:GeneralHandler',

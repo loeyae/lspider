@@ -1,3 +1,7 @@
 /nbproject
-__pycache__
 *.pyc
+/.idea
+build/
+cdspider.egg-info/
+cdspider/runtime/
+dist/

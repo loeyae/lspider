@@ -12,10 +12,11 @@ import re
 import json
 import copy
 import traceback
-from . import BaseParser
-from .PyqueryParser import PyqueryParser
-from .RegularParser import RegularParser
-from .XpathParser import XpathParser
+import jsonpath
+from cdspider.parser.lib import BaseParser
+from cdspider.parser.lib.PyqueryParser import PyqueryParser
+from cdspider.parser.lib.RegularParser import RegularParser
+from cdspider.parser.lib.XpathParser import XpathParser
 from cdspider.exceptions import *
 from cdspider.libs import utils
 
@@ -155,72 +156,83 @@ class JsonParser(BaseParser):
                 return [rest]
 
     def _json_parse(self, data, kstring):
-        idx = kstring.find("*")
-        if idx == -1:
-            idx = kstring.find("-1")
-            if idx == -1:
-                kstring = "[\"%s\"]" % kstring.replace(".", "\"][\"")
-                result = None
-                code = "data%s" % re.sub(r"\[\"(\d+)\"\]", r"[\1]", kstring)
-                try:
-                    result = eval(code, None, locals())
-                except:
-                    self.logger.error(traceback.format_exc())
-                    pass
-                return result
-            else:
-                klist = kstring.split("-1")
-                i = 0
-                l = len(klist)
-                for k in klist:
-                    i += 1
-                    if not k:
-                        continue
-                    rk = k.strip(".")
-                    if not rk:
-                        return data
-                    if k.startswith("."):
-                        if isinstance(data, list):
-                            r = None
-                            data = data.pop(-1)
-                            r = self._json_parse(data, rk)
-                            if r == None:
-                                return None
-                            data = r
-                        else:
-                            return None
-                    else:
-                        data = self._json_parse(data, rk)
-                        if data == None:
-                            return None
-                        if i == l:
-                            if isinstance(data, list):
-                                data = data.pop(-1)
-                            else:
-                                return None
-                return data
-        else:
-            klist = kstring.split("*")
-            for k in klist:
-                if not k:
-                    continue
-                rk = k.strip(".")
-                if not rk:
-                    return data
-                if k.startswith("."):
-                    if isinstance(data, list):
-                        r = None
-                        for item in data:
-                            r = self._json_parse(item, rk)
-                            if r:
-                                data = r
-                                break
-                        if r == None:
-                            return None
-                    else:
-                        return None
-                else:
-                    data = self._json_parse(data, rk)
-                    if data == None:
-                        return None
-            return data
+        if not kstring.startswith("$"):
+            kstring = "$.%s" % kstring;
+        kstring = kstring.replace("[-1]", "[(@.length-1)]").replace(".-1", "[(@.length-1)]")
+        rst = jsonpath.jsonpath(data, kstring)
+        if isinstance(rst, list) and len(rst) == 1 and not isinstance(rst[0], (tuple, list, dict)):
+            return rst[0]
+        return rst;
+
+if __name__ == "__main__":
+    """
+    规则测试
+    """
+    _json = {
+        "key1": [
+            "value11",
+            "value12",
+            "value13",
+        ],
+        "key2": [
+            {
+                "key21": "value211",
+                "key22": "value212",
+            },
+            {
+                "key21": "value221",
+                "key22": "value222"
+            },
+            {
+                "key21": "value231",
+                "key22": "value232"
+            }
+        ],
+        "key3": [
+            {
+                "key30": {
+                    "key301": "value301",
+                }
+            },
+            {
+                "key31": [
+                    {
+                        "key311": "value311",
+                        "key312": "value312",
+                    },
+                    {
+                        "key311": "value321",
+                        "key312": "value322",
+                    }
+                ]
+            }
+        ]
+    }
+    parser = JsonParser();
+    ruleset = {
+        "filter": "$.key2",
+        "item": {
+            "key1": {
+                "filter": "$.key21",
+            },
+            "key2": {
+                "filter": "$.key22",
+            }
+        }
+    }
+    parsed = parser.parse(source=json.dumps(_json),ruleset=ruleset)
+    print(parsed)
+    ruleset = {
+        "filter": "key3.*.key31",
+        "item": {
+            "key1": "key311",
+            "key2": "key312"
+        }
+    }
+    parsed = parser.parse(source=json.dumps(_json),ruleset=ruleset)
+    print(parsed)
+    ruleset = {
+        "filter": "key1.-1",
+    }
+    parsed = parser.parse(source=json.dumps(_json),ruleset=ruleset)
+    print(parsed)

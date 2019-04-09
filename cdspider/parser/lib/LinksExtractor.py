@@ -7,7 +7,7 @@
 :date:    2018-10-12 10:25:05
 """
 import os
-from .goose3.parsers import Parser
+from cdspider.parser.lib.goose3.parsers import Parser
 from cdspider.libs import utils
 from cdspider.parser import KNOWN_TOP_LINK_PATTERN, KNOWN_DETAIL_URLS_PATTERN, KNOWN_RANDOM_KEYS
 from urllib.parse import urljoin, urlparse
@@ -200,3 +200,6 @@ class LinkCleaner(object):
         for i in self.clean_pattern:
             url = re.sub(i, '', url)
         return url
+
+if __name__ == "__main__":
+    pass
