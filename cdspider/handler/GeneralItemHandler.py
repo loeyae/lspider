@@ -8,16 +8,14 @@
 """
 import time
 import copy
-import traceback
 from . import BaseHandler
-from .traite import NewAttachmentTask
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
-from cdspider.parser import ItemParser, CustomParser
+from cdspider.parser import ItemParser
 from cdspider.parser.lib import TimeParser
 
-class GeneralItemHandler(BaseHandler, NewAttachmentTask):
+class GeneralItemHandler(BaseHandler):
     """
     general item handler
     :property task 爬虫任务信息 {"mode": "item", "rid": Article rid}
@@ -104,7 +102,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                             return item
             else:
                 '''
-                获取域名对��的规则
+                获取域名对应的规则
                 '''
                 parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
                 for item in parserule_list:
@@ -201,7 +199,9 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
         if self.response['parsed']:
             typeinfo = utils.typeinfo(self.response['final_url'])
             self.result2db(save, copy.deepcopy(typeinfo))
-            self.result2attach(self.task['crawlinfo'], save, self.task['rid'], **typeinfo)
+            params = {"crawlinfo": self.task['crawlinfo'], "save": save, "rid": self.task['rid'], **typeinfo}
+
+            utils.run_extension(extension_ns="item_handler.result_handle", data=params, handler=self)
 
     def result2db(self, save, typeinfo):
         """
@@ -223,7 +223,8 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                 self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
             else:
                 #生成文章唯一索引并验证是否已存在
-                inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'], self.response['parsed']), ctime)
+                inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'],
+                                                                                    self.response['parsed']), self.crawl_id)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
             #格式化文章信息
             result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], **unid)
@@ -271,6 +272,7 @@ class GeneralItemHandler(BaseHandler, NewAttachmentTask):
                     '''
                     self.debug("%s on_result: %s" % (self.__class__.__name__, self.response['parsed']))
                 else:
+                    result = self.db['ArticlesDB'].get_detail(result_id)
                     content = result['content']
                     if 'content' in self.response['parsed'] and self.response['parsed']['content']:
                         content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])

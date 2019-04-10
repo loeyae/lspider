@@ -24,8 +24,6 @@ class GeneralListHandler(BaseHandler):
                    当测试该handler，数据应为 {"mode": "list", "url": url, "listRule": 列表规则，参考列表规则}
     """
 
-    BBS_TYPES = (MEDIA_TYPE_BBS, MEDIA_TYPE_ASK)
-
     def newtask(self, message):
         """
         新建爬虫任务
@@ -34,6 +32,7 @@ class GeneralListHandler(BaseHandler):
         uid = message['uid']
         if not isinstance(uid, (list, tuple)):
             uid = [uid]
+        rules = []
         for each in uid:
             tasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
             if len(list(tasks)) > 0:
@@ -55,7 +54,7 @@ class GeneralListHandler(BaseHandler):
                 'pid': urls['pid'],          # project uuid
                 'sid': urls['sid'],          # site uuid
                 'tid': urls.get('tid', 0),   # task uuid
-                'uid': each,                  # url uuid
+                'uid': each,                 # url uuid
                 'kid': 0,                    # keyword id
                 'frequency': str(rule.get('rate', self.DEFAULT_RATE)),
                 'url': urls['url'],          # url
@@ -141,10 +140,9 @@ class GeneralListHandler(BaseHandler):
         :input self.task 爬虫任务信息
         :input self.crawl_id 爬虫运行时刻
         """
-        mediaType = self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         return {
                 'listMode': self.task['mode'],
-                'mode': HANDLER_MODE_BBS_ITEM if mediaType in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
+                'mode': HANDLER_MODE_DEFAULT_ITEM,
                 "stid": self.task.get("uuid", 0),   # SpiderTask uuid
                 "uid": self.task.get("uid", 0),     # url id
                 "pid": self.task.get('pid', 0),     # project id
@@ -266,14 +264,12 @@ class GeneralListHandler(BaseHandler):
             formated.append(item)
         return formated
 
-
     def build_item_task(self, rid):
         """
         生成详情抓取任务并入队
         """
-        mediaType = self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         message = {
-            'mode': HANDLER_MODE_BBS_ITEM if mediaType in self.BBS_TYPES else HANDLER_MODE_DEFAULT_ITEM,
+            'mode': HANDLER_MODE_DEFAULT_ITEM,
             'rid': rid,
             'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         }

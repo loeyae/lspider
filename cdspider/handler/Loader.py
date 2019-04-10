@@ -6,14 +6,12 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-11-14 23:31:54
 """
-import six
 import inspect
 import logging
 from cdspider import Component
-from cdspider.exceptions import *
 from cdspider.handler import BaseHandler
 from cdspider.libs.tools import ModulerLoader
-from cdspider.libs.utils import get_object, load_handler
+from cdspider.libs.utils import load_handler
 from cdspider.libs.constants import *
 
 class Loader(Component):
@@ -31,8 +29,7 @@ class Loader(Component):
         try:
             self.handler = load_handler(mode, **self.params)
         except:
-            _class = get_object('cdspider.handler.%s' % HANDLER_MODE_HANDLER_MAPPING[mode])
-            self.handler = _class(**self.params)
+            raise CDSpiderHandlerError("handler not exists")
 
     def get_moduler(self):
         scripts = self.get_scripts()

@@ -96,37 +96,10 @@ HANDLER_MODE_BBS_ITEM = 'bbs-item'                    # 论坛详情handler
 HANDLER_MODE_WEMEDIA_ITEM = 'wemedia-item'            # 自媒体详情handler
 HANDLER_MODE_LINKS_CLUSTER = 'links-cluster'          # Url聚类handler
 HANDLER_MODE_WEIBO = 'weibo'                          # 微博handler
-HANDLER_MODE_COMMENT = 'comment'                      # 评论handler
-HANDLER_MODE_INTERACT = 'interact'                    # 互动数（阅读数、点赞数...）handler
-HANDLER_MODE_EXTENDED = 'extend'                      # 扩展数据handler
 HANDLER_MODE_DEFAULT_SEARCH = 'search'                # 默认搜索handler
 HANDLER_MODE_WEIBO_SEARCH = 'weibo-search'            # 微博搜索
 HANDLER_MODE_SITE_SEARCH = 'site-search'              # 站内搜索
 HANDLER_MODE_WECHAT_SEARCH = 'wechat-search'          # 微信搜索
-
-#handler mode mapping HANDLER
-HANDLER_MODE_HANDLER_MAPPING = {
-    HANDLER_MODE_DEFAULT: 'GeneralHandler',
-    HANDLER_MODE_DEFAULT_LIST: 'GeneralListHandler',
-    HANDLER_MODE_WECHAT_LIST: 'WechatListHandler',
-    HANDLER_MODE_TOUTIAO_LIST: 'ToutiaoListHandler',
-#    HANDLER_MODE_BBS_LIST: 'BbsListHandler',
-    HANDLER_MODE_WEMEDIA_LIST: 'WemediaListHandler',
-    HANDLER_MODE_DEFAULT_ITEM: 'GeneralItemHandler',
-    HANDLER_MODE_WECHAT_ITEM: 'WechatItemHandler',
-#    HANDLER_MODE_TOUTIAO_ITEM: 'ToutiaoItemHandler',
-    HANDLER_MODE_BBS_ITEM: 'BbsItemHandler',
-#    HANDLER_MODE_WEMEDIA_ITEM: 'WemediaItemHandler',
-    HANDLER_MODE_LINKS_CLUSTER: 'LinksClusterHandler',
-    HANDLER_MODE_WEIBO: 'WeiboHandler',
-    HANDLER_MODE_COMMENT: 'CommentHandler',
-    HANDLER_MODE_INTERACT: 'InteractHandler',
-    HANDLER_MODE_EXTENDED: 'ExtendedHandler',
-    HANDLER_MODE_DEFAULT_SEARCH: 'GeneralSearchHandler',
-    HANDLER_MODE_WEIBO_SEARCH: 'WeiboSearchHandler',
-    HANDLER_MODE_SITE_SEARCH: 'SiteSearchHandler',
-    HANDLER_MODE_WECHAT_SEARCH: 'WechatSearchHandler',
-}
 
 #route mode
 ROUTER_MODE_PROJECT = 'project'

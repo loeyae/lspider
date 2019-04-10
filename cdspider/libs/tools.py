@@ -68,13 +68,11 @@ class db_wrapper(collections.UserDict):
         if key in self.data:
             return super(db_wrapper, self).__getitem__(key)
         try:
-            db = 'cdspider.database.{protocol}.{db}'.format(protocol=self.protocol, db=key)
-            cls = load_cls(None, None, db)(self.connector, log_level=self.log_level)
+            cls = utils.load_dao(self.protocol, key, connector = self.connector, log_level=self.log_level)
             self.data[key] = cls
             return cls
         except (ImportError, AttributeError):
-            db = 'cdspider.database.{protocol}.{db}'.format(protocol=self.protocol, db='Base')
-            cls = load_cls(None, None, db)(self.connector, table=key, log_level=self.log_level)
+            cls = utils.load_dao(self.protocol, 'Base', connector = self.connector, log_level=self.log_level)
             self.data[key] = cls
             return cls
 

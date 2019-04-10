@@ -181,7 +181,7 @@ class CDSpiderCrawlerDoLogin(CDSpiderCrawlerBroken):
 
 class CDSpiderCrawlerNoExists(CDSpiderCrawlerBroken):
     """
-    抓取时目标不�在
+    抓取时目标不存在
     """
 
     msg = "CDSpider Crawler No Exists"

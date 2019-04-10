@@ -10,7 +10,6 @@ import copy
 import base64
 import json
 import hashlib
-import datetime
 import tldextract
 import subprocess
 import random
@@ -23,7 +22,6 @@ from threading import Thread
 from multiprocessing import Process
 from chardet.universaldetector import UniversalDetector
 from urllib import parse
-from types import *
 from lxml import etree as le
 
 def url_is_from_any_domain(url, domains):
@@ -35,7 +33,7 @@ def url_is_from_any_domain(url, domains):
     return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
 
 def format_(data, params):
-    keylist = re.findall('\{(\w+)\}', data)
+    keylist = re.findall('{(\w+)}', data)
     format_params = {}
     for key in keylist:
         if key in params:
@@ -50,7 +48,7 @@ def build_url_by_rule(rule, params):
         return url
     mode = rule.get('mode', 'get')
     if mode == 'format':
-        keylist = re.findall('\{(\w+)\}', url)
+        keylist = re.findall('{(\w+)}', url)
         format_params = {}
         for key in keylist:
             if key in params:
@@ -137,7 +135,6 @@ def decode(data, errors="ignore"):
             return data.decode("gb2312")
         except:
             return data.decode("gbk")
-        return data.decode("utf-8")
     return data
 
 def mgkeyconvert(data, restore = False):
@@ -149,7 +146,7 @@ def mgkeyconvert(data, restore = False):
     for k, v in data.items():
         k = k.translate(trantab)
         if isinstance(v, dict):
-            cdata[k] = mgconvert(v, restore)
+            cdata[k] = mgkeyconvert(v, restore)
         else:
             cdata[k] = v
     return cdata
@@ -281,7 +278,7 @@ def rule2pattern(rule):
     """
     将页面配置转化为正则表达式
     """
-    p1 = re.compile(r'([^\[]*)((?:\[\*\])?)(.*)\[r\=(\w+)\](.+)\[\/r\]([^\[]*)((?:\[\*\])?)(.*)', re.M|re.I)
+    p1 = re.compile(r'([^\[]*)((?:\[\*\])?)(.*)\[r=(\w+)\](.+)\[/r\]([^\[]*)((?:\[\*\])?)(.*)', re.M|re.I)
     g1 = p1.search(rule)
     key = None
     if g1:
@@ -301,7 +298,7 @@ def rule2subitem(rule, subject):
     """
     将页面配置转化为正则表达式
     """
-    p1 = re.compile(r'([^\[]*)((?:\[\*\])?)(.*)\[r\=(\w+)\](.+)\[\/r\]([^\[]*)((?:\[\*\])?)(.*)', re.M|re.I)
+    p1 = re.compile(r'([^\[]*)((?:\[\*\])?)(.*)\[r=(\w+)\](.+)\[/r\]([^\[]*)((?:\[\*\])?)(.*)', re.M|re.I)
     g1 = p1.search(rule)
     if g1:
         pt1 = '%s%s%s' % (g1.group(1), '.*?' if g1.group(2) else '', g1.group(3))
@@ -317,6 +314,30 @@ def rule2subitem(rule, subject):
             rule = '%s.+?%s' % ('(%s)' % pt1 if pt1 else '', '(%s)' % pt2 if pt2 else '')
             subject = '%s%s%s' % ('\\1' if pt1 else '' , subject, '\\2' if pt1 and pt2 else ('\\1' if pt2 else ''))
     return (rule, subject)
+
+def run_extension(extension_ns, data, *args, **kwargs):
+    """
+    运行扩展插件
+    :param extension_ns:
+    :param data:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    mgr = stevedore.extension.ExtensionManager(
+        namespace='cdspider.extension.%s' % extension_ns,
+        invoke_on_load=True,
+        invoke_args = args,
+        invoke_kwds = kwargs,
+    )
+    if not mgr.extensions:
+        return None
+    def execut(ext, data):
+        return (ext.name, ext.obj.handle(**data))
+
+    results = mgr.map(execut, data)
+
+    return results
 
 def load_driver(driver_ns, driver_nm, *args, **kwargs):
     """
@@ -361,6 +382,12 @@ def load_db(driver_name, *args, **kwargs):
     """
     return load_driver('db', driver_name, *args, **kwargs)
 
+def load_dao(protocol, driver_name, *args, **kwargs):
+    """
+    以插件模式加载DAO
+    """
+    return load_driver('dao.{protocol}'.format(protocol=protocol), driver_name, *args, **kwargs)
+    
 def load_handler(name, *args, **kwargs):
     """
     以插件模式加载handler
@@ -673,7 +700,7 @@ def get_object(object_string):
     module_name, class_name = object_string.rsplit(".", 1)
     try:
         if six.PY2:
-            module = __import__(module_name, globals(), locals(), [utf8(class_name)], -1)
+            module = __import__(module_name, globals(), locals(), [utf8(class_name).__str__()], -1)
         else:
             module = __import__(module_name, globals(), locals(), [class_name])
     except:

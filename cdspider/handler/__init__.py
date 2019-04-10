@@ -2,21 +2,13 @@
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import os
-import abc
-import re
-import six
 import time
-import logging
 import traceback
-import copy
-from urllib.parse import urljoin, urlparse, urlunparse
-from cdspider import Component
+from urllib.parse import urlparse, urlunparse
 from cdspider.scheduler import CounterMananger
 from cdspider.crawler import BaseCrawler
 from cdspider.crawler import RequestsCrawler, SeleniumCrawler
 from cdspider.database.base import Base as BaseDB
-from cdspider.libs import utils
-from cdspider.exceptions import *
 from cdspider.libs.tools import *
 from cdspider.parser import *
 from cdspider.libs.url_builder import UrlBuilder
@@ -124,7 +116,7 @@ class BaseHandler(Component):
         :param rate 频率
         :param save 传递的上下文
         :return 包含uuid的迭代器，项目模式为项目的uuid，站点模式为站点的uuid
-        :notice 该方法返回的�代器用于router生成queue消息，以便plantask听取，消息格式为:
+        :notice 该方法返回的迭代器用于router生成queue消息，以便plantask听取，消息格式为:
         {"mode": handler mode, "rate": rate, "offset": offset, "count": count}
         """
         if not "id" in save:
@@ -308,7 +300,8 @@ class BaseHandler(Component):
             func_list = self.handle.get(_type, None)
             if func_list:
                 for _,fn in sorted(func_list, reverse=True):
-                    fn(save)
+                    if callable(fn):
+                        fn(save)
 
     @property
     def current_page(self):
@@ -717,14 +710,5 @@ from .GeneralHandler import GeneralHandler
 from .GeneralListHandler import GeneralListHandler
 from .GeneralSearchHandler import GeneralSearchHandler
 from .GeneralItemHandler import GeneralItemHandler
-from .CommentHandler import CommentHandler
-from .InteractHandler import InteractHandler
-from .ExtendedHandler import ExtendedHandler
 from .LinksClusterHandler import LinksClusterHandler
-from .WemediaListHandler import WemediaListHandler
-from .BbsItemHandler import BbsItemHandler
-from .WechatListHandler import WechatListHandler
-from .WechatItemHandler import WechatItemHandler
-from .WeiboSearchHandler import WeiboSearchHandler
 from .SiteSearchHandler import SiteSearchHandler
-from .WechatSearchHandler import WechatSearchHandler
