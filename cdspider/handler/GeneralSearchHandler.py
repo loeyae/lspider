@@ -28,10 +28,8 @@ class GeneralSearchHandler(BaseHandler):
                    "authorListRule": 列表规则，参考列表规则}
 
     支持注册的插件:
-        search_handler.result_handle
-            data参数为 {"save": save,"rid": result_id}
-        search_handler.finish_handle
-            data参数为 {"save": save, "dao": DAO name}
+        search_handler.mode_handle
+            data参数为 {"save": save,"url": url}
     """
 
     ns = "search_handler"
@@ -124,7 +122,7 @@ class GeneralSearchHandler(BaseHandler):
         """
         try:
             if "uuid" in self.task and self.task['uuid']:
-                task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
+                task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.mode)
                 if not task:
                     raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
                 self.task.update(task)
@@ -158,14 +156,14 @@ class GeneralSearchHandler(BaseHandler):
         else:
             keyword = self.db['KeywordsDB'].get_detail(self.task['kid'])
             if not keyword:
-                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.mode)
                 raise CDSpiderDBDataNotFound("keyword: %s not exists" % self.task['kid'])
             if keyword['status'] != KeywordsDB.STATUS_ACTIVE:
-                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderHandlerError("keyword: %s not active" % self.task['kid'])
             rule = self.db['ListRuleDB'].get_detail_by_tid(self.task['tid'])
             if not rule:
-                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderDBDataNotFound("task rule by tid: %s not exists" % self.task['tid'])
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
@@ -209,7 +207,7 @@ class GeneralSearchHandler(BaseHandler):
         :param mode: mode
         """
         return {
-                'listMode': self.task['mode'],
+                'listMode': self.mode,
                 'mode': mode,
                 "stid": self.task.get("uuid", 0),   # SpiderTask uuid
                 "uid": self.task.get("uid", 0),     # url id
@@ -279,9 +277,7 @@ class GeneralSearchHandler(BaseHandler):
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
             if inserted:
-                mode_list = utils.run_extension(
-                    extension_ns="{0}.mode_handle".format(self.ns), data={"save": save, "url": result['url']},
-                    handler=self)
+                mode_list = self.extension("mode_handle", {"save": save, "url": result['url']})
                 mode = HANDLER_MODE_DEFAULT_ITEM
                 if mode_list:
                     for item in mode_list:
@@ -382,9 +378,5 @@ class GeneralSearchHandler(BaseHandler):
             s = {}
         s.update(save)
         self.db['SpiderTaskDB'].update(
-            self.task['uuid'], self.task['mode'],
+            self.task['uuid'], self.mode,
             {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
-
-        utils.run_extension(
-            extension_ns="{0}.finish_handle".format(self.ns), data={"save": save, "dao": ArticlesDB.__name__},
-            handler=self)

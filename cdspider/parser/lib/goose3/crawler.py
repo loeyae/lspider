@@ -233,30 +233,30 @@ class Crawler(object):
             # publishdate
             self.article._publish_date = self.publishdate_extractor.extract()
 
-        # if we have a top node
-        # let's process it
-        if self.article._top_node is not None:
+            # if we have a top node
+            # let's process it
+            if self.article._top_node is not None:
 
-            # article links
-            self.article._links = self.links_extractor.extract()
+                # article links
+                self.article._links = self.links_extractor.extract()
 
-            # tweets
-            self.article._tweets = self.tweets_extractor.extract()
+                # tweets
+                self.article._tweets = self.tweets_extractor.extract()
 
-            # video handling
-            self.article._movies = self.video_extractor.get_videos()
+                # video handling
+                self.article._movies = self.video_extractor.get_videos()
 
-            # image handling
-            if self.config.enable_image_fetching:
-                self.get_image()
+                # image handling
+                if self.config.enable_image_fetching:
+                    self.get_image()
 
-            # post cleanup
-            self.article._top_node = self.extractor.post_cleanup()
+                # post cleanup
+                self.article._top_node = self.extractor.post_cleanup()
 
-            self.article._top_node_html = self.parser.outerHtml(self.article._top_node)
+                self.article._top_node_html = self.parser.outerHtml(self.article._top_node)
 
-            # clean_text
-            self.article._cleaned_text = self.formatter.get_formatted_text()
+                # clean_text
+                self.article._cleaned_text = self.formatter.get_formatted_text()
 
         if not self.article._cleaned_text:
             self.article._cleaned_text = self.extractor.extract()

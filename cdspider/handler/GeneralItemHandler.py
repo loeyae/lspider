@@ -25,11 +25,9 @@ class GeneralItemHandler(BaseHandler):
         item_handler.result_handle
             data参数为 {"save": save, "domain": domain, "subdomain": subdomain}
         item_handler.finish_handle
-            data参数为 {"save": save, "dao": DAO name}
+            data参数为 {"save": save, "rid": rid, "dao": DAO name}
 
     """
-
-    ns = "item_handler"
 
     def route(self, handler_driver_name, rate, save):
         """
@@ -160,7 +158,7 @@ class GeneralItemHandler(BaseHandler):
         :param final_url: 请求的url
         :return:
         """
-        self.task['crawlinfo']['mode'] = HANDLER_MODE_DEFAULT_ITEM
+        self.task['crawlinfo']['mode'] = self.mode
         if 'final_url' not in self.task['crawlinfo']:
             self.task['crawlinfo']['final_url'] = {str(self.page): final_url}
         else:
@@ -224,8 +222,7 @@ class GeneralItemHandler(BaseHandler):
         if self.response['parsed']:
             typeinfo = utils.typeinfo(self.response['final_url'])
             self.result2db(save, copy.deepcopy(typeinfo))
-            params = {"save": save, **typeinfo}
-            utils.run_extension(extension_ns="{0}.result_handle".format(self.ns), data=params, handler=self)
+            self.extension("result_handle", {"save": save, **typeinfo})
 
     def result2db(self, save, typeinfo):
         """
@@ -319,6 +316,4 @@ class GeneralItemHandler(BaseHandler):
         super(GeneralItemHandler, self).finish(save)
         if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
             self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
-            utils.run_extension(
-                extension_ns="{0}.finish_handle".format(self.ns), data={"save": save, "dao": ArticlesDB.__name__},
-                handler=self)
+            self.extension("sync_handle", {"save": save, "rid": self.task['rid'], "dao": ArticlesDB.__name__})

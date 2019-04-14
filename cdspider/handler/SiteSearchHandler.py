@@ -19,10 +19,8 @@ class SiteSearchHandler(GeneralSearchHandler):
                    "authorListRule": 列表规则，参考列表规则}
 
     支持注册的插件:
-        site-search_handler.result_handle
-            data参数为 {"save": save,"rid": result_id}
-        site-search_handler.finish_handle
-            data参数为 {"save": save, "dao": DAO name}
+        site-search_handler.mode_handle
+            data参数为 {"save": save,"url": url}
     """
 
     ns = "site-search_handler"

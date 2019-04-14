@@ -26,11 +26,7 @@ class GeneralListHandler(BaseHandler):
     支持注册的插件:
         list_handler.mode_handle  匹配详情页的mode
             data参数为 {"save": save,"url": url}
-        list_handler.finish_handle
-            data参数为 {"save": save, "dao": DAO name}
     """
-
-    ns = "list_handler"
 
     def newtask(self, message):
         """
@@ -81,7 +77,7 @@ class GeneralListHandler(BaseHandler):
         """
         try:
             if "uuid" in self.task and self.task['uuid']:
-                task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
+                task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.mode)
                 if not task:
                     raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
                 self.task.update(task)
@@ -113,10 +109,10 @@ class GeneralListHandler(BaseHandler):
         else:
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
             if not urls:
-                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.mode)
                 raise CDSpiderDBDataNotFound("urls: %s not exists" % self.task['uid'])
             if urls['status'] != UrlsDB.STATUS_ACTIVE or urls['ruleStatus'] != UrlsDB.STATUS_ACTIVE:
-                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderHandlerError("url not active")
             save['base_url'] = urls['url']
             self.task['urls'] = urls
@@ -124,7 +120,7 @@ class GeneralListHandler(BaseHandler):
                 raise CDSpiderHandlerError("url not has list rule")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
             if not rule:
-                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.task['mode'])
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.mode)
                 raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
             if rule and rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
@@ -149,7 +145,7 @@ class GeneralListHandler(BaseHandler):
         :param final_url: 请求的url
         """
         return {
-                'listMode': self.task['mode'],
+                'listMode': self.mode,
                 'mode': HANDLER_MODE_DEFAULT_ITEM,
                 "stid": self.task.get("uuid", 0),   # SpiderTask uuid
                 "uid": self.task.get("uid", 0),     # url id
@@ -234,9 +230,7 @@ class GeneralListHandler(BaseHandler):
                     if not result_id:
                         raise CDSpiderDBError("Result insert failed")
 
-                    mode_list = utils.run_extension(
-                        extension_ns="{0}.mode_handle".format(self.ns), data={"save": save, "url": result['url']},
-                        handler=self)
+                    mode_list = self.extension("mode_handle", {"save": save, "url": result['url']})
                     if mode_list is None:
                         self.build_item_task(result_id, HANDLER_MODE_DEFAULT_ITEM)
                     else:
@@ -309,9 +303,5 @@ class GeneralListHandler(BaseHandler):
             s = {}
         s.update(save)
         self.db['SpiderTaskDB'].update(
-            self.task['uuid'], self.task['mode'],
+            self.task['uuid'], self.mode,
             {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
-
-        utils.run_extension(
-            extension_ns="{0}.finish_handle".format(self.ns), data={"save": save, "dao": ArticlesDB.__name__},
-            handler=self)
