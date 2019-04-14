@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -32,8 +32,7 @@ class Mongo(BaseDataBase):
         "$regex": "$regex",
     }
 
-
-    def __init__(self, connector, table = None, **kwargs):
+    def __init__(self, connector, table=None, **kwargs):
         if table is None:
             table = self.__tablename__
         super(Mongo, self).__init__(connector, table = table, **kwargs)
@@ -43,7 +42,7 @@ class Mongo(BaseDataBase):
         self.table = table
         return self
 
-    def find(self, where, table = None, select = None, sort = None, offset = 0, hits = 10):
+    def find(self, where, table=None, select=None, sort=None, offset=0, hits=10):
         """
         多行查询
         """
@@ -53,11 +52,11 @@ class Mongo(BaseDataBase):
         self.logger.debug('find %s from %s where %s order %s limit %s, %s' % (projection, table or self.table, where, sort, offset, hits))
         cursor = collection.find(filter=where, projection=projection, sort = sort, skip = offset, limit = hits)
         for each in cursor:
-            if each and '_id' in each and (select and not '_id' in select or not select):
+            if each and '_id' in each and (select and '_id' not in select or not select):
                 del each['_id']
             yield each
 
-    def get(self, where, table = None, select = None, sort = None):
+    def get(self, where, table=None, select=None, sort=None):
         """
         单行查询
         """
@@ -66,11 +65,11 @@ class Mongo(BaseDataBase):
         projection = self._build_projection(select)
         self.logger.debug('find %s from %s where %s order %s' % (projection, table or self.table, where, sort))
         doc = collection.find_one(filter=where, projection=projection, sort = sort)
-        if doc and '_id' in doc and (select and not '_id' in select or not select):
+        if doc and '_id' in doc and (select and '_id' not in select or not select):
             del doc['_id']
         return doc
 
-    def insert(self, setting, table = None):
+    def insert(self, setting, table=None):
         """
         插入数据
         """
@@ -79,7 +78,7 @@ class Mongo(BaseDataBase):
         cursor = collection.insert_one(document=setting)
         return cursor.inserted_id
 
-    def update(self, setting, where, table = None, multi = False, upsert = False):
+    def update(self, setting, where, table=None, multi=False, upsert=False):
         """
         修改数据
         """
@@ -92,8 +91,7 @@ class Mongo(BaseDataBase):
             cursor = collection.update_one(filter = where, update = {"$set": setting}, upsert = upsert)
         return cursor.modified_count
 
-
-    def delete(self, where, table = None, multi = False):
+    def delete(self, where, table=None, multi=False):
         """
         删除数据
         """
@@ -106,7 +104,7 @@ class Mongo(BaseDataBase):
             cursor = collection.delete_one(filter=where)
         return cursor.deleted_count
 
-    def count(self, where, select = None, table = None):
+    def count(self, where, select=None, table=None):
         """
         count
         """
@@ -155,7 +153,7 @@ class Mongo(BaseDataBase):
         elif isinstance(where, list):
             return {'$and': [self._build_where(item) for item in where]}
         elif isinstance(where, dict):
-            cw = {}
+            cw={}
             for k, v in where.items():
                 k = self.get_operator(k)
                 if k.lower() in ['$and', '$or']:
@@ -167,18 +165,20 @@ class Mongo(BaseDataBase):
             return cw
         return {}
 
-
     def _get_increment(self, name):
         collection = self._db.get_collection('inc_ids')
         indexes = collection.index_information()
-        if not 'name' in indexes:
+        if 'name' not in indexes:
             collection.create_index('name', unique=True, name='name')
         res = collection.find_one_and_update({"name": name}, {"$inc": {"id": 1}}, upsert=True, return_document=True)
         return res['id']
 
+
 class SplitTableMixin(object):
 
     __tablename__ = None
+
+    _db = None
 
     def _collection_name(self, suffix):
         if not suffix:

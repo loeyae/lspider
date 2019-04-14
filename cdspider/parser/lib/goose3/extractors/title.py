@@ -152,7 +152,7 @@ class TitleExtractor(BaseExtractor):
                     if data:
                         return {'raw_title': data[0], 'clean_title': self.clean_title(data[0])}
 
-            if not fulldomain in KNOWN_TITLE_TAGS_BY_DOMAIN and not self.domain in KNOWN_TITLE_TAGS_BY_DOMAIN:
+            if fulldomain not in KNOWN_TITLE_TAGS_BY_DOMAIN and self.domain not in KNOWN_TITLE_TAGS_BY_DOMAIN:
                 # rely on opengraph in case we have the data
                 if "title" in list(self.article.opengraph.keys()):
                     title = self.article.opengraph['title']

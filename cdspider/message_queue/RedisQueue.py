@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -68,7 +68,7 @@ class RedisQueue(CDBaseQueue):
         """
 
         k = self.symbol()
-        if not k in connection_pool:
+        if k not in connection_pool:
             connectionPool = redis.ConnectionPool(host=self.host, port=self.port, db=self.path, password=self.password)
             self.connect = redis.Redis(connection_pool=connectionPool)
             connection_pool[k] = self.connect

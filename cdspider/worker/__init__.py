@@ -1,17 +1,16 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
-import sys
+
 import gc
 import time
 import logging
 import traceback
-import copy
-import json
 import tornado.ioloop
 from six.moves import queue
 from cdspider import Component
+
 
 class BaseWorker(Component):
 
@@ -25,7 +24,9 @@ class BaseWorker(Component):
         self.g = context.obj
         self.db = self.g['db']
         self.queue = self.g['queue']
-        self._quit=False
+        self._quit = False
+        self.t = 0
+        self._running = False
         self.inqueue = None
         self.excqueue = None
         self.ioloop = tornado.ioloop.IOLoop()
@@ -71,6 +72,7 @@ class BaseWorker(Component):
         """
         self.info("%s starting..." % self.__class__.__name__)
         self.t = 0
+
         def queue_loop():
             if self._quit:
                 raise SystemExit
@@ -113,7 +115,4 @@ class BaseWorker(Component):
 
 from .result_worker import ResultWorker
 from .exc_worker import ExcWorker
-from .article_sync_kafka_worker import ArticleSyncKafkaWorker
-from .comment_sync_kafka_worker import CommentSyncKafkaWorker
-from .attach_sync_kafka_worker import AttachSyncKafkaWorker
 from .test_worker import TestWorker

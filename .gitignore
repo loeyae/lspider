@@ -1,7 +1,11 @@
-/nbproject
-*.pyc
-/.idea
+# Created by .ignore support plugin (hsz.mobi)
+### Example user template template
+### Example user template
+
+# IntelliJ project files
 build/
 cdspider.egg-info/
 cdspider/runtime/
 dist/
+main.locale.json
+ghostdriver.log

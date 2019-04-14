@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -23,25 +23,23 @@ from cdspider.parser.lib import TimeParser
 class GeneralSearchHandler(BaseHandler):
     """
     general search handler
-    :property task 爬虫任务信息 {"mode": "search", "uuid": SpiderTask.list uuid}
-                   当测试该handler，数据应为 {"mode": "search", "keyword": 关键词规则, "authorListRule": 列表规则，参考列表规则}
+    task 爬虫任务信息 {"mode": "search", "uuid": SpiderTask.list uuid}
+                   当测试该handler，数据应为 {"mode": "search", "keyword": 关键词规则,
+                   "authorListRule": 列表规则，参考列表规则}
+
+    支持注册的插件:
+        search_handler.result_handle
+            data参数为 {"save": save,"rid": result_id}
+        search_handler.finish_handle
+            data参数为 {"save": save, "dao": DAO name}
     """
 
-    NIN_MEDIA_TYPE = (MEDIA_TYPE_WEIBO, MEDIA_TYPE_WECHAT, MEDIA_TYPE_TOUTIAO)
-    MEDIA_TYPE_TO_MODE = {
-        str(MEDIA_TYPE_WEIBO): HANDLER_MODE_WEIBO_SEARCH,
-        str(MEDIA_TYPE_WECHAT): HANDLER_MODE_WECHAT_SEARCH,
-    }
-
-    SEARCH_TYPE_TO_MODE = {
-        TaskDB.SEARCH_TYPE_ENGINE: HANDLER_MODE_DEFAULT_SEARCH,
-        TaskDB.SEARCH_TYPE_SITE: HANDLER_MODE_SITE_SEARCH
-    }
+    ns = "search_handler"
 
     def newtask(self, message):
         """
         新建爬虫任务
-        :param message [{"tid": task id, "kid": keyword uuid, "mode": handler mode}]
+        :param message: [{"tid": task id, "kid": keyword uuid, "mode": handler mode}]
         """
         if 'tid' in message and message['tid']:
             tid = message['tid']
@@ -90,8 +88,10 @@ class GeneralSearchHandler(BaseHandler):
                 uuid = 0
                 while True:
                     has_word = False
-                    for item in self.db['TaskDB'].get_new_list(uuid, where={"type": TASK_TYPE_SEARCH}, select=['uuid', 'pid', 'sid', 'mediaType', 'searchType']):
-                        mode = self.MEDIA_TYPE_TO_MODE.get(str(item['mediaType']), self.SEARCH_TYPE_TO_MODE.get(str(item['searchType']), HANDLER_MODE_DEFAULT_SEARCH))
+                    for item in self.db['TaskDB'].get_new_list(
+                            uuid, where={"type": TASK_TYPE_SEARCH},
+                            select=['uuid', 'pid', 'sid', 'mediaType', 'searchType']):
+                        mode = HANDLER_MODE_DEFAULT_SEARCH
                         tasks = self.db['SpiderTaskDB'].get_list(mode, {"tid": item['uuid'], "kid": each})
                         if len(list(tasks)) > 0:
                             continue
@@ -120,7 +120,7 @@ class GeneralSearchHandler(BaseHandler):
     def get_scripts(self):
         """
         获取列表规则中的自定义脚本
-        :return 自定义脚本
+        :return: 自定义脚本
         """
         try:
             if "uuid" in self.task and self.task['uuid']:
@@ -130,26 +130,28 @@ class GeneralSearchHandler(BaseHandler):
                 self.task.update(task)
             rule = self.match_rule({})
             return rule.get("scripts", None)
-        except:
+        except CDSpiderError:
             return None
 
     def init_process(self, save):
         """
         初始化爬虫流程
-        :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
+        爬取流程格式：self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
+        :param save: 传递的上下文
         """
         rule = self.match_rule(save)
-        self.process =  rule
+        self.process = rule
 
     def match_rule(self, save):
         """
         获取匹配的规则
+        :param save: 传递的上下文
         """
-        if "authorListRule" in self.task:
+        if "listRule" in self.task:
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
             '''
-            rule = copy.deepcopy(self.task['authorListRule'])
+            rule = copy.deepcopy(self.task['listRule'])
             keyword = copy.deepcopy(self.task['keyword'])
             if not keyword:
                 raise CDSpiderError("keyword not exists")
@@ -161,11 +163,11 @@ class GeneralSearchHandler(BaseHandler):
             if keyword['status'] != KeywordsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderHandlerError("keyword: %s not active" % self.task['kid'])
-            rule = self.db['AuthorListRuleDB'].get_detail_by_tid(self.task['tid'])
+            rule = self.db['ListRuleDB'].get_detail_by_tid(self.task['tid'])
             if not rule:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.task['mode'])
                 raise CDSpiderDBDataNotFound("task rule by tid: %s not exists" % self.task['tid'])
-            if rule['status'] != AuthorListRuleDB.STATUS_ACTIVE:
+            if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("author rule: %s not active" % rule['uuid'])
         kset = rule['request'].pop('keyword', {})
         if 'hard_code' in save:
@@ -179,7 +181,8 @@ class GeneralSearchHandler(BaseHandler):
             }],
         }
         now = int(time.time())
-        params = {"lastmonth": now - 30 * 86400, "lastweek": now - 7 * 86400, "yesterday": now - 86400, "lasthour": now - 36000, "now": now}
+        params = {"lastmonth": now - 30 * 86400, "lastweek": now - 7 * 86400,
+                  "yesterday": now - 86400, "lasthour": now - 36000, "now": now}
         self.task['url'] = utils.build_url_by_rule({"base": rule['baseUrl'], "mode": "format"}, params)
         save['base_url'] = self.task['url']
         save['paging'] = True
@@ -188,11 +191,12 @@ class GeneralSearchHandler(BaseHandler):
     def run_parse(self, rule):
         """
         根据解析规则解析源码，获取相应数据
+        爬虫结果 self.response {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
+        解析结果 self.response {"parsed": 解析结果}
         :param rule 解析规则
-        :input self.response 爬虫结果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
-        :output self.response {"parsed": 解析结果}
         """
-        parser = ListParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
+        parser = ListParser(source=self.response['content'], ruleset=copy.deepcopy(rule),
+                            log_level=self.log_level, url=self.response['final_url'])
         parsed = parser.parse()
         self.debug("%s parsed: %s" % (self.__class__.__name__, parsed))
         if parsed:
@@ -201,9 +205,8 @@ class GeneralSearchHandler(BaseHandler):
     def _build_crawl_info(self, final_url, mode):
         """
         构造文章数据的爬虫信息
-        :param final_url 请求的url
-        :input self.task 爬虫任务信息
-        :input self.crawl_id 爬虫运行时刻
+        :param final_url: 请求的url
+        :param mode: mode
         """
         return {
                 'listMode': self.task['mode'],
@@ -222,14 +225,13 @@ class GeneralSearchHandler(BaseHandler):
     def _build_result_info(self, **kwargs):
         """
         构造文章数据
-        :param result 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
-        :param final_url 请求的url
-        :param typeinfo 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
-        :param crawlinfo 爬虫信息
-        :param unid 文章唯一索引
-        :param ctime 抓取时间
-        :param status 状态
-        :input self.crawl_id 爬取时刻
+        :param result: 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
+        :param final_url: 请求的url
+        :param typeinfo: 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
+        :param crawlinfo: 爬虫信息
+        :param unid: 文章唯一索引
+        :param ctime: 抓取时间
+        :param status: 状态
         """
         now = int(time.time())
         result = kwargs.get('result', {})
@@ -256,10 +258,10 @@ class GeneralSearchHandler(BaseHandler):
     def run_result(self, save):
         """
         爬虫结果处理
+        爬虫结果 self.response {"parsed": 解析结果, "final_url": 请求的url}
         :param save 保存的上下文信息
-        :input self.response {"parsed": 解析结果, "final_url": 请求的url}
         """
-        self.crawl_info['crawl_urls'][str(self.page)] = self.response['last_url']
+        self.crawl_info['crawl_urls'][str(self.page)] = self.response['url']
         self.crawl_info['crawl_count']['page'] += 1
         ctime = self.crawl_id
         new_count = self.crawl_info['crawl_count']['new_count']
@@ -273,14 +275,24 @@ class GeneralSearchHandler(BaseHandler):
                 inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
                 self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
             else:
-                #生成文章唯一索引并判断文章是否已经存在
+                # 生成文章唯一索引并判断文章是否已经存在
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
             if inserted:
-                mode = self.match_mode(item['url'])
-                crawlinfo =  self._build_crawl_info(self.response['final_url'], mode)
+                mode_list = utils.run_extension(
+                    extension_ns="{0}.mode_handle".format(self.ns), data={"save": save, "url": result['url']},
+                    handler=self)
+                mode = HANDLER_MODE_DEFAULT_ITEM
+                if mode_list:
+                    for item in mode_list:
+                        if item is not None:
+                            mode = item
+                            break
+
+                crawlinfo = self._build_crawl_info(self.response['final_url'], mode)
                 typeinfo = utils.typeinfo(item['url'])
-                result = self._build_result_info(final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
+                result = self._build_result_info(
+                    final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
                 if self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
@@ -297,64 +309,6 @@ class GeneralSearchHandler(BaseHandler):
         if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
             self.crawl_info['crawl_count']['repeat_page'] += 1
             self.on_repetition(save)
-
-    def match_mode(self, url):
-        """
-        匹配搜索结果详情页的mode
-        """
-        subdomain, domain = utils.domain_info(url)
-        has_bbs = False
-        if subdomain:
-            '''
-            优先获取子域名对应的规则
-            '''
-            parserule_list = self.db['ForumRuleDB'].get_list_by_subdomain(subdomain)
-            for item in parserule_list:
-                if  'urlPattern' in item and item['urlPattern']:
-                    '''
-                    如果规则中存在url匹配规则，则进行url匹配规则验证
-                    '''
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return HANDLER_MODE_BBS_ITEM
-                has_bbs = True
-            parserule_list = self.db['ParseRuleDB'].get_list_by_subdomain(subdomain)
-            for item in parserule_list:
-                if  'urlPattern' in item and item['urlPattern']:
-                    '''
-                    如果规则中存在url匹配规则，则进行url匹配规则验证
-                    '''
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return HANDLER_MODE_DEFAULT_ITEM
-            if has_bbs:
-                return HANDLER_MODE_BBS_ITEM
-        else:
-            '''
-            获取域名对应的规则
-            '''
-            parserule_list = self.db['ForumRuleDB'].get_list_by_domain(domain)
-            for item in parserule_list:
-                if  'urlPattern' in item and item['urlPattern']:
-                    '''
-                    如果规则中存在url匹配规则，则进行url匹配规则验证
-                    '''
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return HANDLER_MODE_BBS_ITEM
-                has_bbs = True
-            parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
-            for item in parserule_list:
-                if  'urlPattern' in item and item['urlPattern']:
-                    '''
-                    如果规则中存在url匹配规则，则进行url匹配规则验证
-                    '''
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return HANDLER_MODE_DEFAULT_ITEM
-            if has_bbs:
-                return HANDLER_MODE_BBS_ITEM
-        return HANDLER_MODE_DEFAULT_ITEM
 
     def url_prepare(self, url):
         """
@@ -384,7 +338,7 @@ class GeneralSearchHandler(BaseHandler):
         urlrule = self.process.get("url")
         formated = []
         for item in data:
-            if not 'url' in item or not item['url']:
+            if 'url' not in item or not item['url']:
                 continue
             if item['url'].startswith('javascript') or item['url'] == '/':
                 continue
@@ -400,7 +354,6 @@ class GeneralSearchHandler(BaseHandler):
                 item['url'] = urljoin(base_url, item['url'])
             formated.append(item)
         return formated
-
 
     def build_item_task(self, rid, mode):
         """
@@ -428,4 +381,10 @@ class GeneralSearchHandler(BaseHandler):
         if not s:
             s = {}
         s.update(save)
-        self.db['SpiderTaskDB'].update(self.task['uuid'], self.task['mode'], {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
+        self.db['SpiderTaskDB'].update(
+            self.task['uuid'], self.task['mode'],
+            {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
+
+        utils.run_extension(
+            extension_ns="{0}.finish_handle".format(self.ns), data={"save": save, "dao": ArticlesDB.__name__},
+            handler=self)

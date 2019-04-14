@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -49,7 +49,7 @@ class SmtpSender(BaseSender):
                 code = self.mailer.ehlo()[0]
                 uses_esmtp = (200 <= code <= 299)
                 if not uses_esmtp:
-                    code = connection.helo()[0]
+                    code = self.mailer.helo()[0]
                 if not (200 <= code <= 299):
                     raise Exception("Remove server refused HELO; code: %s" % code)
                 if self.sender.get('secure') == 'tls' and uses_esmtp and self.mailer.has_extn('starttls'):

@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -12,6 +12,7 @@ import time
 from cdspider.database.base import ArticlesDB as BaseArticlesDB
 from .Mongo import Mongo, SplitTableMixin
 
+
 class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
 
     __tablename__ = 'articles'
@@ -20,7 +21,7 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
         super(ArticlesDB, self).__init__(connector, table = table, **kwargs)
         self._check_collection()
 
-    def insert(self, obj = {}):
+    def insert(self, obj={}):
         obj.setdefault("ctime", int(time.time()))
         table = self._get_collection(obj['ctime'])
         id = self._get_increment(table)
@@ -28,7 +29,7 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
         super(ArticlesDB, self).insert(setting=obj, table=table)
         return obj['rid']
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         table = self._table_name(id)
         obj['utime'] = int(time.time())
         return super(ArticlesDB, self).update(setting=obj, where={"rid": id}, table=table)
@@ -41,26 +42,26 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
         table = self._get_collection(ctime)
         return self.get(where = {"acid", unid}, table=table)
 
-    def get_list(self, ctime, where = {}, select = None, **kwargs):
+    def get_list(self, ctime, where={}, select = None, **kwargs):
         table = self._get_collection(ctime)
         kwargs.setdefault('sort', [('ctime', 1)])
         return self.find(table=table, where=where, select=select, **kwargs)
 
-    def get_count(self, ctime, where = {}, select = None, **kwargs):
+    def get_count(self, ctime, where={}, select = None, **kwargs):
         table = self._get_collection(ctime)
         return self.count(table=table, where=where, select=select, **kwargs)
 
     def _get_collection(self, ctime):
         suffix = time.strftime("%Y%m", time.localtime(ctime))
         name = super(ArticlesDB, self)._collection_name(suffix)
-        if not name in self._collections:
+        if name not in self._collections:
             self._create_collection(name)
         return name
 
     def _table_name(self, id):
         suffix, _ = BaseArticlesDB.unbuild_id(id)
         name = super(ArticlesDB, self)._collection_name(suffix)
-        if not name in self._collections:
+        if name not in self._collections:
             self._create_collection(name)
         return name
 
@@ -68,36 +69,36 @@ class ArticlesDB(Mongo, BaseArticlesDB, SplitTableMixin):
         self._list_collection()
         suffix = time.strftime("%Y%m")
         name = super(ArticlesDB, self)._collection_name(suffix)
-        if not name in self._collections:
+        if name not in self._collections:
             self._create_collection(name)
 
     def _create_collection(self, table):
         collection = self._db.get_collection(table)
         indexes = collection.index_information()
-        if not 'rid' in indexes:
+        if 'rid' not in indexes:
             collection.create_index('rid', unique=True, name='rid')
-        if not 'acid' in indexes:
+        if 'acid' not in indexes:
             collection.create_index('acid', unique=True, name='acid')
-        if not 'domain' in indexes:
+        if 'domain' not in indexes:
             collection.create_index('domain', name='domain')
-        if not 'subdomain' in indexes:
+        if 'subdomain' not in indexes:
             collection.create_index('subdomain', name='subdomain')
-        if not 'status' in indexes:
+        if 'status' not in indexes:
             collection.create_index('status', name='status')
-        if not 'pubtime' in indexes:
+        if 'pubtime' not in indexes:
             collection.create_index('pubtime', name='pubtime')
-        if not 'ctime' in indexes:
+        if 'ctime' not in indexes:
             collection.create_index('ctime', name='ctime')
-        if not 'pid' in indexes:
+        if 'pid' not in indexes:
             collection.create_index('crawlinfo.pid', name='pid')
-        if not 'sid' in indexes:
+        if 'sid' not in indexes:
             collection.create_index('crawlinfo.sid', name='sid')
-        if not 'tid' in indexes:
+        if 'tid' not in indexes:
             collection.create_index('crawlinfo.tid', name='tid')
-        if not 'uid' in indexes:
+        if 'uid' not in indexes:
             collection.create_index('crawlinfo.uid', name='uid')
-        if not 'kid' in indexes:
+        if 'kid' not in indexes:
             collection.create_index('crawlinfo.kid', name='kid')
-        if not 'listRule' in indexes:
+        if 'listRule' not in indexes:
             collection.create_index([('crawlinfo.listMode', 1), ('crawlinfo.listRule', 1)], name='listRule')
         self._collections.add(table)

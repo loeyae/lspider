@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -10,11 +10,10 @@ import time
 import sys
 import traceback
 import json
+import stevedore
 from . import BaseScheduler
-from cdspider.exceptions import *
 from cdspider.libs.constants import *
-from cdspider.libs import utils
-from cdspider.libs.utils import get_object, run_in_thread
+from cdspider.libs.utils import __redirection__, call_extension, load_handler, run_in_thread
 
 class Router(BaseScheduler):
     """
@@ -38,19 +37,18 @@ class Router(BaseScheduler):
             return False
         if not self.testing_mode and int(s) > 3:
             self._check_time = None
-#            self.debug("scheduler2task is running @%s" % s)
+            # self.debug("scheduler2task is running @%s" % s)
             return False
         elif not self.testing_mode and not self._check_time is None:
-#            self.debug("scheduler2task is running @%s" % s)
+            # self.debug("scheduler2task is running @%s" % s)
             return False
         self._check_time = s
         return True
 
     def schedule(self, message = None):
         self.info("%s route starting..." % self.__class__.__name__)
-        def handler_schedule(mode, name, rate, ctx):
-            handler = get_object("cdspider.handler.%s" % name)(ctx, None)
-            self.info("%s loaded handler: %s" % (self.__class__.__name__, handler))
+        def handler_schedule(handler, mode, rate, ctx):
+            self.info("%s loaded handler: %s by %s" % (self.__class__.__name__, handler, rate))
             save = {}
             while True:
                 has_item = False
@@ -69,19 +67,20 @@ class Router(BaseScheduler):
                 if not has_item:
                     break
                 time.sleep(0.1)
-            del handler
         threads = []
         ratemap = self.rate if self.rate else self.ctx.obj.get('app_config', {}).get('ratemap', {}).keys()
 
         if self.mode:
             for key in self.mode:
-                name = HANDLER_MODE_HANDLER_MAPPING[key]
+                handler = load_handler(key, context=self.ctx, task=None)
                 for rate in ratemap:
-                    threads.append(run_in_thread(handler_schedule, key, name, rate, self.ctx))
+                    threads.append(run_in_thread(handler_schedule, handler, key, rate, self.ctx))
         else:
-            for key, name in HANDLER_MODE_HANDLER_MAPPING.items():
-                for rate in ratemap:
-                    threads.append(run_in_thread(handler_schedule, key, name, rate, self.ctx))
+            def execut(ext, data):
+                for rate in data["ratemap"]:
+                    threads.append(run_in_thread(handler_schedule, ext.obj, ext.name, rate, data["ctx"]))
+
+            call_extension("handler", execut, {"ctx": self.ctx, "ratemap": ratemap}, context=self.ctx, task=None)
 
         for each in threads:
             if not each.is_alive():
@@ -95,28 +94,28 @@ class Router(BaseScheduler):
     def newtask(self, message):
         name = message.get('mode', HANDLER_MODE_DEFAULT)
 
-        handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        handler = load_handler(name, self.ctx, None)
         self.info("Spider loaded handler: %s" % handler)
         handler.newtask(message)
         del handler
 
     def status(self, message):
         name = message.get('mode', HANDLER_MODE_DEFAULT)
-        handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        handler = load_handler(name, self.ctx, None)
         self.info("Spider loaded handler: %s" % handler)
         handler.status(message)
         del handler
 
     def frequency(self, message):
         name = message.get('mode', HANDLER_MODE_DEFAULT)
-        handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        handler = load_handler(name, self.ctx, None)
         self.info("Spider loaded handler: %s" % handler)
         handler.frequency(message)
         del handler
 
     def expire(self, message):
         name = message.get('mode', HANDLER_MODE_DEFAULT)
-        handler = get_object("cdspider.handler.%s" % HANDLER_MODE_HANDLER_MAPPING[name])(self.ctx, None)
+        handler = load_handler(name, self.ctx, None)
         self.info("Spider loaded handler: %s" % handler)
         handler.expire(message)
         del handler
@@ -130,9 +129,7 @@ class Router(BaseScheduler):
             self.queue[QUEUE_NAME_SPIDER_TO_RESULT].put_nowait(m)
 
     def xmlrpc_run(self, port=25555, bind='127.0.0.1'):
-        import umsgpack
         from cdspider.libs import WSGIXMLRPCApplication
-        from xmlrpc.client import Binary
 
         application = WSGIXMLRPCApplication()
 
@@ -145,7 +142,7 @@ class Router(BaseScheduler):
 
         def build(task):
             self.debug("%s rpc buid get message %s" % (self.__class__.__name__, task))
-            r_obj = utils.__redirection__()
+            r_obj = __redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
             try:
@@ -164,7 +161,7 @@ class Router(BaseScheduler):
 
         def newtask(task):
             self.debug("%s rpc newtask get message %s" % (self.__class__.__name__, task))
-            r_obj = utils.__redirection__()
+            r_obj = __redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
             try:
@@ -183,7 +180,7 @@ class Router(BaseScheduler):
 
         def status(task):
             self.debug("%s rpc status get message %s" % (self.__class__.__name__, task))
-            r_obj = utils.__redirection__()
+            r_obj = __redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:
@@ -201,7 +198,7 @@ class Router(BaseScheduler):
 
         def frequency(task):
             self.debug("%s rpc frequency get message %s" % (self.__class__.__name__, task))
-            r_obj = utils.__redirection__()
+            r_obj = __redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:
@@ -219,7 +216,7 @@ class Router(BaseScheduler):
 
         def expire(task):
             self.debug("%s rpc expire get message %s" % (self.__class__.__name__, task))
-            r_obj = utils.__redirection__()
+            r_obj = __redirection__()
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = None
             try:

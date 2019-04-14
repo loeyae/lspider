@@ -185,7 +185,7 @@ class Crawler(object):
         self.article._attaches = self.attach_extractor.extract()
 
         for k in self.config.custom_rule:
-            if not k in ('title', 'author', 'pubtime', 'content', 'attaches'):
+            if k not in ('title', 'author', 'pubtime', 'content', 'attaches'):
                 self.article.add_additional_data(k, self.custom_extractor.extract(k))
 
         # check for known node as content body

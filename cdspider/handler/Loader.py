@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -14,6 +14,7 @@ from cdspider.libs.tools import ModulerLoader
 from cdspider.libs.utils import load_handler
 from cdspider.libs.constants import *
 
+
 class Loader(Component):
     """
     handler loader
@@ -28,7 +29,7 @@ class Loader(Component):
         self.params = {"context": context, "task": task, "no_sync": no_sync}
         try:
             self.handler = load_handler(mode, **self.params)
-        except:
+        except ImportError:
             raise CDSpiderHandlerError("handler not exists")
 
     def get_moduler(self):

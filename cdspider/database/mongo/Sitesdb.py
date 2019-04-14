@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -9,9 +9,9 @@
 :version: SVN: $Id: Sitedb.py 2115 2018-07-04 03:56:07Z zhangyi $
 """
 import time
-import pymongo
 from cdspider.database.base import SitesDB as BaseSitesDB
 from .Mongo import Mongo
+
 
 class SitesDB(Mongo, BaseSitesDB):
 
@@ -23,11 +23,11 @@ class SitesDB(Mongo, BaseSitesDB):
         super(SitesDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'uuid' in indexes:
+        if 'uuid' not in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
-        if not 'pid' in indexes:
+        if 'pid' not in indexes:
             collection.create_index('pid', name='pid')
-        if not 'status' in indexes:
+        if 'status' not in indexes:
             collection.create_index('status', name='status')
 
     def insert(self, obj={}):
@@ -38,7 +38,7 @@ class SitesDB(Mongo, BaseSitesDB):
         _id = super(SitesDB, self).insert(setting=obj)
         return obj['uuid']
 
-    def disable(self, id, where = {}):
+    def disable(self, id, where={}):
         if not where:
             where = {'uuid': int(id)}
         else:
@@ -46,47 +46,47 @@ class SitesDB(Mongo, BaseSitesDB):
         return super(SitesDB, self).update(setting={"status": self.STATUS_INIT, 'utime': int(time.time())},
                 where=where, multi=False)
 
-    def disable_by_project(self, pid, where = {}):
+    def disable_by_project(self, pid, where={}):
         if not where:
             where = {'pid': int(pid)}
         else:
             where.update({'pid': int(pid)})
         return super(SitesDB, self).update(setting={"status": self.STATUS_INIT, 'utime': int(time.time())},
-                where=where, multi=True)
+                                           where=where, multi=True)
 
-    def active(self, id, where = {}):
+    def active(self, id, where={}):
         if not where:
             where = {'uuid': int(id)}
         else:
             where.update({'uuid': int(id)})
         return super(SitesDB, self).update(setting={"status": self.STATUS_ACTIVE, 'utime': int(time.time())},
-                where=where, multi=False)
+                                           where=where, multi=False)
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         obj['utime'] = int(time.time())
         return super(SitesDB, self).update(setting=obj, where={'sid': int(id)}, multi=False)
 
-    def update_many(self, obj = {},where=None):
-        if where=={} or where==None:
+    def update_many(self, obj={},where=None):
+        if where == {} or (where is None):
             return
         obj['utime'] = int(time.time())
         return super(SitesDB, self).update(setting=obj, where=where, multi=True)
 
-    def delete(self, id, where = {}):
+    def delete(self, id, where={}):
         if not where:
             where = {'uuid': int(id)}
         else:
             where.update({'uuid': int(id)})
         return super(SitesDB, self).update(setting={"status": self.STATUS_DELETED, 'utime': int(time.time())},
-                where=where, multi=False)
+                                           where=where, multi=False)
 
-    def delete_by_project(self, pid, where = {}):
+    def delete_by_project(self, pid, where={}):
         if not where:
             where = {'pid': int(pid)}
         else:
             where.update({'pid': int(pid)})
         return super(SitesDB, self).update(setting={"status": self.STATUS_DELETED, 'utime': int(time.time())},
-                where=where, multi=True)
+                                           where=where, multi=True)
 
     def get_detail(self, id, select=None):
         return self.get(where={'uuid': int(id)}, select = select)
@@ -98,7 +98,7 @@ class SitesDB(Mongo, BaseSitesDB):
         kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, select=select, **kwargs)
 
-    def get_new_list(self, id, pid, where = {}, select=None, **kwargs):
+    def get_new_list(self, id, pid, where={}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uuid', 1)])
         if not where:
             where == {}

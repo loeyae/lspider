@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from cdspider.libs import utils
 from . import BaseParser
 from .lib import Goose
@@ -28,7 +28,7 @@ class CustomParser(BaseParser):
             else:
                 ruleset['onlyOne'] = 0
         elif ruleset:
-            rule = list(ruleset.values())[0]
+            rule = ruleset.values()[0]
             if 'filter' in rule and rule['filter'] and rule['filter'].startswith('@json:'):
                 parser = JsonParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
                 return parser.parse()

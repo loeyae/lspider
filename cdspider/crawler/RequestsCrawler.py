@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -10,336 +10,150 @@
 import socks
 import requests
 import time
-from urllib.parse import *
-from pyquery import PyQuery
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+import copy
+import urllib3
+from tornado import gen
+from requests import cookies
+from urllib3.exceptions import InsecureRequestWarning
 from requests.exceptions import *
 from cdspider.crawler import BaseCrawler
 from cdspider.exceptions import *
 from cdspider.libs import utils
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+urllib3.disable_warnings(InsecureRequestWarning)
+
 
 class RequestsCrawler(BaseCrawler):
     """
     requests模块爬虫类
     """
 
+    default_options = {
+        "method": "GET",
+        'headers': {
+        },
+        'auth': None,
+        'timeout': (30, 60),
+        'allow_redirects': True,
+        'proxies': None,
+        'hooks': None,
+        'stream': None,
+        'verify': False,
+        'cert': None,
+    }
+
     def __init__(self, *args, **kwargs):
-        self._ses = requests.Session()
-        self._cookies = self._ses.cookies
-        self._headers = self._ses.headers
-        self._base_url = None
-        self._referer = None
+        """
+        init
+        :param args:
+        :param kwargs:
+        """
         super(RequestsCrawler, self).__init__(*args, **kwargs)
-        self._setting = {
-            'auth':None,
-            'timeout': (30, 60),
-            'allow_redirects': True,
-            'proxies': None,
-            'hooks': None,
-            'stream': None,
-            'verify': False,
-            'cert': None
-        }
-        for i in self._setting:
-            if i in kwargs:
-                self._setting[i] = kwargs[i]
-        self._encoding = 'utf-8'
-        if 'encoding' in kwargs:
-            self._encoding = kwargs['encoding']
-        self._response = None
+        self._ses = requests.sessions.Session()
 
-    def __del__(self):
-        self.close()
-        self.quit()
-        super(RequestsCrawler, self).__del__()
-
-    def close(self):
-        if hasattr(self._response, 'close'):
-            self._response.close()
-            self._response = None
-
-    def quit(self):
-        if hasattr(self._ses, 'close'):
-            self._ses.close()
-            self._ses = None
-
-    def _prepare_request(self, url):
-        """
-        预处理，构造header
-        """
-        if isinstance(self._response, requests.Response):
-            self._response.close()
-        if self._proxy:
-            self.parse_proxy(**self._proxy)
-            self._proxy['init'] = False
-        if not self._base_url:
-            self._base_url = url
-        if not self._referer:
-            self._referer = utils.quote_chinese(self._base_url)
-        if self._referer != url and urlparse(self._referer).netloc == urlparse(url).netloc:
-            self._headers.update({'Referer': self._referer})
-
-    def _request(self, method, url, data = None, params = None, files = None, json_data = None):
+    def _request(self, url, fetch):
         """
         发送请求并获取结果
         """
-        self._prepare_request(url)
-        url = self._join_url(url)
-        auth = self._setting.get('auth')
-        timeout = self._setting.get('timeout')
-        allow_redirects = self._setting.get('allow_redirects')
-        proxies = self._setting.get('proxies')
-        hooks = self._setting.get('hooks')
-        stream = self._setting.get('stream')
-        verify = self._setting.get('verify')
-        cert = self._setting.get('cert')
-        self.info("Requests request url: %s" % url)
-        self.info("Requests request data: %s" % str(data))
-        self.info("Requests request params: %s" % str(params))
-        self.info("Requests request setting: %s" % str(self._setting))
         try:
-            req = requests.Request(method.upper(), utils.quote_chinese(url),
-                data=data,
-                files=files,
-                json=json_data,
-                params=params,
-                auth=auth,
-                hooks=hooks,
+            req = requests.Request(
+                method=fetch.get('method'),
+                url=fetch.get('url'),
+                headers=fetch.get('headers'),
+                files=fetch.get('files'),
+                data=fetch.get('data'),
+                params=fetch.get('params'),
+                auth=fetch.get('auth'),
+                cookies=self._cookies,
+                hooks=fetch.get('hooks'),
+                json=fetch.get('json')
             )
             with self._ses as s:
                 prepped = s.prepare_request(req)
-                self._response = s.send(
+                return s.send(
                     prepped,
-                    stream=stream,
-                    verify=verify,
-                    proxies=proxies,
-                    cert=cert,
-                    allow_redirects=allow_redirects,
-                    timeout=timeout,
+                    stream=fetch.get('stream'),
+                    timeout=fetch.get('timeout'),
+                    verify=fetch.get('verify'),
+                    cert=fetch.get('cert'),
+                    proxies=fetch.get('proxies'),
+                    allow_redirects=fetch.get('allow_redirects')
                 )
-        except (TimeoutError, socks.ProxyConnectionError):
-            raise CDSpiderCrawlerProxyError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+        except (TimeoutError, socks.ProxyConnectionError) as e:
+            raise CDSpiderCrawlerProxyError(e, self._base_url, url, setting=fetch)
         except ConnectTimeout as e:
-            raise CDSpiderCrawlerConnectTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            raise CDSpiderCrawlerConnectTimeout(e, self._base_url, url, settings=fetch)
         except ReadTimeout as e:
-            raise CDSpiderCrawlerReadTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            raise CDSpiderCrawlerReadTimeout(e, self._base_url, url, settings=fetch)
         except Timeout as e:
-            raise CDSpiderCrawlerTimeout(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            raise CDSpiderCrawlerTimeout(e, self._base_url, url, settings=fetch)
         except ConnectionError as e:
             if self._setting.get('proxies'):
-                raise CDSpiderCrawlerProxyExpired(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
-            raise CDSpiderCrawlerConnectionError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+                raise CDSpiderCrawlerProxyExpired(e, self._base_url, url, settings=fetch)
+            raise CDSpiderCrawlerConnectionError(e, self._base_url, url, settings=fetch)
         except Exception as e:
-            raise CDSpiderCrawlerError(e, self._base_url, url, settings = self._setting, data = data, params = params, json = json_data, files = files)
+            raise CDSpiderCrawlerError(e, self._base_url, url, settings=fetch)
 
-    def _prepare_response(self, referer):
+    def parse_fetch(self, **kwargs):
         """
-        预处理response
+        解析抓取参数
+        :param kwargs:
+        :return:
         """
+        if self._proxy:
+            self.parse_proxy(**self._proxy)
+            self._proxy['init'] = False
+        fetch_ = copy.deepcopy(self.fetch)
+        fetch_['method'] = kwargs['method'].upper()
+        fetch_['url'] = utils.quote_chinese(kwargs['url'])
+        return fetch_
 
-        if not isinstance(self._response, requests.Response):
-            raise CDSpiderCrawlerNoResponse(base_url = self._base_url)
-        self._cookies = requests.cookies.merge_cookies(self._cookies, self._response.cookies)
-        self._status_code = self._response.status_code
-        self.info('Requests response status: %s' % self._status_code)
-        self.info('Requests response cookies: %s' % self._cookies)
-        url = self._response.url
-        if isinstance(self._response.reason, bytes):
-            try:
-                reason = self._response.reason.decode('utf-8')
-            except UnicodeDecodeError:
-                reason = self._response.reason.decode('iso-8859-1')
-        else:
-            reason = self._response.reason
-        if self._status_code == self.STATUS_CODE_NOT_FOUND:
-            raise CDSpiderCrawlerNotFound(reason, self._base_url, url)
-        elif self._status_code == self.STATUS_CODE_FORBIDDEN:
-            raise CDSpiderCrawlerForbidden(reason, self._base_url, url)
-        elif self._status_code == self.STATUS_CODE_INTERNAL_ERROR:
-            raise CDSpiderCrawlerRemoteServerError(reason, self._base_url, url)
-        elif self._status_code == self.STATUS_CODE_BAD_REQUEST:
-            raise CDSpiderCrawlerBadRequest(reason, self._base_url, url)
-        elif self._status_code == self.STATUS_CODE_GATEWAY_TIMEOUT:
-            raise CDSpiderCrawlerConnectTimeout(reason, self._base_url, url)
-        elif self._status_code != self.STATUS_CODE_OK:
-            raise CDSpiderCrawlerError(reason, self._base_url, url, status_code=self._status_code)
-        if referer == 1:
-            self._referer = url
+    @gen.coroutine
+    def http_fetch(self, url, fetch):
+        """
+        HTTP fetcher
+        """
+        start_time = time.time()
 
-    def crawl(self, *args, **kwargs):
-        """
-        抓取操作
-        :param method: 请求方式get/post/option/delete
-        :param url: 请求的url
-        :param data: 请求时发送的数据
-        :param params: 请求时携带的参数
-        :param files: 请求时发送的文件
-        :param json: 请求时发送的json数据
-        :param ajax: 是否发送ajax请求True/False
-        :param headers: 请求时发送的header {name:value}
-        :param cookies: 请求时携带的cookie
-            [{name:cookie_name, value: cookie_value, path: /, domain: domain}]
-        :param proxy: 请求时的代理设置
-            {
-                proxy_rate: always/every,  always/every二选1
-                proxies: [host1:port1, host2:port2,....],  该项存在时忽略proxy_file
-                和proxy_url设置
-                proxy_file: /tmp/iplist.txt, 代理ip文件,文件内容为以"|"分割的host:port
-                设置,该项存在时忽略proxy_file的设置
-                proxy_url: http://localhost/ip_list.html,  代理ip在线列表, proxies
-                和proxy_file都不存在时启用改设置
-                addr: host:ip, 单一固定代理时设置
-                type: http/socks/ftp/ssl, 代理类型
-                user: username, 代理需要的用户
-                password: password, 代理需要的密码
-            }
-        :param referer: 是否更新header的referer设置
-        :param auth: 请求时发送的认证信息
-        :param timeout: 请求时的超时时间设置, 默认值(60, 90)
-        :param allow_redirects: 请求时是否允许自动跳转，默认为True
-        :param hooks: handle hook
-        :param stream: stream
-        :param verify: 是否验证证书
-        :param cert: 证书 if String, path to ssl client cert file (.pem).
-            If Tuple, ('cert', 'key') pair.
-        """
-        l = len(args)
-        if l > 0:
-            kwargs.setdefault('url', args[0])
-        if l > 1:
-            kwargs.setdefault('method', args[1])
-        kwargs.setdefault('method', 'get')
-        self.info("Requests crawl params: %s" % kwargs)
-        self._setting['proxies'] = None
-        self._prepare_setting(**kwargs)
-        if kwargs.get('ajax', False):
-            self.set_header('x-requested-with', 'XMLHttpRequest')
-        kws = utils.dictunion(kwargs, {'method': None, 'url': None, 'data': None,
-            'params': None, 'files': None, 'json': None})
-        self._request(**kws)
-        self._prepare_response(kwargs.get('referer', True))
+        def handle_error(x):
+            BaseCrawler.handle_error(url, start_time, x)
 
-    def wait(self, item, wait_time=1, intval=0.5, type = None, broken = None):
-        """
-        等待操作
-        """
-        end_time = time.time() + wait_time
-        if not isinstance(item, list):
-            item = [item]
-        if type != None and not isinstance(type, list):
-            type = [type]
-        if broken != None and not isinstance(broken, list):
-            broken = [broken]
+        # making requests
         while True:
-            i = 0
-            pq = PyQuery(self.page_source)
-            for it in item:
-                value = pq.find(it)
-                if value:
-                    if type and len(type) > i and type[i]:
-                        r = getattr(value, type[i])()
-                        if not r:
-                            continue
-                    if broken and len(broken) > i and broken[i]:
-                        raise BROKEN_EXCEPTIONS[broken[i]]
-                    return value
-                i += 1
-            time.sleep(intval)
-            if time.time() > end_time:
-                break
-        raise CDSpiderCrawlerWaitError('timeout for wait: %s' % (str(item)))
-
-    def get_cookie(self, name = None):
-        """
-        获取Response cookie，不指定name时，获取全部cookie
-        """
-        self._cookies.clear_expired_cookies()
-        if name:
-            return self._cookies.get(name, **kwargs)
-        return [item for item in self._cookies]
-
-    def set_cookie(self, name, value, **kwargs):
-        """
-        设置cookie
-        """
-        self.info("Requests request set cookie: name:%s, value:%s, %s" % (str(name),
-            str(value), str(kwargs)))
-        if 'httponly' in kwargs:
-            kwargs['rest'] = {'HttpOnly': kwargs['httponly']}
-        if 'expiry' in kwargs:
-            kwargs['expires'] = kwargs['expiry']
-        allowed = dict(
-            version=0,
-            port=None,
-            domain='',
-            path='/',
-            secure=False,
-            expires=None,
-            discard=True,
-            comment=None,
-            comment_url=None,
-            rest={'HttpOnly': None},
-            rfc2109=False,)
-        result = utils.dictunion(kwargs, allowed)
-        return self._cookies.set(name, str(value), **result)
-
-    def get_header(self, name = None):
-        """
-        获取header，不指定name时，获取全部header
-        """
-        if name:
-            return self._headers.get(name, None)
-        return self._headers
-
-    def set_header(self, name, value):
-        """
-        设置header
-        """
-        self.info("Requests set header: %s => %s" % (str(name), str(value)))
-        try:
-            self._headers.update({name:  utils.quote_chinese(value)})
-        except:
-            pass
-
-    @property
-    def page_source(self):
-        """
-        获取文章源码
-        """
-        if isinstance(self._response, requests.Response):
             try:
-                content = self._response.content
-                content = utils.decode(content)
-                return content
-            except:
-                return self._response.text
-        raise CDSpiderCrawlerNoResponse(base_url = self._base_url,
-            response = self._response)
+                response = yield gen.maybe_future(self._request(url, fetch))
+            except HTTPError as e:
+                if e.response:
+                    response = e.response
+                else:
+                    raise gen.Return(handle_error(e))
+            except Exception as e:
+                raise gen.Return(handle_error(e))
 
-    @property
-    def final_url(self):
-        return self._response.url
+            cookies.extract_cookies_to_jar(self._cookies, response.request, response)
 
-    @property
-    def content(self):
-        if isinstance(self._response, requests.Response):
-            return self._response.content
-        raise CDSpiderCrawlerNoResponse(base_url = self._base_url,
-            response = self._response)
+            error = self._prepare_response(response.status_code, url)
+            if error is not None:
+                raise gen.Return(handle_error(error))
+            self.gen_result(
+                url=response.url or url,
+                code=response.status_code,
+                headers=dict(response.headers),
+                cookies=self._cookies.get_dict(),
+                content=response.content or '',
+                start_time=start_time)
 
-    def set_proxy(self, addr, type = 'http', user = None, password = None):
+    def set_proxy(self, addr, type='http', user=None, password=None):
         """
         设置代理
         """
-        if addr == None:
-            self._setting['proxies'] = None
+        if addr is None:
+            self.fetch['proxies'] = None
         else:
             if user:
                 if password:
                     user += ':' + password
-                proxy = user +'@'+ addr
+                proxy = user + '@' + addr
             else:
                 proxy = addr
             if type == "socks":
@@ -348,6 +162,21 @@ class RequestsCrawler(BaseCrawler):
                 proxies = {"http": "ftp://" + proxy, "https": "ftp://" + proxy}
             elif type == "http":
                 proxies = {"http": "http://" + proxy, "https": "http://" + proxy}
-            elif type == "ssl":
+            else:
                 proxies = {"http": "https://" + proxy, "https": "https://" + proxy}
-            self._setting["proxies"] = proxies
+            self.fetch["proxies"] = proxies
+
+
+if __name__ == "__main__":
+    crawler = RequestsCrawler()
+
+    def f(result):
+        print(result)
+    fetch = {
+        "method": "GET",
+        "headers": {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                                  "Chrome/73.0.3683.103 Safari/537.36"},
+        "url": "http://www.bast.net.cn/art/2019/4/8/art_16644_401747.html",
+        "callback": f
+    }
+    crawler.crawl(**fetch)

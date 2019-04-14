@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -13,6 +13,7 @@ from cdspider.parser import KNOWN_TOP_LINK_PATTERN, KNOWN_DETAIL_URLS_PATTERN, K
 from urllib.parse import urljoin, urlparse
 import tldextract
 import re
+
 
 class LinksExtractor(object):
     """
@@ -29,7 +30,7 @@ class LinksExtractor(object):
         self.links4other = list()
         self.linksofsubdomain = dict()
         self.subdomain = None
-#        if subdomain and subdomain != 'www':
+        # if subdomain and subdomain != 'www':
         if subdomain:
             self.subdomain = "%s.%s" % (subdomain, domain)
         self.domain = domain
@@ -48,7 +49,7 @@ class LinksExtractor(object):
                 continue
             if attr:
                 url = urljoin(self.base, attr.strip())
-                if not url in self.unique:
+                if url not in self.unique:
                     self.unique.add(url)
                     title = Parser.getText(i)
                     link = {"url": url, "title": title}
@@ -58,7 +59,7 @@ class LinksExtractor(object):
     def extend(self, links):
         for link in links:
             l = urljoin(self.base, link['url'])
-            if not l in self.unique:
+            if l not in self.unique:
                 self.unique.add(l)
                 link['url'] = l
                 self.links.append(link)
@@ -67,7 +68,7 @@ class LinksExtractor(object):
     def get_subdomain(self, link):
         parsed = urlparse(link['url'])
         extracted = tldextract.extract(link['url'])
-#        if all((extracted.subdomain, extracted.subdomain != 'www', extracted.subdomain != self.subdomain)):
+        # if all((extracted.subdomain, extracted.subdomain != 'www', extracted.subdomain != self.subdomain)):
         if all((extracted.subdomain, extracted.subdomain != self.subdomain)):
             d = "%s.%s" % (extracted.subdomain.split(".").pop(), self.domain)
             url = "%s://%s" % (parsed.scheme, d)
@@ -99,12 +100,13 @@ class LinksExtractor(object):
     def infos(self):
         return {'all': self.links, 'domain': self.links4domain, 'subdomain': self.links4subdomain, 'other': self.links4other, 'subdomains': self.links4subdomain + [v for v in self.linksofsubdomain.values()]}
 
+
 class TopLinkDetector(object):
 
     matched = set()
     mistaken = set()
 
-    def __init__(self, matched = [], mistaken = []):
+    def __init__(self, matched=[], mistaken=[]):
         if matched:
             for item in matched:
                 self.matched.add(item)

@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -36,10 +36,10 @@ class ArticlesDB(Base):
 
     STATUS_PARSED = 2
 
-    def insert(self, obj = {}):
+    def insert(self, obj={}):
         raise NotImplementedError
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         raise NotImplementedError
 
     def update_many(self,obj, where=None):
@@ -51,10 +51,10 @@ class ArticlesDB(Base):
     def get_detail_by_unid(self, unid, createtime):
         raise NotImplementedError
 
-    def get_count(self, createtime, where = {}, select = None, **kwargs):
+    def get_count(self, createtime, where={}, select = None, **kwargs):
         raise NotImplementedError
 
-    def get_list(self, createtime, where = {}, select = None, sort=[("pid", 1)], **kwargs):
+    def get_list(self, createtime, where={}, select = None, sort=[("pid", 1)], **kwargs):
         raise NotImplementedError
 
     @staticmethod

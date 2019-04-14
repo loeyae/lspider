@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -22,17 +22,18 @@ from . import Base
     }
 }
 
-class MediaTypesDB(object):
+
+class MediaTypesDB(Base):
     """
     put you comment
     """
-    def insert(self, obj = {}):
+    def insert(self, obj={}):
         raise NotImplementedError
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         raise NotImplementedError
 
-    def delete(self, id, where = {}):
+    def delete(self, id, where={}):
         raise NotImplementedError
 
     def get_detail_by_domain(self, domain):
@@ -41,5 +42,5 @@ class MediaTypesDB(object):
     def get_detail_by_subdomain(self, subdomain):
         raise NotImplementedError
 
-    def get_list(self, where = {}, select = None):
+    def get_list(self, where={}, select = None):
         raise NotImplementedError

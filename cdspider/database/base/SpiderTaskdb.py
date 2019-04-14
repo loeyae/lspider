@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -78,7 +78,7 @@ class SpiderTaskDB(Base):
     def update(self, id, mode, obj={}):
         raise NotImplementedError
 
-    def update_many(self, id, mode, obj = {}):
+    def update_many(self, id, mode, obj={}):
         raise NotImplementedError
 
     def delete(self, id, mode, where):
@@ -105,7 +105,7 @@ class SpiderTaskDB(Base):
     def get_detail(self, id, mode, select=None):
         raise NotImplementedError
 
-    def get_count(self, mode, where = {}):
+    def get_count(self, mode, where={}):
         raise NotImplementedError
 
     def get_list(self, mode, where={}, select=None, **kwargs):
@@ -114,5 +114,5 @@ class SpiderTaskDB(Base):
     def get_plan_list(self, mode, id, plantime, where={}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_max_id(self, mode, id, where = {}):
+    def get_max_id(self, mode, id, where={}):
         raise NotImplementedError

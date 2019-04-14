@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -11,7 +11,6 @@ import six
 import re
 import json
 import copy
-import traceback
 import jsonpath
 from cdspider.parser.lib import BaseParser
 from cdspider.parser.lib.PyqueryParser import PyqueryParser
@@ -40,8 +39,8 @@ class JsonParser(BaseParser):
                 source = utils.decode(source)
             except:
                 source = str(source)
-#        self.info("Json source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(source)))
-#        self.info("Json ruleset: %s" % str(ruleset))
+        # self.info("Json source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(source)))
+        # self.info("Json ruleset: %s" % str(ruleset))
         if source and ruleset:
             source = source.strip()
             ll = source[0:1]
@@ -157,12 +156,12 @@ class JsonParser(BaseParser):
 
     def _json_parse(self, data, kstring):
         if not kstring.startswith("$"):
-            kstring = "$.%s" % kstring;
+            kstring = "$.%s" % kstring
         kstring = kstring.replace("[-1]", "[(@.length-1)]").replace(".-1", "[(@.length-1)]")
         rst = jsonpath.jsonpath(data, kstring)
         if isinstance(rst, list) and len(rst) == 1 and not isinstance(rst[0], (tuple, list, dict)):
             return rst[0]
-        return rst;
+        return rst
 
 if __name__ == "__main__":
     """
@@ -208,7 +207,7 @@ if __name__ == "__main__":
             }
         ]
     }
-    parser = JsonParser();
+    parser = JsonParser()
     ruleset = {
         "filter": "$.key2",
         "item": {

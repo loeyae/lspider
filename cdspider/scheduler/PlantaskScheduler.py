@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -7,11 +7,10 @@
 :date:    2018-9-20 15:49:37
 """
 import time
-import logging
 from . import BaseScheduler
-from cdspider.exceptions import *
 from cdspider.libs.constants import *
-from cdspider.libs.utils import get_object
+from cdspider.libs.utils import load_handler
+
 
 class PlantaskScheduler(BaseScheduler):
     """
@@ -38,12 +37,11 @@ class PlantaskScheduler(BaseScheduler):
 
     def schedule(self, message):
         self.debug("%s schedule got message: %s" % (self.__class__.__name__, str(message)))
-        if not 'mode' in message or not message['mode']:
+        if 'mode' not in message or not message['mode']:
             raise CDSpiderError("%s handler mode is missing" % self.__class__.__name__)
         self.info("%s schedule starting..." % self.__class__.__name__)
         handler_mode = message['mode']
-        name = HANDLER_MODE_HANDLER_MAPPING[handler_mode]
-        handler = get_object("cdspider.handler.%s" % name)(self.ctx, None)
+        handler = load_handler(handler_mode, context=self.ctx, task=None)
         self.info("%s loaded handler: %s" % (self.__class__.__name__, handler))
         save = {"now": int(time.time())}
         while True:

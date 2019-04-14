@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -37,10 +37,10 @@ class KeywordsDB(Base):
     def update(self, id, obj={}):
         raise NotImplementedError
 
-    def update_many(self, id, obj = {}):
+    def update_many(self, id, obj={}):
         raise NotImplementedError
     
-    def active(self, id, where = {}):
+    def active(self, id, where={}):
         raise NotImplementedError
 
     def disable(self, id, where = {}):

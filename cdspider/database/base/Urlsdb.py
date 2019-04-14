@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -30,6 +30,7 @@ from . import Base
     }
 }
 
+
 class UrlsDB(Base):
 
     IS_TYPE_CHANNEL_LIST = 1
@@ -39,13 +40,13 @@ class UrlsDB(Base):
     IS_TYPE_LIST = 1
     NO_TYPE_LIST = 0
 
-    def insert(self, obj = {}):
+    def insert(self, obj={}):
         raise NotImplementedError
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         raise NotImplementedError
 
-    def update_many(self, id, obj = {}):
+    def update_many(self, id, obj={}):
         raise NotImplementedError
 
     def enable(self, id, where):
@@ -81,11 +82,11 @@ class UrlsDB(Base):
     def get_detail(self, id):
         raise NotImplementedError
 
-    def get_list(self, where = {}, select=None, **kwargs):
+    def get_list(self, where={}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_new_list(self, id, where = {}, select=None, **kwargs):
+    def get_new_list(self, id, where={}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_new_list_by_pid(self, id, pid, where = {}, select=None, **kwargs):
+    def get_new_list_by_pid(self, id, pid, where={}, select=None, **kwargs):
         raise NotImplementedError

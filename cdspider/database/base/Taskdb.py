@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -16,7 +16,7 @@ from . import Base
         'type' : int,                         # '任务类别 int',
         'name' : int,                         # '任务名称 | 唯一,MAX50',
         'rule' : {
-                #列表类
+                # 列表类
                 'filtration' : int,           # '是否过滤(1:过滤,0:不过滤)',
                 'url' : list,                 # url
                 #接口类
@@ -49,7 +49,7 @@ class TaskDB(Base):
     def update(self, id, obj={}):
         raise NotImplementedError
 
-    def update_many(self, id, obj = {}):
+    def update_many(self, id, obj={}):
         raise NotImplementedError
 
     def delete(self, id, where):
@@ -58,7 +58,7 @@ class TaskDB(Base):
     def get_detail(self, id, select=None):
         raise NotImplementedError
 
-    def get_count(self, where = {}):
+    def get_count(self, where={}):
         raise NotImplementedError
 
     def get_list(self, where={}, select=None, **kwargs):

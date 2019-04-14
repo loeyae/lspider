@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -12,7 +12,7 @@ import traceback
 from cdspider.libs import utils
 from cdspider.tools import Base
 from cdspider.mailer import BaseSender
-from cdspider.exceptions import *
+
 
 class statistics_by_day(Base):
     """
@@ -32,7 +32,7 @@ class statistics_by_day(Base):
         '''
         运行时间
         '''
-        if running_time != None:
+        if running_time is not None:
             h = int(time.strftime('%H'))
             if h == running_time:
                 self.running = True

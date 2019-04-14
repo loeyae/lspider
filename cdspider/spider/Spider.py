@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,24 +8,17 @@
 :date:    2018-1-9 18:01:26
 :version: SVN: $Id: Spider.py 2266 2018-07-06 06:50:15Z zhangyi $
 """
-import sys
 import gc
-import re
 import time
-import logging
 import traceback
-import copy
-import json
 import tornado.ioloop
 from six.moves import queue
 
 from cdspider import Component
 from cdspider.handler import BaseHandler, Loader
-from cdspider.exceptions import *
-from cdspider.libs import utils
 from cdspider.libs.tools import *
-from cdspider.database.base import *
 from cdspider.libs.constants import *
+
 
 class Spider(Component):
     """
@@ -100,13 +93,13 @@ class Spider(Component):
                     continue
                 elif handler.response['broken_exc']:
                     raise handler.response['broken_exc']
-                if not handler.response['last_source']:
+                if not handler.response['content']:
                     raise CDSpiderCrawlerError('Spider crawl failed')
-                unid = utils.md5(handler.response['last_source'])
-                if last_source_unid == unid or last_url == handler.response['last_url']:
-                    raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['last_url'])
+                unid = utils.md5(handler.response['content'])
+                if last_source_unid == unid or last_url == handler.response['url']:
+                    raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['url'])
                 last_source_unid = unid
-                last_url = handler.response['last_url']
+                last_url = handler.response['url']
                 if self.sdebug:
                     self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["last_source"]))
                 else:
@@ -115,7 +108,8 @@ class Spider(Component):
                 handler.parse()
                 self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
                 if return_result:
-                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
+                    return_data.append((handler.response['parsed'], None, handler.response['content'],
+                                        handler.response['url'], save))
                     self.info("Spider next start")
                     handler.on_next(save)
                     self.info("Spider next end")
@@ -133,7 +127,7 @@ class Spider(Component):
                     handler.on_error(e, save)
             else:
                 if isinstance(e, (CDSpiderCrawlerReturnBroken,)):
-                    return_data.append((handler.response['parsed'], None, handler.response['last_source'], handler.response['last_url'], save))
+                    return_data.append((handler.response['parsed'], None, handler.response['content'], handler.response['url'], save))
                 elif not isinstance(e, IGNORE_EXCEPTIONS):
                     return_data.append((None, traceback.format_exc(), None, None, save))
                     self.error(traceback.format_exc())
@@ -216,9 +210,7 @@ class Spider(Component):
         self.info("Spider exiting...")
 
     def xmlrpc_run(self, port=24444, bind='127.0.0.1'):
-        import umsgpack
         from cdspider.libs import WSGIXMLRPCApplication
-        from xmlrpc.client import Binary
 
         application = WSGIXMLRPCApplication()
 

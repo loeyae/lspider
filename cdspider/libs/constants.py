@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -58,11 +58,6 @@ QUEUE_NAME_SCHEDULER_TO_TASK = "scheduler2task"
 QUEUE_NAME_SCHEDULER_TO_SPIDER = "scheduler2spider"
 QUEUE_NAME_SPIDER_TO_RESULT = "spider2result"
 QUEUE_NAME_EXCINFO = "excinfo_queue"
-QUEUE_NAME_ARTICLE_TO_KAFKA = "article2kafka"
-QUEUE_NAME_WECHAT_TO_REPLY = "wechat2reply"
-QUEUE_NAME_WEB_TO_CLUSTER = "web2cluster"
-QUEUE_NAME_COMMENT_TO_KAFKA = "comment2kafka"
-QUEUE_NAME_ATTACH_TO_KAFKA = "attach2kafka"
 
 #handler redister fn type
 HANDLER_FUN_INIT = '0'                   # 初始化自定义方法类型
@@ -85,21 +80,9 @@ HANDLER_FUN_FINISH = '14'                # finish自定义方法类型
 #handler mode
 HANDLER_MODE_DEFAULT = 'default'                      # 默认handler
 HANDLER_MODE_DEFAULT_LIST = 'list'                    # 默认列表handler
-HANDLER_MODE_WECHAT_LIST = 'wechat-list'              # 微信列表handler
-HANDLER_MODE_TOUTIAO_LIST = 'toutiao-list'            # 头条列表handler
-HANDLER_MODE_BBS_LIST = 'bbs-list'                    # 论坛列表handler
-HANDLER_MODE_WEMEDIA_LIST = 'wemedia-list'            # 自媒体列表handler
 HANDLER_MODE_DEFAULT_ITEM = 'item'                    # 默认详情handler
-HANDLER_MODE_WECHAT_ITEM = 'wechat-item'              # 微信详情handler
-HANDLER_MODE_TOUTIAO_ITEM = 'toutiao-item'            # 头条详情handler
-HANDLER_MODE_BBS_ITEM = 'bbs-item'                    # 论坛详情handler
-HANDLER_MODE_WEMEDIA_ITEM = 'wemedia-item'            # 自媒体详情handler
-HANDLER_MODE_LINKS_CLUSTER = 'links-cluster'          # Url聚类handler
-HANDLER_MODE_WEIBO = 'weibo'                          # 微博handler
 HANDLER_MODE_DEFAULT_SEARCH = 'search'                # 默认搜索handler
-HANDLER_MODE_WEIBO_SEARCH = 'weibo-search'            # 微博搜索
 HANDLER_MODE_SITE_SEARCH = 'site-search'              # 站内搜索
-HANDLER_MODE_WECHAT_SEARCH = 'wechat-search'          # 微信搜索
 
 #route mode
 ROUTER_MODE_PROJECT = 'project'

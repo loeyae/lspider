@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,9 +8,11 @@
 :date:    2018-6-12 16:14:02
 """
 import lxml
+import lxml.html
 from .goose3.parsers import Parser
 from . import BaseParser
 from cdspider.libs.utils import table2kvlist, decode, extract_result
+
 
 class XpathParser(BaseParser):
     """
@@ -47,7 +49,7 @@ class XpathParser(BaseParser):
                     return None
                 data = self.match(doc, rule['filter'], onlyOne)
                 if 'item' in rule:
-                    onlyOne = bool(int(rule.get('onlyOne', 0)))
+                    onlyOne = int(rule.get('onlyOne', 0))
                     return self._item_filter(data, rule, onlyOne)
                 else:
                     rule.setdefault('type', 'text')
@@ -101,7 +103,7 @@ class XpathParser(BaseParser):
                     rest[item] = r
             return table2kvlist(rest)
 
-    def match(self, doc, rule, onlyOne = True):
+    def match(self, doc, rule, onlyOne=1):
         ret = Parser.xpath_re(doc, rule)
         if onlyOne:
             return ret[0]

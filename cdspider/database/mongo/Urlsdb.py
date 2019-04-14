@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,7 +8,6 @@
 :date:    2018-1-9 21:58:31
 :version: SVN: $Id: Urlsdb.py 2116 2018-07-04 03:56:12Z zhangyi $
 """
-import sys
 import time
 import pymongo
 from cdspider.database.base import UrlsDB as BaseUrlsDB
@@ -24,35 +23,35 @@ class UrlsDB(Mongo, BaseUrlsDB):
         super(UrlsDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'uuid' in indexes:
+        if 'uuid' not in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
-        if not 'pid' in indexes:
+        if 'pid' not in indexes:
             collection.create_index('pid', name='pid')
-        if not 'sid' in indexes:
+        if 'sid' not in indexes:
             collection.create_index('sid', name='sid')
-        if not 'tid' in indexes:
+        if 'tid' not in indexes:
             collection.create_index('tid', name='tid')
-        if not 'typeChannel' in indexes:
+        if 'typeChannel' not in indexes:
             collection.create_index('typeChannel', name='typeChannel')
-        if not 'typeList' in indexes:
+        if 'typeList' not in indexes:
             collection.create_index('typeList', name='typeList')
-        if not 'typeDetail' in indexes:
+        if 'typeDetail' not in indexes:
             collection.create_index('typeDetail', name='typeDetail')
-        if not 'typeOther' in indexes:
+        if 'typeOther' not in indexes:
             collection.create_index('typeOther', name='typeOther')
-        if not 'linkText' in indexes:
+        if 'linkText' not in indexes:
             collection.create_index('linkText', name='linkText')
-        if not 'url' in indexes:
+        if 'url' not in indexes:
             collection.create_index([('url', pymongo.TEXT)], name='url')
-        if not 'cluster' in indexes:
+        if 'cluster' not in indexes:
             collection.create_index('cluster', name='cluster')
-        if not 'dataNum' in indexes:
+        if 'dataNum' not in indexes:
             collection.create_index('dataNum', name='dataNum')
-        if not 'addAuthor' in indexes:
+        if 'addAuthor' not in indexes:
             collection.create_index('addAuthor', name='addAuthor')
-        if not 'status' in indexes:
+        if 'status' not in indexes:
             collection.create_index('status', name='status')
-        if not 'ruleStatus' in indexes:
+        if 'ruleStatus' not in indexes:
             collection.create_index('ruleStatus', name='ruleStatus')
 
     def insert(self, obj = {}):

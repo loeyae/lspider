@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import os
@@ -14,6 +14,7 @@ from cdspider.parser import *
 from cdspider.libs.url_builder import UrlBuilder
 from cdspider.libs.constants import *
 from cdspider.parser import CustomParser
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseHandler(Component):
@@ -38,9 +39,14 @@ class BaseHandler(Component):
 
     MAX_RETRY = 5
 
+    ns = "base_handler"
+
     def __init__(self, context, task, **kwargs):
         """
         init
+        :param context: click,Context
+        :param task: task info
+        :param kwargs: kwargs
         """
         self.ctx = context
         self.task = task or {}
@@ -63,7 +69,7 @@ class BaseHandler(Component):
                 attach_storage = os.path.realpath(os.path.join(g.get("app_path"), attach_storage))
             self.attach_storage = attach_storage
             self.crawl_id = int(time.time())
-            self.crawl_info  = {
+            self.crawl_info = {
                 "crawl_start": self.crawl_id,
                 "crawl_end": None,
                 "crawl_urls": {},
@@ -85,9 +91,14 @@ class BaseHandler(Component):
             self.request_params = {}
             self.response = {
                 "source": None,
-                "last_source": None,
                 "final_url": self.task.get('url', None),
-                "last_url": self.task.get('url', None),
+                "orig_url": None,
+                "content": None,
+                "headers": None,
+                "status_code": None,
+                "url": None,
+                "time": None,
+                "cookies": None,
                 "broken_exc": None,
                 "parsed": None,
             }
@@ -98,6 +109,10 @@ class BaseHandler(Component):
         self.handle = {}
 
     def __del__(self):
+        """
+        释放
+        :return:
+        """
         self.close()
         del self.ctx
         del self.handle
@@ -110,16 +125,16 @@ class BaseHandler(Component):
             del self.task
         super(BaseHandler, self).__del__()
 
-    def route(self, mode, rate, save):
+    def route(self, handler_driver_name, rate, save):
         """
-        schedule 分发
-        :param rate 频率
-        :param save 传递的上下文
-        :return 包含uuid的迭代器，项目模式为项目的uuid，站点模式为站点的uuid
-        :notice 该方法返回的迭代器用于router生成queue消息，以便plantask听取，消息格式为:
+        schedule 分发 该方法返回的迭代器用于router生成queue消息，以便plantask听取，消息格式为:
         {"mode": handler mode, "rate": rate, "offset": offset, "count": count}
+        :param handler_driver_name: handler mode
+        :param rate: 频率
+        :param save: 传递的上下文
+        :return: 包含字典（{"offset": offset, "count": count}）的迭代器。
         """
-        if not "id" in save:
+        if "id" not in save:
             '''
             初始化上下文中的id参数,该参数用于数据查询
             '''
@@ -130,19 +145,20 @@ class BaseHandler(Component):
             now = int(time.time())
             save['now'] = now
 
-        #按项目分发
+        # 按项目分发
         cmdir = os.path.join(self.runtime_dir, 'cm')
         setting = self.ratemap[rate]
-        cm = CounterMananger(cmdir, (mode, rate))
+        cm = CounterMananger(cmdir, (handler_driver_name, rate))
         if not cm.get('stime') or cm.get('stime') + cm.get('ctime') <= now:
             cm.empty()
-            total = self.db['SpiderTaskDB'].get_active_count(mode, {"frequency": rate})
+            total = self.db['SpiderTaskDB'].get_active_count(handler_driver_name, {"frequency": rate})
             cm.event(stime=now, itime=self.ROUTE_INTERVAL, ctime=setting[0], total=total)
         cm.event(now=now)
         offset = cm.get('offset')
         count = cm.get('count')
         total = cm.get('total')
-#        self.error("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, rate, now, total, offset, count))
+        # self.error("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, rate, now, total,
+        # offset, count))
         cm.value(count)
         while count > 0 and offset < total:
             yield {"offset": offset, "count": self.ROUTE_LIMIT if count > self.ROUTE_LIMIT else count}
@@ -153,15 +169,17 @@ class BaseHandler(Component):
     def schedule(self, message, save):
         """
         任务分发
-        :params message ex: {
+        :param message: 消息 ex: {
                     "rate": rate,
                     "mode": mode,
                     "offset": offset,
                     "count": count,
                 }
+        :param save: 传递的上下文
+        :return: 包含字典({"uuid": uuid, "url": url})的迭代器
         """
         if 'type' in message:
-            if not 'id' in save:
+            if 'id' not in save:
                 save['id'] = 0
             if message['type'] == ROUTER_MODE_PROJECT:
                 where = {"pid": int(message['item'])}
@@ -171,7 +189,8 @@ class BaseHandler(Component):
                 where = {"uid": int(message['item'])}
             else:
                 where = {"tid": int(message['item'])}
-            for item in self.db['SpiderTaskDB'].get_plan_list(message['mode'], save['id'], plantime=save['now'], where=where, select=['uuid', 'url', 'frequency']):
+            for item in self.db['SpiderTaskDB'].get_plan_list(message['mode'], save['id'], plantime=save['now'],
+                                                              where=where, select=['uuid', 'url', 'frequency']):
                 if not self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
@@ -183,7 +202,9 @@ class BaseHandler(Component):
                     save['id'] = item['uuid']
                 yield item
         elif 'rate' in message:
-            for item in self.db['SpiderTaskDB'].get_active_list(message['mode'], where={"frequency": str(message['rate'])}, offset=int(message['offset']), hits=int(message['count']), select=['uuid', 'url']):
+            for item in self.db['SpiderTaskDB'].get_active_list(
+                    message['mode'], where={"frequency": str(message['rate'])}, offset=int(message['offset']),
+                    hits=int(message['count']), select=['uuid', 'url']):
                 if not self.testing_mode:
                     '''
                     testing_mode打开时，数据不入库
@@ -193,11 +214,18 @@ class BaseHandler(Component):
                 yield item
 
     def newtask(self, message):
+        """
+        生成新任务
+        :param message: 消息
+        :return:
+        """
         pass
 
     def frequency(self, message):
         """
         更新更新频率
+        :param message: 消息
+        :return:
         """
         mode = message['mode']
         frequency = str(message['frequency'])
@@ -219,6 +247,8 @@ class BaseHandler(Component):
     def expire(self, message):
         """
         更新过期时间
+        :param message: 消息
+        :return:
         """
         mode = message['mode']
         expire = message['expire']
@@ -238,6 +268,11 @@ class BaseHandler(Component):
         self.db['SpiderTaskDB'].update_many(mode, {"expire": expire}, where=where)
 
     def status(self, message):
+        """
+        更改状态
+        :param message: 消息
+        :return:
+        """
         mode = message['mode']
         status = message['status']
         if status == BaseDB.STATUS_DELETED:
@@ -275,25 +310,40 @@ class BaseHandler(Component):
                 self.db['SpiderTaskDB'].disable_by_kid(message['kid'], mode)
 
     def get_scripts(self):
+        """
+        获取自定义脚本
+        :return:
+        """
         return None
 
     def handler_register(self, handle_type, priority = 1000):
         """
         handler register
-        :param handle_type any of cdspider.libs.constants.(HANDLER_FUN_INIT, HANDLER_FUN_PROCESS, HANDLER_FUN_PREPARE, HANDLER_FUN_PRECRAWL, HANDLER_FUN_CRAWL, HANDLER_FUN_POSTCRAWL, HANDLER_FUN_PREPARSE, HANDLER_FUN_PARSE, HANDLER_FUN_POSTPARSE, HANDLER_FUN_RESULT, HANDLER_FUN_NEXT, HANDLER_FUN_CONTINUE, HANDLER_FUN_REPETITION, HANDLER_FUN_ERROR, HANDLER_FUN_FINISH)
-        :param priority 数值越大，优先级越高
+        :param handle_type: any of cdspider.libs.constants.(HANDLER_FUN_INIT, HANDLER_FUN_PROCESS,
+        HANDLER_FUN_PREPARE, HANDLER_FUN_PRECRAWL, HANDLER_FUN_CRAWL, HANDLER_FUN_POSTCRAWL, HANDLER_FUN_PREPARSE,
+        HANDLER_FUN_PARSE, HANDLER_FUN_POSTPARSE, HANDLER_FUN_RESULT, HANDLER_FUN_NEXT, HANDLER_FUN_CONTINUE,
+        HANDLER_FUN_REPETITION, HANDLER_FUN_ERROR, HANDLER_FUN_FINISH)
+        :param priority: 数值越大，优先级越高
+        :return:
         """
         if not (isinstance(handle_type, list) or isinstance(handle_type, tuple)):
             handle_type = [handle_type]
+
         def _handler_register(fn):
             for _type in handle_type:
-                if not _type in self.handle:
+                if _type not in self.handle:
                     self.handle[_type] = []
                 self.handle[_type].append((priority, fn))
             return fn
         return _handler_register
 
     def handler_run(self, handle_type, save):
+        """
+        运行注册的方法
+        :param handle_type: 方法类型
+        :param save: 参宿
+        :return:
+        """
         if not (isinstance(handle_type, list) or isinstance(handle_type, tuple)):
             handle_type = [handle_type]
         for _type in handle_type:
@@ -305,11 +355,16 @@ class BaseHandler(Component):
 
     @property
     def current_page(self):
+        """
+        当前页码
+        :return:
+        """
         return self.page
 
     def get_crawler(self, rule):
         """
         load crawler
+        :param rule: 爬虫规则
         """
         crawler = rule.get('crawler', '') or 'requests'
         return utils.load_crawler(crawler, proxy=rule.get('proxy'), log_level=self.log_level)
@@ -317,6 +372,7 @@ class BaseHandler(Component):
     def init(self, save):
         """
         初始化爬虫
+        :param save: 船体的上下文
         """
         if "uuid" in self.task and self.task['uuid']:
             task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.task['mode'])
@@ -380,23 +436,37 @@ class BaseHandler(Component):
                     else:
                         request[k] = v
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
-        self.request_params = builder.build(request, self.response['last_source'] or DEFAULT_SOURCE, self.crawler, save)
+        self.request_params = builder.build(request, self.response['content'] or DEFAULT_SOURCE,
+                                            self.response.get('cookies', {}), save)
         self.handler_run(HANDLER_FUN_INIT, {"request_params": self.request_params, "save": save})
 
     @abc.abstractmethod
     def init_process(self, save):
+        """
+        初始化抓取流程
+        :param save: 传递的上下文
+        :return:
+        """
         pass
 
     def prepare(self, save):
         """
         预处理
+        :param save: 传递的上下文
         """
-        self.handler_run(HANDLER_FUN_PREPARE, {"request": self.request, "request_params": self.request_params, "save": save})
+        self.handler_run(HANDLER_FUN_PREPARE, {"request": self.request, "request_params": self.request_params,
+                                               "save": save})
 
     def precrawl(self, save):
+        """
+        爬取预处理
+        :param save: 传递的上下文
+        :return:
+        """
         if isinstance(self.crawler, SeleniumCrawler) and self.request_params['method'].upper() == 'GET':
             self.request_params['method'] = 'open'
-        if (self.proxy_mode == PROXY_TYPE_EVER or self.force_proxy or (self.proxy_mode == PROXY_TYPE_AUTO and self.auto_proxy)) and self.proxy:
+        if (self.proxy_mode == PROXY_TYPE_EVER or self.force_proxy or (self.proxy_mode == PROXY_TYPE_AUTO and
+                                                                       self.auto_proxy)) and self.proxy:
             self.request_params['proxy'] = copy.deepcopy(self.proxy)
         else:
             self.request_params['proxy'] = None
@@ -405,22 +475,22 @@ class BaseHandler(Component):
     def crawl(self, save):
         """
         数据抓取
-        :param: save 保持的上下文
-        :param: crawler 是否更新crawler对象
+        :param: save: 传递的上下文
+        :return:
         """
         try:
             self.precrawl(save)
             params = copy.deepcopy(self.request_params)
             if HANDLER_FUN_CRAWL in self.handle:
-                self.handler_run(HANDLER_FUN_CRAWL, {"request": self.request, "requst_params": params, "response": self.response, "save": save})
+                self.handler_run(HANDLER_FUN_CRAWL, {"request": self.request, "requst_params": params, "response":
+                                                     self.response, "save": save})
             else:
-                self.crawler.crawl(**params)
-                self.response['last_source'] = self.crawler.page_source
-                self.response['last_url'] = self.crawler.final_url
-                save['request_url'] = self.crawler.final_url
+                response = self.crawler.crawl(**params)
+                self.response.update(response)
+                save['request_url'] = response['url']
             if self.page == 1:
-                self.response['final_url'] = self.response['last_url']
-                self.response['source'] = self.response['last_source']
+                self.response['final_url'] = self.response['url']
+                self.response['source'] = self.response['content']
         except Exception as exc:
             self.response['broken_exc'] = exc
         finally:
@@ -429,6 +499,8 @@ class BaseHandler(Component):
     def _get_request(self, save):
         """
         获取请求配置
+        :param save: 传递的上下文
+        :return:
         """
 
         request = utils.dictjoin(self.process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
@@ -457,7 +529,7 @@ class BaseHandler(Component):
             if isinstance(request['data'], six.text_type):
                 request['data'] = utils.quertstr2dict(request['data'])
                 self.debug("%s parsed data: %s" % (self.__class__.__name__, request['data']))
-            elif not 'hard_code' in save or not save['hard_code']:
+            elif 'hard_code' not in save or not save['hard_code']:
                 rule = utils.array2rule(request.pop('data'), save['base_url'])
                 parsed = utils.rule2parse(CustomParser, DEFAULT_SOURCE, save['base_url'], rule, self.log_level)
                 self.debug("%s parsed data: %s" % (self.__class__.__name__, parsed))
@@ -474,14 +546,21 @@ class BaseHandler(Component):
         return request
 
     def preparse(self, rule):
+        """
+        解析预处理
+        :param rule: 解析规则
+        :return:
+        """
         self.handler_run(HANDLER_FUN_PREPARSE, {"rule": rule, "response": self.response})
         return rule
 
-    def parse(self, rule = None):
+    def parse(self, rule=None):
         """
         页面解析
+        :param rule: 解析规则
+        :return:
         """
-        self.debug("%s parse start" % (self.__class__.__name__))
+        self.debug("%s parse start" % self.__class__.__name__)
         if not rule:
             rule = self.process.get("parse")
         self.debug("%s parse rule: %s" % (self.__class__.__name__, rule))
@@ -493,33 +572,45 @@ class BaseHandler(Component):
         else:
             self.run_parse(rule)
         self.handler_run(HANDLER_FUN_POSTPARSE, {"response": self.response})
-        self.debug("%s parse end" % (self.__class__.__name__))
+        self.debug("%s parse end" % self.__class__.__name__)
 
     @abc.abstractmethod
     def run_parse(self, rule):
-#        parser = CustomParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url = self.response['final_url'], attach_storage = self.attach_storage)
-#        self.debug("%s parse start: %s @ %s" % (self.__class__.__name__, str(rule), self.mode))
-#        parsed = parser.parse()
-#        self.response['parsed'] = parsed
+        """
+        执行解析规则
+        :param rule:
+        :return:
+        """
+        # parser = CustomParser(source=self.response['content'], ruleset=copy.deepcopy(rule),
+        # log_level=self.log_level, url = self.response['final_url'], attach_storage = self.attach_storage)
+        # self.debug("%s parse start: %s @ %s" % (self.__class__.__name__, str(rule), self.mode))
+        # parsed = parser.parse()
+        # self.response['parsed'] = parsed
         pass
 
     def on_repetition(self, save):
         """
         重复处理
+        :param save: 传递的上下文
+        :return:
         """
-        self.debug("%s on repetition" % (self.__class__.__name__))
+        self.debug("%s on repetition" % self.__class__.__name__)
         if self.crawl_info['crawl_count']['repeat_page'] < self.ALLOWED_REPEAT:
             return
         if HANDLER_FUN_REPETITION in self.handle:
             self.handler_run(HANDLER_FUN_REPETITION, {"crawl_info": self.crawl_info, "task": self.task, "save": save})
         else:
-            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", self.task['url']), current_url=save.get("request_url", self.task['url']))
+            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", self.task['url']), current_url=save.get(
+                "request_url", self.task['url']))
 
     def on_error(self, exc, save):
         """
         错误处理
+        :param exc: exception
+        :param save: 传递的上下文
+        :return:
         """
-        self.debug("%s on error" % (self.__class__.__name__))
+        self.debug("%s on error" % self.__class__.__name__)
         self.exception(exc)
         elid = 0
         if 'uuid' in self.task and self.task['uuid']:
@@ -528,7 +619,7 @@ class BaseHandler(Component):
                 'mode': self.task['mode'],
                 'create_at': self.crawl_id,
                 'frequency': self.task.get('frequency', None),      # process info
-                'url': save.get('request_url', self.request_params.get('url', self.task['url'])),                         # error message
+                'url': save.get('request_url', self.request_params.get('url', self.task['url'])), # error message
                 'error': str(exc),                                  # create time
                 'msg': str(traceback.format_exc()),                 # trace log
                 'class': exc.__class__.__name__,                    # error class
@@ -540,7 +631,7 @@ class BaseHandler(Component):
                 'mode': self.task['mode'],
                 'create_at': self.crawl_id,
                 'frequency': self.task.get('frequency', None),      # process info
-                'url': save.get('request_url', self.request_params.get('url', self.task['url'])),                         # error message
+                'url': save.get('request_url', self.request_params.get('url', self.task['url'])), # error message
                 'error': str(exc),                                  # create time
                 'msg': str(traceback.format_exc()),                 # trace log
                 'class': exc.__class__.__name__,                    # error class
@@ -548,7 +639,7 @@ class BaseHandler(Component):
             elid = self.db['ErrorLogDB'].insert(data)
         if elid == 0:
             self.crawl_info['exc'] = exc.__class__.__name__
-            self.crawl_info['traceback'] = str(traceback.format_exc())
+            self.crawl_info['traceback'] = traceback.format_exc()
         else:
             self.crawl_info['errid'] = elid
         self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info, "save": save})
@@ -556,8 +647,9 @@ class BaseHandler(Component):
     def on_result(self, save):
         """
         数据处理
+        :param save: 传递的上下文
         """
-        self.debug("%s on result" % (self.__class__.__name__))
+        self.debug("%s on result" % self.__class__.__name__)
         if not self.response['parsed']:
             if self.page > 1:
                 self.page -= 1
@@ -571,11 +663,18 @@ class BaseHandler(Component):
         self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
 
     def run_result(self, save):
+        """
+        数据处理执行方法
+        :param save: 传递的上下文
+        :return:
+        """
         pass
 
     def on_next(self, save):
         """
         下一页解析
+        :param save: 传递的上下文
+        :return:
         """
         self.page += 1
         request = copy.deepcopy(self.request)
@@ -594,12 +693,20 @@ class BaseHandler(Component):
             else:
                 request[k] = v
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
-        self.request_params = builder.build(request, self.response['last_source'], self.crawler, save)
-        self.handler_run(HANDLER_FUN_NEXT, {"response": self.response, "request_params": self.request_params, "save": save})
+        self.request_params = builder.build(request, self.response['content'], self.response.get('cookies', {}),
+                                            save)
+        self.handler_run(HANDLER_FUN_NEXT, {"response": self.response, "request_params": self.request_params,
+                                            "save": save})
         save['next_url'] = self.request_params['url']
 
     def on_continue(self, broken_exc, save):
-#        if isinstance(broken_exc, (CDSpiderCrawlerForbidden,)):
+        """
+        重操作处理
+        :param broken_exc: 中断执行的exception
+        :param save: 传递的上下文
+        :return:
+        """
+        # if isinstance(broken_exc, (CDSpiderCrawlerForbidden,)):
         if isinstance(self.crawler, RequestsCrawler):
             self.info('Change crawler to Tornado')
             self.crawler.close()
@@ -616,31 +723,38 @@ class BaseHandler(Component):
         if save['retry'] < self.MAX_RETRY:
             save['retry'] += 1
             self.handler_run(HANDLER_FUN_CONTINUE, {"broken_exc": broken_exc, "save": save})
-            self.info('Retry to fetch: %s because of %s, current times: %s' % (self.request_params['url'], broken_exc, save['retry']))
+            self.info('Retry to fetch: %s because of %s, current times: %s' % (self.request_params['url'],
+                                                                               broken_exc, save['retry']))
         else:
             raise broken_exc
 
     def format_paging(self, paging):
-        if not paging or not "url" in paging or not paging['url'] or not isinstance(paging['url'], dict):
+        """
+        格式化分页规则
+        :param paging:
+        :return:
+        """
+        if not paging or "url" not in paging or not paging['url'] or not isinstance(paging['url'], dict):
             return None
 
-        def build_rule(rule, item):
-            _type = item.pop('type', 'incr_data')
+        def build_rule(rule_, item_):
+            _type = item_.pop('type', 'incr_data')
             if _type == 'match_data':
-                rule['match_data'].update({item.pop('name'): item})
+                rule_['match_data'].update({item_.pop('name'): item_})
             else:
-                rule[_type].append(item)
+                rule_[_type].append(item_)
+
         if paging['url']['type'] == 'match' and not paging['url']['filter']:
             return None
         rule = {"url": paging['url'], 'max': paging.get('max', 0), 'first': paging.get('first', 0), 'incr_data': [], 'random': [], 'cookie': [], 'hard_code': [], 'match_data': {}}
         if isinstance(paging['rule'], (list, tuple)):
             for item in paging['rule']:
-                if not 'name' in item or not item['name']:
+                if 'name' not in item or not item['name']:
                     continue
                 build_rule(rule, copy.deepcopy(item))
         elif isinstance(paging['rule'], dict):
             for item in paging['rule'].values():
-                if not 'word' in item or not item['word']:
+                if 'word' not in item or not item['word']:
                     continue
                 build_rule(rule, item)
         if not rule['incr_data'] and not rule['match_data'] and rule['url']['type'] != 'match':
@@ -650,12 +764,11 @@ class BaseHandler(Component):
     def get_unique_setting(self, url, data):
         """
         获取生成唯一ID的字段
-        :param url 用来生成唯一索引的url
-        :param data 用来生成唯一索引的数据
-        :input self.process 爬取流程 {"unique": 唯一索引设置}
-        :return 唯一索引的源字符串
+        :param url: 用来生成唯一索引的url
+        :param data: 用来生成唯一索引的数据
+        :return: 唯一索引的源字符串
         """
-        #获取唯一索引设置规则
+        # 获取唯一索引设置规则
         identify = self.process.get('unique', None)
         subdomain, domain = utils.parse_domain(url)
         if not subdomain:
@@ -685,6 +798,11 @@ class BaseHandler(Component):
         return u
 
     def finish(self, save):
+        """
+        爬取结束处理
+        :param save: 传递的上下文
+        :return:
+        """
         if self.log_id:
             log = {
                 'crawl_urls': self.crawl_info['crawl_urls'],                    # {page: request url, ...}
@@ -700,15 +818,17 @@ class BaseHandler(Component):
         self.handler_run(HANDLER_FUN_FINISH, {"crawl_info": self.crawl_info, "response": self.response, "save": save})
 
     def close(self):
+        """
+        关闭
+        :return:
+        """
         if hasattr(self, 'crawler') and isinstance(self.crawler, BaseCrawler):
-            self.crawler.close()
-            self.crawler.quit()
             del self.crawler
+
 
 from .Loader import Loader
 from .GeneralHandler import GeneralHandler
 from .GeneralListHandler import GeneralListHandler
 from .GeneralSearchHandler import GeneralSearchHandler
 from .GeneralItemHandler import GeneralItemHandler
-from .LinksClusterHandler import LinksClusterHandler
 from .SiteSearchHandler import SiteSearchHandler

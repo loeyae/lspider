@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -9,9 +9,9 @@
 :version: SVN: $Id: Taskdb.py 2141 2018-07-04 06:43:11Z zhangyi $
 """
 import time
-import pymongo
 from cdspider.database.base import TaskDB as BaseTaskDB
 from .Mongo import Mongo, SplitTableMixin
+
 
 class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
 
@@ -21,13 +21,13 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         super(TaskDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'uuid' in indexes:
+        if 'uuid' not in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
-        if not 'pid' in indexes:
+        if 'pid' not in indexes:
             collection.create_index('pid', name='pid')
-        if not 'sid' in indexes:
+        if 'sid' not in indexes:
             collection.create_index('sid', name='sid')
-        if not 'status' in indexes:
+        if 'status' not in indexes:
             collection.create_index('status', name='status')
 
     def insert(self, obj):
@@ -49,7 +49,7 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         obj['utime'] = int(time.time())
         return super(TaskDB, self).update(setting=obj, where=where, multi=True)
 
-    def disable(self, id, where = {}):
+    def disable(self, id, where={}):
         obj={"status": self.STATUS_INIT}
         obj['utime'] = int(time.time())
         obj['save'] = None
@@ -59,7 +59,7 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({'uuid':int(id)})
         return super(TaskDB, self).update(setting=obj, where=where, multi=False)
 
-    def active(self, id, where = {}):
+    def active(self, id, where={}):
         obj={"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
         if not where:
@@ -68,7 +68,7 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({'uuid':int(id)})
         return super(TaskDB, self).update(setting=obj, where=where, multi=False)
 
-    def delete(self, id, obj, where = {}):
+    def delete(self, id, obj, where={}):
         obj={"status": self.STATUS_DELETED}
         obj['utime'] = int(time.time())
         obj['save'] = None
@@ -81,14 +81,14 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
     def get_detail(self, id, select=None):
         return self.get(where={'uuid': int(id)}, select=select)
 
-    def get_count(self, where = {}):
+    def get_count(self, where={}):
         return self.count(where=where)
 
-    def get_list(self, where = {}, select=None, **kwargs):
+    def get_list(self, where={}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uuid', 1)])
         return self.find(where=where, select=select, **kwargs)
 
-    def get_new_list(self, id, where = {}, select=None, **kwargs):
+    def get_new_list(self, id, where={}, select=None, **kwargs):
         if not where:
             where == {}
         where['uuid'] = {'$gt': int(id)}

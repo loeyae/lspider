@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -64,10 +64,10 @@ class SitesDB(Base):
     def active(self, id, where):
         raise NotImplementedError
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         raise NotImplementedError
 
-    def update_many(self, id, obj = {}):
+    def update_many(self, id, obj={}):
         raise NotImplementedError
 
     def delete(self, id, where):
@@ -82,8 +82,8 @@ class SitesDB(Base):
     def get_site(self, id):
         raise NotImplementedError
 
-    def get_new_list(self, id, pid, where = {}, select=None, **kwargs):
+    def get_new_list(self, id, pid, where={}, select=None, **kwargs):
         raise NotImplementedError
 
-    def get_list(self, where = {}, select=None, **kwargs):
+    def get_list(self, where={}, select=None, **kwargs):
         raise NotImplementedError

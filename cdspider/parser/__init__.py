@@ -1,35 +1,35 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import abc
 import six
-import re
 import logging
 from cdspider import Component
-from cdspider.libs.utils import parse_domain, patch_result
+from cdspider.libs.utils import parse_domain
 
 KNOWN_RANDOM_KEYS = [
     'r', '_', 'rm', 'f', 'callback'
 ]
 
 KNOWN_TOP_LINK_PATTERN = [
-    '/thread\.php\?fid=\d+',
-    '/forum\.php\?gid=\d+',
-    '(forum-|list-funinfo-)',
+    r'/thread\.php\?fid=\d+',
+    r'/forum\.php\?gid=\d+',
+    r'(forum-|list-funinfo-)',
 ]
 
 KNOWN_DETAIL_URLS_PATTERN = [
-    '(20[012][0-9]|19[789][0-9]).?([1-9]|0[1-9]|1[012]).?([1-9]|0[1-9]|[12][0-9]|3[01]).*?\.[a-z]{3,5}',
-    '(mod=viewthread.*?tid=|read.*?tid=|viewnews-|blog-id-|do=blog&id=|thread-|post-funinfo-)',
-    '\d{2}/\d{4}/\d{2}/[\_\-\d\w]{10,}\.[a-z]{3,5}',
-    '\d{8}/[\_\-\d\w]{10,}\.[a-z]{3,5}',
-    '/\d{4}-\d{1,2}-\d{1,2}/',
-    '/[a-z0-9]{10,}/$',
-    'article/details/\d{6,}',
-    '/content\.[a-z]{3,5}',
-    '\d+\.s?html?$',
-    '/p/[a-z0-9]+(?:\?.+)?'
+    r'(20[012][0-9]|19[789][0-9]).?([1-9]|0[1-9]|1[012]).?([1-9]|0[1-9]|[12][0-9]|3[01]).*?\.[a-z]{3,5}',
+    r'(mod=viewthread.*?tid=|read.*?tid=|viewnews-|blog-id-|do=blog&id=|thread-|post-funinfo-)',
+    r'\d{2}/\d{4}/\d{2}/[\_\-\d\w]{10,}\.[a-z]{3,5}',
+    r'\d{8}/[\_\-\d\w]{10,}\.[a-z]{3,5}',
+    r'/\d{4}-\d{1,2}-\d{1,2}/',
+    r'/[a-z0-9]{10,}/$',
+    r'article/details/\d{6,}',
+    r'/content\.[a-z]{3,5}',
+    r'\d+\.s?html?$',
+    r'/p/[a-z0-9]+(?:\?.+)?'
 ]
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseParser(Component):
@@ -69,6 +69,7 @@ class BaseParser(Component):
         解析类
         """
         pass
+
 
 from .ListParser import ListParser
 from .ItemParser import ItemParser

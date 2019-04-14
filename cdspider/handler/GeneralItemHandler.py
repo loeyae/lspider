@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
@@ -15,36 +15,56 @@ from cdspider.libs.constants import *
 from cdspider.parser import ItemParser
 from cdspider.parser.lib import TimeParser
 
+
 class GeneralItemHandler(BaseHandler):
     """
     general item handler
-    :property task 爬虫任务信息 {"mode": "item", "rid": Article rid}
-                   当测试该handler，数据应为 {"mode": "item", "url": url, "detailRule": 详情规则，参考详情规则}
+    task 爬虫任务信息 {"mode": "item", "rid": Article rid}
+                      当测试该handler，数据应为 {"mode": "item", "url": url, "detailRule": 详情规则，参考详情规则}
+    支持注册的插件:
+        item_handler.result_handle
+            data参数为 {"save": save, "domain": domain, "subdomain": subdomain}
+        item_handler.finish_handle
+            data参数为 {"save": save, "dao": DAO name}
+
     """
 
-    def route(self, mode, rate, save):
+    ns = "item_handler"
+
+    def route(self, handler_driver_name, rate, save):
+        """
+        route
+        :param handler_driver_name:
+        :param rate:
+        :param save:
+        :return:
+        """
         yield None
 
     def get_scripts(self):
         """
         获取自定义脚本
+        :return:
         """
         try:
             rule = self.match_rule()
             return rule.get("scripts", None)
-        except:
+        except CDSpiderError:
             return None
 
     def init_process(self, save):
         """
-        初始化爬虫流程
-        :output self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则}
+        初始化爬虫流程 初始化后的数据self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则}
+        :param save: 传递的上下文
+        :return:
         """
         if "detailRule" in self.task:
             typeinfo = utils.typeinfo(self.task['url'])
-            if typeinfo['domain'] != self.task['detailRule']['domain'] or (self.task['detailRule']['subdomain'] and typeinfo['subdomain'] != self.task['detailRule']['subdomain']):
+            if typeinfo['domain'] != self.task['detailRule']['domain']\
+                    or (self.task['detailRule']['subdomain']
+                        and typeinfo['subdomain'] != self.task['detailRule']['subdomain']):
                 raise CDSpiderNotUrlMatched()
-            if  'urlPattern' in self.task['detailRule'] and self.task['detailRule']['urlPattern']:
+            if 'urlPattern' in self.task['detailRule'] and self.task['detailRule']['urlPattern']:
                 '''
                 如果规则中存在url匹配规则，则进行url匹配规则验证
                 '''
@@ -58,17 +78,19 @@ class GeneralItemHandler(BaseHandler):
     def match_rule(self):
         """
         匹配详情页规则
+        :return:
         """
-        #优先获取task中详情规则
+        # 优先获取task中详情规则
         parse_rule = self.task.get("detailRule", {})
-        #根据task中的rid获取文章信息
+        # 根据task中的rid获取文章信息
         rid = self.task.get('rid', None)
         if rid:
-            article = self.db['ArticlesDB'].get_detail(rid, select=['mediaType', 'url', 'crawlinfo', 'title', 'author', 'channel', 'pubtime'])
+            article = self.db['ArticlesDB'].get_detail(rid, select=['mediaType', 'url', 'crawlinfo', 'title',
+                                                                    'author', 'channel', 'pubtime'])
             if not article:
                 raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
             self.task.setdefault('mediaType', article.get('mediaType', MEDIA_TYPE_OTHER))
-            if not 'ulr' in self.task or not self.task['url']:
+            if 'ulr' not in self.task or not self.task['url']:
                 self.task["url"] = article['url']
             self.task.setdefault('crawlinfo', article.get('crawlinfo', {}))
             self.task['article'] = article
@@ -122,45 +144,47 @@ class GeneralItemHandler(BaseHandler):
 
     def run_parse(self, rule):
         """
-        文章解析
-        :param rule 解析规则
-        :input self.response 爬虫��果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
-        :output self.response {"parsed": 解析结果}
+        解析
+        根据 self.response {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
+        获取self.response {"parsed": 解析结果}
+        :param rule: 解析规则
+        :return:
         """
-        parser = ItemParser(source=self.response['last_source'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
+        parser = ItemParser(source=self.response['content'], ruleset=copy.deepcopy(rule),
+                            log_level=self.log_level, url=self.response['final_url'])
         self.response['parsed'] = parser.parse()
 
     def _build_crawl_info(self, final_url):
         """
         构造爬虫log信息
-        :param final_url 请求的url
-        :input self.task 爬虫任务信息
-        :input self.page 当前的页码
+        :param final_url: 请求的url
+        :return:
         """
         self.task['crawlinfo']['mode'] = HANDLER_MODE_DEFAULT_ITEM
-        if not 'final_url' in self.task['crawlinfo']:
+        if 'final_url' not in self.task['crawlinfo']:
             self.task['crawlinfo']['final_url'] = {str(self.page): final_url}
         else:
             self.task['crawlinfo']['final_url'][str(self.page)] = final_url
-        if not 'detailRule' in self.task['crawlinfo']:
+        if 'detailRule' not in self.task['crawlinfo']:
             self.task['crawlinfo']['detailRule'] = self.process.get('uuid', 0)
         self.task['crawlinfo']['page'] = self.page
 
     def _build_result_info(self, **kwargs):
         """
         构造文章数据
-        :param result 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
-        :param final_url 请求的url
-        :param typeinfo 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
-        :param crawlinfo 爬虫信息
-        :param unid 文章唯一索引
-        :param ctime 抓取时间
-        :param status 状态
+        :param result: 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
+        :param final_url: 请求的url
+        :param typeinfo: 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
+        :param crawlinfo: 爬虫信息
+        :param unid: 文章唯一索引
+        :param ctime: 抓取时间
+        :param status: 状态
+        :return:
         """
         now = int(time.time())
         result = kwargs.pop('result')
         item = self.task.get('article', {}) or {}
-        #格式化发布时间
+        # 格式化发布时间
         pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
         if pubtime and pubtime > now:
             pubtime = now
@@ -193,21 +217,22 @@ class GeneralItemHandler(BaseHandler):
     def run_result(self, save):
         """
         爬虫结果处理
-        :param save 保存的上下文信息
+        :param save: 传递的上下文
+        :return:
         """
         self._build_crawl_info(final_url=self.response['final_url'])
         if self.response['parsed']:
             typeinfo = utils.typeinfo(self.response['final_url'])
             self.result2db(save, copy.deepcopy(typeinfo))
-            params = {"crawlinfo": self.task['crawlinfo'], "save": save, "rid": self.task['rid'], **typeinfo}
-
-            utils.run_extension(extension_ns="item_handler.result_handle", data=params, handler=self)
+            params = {"save": save, **typeinfo}
+            utils.run_extension(extension_ns="{0}.result_handle".format(self.ns), data=params, handler=self)
 
     def result2db(self, save, typeinfo):
         """
         详情解析结果入库
-        :param save 保存的上下文信息
-        :param typeinfo 域名信息
+        :param save: 传递的上下文
+        :param typeinfo: 域名信息
+        :return:
         """
         result_id = self.task.get("rid", None)
         if not result_id:
@@ -222,12 +247,13 @@ class GeneralItemHandler(BaseHandler):
                 inserted, unid = (True, {"acid": "testing_mode", "ctime": self.crawl_id})
                 self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
             else:
-                #生成文章唯一索引并验证是否已存在
-                inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(self.response['final_url'],
-                                                                                    self.response['parsed']), self.crawl_id)
+                # 生成文章唯一索引并验证是否已存在
+                inserted, unid = self.db['UniqueDB'].insert(
+                    self.get_unique_setting(self.response['final_url'], self.response['parsed']), self.crawl_id)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
-            #格式化文章信息
-            result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], **unid)
+            # 格式化文章信息
+            result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo,
+                                             result=self.response['parsed'], crawlinfo=self.task['crawlinfo'], **unid)
             if self.testing_mode:
                 '''
                 testing_mode打开时，数据不入库
@@ -253,8 +279,10 @@ class GeneralItemHandler(BaseHandler):
                 对于已存在的文章，如果是第一页，则更新所有解析到的内容
                 否则只追加content的内容
                 '''
-                #格式化文章信息
-                result = self._build_result_info(final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'], crawlinfo=self.task['crawlinfo'])
+                # 格式化文章信息
+                result = self._build_result_info(
+                    final_url=self.response['final_url'], typeinfo=typeinfo, result=self.response['parsed'],
+                    crawlinfo=self.task['crawlinfo'])
 
                 if self.testing_mode:
                     '''
@@ -284,16 +312,13 @@ class GeneralItemHandler(BaseHandler):
 
     def finish(self, save):
         """
-        记录抓取日志
+        怕却结束 记录抓取日志
+        :param save: 传递的上下文
+        :return:
         """
         super(GeneralItemHandler, self).finish(save)
         if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
             self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
-            self.build_sync_task(self.task['rid'], 'ArticlesDB')
-
-    def build_sync_task(self, rid, db):
-        """
-        生成同步任务并入队
-        """
-        message = {'rid': rid, 'db': db}
-        self.queue['article2kafka'].put_nowait(message)
+            utils.run_extension(
+                extension_ns="{0}.finish_handle".format(self.ns), data={"save": save, "dao": ArticlesDB.__name__},
+                handler=self)

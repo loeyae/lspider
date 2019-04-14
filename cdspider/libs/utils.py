@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import sys
@@ -24,6 +24,7 @@ from chardet.universaldetector import UniversalDetector
 from urllib import parse
 from lxml import etree as le
 
+
 def url_is_from_any_domain(url, domains):
     """Return True if the url belongs to any of the given domains"""
     host = parse.urlparse(url).netloc.lower()
@@ -32,8 +33,9 @@ def url_is_from_any_domain(url, domains):
     domains = [d.lower() for d in domains]
     return any((host == d) or (host.endswith('.%s' % d)) for d in domains)
 
+
 def format_(data, params):
-    keylist = re.findall('{(\w+)}', data)
+    keylist = re.findall(r'{(\w+)}', data)
     format_params = {}
     for key in keylist:
         if key in params:
@@ -42,13 +44,14 @@ def format_(data, params):
             format_params[key] = '{%s}' % key
     return data.format(**format_params)
 
+
 def build_url_by_rule(rule, params):
     url = rule.get('base')
     if not params:
         return url
     mode = rule.get('mode', 'get')
     if mode == 'format':
-        keylist = re.findall('{(\w+)}', url)
+        keylist = re.findall(r'{(\w+)}', url)
         format_params = {}
         for key in keylist:
             if key in params:
@@ -69,12 +72,14 @@ def build_url_by_rule(rule, params):
         return build_query(url, params)
     return url
 
+
 def parse_domain(url):
     try:
         extracted = tldextract.extract(url)
         return extracted.subdomain, "%s.%s" % (extracted.domain, extracted.suffix)
     except:
         return None, None
+
 
 def domain_info(url):
     subdomain, domain = parse_domain(url)
@@ -86,17 +91,20 @@ def typeinfo(url):
     subdomain, domain = domain_info(url)
     return {"domain": domain, "subdomain": subdomain}
 
+
 def remove_punctuation(content):
     if not isinstance(content, str):
         content = content.decode('utf-8')
     tbl = dict.fromkeys(ord(x) for x in string.punctuation)
     return content.translate(tbl)
 
+
 def remove_whtiespace_plus(content):
     if not isinstance(content, str):
         content = content.decode('utf-8')
     tbl = dict.fromkeys(ord(x) for x in string.whitespace)
     return content.translate(tbl)
+
 
 def remove_whitespace(content):
     if not content:
@@ -107,7 +115,8 @@ def remove_whitespace(content):
         content = str(content)
     tbl = dict.fromkeys(ord(x) for x in '\t\v\f')
     content = content.translate(tbl)
-    return re.sub('((?:\r\n\s*)+|(?:\r\s*)+|(?:\n\s*)+|(?:<style>).+?(?:</style>))', '\r\n', content)
+    return re.sub(r'((?:\r\n\s*)+|(?:\r\s*)+|(?:\n\s*)+|(?:<style>).+?(?:</style>))', '\r\n', content)
+
 
 def decode(data, errors="ignore"):
     if isinstance(data, bytes):
@@ -137,6 +146,7 @@ def decode(data, errors="ignore"):
             return data.decode("gbk")
     return data
 
+
 def mgkeyconvert(data, restore = False):
     cdata = {}
     if restore:
@@ -163,6 +173,7 @@ def filter_list_result(data):
            item = [item]
         rest.extend(item)
     return rest
+
 
 def filter_item_result(data):
     if not data:
@@ -195,6 +206,7 @@ def filter_item_result(data):
             rest.update({key: item})
     return rest
 
+
 def get_current_month_days():
     currentday = datetime.datetime.now()
     currentMonth = currentday.strftime('%m')
@@ -204,6 +216,7 @@ def get_current_month_days():
     days = d2 - d1
     day = days.days
     return day
+
 
 def patch_result(data, rule, callback=None):
     prefix = rule.get('prefix', '')
@@ -223,6 +236,7 @@ def patch_result(data, rule, callback=None):
             return re.sub('\[\w+\]', str(rst), patch) if not isinstance(rst, (list, dict)) and rst else rst
         return "%s%s%s" %(prefix, rst, suffix) if not isinstance(rst, (list, dict)) and rst else rst
 
+
 def preg(data, rule):
     pattern, key = rule2pattern(rule)
     r = re.search(pattern, str(data), re.S|re.I)
@@ -232,6 +246,7 @@ def preg(data, rule):
             matched = matched.strip()
         return matched
     return None
+
 
 def extract_result(data, rule, callback=None):
 
@@ -244,6 +259,7 @@ def extract_result(data, rule, callback=None):
         return dict((k, preg(callback_result(callback, d), extract)) if not isinstance(d, (list, dict)) and d else d for k,d in data.items())
     else:
         return preg(callback_result(callback, data), extract)
+
 
 def load_config(f):
     """
@@ -260,19 +276,23 @@ def load_config(f):
     config = underline_dict(json.load(open(f, encoding='utf-8')))
     return config
 
+
 def query2dict(value):
     if not value:
         return {}
     return dict([(k, v[0]) for k, v in parse.parse_qs(value).items()])
 
+
 def parse_arg(ctx, param, value):
     return query2dict(value)
+
 
 def quertstr2dict(value):
     if not value:
         return {}
     d = [parse.unquote(item).split('=') for item in value.split("&")]
     return dict([(i[0], i[1]) for i in d])
+
 
 def rule2pattern(rule):
     """
@@ -291,8 +311,9 @@ def rule2pattern(rule):
             rule = '%s%s%s(?P<%s>.+?)%s%s%s' % (g2.group(1), '.*?' if g2.group(2) else '', g2.group(3), g2.group(4), g2.group(5), '.*?' if g2.group(6) else '', g2.group(7))
             key = g2.group(4)
         else:
-            return (None, None)
-    return (rule, key)
+            return None, None
+    return rule, key
+
 
 def rule2subitem(rule, subject):
     """
@@ -313,15 +334,17 @@ def rule2subitem(rule, subject):
             pt2 = '%s%s%s' % (g2.group(5), '.*?' if g2.group(6) else '', g2.group(7))
             rule = '%s.+?%s' % ('(%s)' % pt1 if pt1 else '', '(%s)' % pt2 if pt2 else '')
             subject = '%s%s%s' % ('\\1' if pt1 else '' , subject, '\\2' if pt1 and pt2 else ('\\1' if pt2 else ''))
-    return (rule, subject)
+    return rule, subject
 
-def run_extension(extension_ns, data, *args, **kwargs):
+
+def run_extension(extension_ns, data, ignore = True, *args, **kwargs):
     """
     运行扩展插件
-    :param extension_ns:
-    :param data:
-    :param args:
-    :param kwargs:
+    :param extension_ns: 插件命名空间
+    :param data: 传递给函数的参数
+    :param ignore: 如果没有插件，是否忽略
+    :param args: 传递给插件的参数
+    :param kwargs: 传递给插件的参数
     :return:
     """
     mgr = stevedore.extension.ExtensionManager(
@@ -330,14 +353,39 @@ def run_extension(extension_ns, data, *args, **kwargs):
         invoke_args = args,
         invoke_kwds = kwargs,
     )
-    if not mgr.extensions:
+    if ignore and not mgr.extensions:
         return None
+
     def execut(ext, data):
-        return (ext.name, ext.obj.handle(**data))
+        return ext.name, ext.obj.handle(**data)
 
     results = mgr.map(execut, data)
 
     return results
+
+
+def call_extension(extension_ns, fn, data, ignore = True, *args, **kwargs):
+    """
+    调用插件
+    :param extension_ns: 插件命名空间
+    :param fn: 调用函数
+    :param data: 传递的参数
+    :param ignore: 如果没有插件，是否忽略
+    :return:
+    """
+    mgr = stevedore.extension.ExtensionManager(
+        namespace='cdspider.%s' % extension_ns,
+        invoke_on_load=True,
+        invoke_args = args,
+        invoke_kwds = kwargs,
+    )
+    if ignore and not mgr.extensions:
+        return None
+
+    results = mgr.map(fn, data)
+
+    return results
+
 
 def load_driver(driver_ns, driver_nm, *args, **kwargs):
     """
@@ -352,11 +400,13 @@ def load_driver(driver_ns, driver_nm, *args, **kwargs):
     )
     return mgr.driver
 
+
 def load_crawler(crawler, *args, **kwargs):
     """
     以插件模式加载crawler
     """
     return load_driver('crawler', crawler, *args, **kwargs)
+
 
 def load_parser(parser, *args, **kwargs):
     """
@@ -364,11 +414,13 @@ def load_parser(parser, *args, **kwargs):
     """
     return load_driver('parser', parser, *args, **kwargs)
 
+
 def load_queue(queue, *args, **kwargs):
     """
     以插件模式加载queue
     """
     return load_driver('queue', queue, *args, **kwargs)
+
 
 def load_mailer(mailer, *args, **kwargs):
     """
@@ -376,23 +428,27 @@ def load_mailer(mailer, *args, **kwargs):
     """
     return load_driver('mailer', mailer, *args, **kwargs)
 
+
 def load_db(driver_name, *args, **kwargs):
     """
     以插件模式加载db
     """
     return load_driver('db', driver_name, *args, **kwargs)
 
+
 def load_dao(protocol, driver_name, *args, **kwargs):
     """
     以插件模式加载DAO
     """
     return load_driver('dao.{protocol}'.format(protocol=protocol), driver_name, *args, **kwargs)
-    
+
+
 def load_handler(name, *args, **kwargs):
     """
     以插件模式加载handler
     """
     return load_driver('handler', name, *args, **kwargs)
+
 
 def run_in_thread(func, *args, **kwargs):
     """Run function in thread, return a Thread object"""
@@ -409,29 +465,31 @@ def run_in_subprocess(func, *args, **kwargs):
     thread.start()
     return thread
 
+
 def run_cmd(command):
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     return p.stdout.read()
 
+
 def url_encode(params):
     g_encode_params = {}
 
-    def _encode_params(params, p_key=None):
+    def _encode_params(params_, p_key=None):
         encode_params = {}
-        if isinstance(params, dict):
-            for key in params:
-                encode_key = '{}[{}]'.format(p_key,key)
-                encode_params[encode_key] = params[key]
-        elif isinstance(params, (list, tuple)):
-            for offset,value in enumerate(params):
+        if isinstance(params_, dict):
+            for key_ in params_:
+                encode_key = '{}[{}]'.format(p_key,key_)
+                encode_params[encode_key] = params_[key_]
+        elif isinstance(params_, (list, tuple)):
+            for offset, value in enumerate(params_):
                 encode_key = '{}[{}]'.format(p_key, offset)
                 encode_params[encode_key] = value
         else:
-            g_encode_params[p_key] = params
+            g_encode_params[p_key] = params_
 
-        for key in encode_params:
-            value = encode_params[key]
-            _encode_params(value, key)
+        for key_ in encode_params:
+            value = encode_params[key_]
+            _encode_params(value, key_)
 
     if isinstance(params, dict):
         for key in params:
@@ -442,6 +500,7 @@ def url_encode(params):
     for item in t:
         query_str.append("%s=%s" % (item[0], parse.quote_plus(item[1])))
     return "&". join(query_str)
+
 
 def build_query(url, query):
     if not query:
@@ -455,7 +514,7 @@ def build_query(url, query):
         query = parse.parse_qs(query)
     query1.update(query)
     query2 = {}
-    for i,v in query1.items():
+    for i, v in query1.items():
         if v:
             if isinstance(v, (list, tuple)):
                query2[i] = v[0] or ""
@@ -464,35 +523,39 @@ def build_query(url, query):
     querystr = url_encode(query2)
     return parse.urlunparse((arr.scheme, arr.netloc, arr.path, arr.params, querystr, arr.fragment))
 
-def build_filter_query(url, query = [], exclude = []):
+
+def build_filter_query(url, query=[], exclude=[]):
     arr = parse.urlparse(url)
     if arr.query:
         query1 = parse.parse_qs(arr.query)
     else:
-        query1 = {}
-    query2 = {}
+        query1 = dict()
+    query2 = dict()
     if query:
-        for i,v in query1.items():
+        for i, v in query1.items():
             if i in query and v:
                 if isinstance(v, (list, tuple)):
-                   query2[i] = v[0] or ""
+                   query2[i] = str(v[0]) or ""
                 else:
-                    query2[i] = str(v)  or ""
+                    query2[i] = str(v) or ""
     elif exclude:
         for i,v in query1.items():
-            if not i in exclude and v:
+            if i not in exclude and v:
                 if isinstance(v, (list, tuple)):
-                   query2[i] = v[0] or ""
+                   query2[i] = str(v[0]) or ""
                 else:
-                    query2[i] = str(v)  or ""
+                    query2[i] = str(v) or ""
     querystr = url_encode(query2)
     return parse.urlunparse((arr.scheme, arr.netloc, arr.path, arr.params, querystr, arr.fragment))
+
 
 def base64encode(text):
     return base64.b64encode(text.encode('utf-8')).decode('utf-8')
 
+
 def base64decode(text):
     return base64.b64decode(text.encode('utf-8')).decode('utf-8')
+
 
 def quote_chinese(url, encodeing="utf-8"):
     """Quote non-ascii characters"""
@@ -503,6 +566,7 @@ def quote_chinese(url, encodeing="utf-8"):
     else:
         res = [b if ord(b) < 128 else '%%%02X' % ord(b) for b in url]
     return "".join(res)
+
 
 def randomint(wait):
     if isinstance(wait, list):
@@ -519,6 +583,7 @@ def randomint(wait):
         min = int(max / 2)
     return random.randint(min, max)
 
+
 def map_build(data, mapping, clear = False):
     if isinstance(data, dict):
         for name,value in data.items():
@@ -528,6 +593,7 @@ def map_build(data, mapping, clear = False):
                     del data[name]
     return data
 
+
 def desc2date(desc):
     today = datetime.date.today()
     if desc == '前天':
@@ -536,12 +602,15 @@ def desc2date(desc):
         return str(today - datetime.timedelta(days=1))
     return desc
 
+
 def md5(key):
     return hashlib.md5(str(key).encode("utf-8")).hexdigest()
+
 
 def str2json(json_str):
     data = json.loads(json_str)
     return data
+
 
 def merge(data1, data2):
     if isinstance(data1, list) and  isinstance(data2, list):
@@ -556,10 +625,12 @@ def merge(data1, data2):
     else:
         return str(data1) + str(data2)
 
-def list_column(list1, key, column = None):
+
+def list_column(list1, key, column=None):
     if column:
         return dict((item[key],item[column]) for item in list1 if key in item and column in item)
     return dict((item[key],item) for item in list1 if key in item)
+
 
 def filter(data):
     if isinstance(data, list):
@@ -567,6 +638,7 @@ def filter(data):
     elif isinstance(data, dict):
         return dict((k, v) for k, v in data.items() if v)
     return data
+
 
 def iterator2list(iterator):
     """
@@ -576,6 +648,7 @@ def iterator2list(iterator):
     """
     return list(iterator)
 
+
 def list2dict(keylist, valuelist):
     """
     返回以列表keylist的值为key,对应valuelist位置的值为value的字典，如果valuelist的长度小于keylist的长度，则返回 None
@@ -584,6 +657,7 @@ def list2dict(keylist, valuelist):
         return None
     return dict((keylist[idx],valuelist[idx]) for idx in range(len(keylist)))
 
+
 def dictjoin(dict1, dict2, replace = False):
     """
     返回出现在dict1或dict2中key对应的字典，如果dict1和dict2中都存在该key，并且都不为空，则保留dict1中的值
@@ -591,19 +665,21 @@ def dictjoin(dict1, dict2, replace = False):
     for key in dict1:
         val = dict2.pop(key, None)
         if replace:
-            if val != None and val != '':
+            if val is not None and val != '':
                 dict1[key] = val
         else:
-            if (dict1[key] == None or dict1[key] == '') and val != None and val != '':
+            if (dict1[key] is None or dict1[key] == '') and val is not None and val != '':
                 dict1[key] = val
     dict1.update(dict2)
     return dict1
+
 
 def dictunion(dict1, dict2):
     """
     返回key出现在dict1中同时出现在dict2的对应字典
     """
-    return dict((x,y) for x,y in dict1.items() if x in dict2)
+    return dict((x, y) for x, y in dict1.items() if x in dict2)
+
 
 def table2kvlist(data):
     """
@@ -644,6 +720,7 @@ def table2kvlist(data):
             d.append(dict(zip(keys,item)))
     return d
 
+
 def list2kv(data):
     """"
     返回以list第一行为key，其他行为value的数据集
@@ -662,7 +739,8 @@ def list2kv(data):
     """
     keys = data[0]
     values = data[1:]
-    return [dict((keys[i],item[i]) for i in range(len(item))) for item in values]
+    return [dict((keys[i], item[i]) for i in range(len(item))) for item in values]
+
 
 def utf8(string):
     """
@@ -691,6 +769,7 @@ def text(string, encoding='utf8'):
     else:
         return six.text_type(string)
 
+
 def get_object(object_string):
     """
     动态返回module中的对象
@@ -712,6 +791,7 @@ def get_object(object_string):
         return getattr(obj, class_name)
     return obj
 
+
 def get_method(method_string, *args, **kwargs):
     """
     动态返回对象
@@ -721,6 +801,7 @@ def get_method(method_string, *args, **kwargs):
     object_string, method_name = method_string.rsplit(".", 1)
     o = get_object(object_string)(*args, **kwargs)
     return getattr(o, method_name)
+
 
 def callback_result(func, data):
     """
@@ -734,6 +815,7 @@ def callback_result(func, data):
     except:
         logging.error(traceback.format_exc())
         return data
+
 
 def pcre2re(pattern, m = None):
     """
@@ -749,9 +831,9 @@ def pcre2re(pattern, m = None):
     else:
         ids = 0
         idx = len(pattern)
-    ptr =  pattern[ids:idx]
+    ptr = pattern[ids:idx]
     md = pattern[idx+1:]
-    arg = []
+    arg = list()
     arg.append(ptr)
     if m:
         arg.append(m)
@@ -759,7 +841,8 @@ def pcre2re(pattern, m = None):
         for i in md:
             if i in mode:
                 arg.append(getattr(re, mode[i]))
-    return getattr(re,'compile')(*arg)
+    return getattr(re, 'compile')(*arg)
+
 
 def find_str(string, sub_str, find_cnt):
     """
@@ -769,6 +852,7 @@ def find_str(string, sub_str, find_cnt):
     if len(str_list) <= find_cnt:
         return -1
     return len(string)-len(str_list[-1])-len(sub_str)
+
 
 class __redirection__:
 
@@ -797,6 +881,7 @@ class __redirection__:
     def reset(self):
         sys.stdout=self.__console__
 
+
 class xml_tool(object):
 
     def __init__(self, x):
@@ -821,7 +906,8 @@ class xml_tool(object):
             parent = parent[0]
         parent.append(element)
 
-    def remove(self, node):
+    @staticmethod
+    def remove(node):
         parent = node.getparent()
         if parent is not None:
             if node.tail:
@@ -837,10 +923,11 @@ class xml_tool(object):
             node.clear()
             parent.remove(node)
 
-    def create_element(self, tag, text = None, tail = '\n'):
+    @staticmethod
+    def create_element(tag, text=None, tail='\n'):
         e = le.Element(tag)
         if text:
-            e.text =text
+            e.text = text
         e.tail = tail
         return e
 
@@ -877,7 +964,9 @@ class xml_tool(object):
     def save_file(self, filename):
         return le.ElementTree(self.root).write(filename, pretty_print=True, xml_declaration=True, encoding='utf-8')
 
+
 def array2rule(rule, final_url):
+
     def build_rule(item, final_url):
         key = item.pop('key')
         if key and item['filter']:
@@ -888,7 +977,7 @@ def array2rule(rule, final_url):
                 item['filter'] = '@value:%s' % final_url
             return {key: item}
         return None
-    #格式化解析规则
+    # 格式化解析规则
     parse = {}
     if isinstance(rule, (list, tuple)):
         for item in rule:
@@ -902,6 +991,7 @@ def array2rule(rule, final_url):
                 parse.update(ret)
     return parse
 
+
 def rule2parse(parser_cls, source, final_url, rule, log_level):
     """
     根据规则解析出结果
@@ -911,6 +1001,7 @@ def rule2parse(parser_cls, source, final_url, rule, log_level):
     parser = parser_cls(source=source, ruleset=rule, log_level=log_level, url=final_url)
     parsed = parser.parse()
     return filter(parsed)
+
 
 def attach_preparse(parser_cls, source, final_url, rule, log_level):
     """
@@ -924,6 +1015,7 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
         return False
     return parsed
 
+
 def get_attach_data(parser_cls, source, final_url, rule, log_level):
     if 'preparse' in rule and rule['preparse']:
         parse = rule['preparse'].get('parse', None)
@@ -931,10 +1023,11 @@ def get_attach_data(parser_cls, source, final_url, rule, log_level):
         if parse:
             _rule = array2rule(copy.deepcopy(parse), final_url)
             parsed = attach_preparse(parser_cls, source, final_url, _rule, log_level)
-            if parsed == False:
+            if parsed is False:
                 return False
         return parsed
     return {}
+
 
 def build_attach_url(data, rule, final_url):
     """
@@ -942,7 +1035,7 @@ def build_attach_url(data, rule, final_url):
     :param rule 附加任务url生成规则
     """
     if 'preparse' in rule and rule['preparse']:
-        #根据解析规则匹配解析内容
+        # 根据解析规则匹配解析内容
         parse = rule['preparse'].get('parse', None)
         params = {}
         hard_code = []
@@ -950,15 +1043,15 @@ def build_attach_url(data, rule, final_url):
             _rule = array2rule(copy.deepcopy(parse), final_url)
             for k, r in _rule.items():
                 if k not in data:
-                    return (None, None)
+                    return None, None
                 if 'mode' in r:
                     hard_code.append({"type": r['mode'], "name": k, "value": data[k]})
                 else:
                     params[k] = data[k]
         urlrule = rule['preparse'].get('url', {})
         if urlrule:
-            #格式化url设置，将parent_rul替换为详情页url
+            # 格式化url设置，将parent_rul替换为详情页url
             if urlrule['base'] == 'parent_url':
                 urlrule['base'] = final_url
-        return (build_url_by_rule(urlrule, params), hard_code)
-    return (None, None)
+        return build_url_by_rule(urlrule, params), hard_code
+    return None, None

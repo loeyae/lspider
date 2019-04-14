@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -40,7 +40,7 @@ class ItemParser(BaseParser):
         if isinstance(source, bytes):
             try:
                 article = g.extract(raw_html=utils.decode(source), encoding='UTF8')
-            except:
+            except UnicodeDecodeError:
                 article = g.extract(raw_html=source)
         else:
             article = g.extract(raw_html=source, encoding='UTF8')
@@ -58,15 +58,15 @@ class ItemParser(BaseParser):
                 data[i] = self.get_author(article.infos['authors'])
             else:
                 data[i] = article.infos.get(i, None)
-        if not 'title' in data:
+        if 'title' not in data:
             data['title'] = article.infos['title']['clean_title']
-        if not 'content' in data:
+        if 'content' not in data:
             data['content'] = article.infos['cleaned_text']
             data["raw_content"] = '\r\n'.join(article.top_node_html) if isinstance(article.top_node_html, (list, tuple)) else article.top_node_html
             data["raw_content"] = re.sub('[\u3000\xa0]', ' ', str(data["raw_content"]))
-        if not 'pubtime' in data:
+        if 'pubtime' not in data:
             data['pubtime'] = article.infos['publish_date']
-        if not 'author' in data:
+        if 'author' not in data:
             data['author'] = self.get_author(article.infos['authors'])
         return data
 

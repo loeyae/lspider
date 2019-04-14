@@ -1,10 +1,9 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import sys
 import copy
-import imp
-import inspect
+import importlib.util
 import linecache
 import six
 import click
@@ -15,6 +14,7 @@ import collections
 
 from cdspider.exceptions import *
 from cdspider.libs import utils
+
 
 class Redis():
     """
@@ -39,7 +39,7 @@ class Redis():
         self.connect()
 
     def connect(self):
-        if not 'pool' in self.setting:
+        if 'pool' not in self.setting:
             if 'url' in self.setting:
                 self.setting['pool'] = redis.ConnectionPool.from_url(url=self.setting['url'], db=self.setting['db'])
             else:
@@ -52,12 +52,14 @@ class Redis():
         except Exception as e:
             raise CDSpiderRedisError(str(e))
 
+
 class db_wrapper(collections.UserDict):
     """
     db wrapper
     """
     connector = None
     protocol = None
+
     def __init__(self, connector, protocol, log_level = logging.WARN):
         self.connector = connector
         self.protocol = protocol
@@ -68,13 +70,14 @@ class db_wrapper(collections.UserDict):
         if key in self.data:
             return super(db_wrapper, self).__getitem__(key)
         try:
-            cls = utils.load_dao(self.protocol, key, connector = self.connector, log_level=self.log_level)
+            cls = utils.load_dao(self.protocol, key, connector=self.connector, log_level=self.log_level)
             self.data[key] = cls
             return cls
         except (ImportError, AttributeError):
-            cls = utils.load_dao(self.protocol, 'Base', connector = self.connector, log_level=self.log_level)
+            cls = utils.load_dao(self.protocol, 'Base', connector=self.connector, log_level=self.log_level)
             self.data[key] = cls
             return cls
+
 
 class queue_wrapper(collections.UserDict):
     """
@@ -82,6 +85,7 @@ class queue_wrapper(collections.UserDict):
     """
     context = None
     queue_setting = None
+
     def __init__(self, context, queue_setting):
         self.context = context
         self.queue_setting = queue_setting
@@ -112,7 +116,7 @@ def read_config(ctx, param, value):
     return config
 
 def load_config(ctx, param, value):
-    if value == None:
+    if value is None:
         return None
     if not value:
         return {}
@@ -193,11 +197,13 @@ def connect_db(ctx, param, value):
         password = password, logger=logger, log_level = log_level, **kwargs)
     return connector
 
+
 def connect_rpc(ctx, param, value):
     if isinstance(value, six.string_types):
         from xmlrpc import client as xmlrpc_client
         return xmlrpc_client.ServerProxy(value, allow_none=True)
     return value
+
 
 class ModulerLoader(object):
     """
@@ -211,7 +217,7 @@ class ModulerLoader(object):
 
     def load_module(self, handler, handler_params):
         if self.mod is None:
-            self.mod = mod = imp.new_module(self.name)
+            self.mod = mod = importlib.util.module_from_spec(self.name)
         else:
             mod = self.mod
         mod.__file__ = '<%s>' % self.name

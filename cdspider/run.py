@@ -1,22 +1,18 @@
 #! /usr/bin/python
-#-*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
-__author__="Zhang Yi <loeyae@gmail.com>"
-__date__ ="$2018-1-9 18:04:41$"
+__author__ = "Zhang Yi <loeyae@gmail.com>"
+__date__ = "$2018-1-9 18:04:41$"
 
-import sys
 import os
 import traceback
-import click
 import logging.config
-import json
-from cdspider.libs import utils
 from cdspider.libs.tools import *
-from cdspider.database.base import *
 
 cpath = os.path.dirname(os.path.abspath(__file__))
+
 
 @click.group(invoke_without_command=True)
 @click.option('-c', '--config', default=os.path.join(cpath, "config", "main.json"),
@@ -60,6 +56,8 @@ def cli(ctx, **kwargs):
     if db_setting:
         connector = connect_db(ctx, None, db_setting)
         db_object = db_wrapper(connector, db_setting.get('protocol'), log_level=logging.DEBUG if kwargs['db_debug'] else logging.WARN)
+    else:
+        kwargs['testing_mode'] = True
     kwargs['db'] = db_object
 
     queue_object = {}
@@ -93,9 +91,9 @@ def route(ctx, scheduler_cls, mode, rate, outqueue, no_loop, get_object=False):
     路由: 按handle和频率分发任务
     """
     mode = list(set(mode))
-    g=ctx.obj
-    Scheduler = load_cls(ctx, None, scheduler_cls)
-    scheduler = Scheduler(ctx, mode=mode, rate=rate, outqueue=outqueue)
+    g = ctx.obj
+    scheduler = load_cls(ctx, None, scheduler_cls)
+    scheduler = scheduler(ctx, mode=mode, rate=rate, outqueue=outqueue)
     g['instances'].append(scheduler)
     if get_object:
         return scheduler
@@ -115,8 +113,8 @@ def plantask_schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop,  get_objec
     根据路由的分发，将爬虫任务入队
     """
     g=ctx.obj
-    Scheduler = load_cls(ctx, None, scheduler_cls)
-    scheduler = Scheduler(ctx, inqueue=inqueue, outqueue=outqueue)
+    scheduler = load_cls(ctx, None, scheduler_cls)
+    scheduler = scheduler(ctx, inqueue=inqueue, outqueue=outqueue)
     g['instances'].append(scheduler)
     if get_object:
         return scheduler
@@ -136,14 +134,14 @@ def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
     调度器rpc接口
     """
     g = ctx.obj
-    Scheduler = load_cls(ctx, None, scheduler_cls)
+    scheduler = load_cls(ctx, None, scheduler_cls)
 
-    scheduler = Scheduler(ctx)
+    scheduler = scheduler(ctx)
     g['instances'].append(scheduler)
     scheduler.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
 @cli.command()
-@click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
+@click.option('--fetch-cls', default='cdspider.spider.spider', callback=load_cls, help='spider name')
 @click.option('-i', '--inqueue', default=None, help='监听的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.option('--no-sync', default=False, is_flag=True, help='不同步数据给kafka', show_default=True)
@@ -153,10 +151,10 @@ def fetch(ctx, fetch_cls, inqueue, no_loop, no_sync, get_object=False, no_input=
     监听任务队列并执行抓取
     """
     g = ctx.obj
-    Spider = load_cls(ctx, None, fetch_cls)
+    spider = load_cls(ctx, None, fetch_cls)
     if no_input:
         inqueue = False
-    spider = Spider(ctx, no_sync=no_sync, inqueue = inqueue)
+    spider = spider(ctx, no_sync=no_sync, inqueue = inqueue)
     g['instances'].append(spider)
     if get_object:
         return spider
@@ -175,9 +173,9 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     采集器rpc接口
     """
     g = ctx.obj
-    Spider = load_cls(ctx, None, spider_cls)
+    spider = load_cls(ctx, None, spider_cls)
 
-    spider = Spider(ctx, inqueue = False)
+    spider = spider(ctx, inqueue = False)
     g['instances'].append(spider)
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
@@ -190,8 +188,8 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
     worker
     """
     g = ctx.obj
-    Worker = load_cls(ctx, None, worker_cls)
-    worker = Worker(ctx)
+    worker = load_cls(ctx, None, worker_cls)
+    worker = worker(ctx)
     g['instances'].append(worker)
     if get_object:
         return worker
@@ -227,8 +225,8 @@ def schedule_test(ctx, scheduler_cls, message, outqueue):
     计划任务测试
     """
     g = ctx.obj
-    Scheduler = load_cls(ctx, None, scheduler_cls)
-    scheduler = Scheduler(ctx, outqueue=outqueue)
+    scheduler = load_cls(ctx, None, scheduler_cls)
+    scheduler = scheduler(ctx, outqueue=outqueue)
     task = json.loads(message)
     scheduler.schedule(task)
 
@@ -243,11 +241,11 @@ def spider_test(ctx, spider_cls, setting, output, no_input):
     """
     抓取流程测试
     """
-    Spider = load_cls(ctx, None, spider_cls)
+    spider = load_cls(ctx, None, spider_cls)
     inqueue = None
     if no_input:
         inqueue = False
-    spider = Spider(ctx, no_sync = True, handler=None, inqueue=inqueue)
+    spider = spider(ctx, no_sync = True, handler=None, inqueue=inqueue)
     task = spider.get_task(message = setting, no_check_status = True)
     return_result = spider.fetch(task=task, return_result = setting.get("return_result", False))
     print(return_result)
@@ -266,9 +264,8 @@ def fetch_task(ctx, spider_cls, tid, mode, output):
     """
     按任务ID抓取数据,测试时使用
     """
-    g = ctx.obj
-    Spider = load_cls(ctx, None, spider_cls)
-    spider = Spider(ctx, no_sync = True, handler=None, inqueue=False)
+    spider = load_cls(ctx, None, spider_cls)
+    spider = spider(ctx, no_sync = True, handler=None, inqueue=False)
     task = {
         "uuid": int(tid),
         "mode": mode,
@@ -294,12 +291,11 @@ def fetch_result(ctx, worker_cls, rid, output):
     """
     抓取文章测试结果
     """
-    g = ctx.obj
-    Worker = load_cls(ctx, None, worker_cls)
-    worker = Worker(ctx)
-    task = {
+    worker = load_cls(ctx, None, worker_cls)
+    worker = worker(ctx)
+    task = dict({
         "rid": rid
-    }
+    })
     task['return_result'] = False
     if output:
         task['return_result'] = True
@@ -326,7 +322,7 @@ def rpc_test(ctx, rpc, method, params, output):
     rpc = connect_rpc(ctx, None, rpc)
     ret = None
     if hasattr(rpc, method):
-        if params == None:
+        if params is None:
             data = getattr(rpc, method)()
         else:
             data = getattr(rpc, method)(json.dumps(params))
@@ -358,32 +354,32 @@ def all(ctx, fetch_num, plantask_schedule_num, run_in):
     threads = []
 
     try:
-        #route
+        # route
         route_config = g['config'].get('route', {})
         route_config.setdefault('xmlrpc_host', '127.0.0.1')
         threads.append(run_in(ctx.invoke, route, **route_config))
 
-        #plantask_schedule
+        # plantask_schedule
         plantask_schedule_config = g['config'].get('plantask_schedule', {})
         for i in range(plantask_schedule_num):
             threads.append(run_in(ctx.invoke, plantask_schedule, **plantask_schedule_config))
 
-        #schedule_rpc
+        # schedule_rpc
         schedule_rpc_config = g['config'].get('schedule_rpc', {})
         schedule_rpc_config.setdefault('xmlrpc_host', '127.0.0.1')
-        threads.append(run_in(ctx.invoke, schedule_rpc, **schedule_config))
+        threads.append(run_in(ctx.invoke, schedule_rpc, **schedule_rpc_config))
 
-        #fetch
+        # fetch
         fetcher_config = g['config'].get('fetche', {})
         for i in range(fetch_num):
             threads.append(run_in(ctx.invoke, fetch, **fetcher_config))
 
-        #spider_rpc
+        # spider_rpc
         spider_rpc_config = g['config'].get('spider_rpc', {})
         spider_rpc_config.setdefault('xmlrpc_host', '127.0.0.1')
         threads.append(run_in(ctx.invoke, spider_rpc, **spider_rpc_config))
 
-        #work
+        # work
         work_config = g['config'].get('work', None)
         if isinstance(work_config, (list, tuple)):
             for item in work_config:
@@ -391,7 +387,7 @@ def all(ctx, fetch_num, plantask_schedule_num, run_in):
         elif work_config:
             threads.append(run_in(ctx.invoke, work, **work_config))
 
-        #tool
+        # tool
         tool_config = g['config'].get('tool', None)
         if isinstance(tool_config, (list, tuple)):
             for item in tool_config:
@@ -399,7 +395,7 @@ def all(ctx, fetch_num, plantask_schedule_num, run_in):
         elif tool_config:
             threads.append(run_in(ctx.invoke, tool, **tool_config))
 
-    except:
+    except Exception:
         g['logger'].error(traceback.format_exc())
     finally:
         for each in g["instances"]:

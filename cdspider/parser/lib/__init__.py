@@ -1,13 +1,13 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import abc
 import six
-import re
 from tld import get_tld
 from urllib.parse import urlparse
 import logging
 from cdspider.libs.utils import patch_result
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseParser(object):

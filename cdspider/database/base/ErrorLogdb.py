@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -31,10 +31,10 @@ class ErrorLogDB(Base):
     craw_log data object
     """
 
-    def insert(self, obj = {}):
+    def insert(self, obj={}):
         raise NotImplementedError
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         raise NotImplementedError
 
     def delete(self, id):

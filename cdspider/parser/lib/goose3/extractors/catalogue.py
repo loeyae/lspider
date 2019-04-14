@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,9 +8,7 @@
 :date:    2018-6-13 12:55:26
 :version: SVN: $Id: catalogue.py 1550 2018-06-25 12:08:40Z zhangyi $
 """
-import re
 import copy
-import traceback
 from cdspider.parser.lib.goose3.extractors import BaseExtractor
 from cdspider.libs import utils
 from cdspider.parser import KNOWN_DETAIL_URLS_PATTERN
@@ -52,28 +50,37 @@ class CatalogueExtractor(BaseExtractor):
                 doc = self.article.doc
             custom_rule = copy.deepcopy(self.custom_rule['item'])
             urls_pattern = custom_rule.pop('url', {})
+            data = dict()
             if not urls_pattern:
                 for k, rule in custom_rule.items():
-                    val = self.custom_match(rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'), target=rule.get('target', None))
+                    val = self.custom_match(rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'),
+                                            target=rule.get('target', None))
                     data[k] = self.correction_result(val, rule)
                 return utils.table2kvlist(data)
             if 'filter' in urls_pattern and urls_pattern['filter']:
                 if not urls_pattern['filter'].startswith('@'):
                     rule, key = utils.rule2pattern(urls_pattern['filter'])
                     if not key:
-                        urls = self.custom_match(urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'), target=urls_pattern.get('target', 'href'), doc=doc)
+                        urls = self.custom_match(
+                            urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type','attr'),
+                            target=urls_pattern.get('target', 'href'), doc=doc)
                         urls = self.correction_result(urls, urls_pattern)
                     else:
-                        urls = self.get_message_by_tag({'tag': 'a', 'attr': 'href', 'value': rule, 'content': 'href'}, doc=doc)
+                        urls = self.get_message_by_tag({'tag': 'a', 'attr': 'href', 'value': rule, 'content': 'href'},
+                                                       doc=doc)
                         urls = self.correction_result(urls, urls_pattern)
                 else:
-                    urls = self.custom_match(urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'), target=urls_pattern.get('target', 'href'), doc=doc)
+                    urls = self.custom_match(
+                        urls_pattern['filter'], onlyOne=False, dtype=urls_pattern.get('type', 'attr'),
+                        target=urls_pattern.get('target', 'href'), doc=doc)
                     urls = self.correction_result(urls, urls_pattern)
                 if urls:
                     data = {'url': urls}
                     for k, rule in custom_rule.items():
                         if rule and 'filter' in rule and rule['filter']:
-                            val = self.custom_match(rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'), target=rule.get('target', None))
+                            val = self.custom_match(
+                                rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'),
+                                target=rule.get('target', None))
                             data[k] = self.correction_result(val, rule)
                     return utils.table2kvlist(data)
                 return []

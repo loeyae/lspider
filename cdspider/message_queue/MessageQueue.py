@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -18,7 +18,6 @@ import threading
 import pika
 import pika.exceptions
 import amqp
-import errno
 from six.moves.urllib.parse import unquote
 from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
@@ -68,8 +67,11 @@ class PikaQueue(CDBaseQueue):
         """
         init
         """
-        super(PikaQueue, self).__init__(name=name, exchange=exchange, user=user, password=password, host=host, port=port, path=path,
-                 maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
+        self.connection = None
+        self.channel = None
+        super(PikaQueue, self).__init__(name=name, exchange=exchange, user=user, password=password, host=host,
+                                        port=port, path=path, maxsize=maxsize, lazy_limit=lazy_limit,
+                                        log_level=log_level)
         self.lock = threading.RLock()
         if self.lazy_limit and self.maxsize:
             self.qsize_diff_limit = int(self.maxsize * 0.1)
@@ -86,12 +88,12 @@ class PikaQueue(CDBaseQueue):
             self.connection = connection_pool[k]
             if not self.connection.is_open:
                 del connection_pool[k]
-        if not k in connection_pool:
-            credentials = pika.PlainCredentials(self.username, self.password)
-            parameters = pika.ConnectionParameters(self.host,
-                                           self.port,
-                                           unquote(self.path.lstrip('/') or '%2F'),
-                                           credentials)
+        credentials = pika.PlainCredentials(self.username, self.password)
+        parameters = pika.ConnectionParameters(self.host,
+                                               self.port,
+                                               unquote(self.path.lstrip('/') or '%2F'),
+                                               credentials)
+        if k not in connection_pool:
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
             connection_pool[k] = self.connection
@@ -104,7 +106,7 @@ class PikaQueue(CDBaseQueue):
             self.channel = self.connection.channel()
             connection_pool[k] = self.connection
             self.channel.queue_declare(self.queuename)
-        #self.channel.queue_purge(self.queuename)
+        # self.channel.queue_purge(self.queuename)
 
     @catch_error
     def qsize(self):
@@ -216,7 +218,7 @@ class AmqpQueue(PikaQueue):
         连接rabbitmq服务器
         """
         k = self.symbol()
-        if not k in connection_pool:
+        if k not in connection_pool:
             self.connection = amqp.Connection(host="%s:%s" % (self.host, self.port),
                                               userid=self.username or 'guest',
                                               password=self.password or 'guest',

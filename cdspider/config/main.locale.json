@@ -1,0 +1,39 @@
+{
+  "debug": true,
+  "testing_mode": true,
+  "app_config": "E:/work/src/bys/cdspider_sample/cdspider_sample/config/app.local.json",
+  "database": {
+    "protocol": "mongo",
+    "host": "localhost",
+    "port": 27017,
+    "db": "cdspider_sample",
+    "user": "admin",
+    "password": "admin"
+  },
+  "message_queue": {
+    "protocol": "redis",
+    "host": "localhost",
+    "port": 6379,
+    "user": "",
+    "password": "0f87990482b26838c1c2702cb1145007",
+    "maxsize": 1000000,
+    "queue_prefix": "local"
+  },
+  "exc_work": {
+    "mailer": "smtp",
+    "sender": {
+      "host": "mail-bj.beyondsoft.com",
+      "port": 25,
+      "user": "bdopener",
+      "pass": "bdopener20170510",
+      "from": "bdopener@beyondsoft.com",
+      "from_name": "bdopener service"
+    },
+    "receiver": [
+      {
+        "name": "Zhang Yi",
+        "mail": "zhangyi07@beyondsoft.com"
+      }
+    ]
+  }
+}

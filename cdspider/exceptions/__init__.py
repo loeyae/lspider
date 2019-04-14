@@ -1,8 +1,9 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
 import socket
+
 
 class CDSpiderError(Exception):
     """
@@ -31,7 +32,7 @@ class CDSpiderError(Exception):
     def __str__(self):
         return self.msg
 
-    def getMessage(self):
+    def get_message(self):
         exception_msg = 'Message: %s\r\n' % self.msg
         if self.hostname is not None:
             exception_msg += 'HostName: %s\r\n' % self.hostname
@@ -46,12 +47,14 @@ class CDSpiderError(Exception):
                 exception_msg += '%s: %s\r\n' % (k.capitalize(), v)
         return exception_msg
 
+
 class CDSpiderSettingError(CDSpiderError):
     """
     配置错误
     """
 
     msg = "CDSpider Setting Error"
+
 
 class CDSpiderNotUrlMatched(CDSpiderError):
     """
@@ -60,12 +63,14 @@ class CDSpiderNotUrlMatched(CDSpiderError):
 
     msg = "CDSpider Not Url Matched"
 
+
 class CDSpiderCrawlerError(CDSpiderError):
     """
     抓取异常基类
     """
 
     msg = "CDSpider Crawler Error"
+
 
 class CDSpiderCrawlerNoMethod(CDSpiderCrawlerError):
     """
@@ -74,12 +79,14 @@ class CDSpiderCrawlerNoMethod(CDSpiderCrawlerError):
 
     msg = "CDSpider Crawler No Method"
 
+
 class CDSpiderCrawlerRemoteServerError(CDSpiderCrawlerError):
     """
     抓取时目标站点错误
     """
 
     msg = "CDSpider Crawler Remote Server Error"
+
 
 class CDSpiderCrawlerConnectionError(CDSpiderCrawlerError):
     """
@@ -88,12 +95,14 @@ class CDSpiderCrawlerConnectionError(CDSpiderCrawlerError):
 
     msg = "CDSpider Crawler Connection Error"
 
+
 class CDSpiderCrawlerWaitError(CDSpiderCrawlerError):
     """
     未发现等待的元素
     """
 
     msg = "CDSpider Crawler Wait Element Time Out"
+
 
 class CDSpiderCrawlerTimeout(CDSpiderCrawlerError):
     """
@@ -102,12 +111,14 @@ class CDSpiderCrawlerTimeout(CDSpiderCrawlerError):
 
     msg = "CDSpider Crawler Time Out"
 
+
 class CDSpiderCrawlerConnectTimeout(CDSpiderCrawlerTimeout):
     """
     抓取时连接超时
     """
 
     msg = "CDSpider Crawler Connect Time Out Error"
+
 
 class CDSpiderCrawlerReadTimeout(CDSpiderCrawlerTimeout):
     """
@@ -116,12 +127,14 @@ class CDSpiderCrawlerReadTimeout(CDSpiderCrawlerTimeout):
 
     msg = "CDSpider Crawler Read Time Out Error"
 
+
 class CDSpiderCrawlerNotFound(CDSpiderCrawlerError):
     """
     抓取时目标站点无效
     """
 
     msg = "CDSpider Crawler Not Found"
+
 
 class CDSpiderCrawlerNoResponse(CDSpiderCrawlerError):
     """
@@ -130,12 +143,14 @@ class CDSpiderCrawlerNoResponse(CDSpiderCrawlerError):
 
     msg = "CDSpider Crawler No Response"
 
+
 class CDSpiderCrawlerBadRequest(CDSpiderCrawlerError):
     """
     抓取时请求无效
     """
 
     msg = "CDSpider Crawler Bad Request"
+
 
 class CDSpiderCrawlerForbidden(CDSpiderCrawlerError):
     """
@@ -144,12 +159,14 @@ class CDSpiderCrawlerForbidden(CDSpiderCrawlerError):
 
     msg = "CDSpider Crawler Forbidden"
 
+
 class CDSpiderCrawlerProxyError(CDSpiderCrawlerError):
     """
     抓取时代理出错
     """
 
     msg = "CDSpider Crawler Proxy Error"
+
 
 class CDSpiderCrawlerProxyExpired(CDSpiderCrawlerProxyError):
     """
@@ -158,12 +175,22 @@ class CDSpiderCrawlerProxyExpired(CDSpiderCrawlerProxyError):
 
     msg = "CDSpider Crawler Proxy Expired"
 
+
+class CDSpiderCrawlerNotFoundEelement(CDSpiderCrawlerError):
+    """
+    未找到元素
+    """
+
+    msg = "CDSpider Crawler Not Found Element"
+
+
 class CDSpiderCrawlerBroken(CDSpiderCrawlerError):
     """
     抓取时中断抓取
     """
 
     msg = "CDSpider Crawler Broken"
+
 
 class CDSpiderCrawlerReturnBroken(CDSpiderCrawlerBroken):
     """
@@ -172,12 +199,14 @@ class CDSpiderCrawlerReturnBroken(CDSpiderCrawlerBroken):
 
     msg = "CDSpider Crawler Prepare Broken"
 
+
 class CDSpiderCrawlerDoLogin(CDSpiderCrawlerBroken):
     """
-    抓取时需要登�验证
+    抓取时需要登录验证
     """
 
     msg = "CDSpider Crawler Need Dologin"
+
 
 class CDSpiderCrawlerNoExists(CDSpiderCrawlerBroken):
     """
@@ -186,12 +215,14 @@ class CDSpiderCrawlerNoExists(CDSpiderCrawlerBroken):
 
     msg = "CDSpider Crawler No Exists"
 
+
 class CDSpiderCrawlerNoSource(CDSpiderCrawlerBroken):
     """
     抓取时未获取到内容
     """
 
     msg = "CDSpider Crawler No Source"
+
 
 class CDSpiderCrawlerNoNextPage(CDSpiderCrawlerBroken):
     """
@@ -200,12 +231,14 @@ class CDSpiderCrawlerNoNextPage(CDSpiderCrawlerBroken):
 
     msg = "CDSpider Crawler No Next Page"
 
+
 class CDSpiderCrawlerMoreThanMaximum(CDSpiderCrawlerBroken):
     """
     抓取时超过规定页数
     """
 
     msg = "CDSpider Crawler More Than Maximum"
+
 
 class CDSpiderCrawlerDebugBroken(CDSpiderCrawlerBroken):
     """
@@ -214,12 +247,14 @@ class CDSpiderCrawlerDebugBroken(CDSpiderCrawlerBroken):
 
     msg = "CDSpider debug broken"
 
+
 class CDSpiderParserError(CDSpiderError):
     """
     解析异常基类
     """
 
     msg = "CDSpider Parse Error"
+
 
 class CDSpiderParserNoContent(CDSpiderParserError):
     """
@@ -228,12 +263,14 @@ class CDSpiderParserNoContent(CDSpiderParserError):
 
     msg = "CDSpider Parse No Content"
 
+
 class CDSpiderParserJsonLoadFaild(CDSpiderParserError):
     """
     解析时json数据load失败
     """
 
     msg = "CDSpider Parse Json Load Faild"
+
 
 class CDSpiderRedisError(CDSpiderError):
     """
@@ -242,12 +279,14 @@ class CDSpiderRedisError(CDSpiderError):
 
     msg = "CDSpider Redis Error"
 
+
 class CDSpiderDBError(CDSpiderError):
     """
     DB异常基类
     """
 
     msg = "CDSpider DB Error"
+
 
 class CDSpiderDBDataNotFound(CDSpiderDBError):
     """
@@ -256,12 +295,14 @@ class CDSpiderDBDataNotFound(CDSpiderDBError):
 
     msg = "CDSpider DB Data Not Found"
 
+
 class CDSpiderQueueError(CDSpiderError):
     """
     queue异常基类
     """
 
     msg = "CDSpider Queue Error"
+
 
 class CDSpiderHandlerError(CDSpiderError):
     """
@@ -270,12 +311,14 @@ class CDSpiderHandlerError(CDSpiderError):
 
     msg = "CDSpider Handler Error"
 
+
 class CDSpiderHandlerForbiddenWord(CDSpiderHandlerError):
     """
     自定义Handler使用禁用关键词和函数
     """
 
     msg = "CDSpider Handler Have Forbidden Word"
+
 
 class CDSpiderMailerError(CDSpiderError):
     """

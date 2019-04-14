@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -29,11 +29,11 @@ class UrlBuilder(Component):
         self.parser = parser
         super(UrlBuilder, self).__init__(logger, log_level)
 
-    def build(self, kwargs, source, crawler, save):
+    def build(self, kwargs, source, cookies, save):
         """
         解析配置的内容
         """
-        if not kwargs or not 'url' in kwargs:
+        if not kwargs or 'url' not in kwargs:
             return kwargs
         self.info("UrlBuilder parse params: %s, save: %s" % (kwargs, save))
         _max = int(kwargs.pop('max', 0) or 0)
@@ -51,25 +51,25 @@ class UrlBuilder(Component):
         kwargs['fmtdata']= {}
 
         self._parse_match_code(kwargs, source, save)
-        #自增变量设置
+        # 自增变量设置
         self._parse_incr_data(kwargs, save)
-        #随机数变量设置
+        # 随机数变量设置
         self._parse_random_data(kwargs)
-        #cookie变量设置
-        self._parse_cookie_data(kwargs, crawler, save)
-        if (not 'hard_code' in kwargs or not kwargs['hard_code']) and 'hard_code_list' in kwargs and kwargs['hard_code_list']:
+        # cookie变量设置
+        self._parse_cookie_data(kwargs, cookies, save)
+        if ('hard_code' not in kwargs or not kwargs['hard_code']) and 'hard_code_list' in kwargs and kwargs['hard_code_list']:
             hard_code = random.choice(kwargs['hard_code_list'])
             kwargs['hard_code'] = hard_code
-        #自定义常量设置
+        # 自定义常量设置
         self._parse_hard_code(kwargs, save)
 
 
-        #url组合，内含从页面获取数据解析，从基本url获取数据解析
+        # url组合，内含从页面获取数据解析，从基本url获取数据解析
         url = self._parse_url(kwargs, source, save)
-        if (not 'hearders' in kwargs or not kwargs['headers']) and 'headers_list' in kwargs and kwargs['headers_list']:
+        if ('hearders' not in kwargs or not kwargs['headers']) and 'headers_list' in kwargs and kwargs['headers_list']:
             headers = random.choice(kwargs['headers_list'])
             kwargs['headers'] = headers
-        if (not 'cookies' in kwargs or not kwargs['cookies']) and 'cookies_list' in kwargs and kwargs['cookies_list']:
+        if ('cookies' not in kwargs or not kwargs['cookies']) and 'cookies_list' in kwargs and kwargs['cookies_list']:
             cookies = random.choice(kwargs['cookies_list'])
             kwargs['cookies'] = cookies
 
@@ -108,7 +108,8 @@ class UrlBuilder(Component):
                     url = parsed['url']
         elif isinstance(kwargs['url'], list):
             setting = kwargs['url']
-            url = setting[0].format(self._run_parse(setting[1], source, base_url))
+            parser = self.parser(ruleset=setting[1], source=source, url=base_url, log_level=self.log_level)
+            url = setting[0].format(parser.parse())
         if not url:
             raise CDSpiderNotUrlMatched('Url not exists', base_url, rule=kwargs)
         return self._complate_url(url, kwargs, save)
@@ -127,7 +128,8 @@ class UrlBuilder(Component):
             else:
                 prule[k] = v
         try:
-            parser = self.parser(source=source, ruleset=copy.deepcopy(prule), log_level=self.log_level, url=save['base_url'])
+            parser = self.parser(source=source, ruleset=copy.deepcopy(prule), log_level=self.log_level,
+                                 url=save['base_url'])
             parsed = parser.parse()
             self.debug("UrlBuilder parse match code data: %s" % str(parsed))
             if parsed:
@@ -169,7 +171,8 @@ class UrlBuilder(Component):
                             data.append({"name": item['name'], "type": item['type'], "value": save.get("referer")})
                     else:
                         if item['attr'] in save.get('hard_data', {}):
-                            data.append({"name": item['name'], "type": item['type'], "value": save.get("hard_data").get(item['attr'])})
+                            data.append({"name": item['name'], "type": item['type'],
+                                         "value": save.get("hard_data").get(item['attr'])})
                 else:
                     data.append({"name": item['name'], "type": item['type'], "value": item['value']})
             save['hard_code'] = data
@@ -179,7 +182,7 @@ class UrlBuilder(Component):
                 if item['name']:
                     self._append_kwargs_data(kwargs, item['type'], item['name'], item['value'])
 
-    def _parse_cookie_data(self, kwargs, crawler, save):
+    def _parse_cookie_data(self, kwargs, cookies, save):
         """
         cookie值获取
         """
@@ -195,10 +198,7 @@ class UrlBuilder(Component):
                         item.setdefault('type', 'data')
                     else:
                         item.setdefault('type', item['mode'])
-                if 'params' in item and item['params']:
-                    cookie_value = crawler.get_cookie(item['value'], **item['params'])
-                else:
-                    cookie_value = crawler.get_cookie(item['value'])
+                cookie_value = cookies.get(item['value'])
                 value = str(cookie_value)
                 value = utils.patch_result(value, item)
                 data.append({"name": item['name'], "type": item['type'], "value": value})

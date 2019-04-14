@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 '''
 Created on 2018年8月5日
@@ -7,26 +7,25 @@ Created on 2018年8月5日
 '''
 
 from pykafka import KafkaClient
-from pykafka import exceptions
 from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
 import time
 import logging
 import json
-import sys
 
 connection_pool = {}
 
+
 class KafkaQueue(CDBaseQueue):
 
-    def __init__(self, name, user=None, password=None, host="101.201.148.88:9092", path='0',
-                 maxsize=0, lazy_limit=True, log_level = logging.WARN):
+    def __init__(self, name, user=None, password=None, host="127.0.0.1:9092", path='0', maxsize=0,
+                 lazy_limit=True, log_level=logging.WARN):
         """
         init
         """
-        #self.zookeeper_hosts=zookeeper_hosts
+        # self.zookeeper_hosts=zookeeper_hosts
         super(KafkaQueue, self).__init__(name=name, user=user, password=password, host=host, path=path,
-                 maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
+                                         maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
 
     def connect(self):
         """
@@ -34,7 +33,7 @@ class KafkaQueue(CDBaseQueue):
         """
 
         k = self.symbol()
-        if not k in connection_pool:
+        if k not in connection_pool:
             self.connect = KafkaClient(hosts=self.host)
             self.connect=self.connect.topics[self.queuename.encode()]
             connection_pool[k] = self.connect
@@ -65,7 +64,7 @@ class KafkaQueue(CDBaseQueue):
 
     def put(self, obj, block=True, timeout=None):
         if not block:
-            return self.put_nowait()
+            return self.put_nowait(obj)
 
         start_time = time.time()
         while True:
@@ -82,17 +81,17 @@ class KafkaQueue(CDBaseQueue):
                     time.sleep(self.max_timeout)
 
     def get_nowait(self, ack=False):
-        consumer = self.connect.get_simple_consumer(b'cdspider',auto_commit_enable=True,auto_commit_interval_ms=1)
-#         sum=self.connect.latest_available_offsets()[0][0][0]
+        consumer = self.connect.get_simple_consumer(b'cdspider', auto_commit_enable=True, auto_commit_interval_ms=1)
+        # sum=self.connect.latest_available_offsets()[0][0][0]
         c=consumer.consume()
-#         self.qsize=sum-c.offset
+        # self.qsize=sum-c.offset
         msg=c.value.decode('utf-8')
         msg=json.loads(msg)
         if msg is None:
             raise BaseQueue.Empty
         return msg
 
-    def put_nowait(self, obj):
+    def put_nowait(self, obj, **kwargs):
         """
         直接发送
         （obj>>json格式）
@@ -118,8 +117,9 @@ class KafkaQueue(CDBaseQueue):
     def close(self):
         pass
 
+
 if __name__=='__main__':
-    k=KafkaQueue('test2_queue',host='114.112.86.135:6667,114.112.86.136:6667,114.112.86.137:6667')
+    k = KafkaQueue('test2_queue', host='127.0.0.1:6667')
     for i in range(5):
         k.put_nowait({'test':i})
-#     print(k.get_nowait())
+    # print(k.get_nowait())

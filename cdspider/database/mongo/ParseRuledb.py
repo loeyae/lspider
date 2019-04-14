@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -11,28 +11,29 @@ import time
 from cdspider.database.base import ParseRuleDB as BaseParseRuleDB
 from .Mongo import Mongo
 
+
 class ParseRuleDB(Mongo, BaseParseRuleDB):
     """
     parse_rule data object
     """
 
-    __tablename__ = 'detailRule'
+    __tablename__ = 'detail_rule'
 
-    incr_key = 'detailRule'
+    incr_key = 'detail_rule'
 
     def __init__(self, connector, table=None, **kwargs):
         super(ParseRuleDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
         indexes = collection.index_information()
-        if not 'uuid' in indexes:
+        if 'uuid' not in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
-        if not 'domain' in indexes:
+        if 'domain' not in indexes:
             collection.create_index('domain', name='domain')
-        if not 'subdomain' in indexes:
+        if 'subdomain' not in indexes:
             collection.create_index('subdomain', name='subdomain')
-        if not 'status' in indexes:
+        if 'status' not in indexes:
             collection.create_index('status', name='status')
-        if not 'ctime' in indexes:
+        if 'ctime' not in indexes:
             collection.create_index('ctime', name='ctime')
 
     def insert(self, obj):
@@ -43,17 +44,16 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
         _id = super(ParseRuleDB, self).insert(setting=obj)
         return obj['kwid']
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         obj['utime'] = int(time.time())
         return super(ParseRuleDB, self).update(setting=obj, where={"uuid": int(id)}, multi=False)
 
-    def delete(self, id, wherer = {}):
+    def delete(self, id, where={}):
         if not where:
             where = {'uuid': int(id)}
         else:
             where.update({'uuid': int(id)})
-        return super(ParseRuleDB, self).update(setting={"status": self.STATUS_DELETED},
-                where=where, multi=False)
+        return super(ParseRuleDB, self).update(setting={"status": self.STATUS_DELETED}, where=where, multi=False)
 
     def get_detail(self, id):
         return self.get(where={"uuid": int(id)})
@@ -66,17 +66,17 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
         where = {'subdomain': subdomain}
         return self.get(where=where)
 
-    def get_list(self, where = {}, select = None):
+    def get_list(self, where={}, select=None):
         return self.find(where=where, select=select)
 
-    def get_list_by_domain(self, domain, where = {}, select = None):
+    def get_list_by_domain(self, domain, where={}, select = None):
         if not where:
-            where = {}
+            where={}
         where.update({'domain': domain, 'subdomain': {"$in": ["", None]}})
         return self.find(where=where, select=select)
 
-    def get_list_by_subdomain(self, subdomain, where = {}, select = None):
+    def get_list_by_subdomain(self, subdomain, where={}, select=None):
         if not where:
-            where = {}
+            where={}
         where.update({'subdomain': subdomain})
         return self.find(where=where, select=select)

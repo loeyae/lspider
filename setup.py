@@ -51,8 +51,8 @@ setup(
 
     install_requires = require_packages,
     packages = find_packages(),
-#    package_dir = {'':'src'},
-#    py_modules=['run'],
+    # package_dir = {'':'src'},
+    # py_modules=['run'],
 
     package_data = {
         'cdspider': [
@@ -77,7 +77,6 @@ setup(
             'default=cdspider.handler:GeneralHandler',
             'list=cdspider.handler:GeneralListHandler',
             'item=cdspider.handler:GeneralItemHandler',
-            'links-cluster=cdspider.handler:LinksClusterHandler',
             'search=cdspider.handler:GeneralSearchHandler',
             'site-search=cdspider.handler:SiteSearchHandler',
         ],

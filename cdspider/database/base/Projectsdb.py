@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -25,10 +25,10 @@ class ProjectsDB(Base):
     def get_detail(self, id):
         raise NotImplementedError
 
-    def insert(self, obj = {}):
+    def insert(self, obj={}):
         raise NotImplementedError
 
-    def update(self, id, obj = {}):
+    def update(self, id, obj={}):
         raise NotImplementedError
 
     def active(self, id):
@@ -40,11 +40,11 @@ class ProjectsDB(Base):
     def delete(self, id):
         raise NotImplementedError
 
-    def get_list(self, where = {}, select = None, **kwargs):
+    def get_list(self, where={}, select = None, **kwargs):
         raise NotImplementedError
 
-    def get_count(self, where = {}, select = None, **kwargs):
+    def get_count(self, where={}, select = None, **kwargs):
         raise NotImplementedError
 
-    def get_new_list(self, where = {}, select = None, **kwargs):
+    def get_new_list(self, where={}, select = None, **kwargs):
         raise NotImplementedError

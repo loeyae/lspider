@@ -1,20 +1,25 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import os
 import abc
-import six
-import logging
+import time
+import math
 import urllib.request
+import urllib.error
 import traceback
 import random
 import re
+import functools
+import tornado.ioloop
+from tornado import gen
+from requests import cookies
 from http import cookiejar as cookielib
 from urllib.parse import *
 from cdspider import Component
-from cdspider.libs import utils
-from cdspider.exceptions import *
 from cdspider.libs.tools import *
+from cdspider.libs.constants import BROKEN_EXCEPTIONS
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseCrawler(Component):
@@ -31,13 +36,23 @@ class BaseCrawler(Component):
     _proxy = None
     __proxy_str = None
 
+    default_options = {
+        "method": "GET",
+        'headers': {
+        }
+    }
+
+    # 默认User-Agent
     user_agent = [
-                "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 "
+                "Safari/537.36",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:62.0) Gecko/20100101 Firefox/62.0",
-                "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134",
+                "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134",
                 "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; LCTE; rv:11.0) like Gecko"
     ]
 
+    # proxy setting
     proxies_setting = {
         'proxy_rate': None,
         'proxies': None,
@@ -48,22 +63,33 @@ class BaseCrawler(Component):
     def __init__(self, *args, **kwargs):
         """
         实例化类时如果传入参数url, 则会以传入的url为参数执行crawl
+        :param url: base url
+        :param logger: logger
+        :param log_level: logging level
         """
         if len(args) > 0:
             kwargs.setdefault('url', args[0])
+        self._base_url = kwargs.get("url")
+        self._referer = None
+        self._cookies = cookies.RequestsCookieJar()
+        self.async_ = kwargs.get('async', True)
         self.logger = kwargs.pop('logger', logging.getLogger('crawler'))
         log_level = kwargs.pop('log_level', logging.WARN)
         super(BaseCrawler, self).__init__(self.logger, log_level)
-        self._prepare_setting(**kwargs)
-
-        if "url" in kwargs and kwargs['url']:
-            self.crawl(url)
+        self.fetch = copy.deepcopy(self.default_options)
+        if kwargs:
+            self._prepare_setting(**kwargs)
+        self.ioloop = kwargs.get('ioloop', tornado.ioloop.IOLoop())
 
     def _prepare_setting(self, **kwargs):
         """
         基础设置
+        :param headers: header dict
+        :param cookies: cookie list
+        :param encoding: character set
+        :param proxy: proxy
         """
-        headers = {}
+        headers = dict()
         headers['User-Agent'] = random.choice(self.user_agent)
         if 'headers' in kwargs and kwargs['headers']:
             headers.update(kwargs['headers'])
@@ -80,11 +106,12 @@ class BaseCrawler(Component):
                         if 'name' in item and 'value' in item:
                             self.set_cookie(**item)
                         else:
-                            for k,v in item.items():
+                            for k, v in item.items():
                                 self.set_cookie(name=k, value=v)
             elif isinstance(kwargs['cookies'], cookielib.Cookie):
-                self.set_cookie(name=kwargs['cookies'].name, value=kwargs['cookies'].value,
-                    path=kwargs['cookies'].path, domain=kwargs['cookies'].domain)
+                self.set_cookie(
+                    name=kwargs['cookies'].name, value=kwargs['cookies'].value, path=kwargs['cookies'].path,
+                    domain=kwargs['cookies'].domain)
             elif isinstance(kwargs['cookies'], dict):
                 if 'name' in kwargs['cookies'] and 'value' in kwargs['cookies']:
                     self.set_cookie(**kwargs['cookies'])
@@ -97,84 +124,180 @@ class BaseCrawler(Component):
 
     def _join_url(self, url):
         """
-        join url
+        join url by base url
+        :param url: url
+        :return: url
         """
         if self._referer:
             return urljoin(self._referer, url)
-        return urljoin(self._base_url, url)
+        if self._base_url:
+            return urljoin(self._base_url, url)
+        return url
 
-    @abc.abstractmethod
+    def fetch(self, *args, **kwargs):
+        """
+        fetch
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        l = len(args)
+        if l > 0:
+            kwargs.setdefault('url', args[0])
+        if l > 1:
+            kwargs.setdefault('method', args[1])
+        kwargs.setdefault('method', 'get')
+        callback = kwargs.pop("callback", None)
+        self._base_url = kwargs['url']
+        self._prepare_setting(**kwargs)
+        fetch = self.parse_fetch(**kwargs)
+        self.info("Requests crawl params: %s" % fetch)
+        if self.async_:
+            return self.async_fetch(kwargs['url'], fetch, callback)
+        else:
+            return self.async_fetch(kwargs['url'], fetch, callback).result()
+
     def crawl(self, *args, **kwargs):
         """
-        抓取操作。由于__init__时，如果传入url参数会执行该方法，在实现该方法时默认的第一个参数必须为接收url的参数
+        抓取
+        :param args:
+        :param kwargs:
+        :return:
         """
-        pass
+        l = len(args)
+        if l > 0:
+            kwargs.setdefault('url', args[0])
+        if l > 1:
+            kwargs.setdefault('method', args[1])
+        kwargs.setdefault('method', 'get')
+        callback = kwargs.pop("callback", None)
+        self._base_url = kwargs['url']
+        self._prepare_setting(**kwargs)
+        fetch = self.parse_fetch(**kwargs)
+        self.info("Requests crawl params: %s" % fetch)
+        result = self.sync_fetch(kwargs['url'], fetch)
+        if result:
+            self._referer = result['url']
+        if callback:
+            callback(result)
+        return result
+
+    def parse_fetch(self, **kwargs):
+        """
+        解析抓取参数
+        :param kwargs: 抓取时的参数
+        """
+        return kwargs
+
+    def sync_fetch(self, url, fetch):
+        """
+        Synchronization fetch, usually used in xmlrpc thread
+        :param url:
+        :param fetch:
+        :return:
+        """
+        return self.ioloop.run_sync(functools.partial(self.async_fetch, url, fetch, lambda r: True))
+
+    @gen.coroutine
+    def async_fetch(self, url, fetch, callback=None):
+        """
+        Do one fetch
+        """
+        start_time = time.time()
+        if callback is None:
+            callback = lambda x: True
+        try:
+            result = yield self.http_fetch(url, fetch)
+        except Exception as e:
+            self.exception(e)
+            result = self.handle_error(url, start_time, e)
+        callback(result)
+        raise gen.Return(result)
 
     @abc.abstractmethod
-    def wait(self, **kwargs):
-        """
-        等待操作
-        """
+    def http_fetch(self, url, fetch):
         pass
 
-    @abc.abstractmethod
-    def get_cookie(self, name = None):
-        """
-        获取cookie，不指定name时，获取全部cookie
-        """
-        pass
+    def set_header(self, name, value):
+        self.fetch['headers'][name] = utils.quote_chinese(value)
 
-    @abc.abstractmethod
     def set_cookie(self, name, value, **kwargs):
         """
         设置cookie
         """
-        pass
+        self.info("Requests request set cookie: name:%s, value:%s, %s" % (str(name), str(value), str(kwargs)))
+        if 'httponly' in kwargs:
+            kwargs['rest'] = {'HttpOnly': kwargs['httponly']}
+        if 'expiry' in kwargs:
+            kwargs['expires'] = kwargs['expiry']
+        allowed = dict(
+            version=0,
+            port=None,
+            domain='',
+            path='/',
+            secure=False,
+            expires=None,
+            discard=True,
+            comment=None,
+            comment_url=None,
+            rest={'HttpOnly': None},
+            rfc2109=False,)
+        result = utils.dictunion(kwargs, allowed)
+        if not result['domain'] and self._base_url:
+            result['domain'] = utils.typeinfo(self._base_url)["domain"]
 
-    @abc.abstractmethod
-    def get_header(self, name = None):
-        """
-        获取header，不指定name时，获取全部header
-        """
-        pass
+        return self._cookies.set(name, str(value), **result)
 
-    @abc.abstractmethod
-    def set_header(self, name, value):
-        """
-        设置header
-        """
-        pass
+    @staticmethod
+    def handle_error(url, start_time, error):
+        result = {
+            'status_code': getattr(error, 'code',  599),
+            'error': error,
+            'traceback': traceback.format_exc() if sys.exc_info()[0] else None,
+            'content': "",
+            'time': time.time() - start_time,
+            'orig_url': url,
+            'url': url,
+        }
+        return result
 
-    @property
-    def page_source(self):
-        raise NotImplementedError
+    def _prepare_response(self, code, url):
+        """
+        预处理response
+        """
 
-    @property
-    def content(self):
+        if code == self.STATUS_CODE_NOT_FOUND:
+            return CDSpiderCrawlerNotFound(None, self._base_url, url, code=code)
+        elif code == self.STATUS_CODE_FORBIDDEN:
+            return CDSpiderCrawlerForbidden(None, self._base_url, url, code=code)
+        elif code == self.STATUS_CODE_INTERNAL_ERROR:
+            return CDSpiderCrawlerRemoteServerError(None, self._base_url, url, code=code)
+        elif code == self.STATUS_CODE_BAD_REQUEST:
+            return CDSpiderCrawlerBadRequest(None, self._base_url, url, code=code)
+        elif code == self.STATUS_CODE_GATEWAY_TIMEOUT:
+            return CDSpiderCrawlerConnectTimeout(None, self._base_url, url, code=code)
+        elif code != self.STATUS_CODE_OK:
+            return CDSpiderCrawlerError(None, self._base_url, url, code=code)
         return None
 
-    @property
-    def final_url(self):
-        raise NotImplementedError
-
-    @property
-    def proxy_str(self):
-        return self.__proxy_str
-
     @abc.abstractmethod
-    def set_proxy(self, addr, type = 'http', user = None, passwrod = None):
+    def set_proxy(self, addr, type='http', user=None, password=None):
         """
         设置代理
+        :param addr: proxy addr ex: 127.0.0.1:8080
+        :param type: proxy type
+        :param user: proxy user
+        :param password: proxy password
         """
         pass
 
-    def close(self):
-        raise NotImplementedError
-
-    def quit(self):
-        raise NotImplementedError
-
-    def sleep(self, interval):
+    @staticmethod
+    def sleep(interval):
+        """
+        睡眠
+        :param interval: 睡眠间隔
+        :return:
+        """
         if isinstance(interval, (list, tuple)):
             interval = random.randint(interval[0], interval[1])
         elif interval >= 30:
@@ -184,6 +307,15 @@ class BaseCrawler(Component):
     def parse_proxy(self, *args, **kwargs):
         """
         代理设置解析
+        :param init: 初始化代理，default: True
+        :param proxy_rate: 代理使用频率, default: always
+        :param addr: proxy addr
+        :param type: proxy type
+        :param user: proxy user
+        :param password: proxy password
+        :param proxies: proxy list
+        :param proxy_file: proxy file
+        :param proxy_url: proxy url
         """
         init = kwargs.get('init', True)
         proxy_rate = kwargs.get('proxy_rate', 'always')
@@ -210,9 +342,9 @@ class BaseCrawler(Component):
                 c = urllib.request.urlopen(kwargs['proxy_url'], timeout=5).read().decode()
                 if len(c) > 0:
                     proxies['proxies'] = c.split('|')
-            except:
+            except urllib.error.URLError:
                 self.logger.error(traceback.format_exc())
-                pass
+
         if 'proxies' in proxies:
             proxies['proxies'].append("127.0.0.1")
             proxy = random.choice(proxies['proxies'])
@@ -226,7 +358,7 @@ class BaseCrawler(Component):
             proxies['addr'] = args[0]
         if "addr" in proxies and proxies['addr']:
             self.__proxy_str = proxies['addr']
-            g = re.search('(\d+\.\d+\.\d+.\d+):(\d+)', proxies['addr'])
+            g = re.search(r'(\d+\.\d+\.\d+\.\d+):(\d+)', proxies['addr'])
             if g and g.groups():
                 gs = g.groups()
                 if gs[0] and gs[1]:
@@ -236,13 +368,30 @@ class BaseCrawler(Component):
                     self.info('Proxy: %s' % data)
                     self.set_proxy(**data)
 
-    def broken(self, type, message = None):
+    @staticmethod
+    def broken(type_, message=None):
         """
         中断操作
+        :param type_: 中断类型
+        :param message: 中断时的消息
         """
-        if type in BROKEN_EXCEPTIONS:
-            raise BROKEN_EXCEPTIONS[type](message)
+        if type_ in BROKEN_EXCEPTIONS:
+            raise BROKEN_EXCEPTIONS[type_](message)
         raise CDSpiderCrawlerError("Invalid broken setting")
+
+    def gen_result(self, url, code, headers, cookies, content, start_time, error=None):
+        result = dict()
+        result['orig_url'] = self._base_url
+        result['content'] = utils.decode(content) if content else ''
+        result['headers'] = headers
+        result['status_code'] = code
+        result['url'] = url
+        result['time'] = time.time() - start_time
+        result['cookies'] = cookies
+        if error:
+            result['error'] = utils.text(error)
+
+        raise gen.Return(result)
 
 
 from .RequestsCrawler import RequestsCrawler

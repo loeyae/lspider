@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -36,8 +36,8 @@ class PyqueryParser(BaseParser):
                 source = decode(source)
             except:
                 pass
-#        self.info("Pyquery source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(content)))
-#        self.info("Pyquery ruleset: %s" % str(ruleset))
+        # self.info("Pyquery source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(content)))
+        # self.info("Pyquery ruleset: %s" % str(ruleset))
         if source and ruleset:
             pq = PyQuery(source)
             data = {}
@@ -141,7 +141,7 @@ class PyqueryParser(BaseParser):
                     return self.patch_result(extract_result(rst, rule, None), rule, None)
                 return rst
             if isinstance(content, six.string_types):
-                return self.patch_result(extract_result(rst, rule, None), rule, None)
+                return self.patch_result(extract_result(content, rule, None), rule, None)
             return content
         elif 'item' in rule:
             onlyOne = int(rule.get('onlyOne', 0))
@@ -216,7 +216,7 @@ class PyqueryParser(BaseParser):
                     if m:
                         return callback_result(callback, llimiter + m.group(1) + rlimiter)
         else:
-            data = {}
+            data = []
             for i in range(0, pq.length):
                 text = pq.eq(i).text()
                 if text:
