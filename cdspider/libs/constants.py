@@ -112,5 +112,4 @@ MEDIA_TYPE_WEIBO = 12   # '微博',
 MEDIA_TYPE_PAPER = 13   # '平媒',
 MEDIA_TYPE_OTHER = 99   # '其他',
 
-WEMEDIA_TYPE_GENERAL = 1
-WEMEDIA_TYPE_TOUTIAO = 2
+RESULT_SYNC_QUEUE_NAME = 'result_sync_queue'  # app.json中结果同步队列名设置的key

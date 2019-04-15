@@ -8,7 +8,7 @@
 """
 import time
 import copy
-from . import BaseHandler
+from . import BaseHandler, HandlerUtils
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
@@ -24,8 +24,6 @@ class GeneralItemHandler(BaseHandler):
     支持注册的插件:
         item_handler.result_handle
             data参数为 {"save": save, "domain": domain, "subdomain": subdomain}
-        item_handler.finish_handle
-            data参数为 {"save": save, "rid": rid, "dao": DAO name}
 
     """
 
@@ -316,4 +314,5 @@ class GeneralItemHandler(BaseHandler):
         super(GeneralItemHandler, self).finish(save)
         if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
             self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
-            self.extension("sync_handle", {"save": save, "rid": self.task['rid'], "dao": ArticlesDB.__name__})
+            HandlerUtils.send_result_into_queue(self.queue, self.ctx.obj.get('app_config'), self.mode, self.task['rid'])
+

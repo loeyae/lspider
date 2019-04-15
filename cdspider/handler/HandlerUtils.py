@@ -12,6 +12,7 @@ import re
 import traceback
 from urllib.parse import urlparse, urlunparse
 from cdspider.libs import utils
+from cdspider.libs.constants import *
 
 
 class HandlerUtils(object):
@@ -208,3 +209,12 @@ class HandlerUtils(object):
             'msg': str(traceback.format_exc()),         # trace log
             'class': exc.__class__.__name__,            # error class
         }
+
+    @classmethod
+    def send_result_into_queue(cls, queue, config, mode, rid):
+        queue_name = config.get(RESULT_SYNC_QUEUE_NAME, None)
+        if queue_name is not None:
+            if isinstance(queue_name, str):
+                queue_name = [queue_name]
+            for q in queue_name:
+                queue[q].put_nowait({"mode": mode, "rid": rid})
