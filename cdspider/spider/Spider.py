@@ -146,7 +146,7 @@ class Spider(Component):
     def get_handler(self, task):
         if hasattr(self, 'handler'):
             return self.handler
-        return Loader(self.ctx, task = task, no_sync = self.no_sync).load()
+        return Loader(self.ctx, task=task, no_sync=self.no_sync).load()
 
     def get_task(self, message, no_check_status = False):
         """

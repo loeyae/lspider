@@ -141,7 +141,7 @@ def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
     scheduler.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
 @cli.command()
-@click.option('--fetch-cls', default='cdspider.spider.spider', callback=load_cls, help='spider name')
+@click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('-i', '--inqueue', default=None, help='监听的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.option('--no-sync', default=False, is_flag=True, help='不同步数据给kafka', show_default=True)

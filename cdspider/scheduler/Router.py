@@ -47,7 +47,7 @@ class Router(BaseScheduler):
 
     def schedule(self, message = None):
         self.info("%s route starting..." % self.__class__.__name__)
-        def handler_schedule(handler, mode, rate, ctx):
+        def handler_schedule(handler, mode, rate):
             self.info("%s loaded handler: %s by %s" % (self.__class__.__name__, handler, rate))
             save = {}
             while True:
@@ -58,8 +58,7 @@ class Router(BaseScheduler):
                         message = {
                             "rate": rate,
                             "mode": mode,
-                            "offset": item['offset'],
-                            "count": item['count'],
+                            **item
                         }
                         self.debug("%s route message: %s" % (self.__class__.__name__, str(message)))
                         if not self.testing_mode:
@@ -74,11 +73,11 @@ class Router(BaseScheduler):
             for key in self.mode:
                 handler = load_handler(key, context=self.ctx, task=None)
                 for rate in ratemap:
-                    threads.append(run_in_thread(handler_schedule, handler, key, rate, self.ctx))
+                    threads.append(run_in_thread(handler_schedule, handler, key, rate))
         else:
             def execut(ext, data):
                 for rate in data["ratemap"]:
-                    threads.append(run_in_thread(handler_schedule, ext.obj, ext.name, rate, data["ctx"]))
+                    threads.append(run_in_thread(handler_schedule, ext.obj, ext.name, rate))
 
             call_extension("handler", execut, {"ctx": self.ctx, "ratemap": ratemap}, context=self.ctx, task=None)
 
