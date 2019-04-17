@@ -24,6 +24,7 @@ import re
 import lxml
 from cdspider.libs.utils import preg, rule2pattern, patch_result, extract_result
 
+
 class BaseExtractor(object):
 
     def __init__(self, config, article):
@@ -44,11 +45,15 @@ class BaseExtractor(object):
 
         self.custom_rule = config.custom_rule or {}
 
-    def get_message_by_tag(self, tags, doc = None, link=False):
+    def get_message_by_tag(self, tags, doc=None, link=False):
         if doc is None:
             doc = self.article._raw_doc
         if isinstance(doc, list) and doc:
             doc = doc.pop(0)
+        if doc is None:
+            return None
+
+        doc = self.parser.fromstring(self.parser.nodeToString(doc))
         leaf = tags.pop('leaf', None)
         content = tags.pop('content', None)
         if 'attribute' in tags:
@@ -62,7 +67,7 @@ class BaseExtractor(object):
                     if item:
                         data.extend(item)
                 elif content:
-                    if tags['tag'] == 'a' and link == True:
+                    if tags['tag'] == 'a' and link is True:
                         data.append({"url": self.parser.getAttribute(matched_tag, content), "title": self.parser.getText(matched_tag)})
                     else:
                         if content == 'text':
@@ -71,7 +76,7 @@ class BaseExtractor(object):
                             data.append(self.parser.getAttribute(matched_tag, content))
         return data
 
-    def custom_match_elements(self, custom_rule, onlyOne = True, doc = None):
+    def custom_match_elements(self, custom_rule, onlyOne=True, doc=None):
         ret = []
         if doc is None:
             doc = self.article.raw_doc
@@ -79,6 +84,8 @@ class BaseExtractor(object):
             doc = doc.pop(0)
         if doc is None:
             return None
+
+        doc = self.parser.fromstring(self.parser.nodeToString(doc))
         if custom_rule.startswith('@css:'):
             custom_rule = custom_rule[5:]
             custom_rule_arr = custom_rule.split(":eq")
@@ -121,13 +128,15 @@ class BaseExtractor(object):
             return ret[0]
         return ret
 
-    def custom_match(self, custom_rule, onlyOne = True, dtype='text', target=None, doc = None):
+    def custom_match(self, custom_rule, onlyOne=True, dtype='text', target=None, doc=None):
         if doc is None:
             doc = self.article.raw_doc
         if isinstance(doc, list) and doc:
             doc = doc.pop(0)
         if doc is None:
             return None
+
+        doc = self.parser.fromstring(self.parser.nodeToString(doc))
         if custom_rule.startswith('@css:'):
             custom_rule = custom_rule[5:]
             ret = self.parser.css_select(doc, custom_rule)
@@ -160,6 +169,7 @@ class BaseExtractor(object):
         else:
             if custom_rule.startswith('@xpath:'):
                 custom_rule = custom_rule[7:]
+
             ret = self.parser.xpath_re(doc, custom_rule)
             if not ret:
                 return None
