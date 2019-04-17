@@ -411,6 +411,8 @@ class BaseHandler(Component):
                     self.response, "save": save})
             else:
                 response = self.crawler.crawl(**params)
+                if response is None:
+                    raise CDSpiderCrawlerBadRequest()
                 self.response.update(response)
                 save['request_url'] = response['url']
             if self.page == 1:
