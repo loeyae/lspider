@@ -324,16 +324,20 @@ def rule2subitem(rule, subject):
     if g1:
         pt1 = '%s%s%s' % (g1.group(1), '.*?' if g1.group(2) else '', g1.group(3))
         pt2 = '%s%s%s' % (g1.group(6), '.*?' if g1.group(7) else '', g1.group(8))
-        rule = '%s%s%s' % ('(%s)' % pt1 if pt1 else '', '.+?' if g1.group(5) == "[*]" else g1.group(5), '(%s)' % pt2 if pt2 else '')
-        subject = '%s%s%s' % ('\\1' if pt1 else '' , subject, '\\2' if pt1 and pt2 else ('\\1' if pt2 else ''))
+        rule = '%s%s%s' % ('(?P<prefix>%s)' % pt1 if pt1 else '', '.+?' if g1.group(5) == "[*]" else g1.group(5),
+                           '(?P<suffix>%s)' % pt2
+        if pt2 else '')
+        subject = '%s%s%s' % ('\\g<prefix>' if pt1 else '' , subject, '\\g<suffix>' if pt1 and pt2 else (
+            '\\g<prefix>' if pt2 else ''))
     else:
         p2 = re.compile(r'([^\[]*)((?:\[\*\])?)(.*)\[(\w+)\]([^\[]*)((?:\[\*\])?)(.*)', re.M|re.I)
         g2 = p2.search(rule)
         if g2:
             pt1 = '%s%s%s' % (g2.group(1), '.*?' if g2.group(2) else '', g2.group(3))
             pt2 = '%s%s%s' % (g2.group(5), '.*?' if g2.group(6) else '', g2.group(7))
-            rule = '%s.+?%s' % ('(%s)' % pt1 if pt1 else '', '(%s)' % pt2 if pt2 else '')
-            subject = '%s%s%s' % ('\\1' if pt1 else '' , subject, '\\2' if pt1 and pt2 else ('\\1' if pt2 else ''))
+            rule = '%s.+?%s' % ('(?P<prefix>%s)' % pt1 if pt1 else '', '(?P<suffix>%s)' % pt2 if pt2 else '')
+            subject = '%s%s%s' % ('\\g<prefix>' if pt1 else '' , subject, '\\g<suffix>' if pt1 and pt2 else (
+                '\\g<prefix>' if pt2 else ''))
     return rule, subject
 
 
