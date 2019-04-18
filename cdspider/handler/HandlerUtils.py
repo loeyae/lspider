@@ -102,7 +102,7 @@ class HandlerUtils(object):
                 request[k].update(v)
             else:
                 request[k] = v
-        return
+        return request
 
     @classmethod
     def format_paging(cls, paging):
@@ -140,7 +140,7 @@ class HandlerUtils(object):
                 build_rule(rule, copy.deepcopy(item))
         elif isinstance(paging['rule'], dict):
             for item in paging['rule'].values():
-                if 'word' not in item or not item['word']:
+                if 'name' not in item or not item['name']:
                     continue
                 build_rule(rule, item)
         if not rule['incr_data'] and not rule['match_data'] and rule['url']['type'] != 'match':
