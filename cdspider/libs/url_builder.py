@@ -85,6 +85,7 @@ class UrlBuilder(Component):
         """
         """
         base_url = save.get('base_url')
+        url = None
         if isinstance(kwargs['url'], six.string_types):
             if kwargs['url'] == 'base_url':
                 url = base_url
