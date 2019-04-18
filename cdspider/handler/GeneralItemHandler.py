@@ -259,14 +259,16 @@ class GeneralItemHandler(BaseHandler):
                 self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
                 if inserted:
                     result_id = self.db['ArticlesDB'].insert(result)
-                    self.build_sync_task(result_id, 'ArticlesDB')
+                    HandlerUtils.send_result_into_queue(
+                        self.queue, self.ctx.obj.get('app_config'), self.mode, result_id)
                     self.task['crawlinfo'] = result['crawlinfo']
                 else:
                     item = self.db['ArticlesDB'].get_detail_by_unid(**unid)
                     self.task['crawlinfo'] = item['crawlinfo']
                     result_id = item['rid']
                     self.db['ArticlesDB'].update(result_id, result)
-                    self.build_sync_task(result_id, 'ArticlesDB')
+                    HandlerUtils.send_result_into_queue(
+                        self.queue, self.ctx.obj.get('app_config'), self.mode, result_id)
             self.task['rid'] = result_id
         else:
             if self.page == 1:
@@ -287,7 +289,8 @@ class GeneralItemHandler(BaseHandler):
                 else:
                     self.debug("%s on_result formated data: %s" % (self.__class__.__name__, str(result)))
                     self.db['ArticlesDB'].update(result_id, result)
-                    self.build_sync_task(result_id, 'ArticlesDB')
+                    HandlerUtils.send_result_into_queue(
+                        self.queue, self.ctx.obj.get('app_config'), self.mode, result_id)
             else:
                 if self.testing_mode:
                     '''
@@ -301,7 +304,8 @@ class GeneralItemHandler(BaseHandler):
                         content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
                         self.debug("%s on_result content: %s" % (self.__class__.__name__, content))
                         self.db['ArticlesDB'].update(result_id, {"content": content})
-                        self.build_sync_task(result_id, 'ArticlesDB')
+                        HandlerUtils.send_result_into_queue(
+                            self.queue, self.ctx.obj.get('app_config'), self.mode, result_id)
         if not result_id:
             raise CDSpiderDBError("Result insert failed")
 
@@ -314,5 +318,4 @@ class GeneralItemHandler(BaseHandler):
         super(GeneralItemHandler, self).finish(save)
         if self.task.get('rid') and self.task.get('crawlinfo') and not self.testing_mode:
             self.db['ArticlesDB'].update(self.task['rid'], {"crawlinfo": self.task['crawlinfo']})
-            HandlerUtils.send_result_into_queue(self.queue, self.ctx.obj.get('app_config'), self.mode, self.task['rid'])
 
