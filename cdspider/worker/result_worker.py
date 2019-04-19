@@ -19,64 +19,6 @@ class ResultWorker(BaseWorker):
     """
     inqueue_key = QUEUE_NAME_SPIDER_TO_RESULT
 
-    def match_mode(self, url):
-        """
-        匹配搜索结果详情页的mode
-        """
-        subdomain, domain = utils.domain_info(url)
-        has_bbs = False
-        if subdomain:
-            '''
-            优先获取子域名对应的规则
-            '''
-            parserule_list = self.db['ForumRuleDB'].get_list_by_subdomain(subdomain)
-            for item in parserule_list:
-                if  'urlPattern' in item and item['urlPattern']:
-                    '''
-                    如果规则中存在url匹配规则，则进行url匹配规则验证
-                    '''
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return HANDLER_MODE_BBS_ITEM
-                has_bbs = True
-            parserule_list = self.db['ParseRuleDB'].get_list_by_subdomain(subdomain)
-            for item in parserule_list:
-                if  'urlPattern' in item and item['urlPattern']:
-                    '''
-                    如果规则中存在url匹配规则，则进行url匹配规则验证
-                    '''
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return HANDLER_MODE_DEFAULT_ITEM
-            if has_bbs:
-                return HANDLER_MODE_BBS_ITEM
-        else:
-            '''
-            获取域名对应的规则
-            '''
-            parserule_list = self.db['ForumRuleDB'].get_list_by_domain(domain)
-            for item in parserule_list:
-                if  'urlPattern' in item and item['urlPattern']:
-                    '''
-                    如果规则中存在url匹配规则，则进行url匹配规则验证
-                    '''
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return HANDLER_MODE_BBS_ITEM
-                has_bbs = True
-            parserule_list = self.db['ParseRuleDB'].get_list_by_domain(domain)
-            for item in parserule_list:
-                if  'urlPattern' in item and item['urlPattern']:
-                    '''
-                    如果规则中存在url匹配规则，则进行url匹配规则验证
-                    '''
-                    u = utils.preg(url, item['urlPattern'])
-                    if u:
-                        return HANDLER_MODE_DEFAULT_ITEM
-            if has_bbs:
-                return HANDLER_MODE_BBS_ITEM
-        return HANDLER_MODE_DEFAULT_ITEM
-
     def on_result(self, message):
         self.debug("got message: %s" % message)
         if 'rid' not in message or not message['rid']:
@@ -90,7 +32,7 @@ class ResultWorker(BaseWorker):
         spider = Spider(self.ctx, no_sync = True, handler=None, inqueue=False)
         task = {
             "rid": rid,
-            "mode": self.match_mode(article['url']),
+            "mode": (article.get("crawlinfo") or {}).get("mode", HANDLER_MODE_DEFAULT_ITEM),
         }
         return_result = message.get('return_result', False)
         return spider.fetch(task=task, return_result=return_result)
