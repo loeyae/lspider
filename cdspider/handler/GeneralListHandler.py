@@ -9,16 +9,14 @@
 import copy
 import time
 import traceback
-from . import BaseHandler
 from urllib.parse import urljoin
+from cdspider.handler import GeneralHandler
 from cdspider.database.base import *
 from cdspider.libs import utils
 from cdspider.libs.constants import *
-from cdspider.parser import ListParser
-from cdspider.parser.lib import TimeParser
 
 
-class GeneralListHandler(BaseHandler):
+class GeneralListHandler(GeneralHandler):
     """
     general list handler
     task 爬虫任务信息 {"mode": "list", "uuid": SpiderTask.list uuid}
@@ -70,37 +68,11 @@ class GeneralListHandler(BaseHandler):
                 '''
                 self.db['SpiderTaskDB'].insert(task)
 
-    def get_scripts(self):
-        """
-        获取列表规则中的自定义脚本
-        :return 自定义脚本
-        """
-        try:
-            if "uuid" in self.task and self.task['uuid']:
-                task = self.db['SpiderTaskDB'].get_detail(self.task['uuid'], self.mode)
-                if not task:
-                    raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
-                self.task.update(task)
-            rule = self.match_rule({})
-            return rule.get("scripts", None)
-        except CDSpiderError:
-            return None
-
-    def init_process(self, save):
-        """
-        初始化爬虫流程
-        爬虫流程：self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则, "unique": 唯一索引规则}
-        :param save: 传递的上下文
-        """
-        rule = self.match_rule(save)
-        self.process = rule
-
     def match_rule(self, save):
         """
         获取匹配的规则
         :param save: 传递的上下文
         """
-        rule = {}
         if "listRule" in self.task and self.task['listRule']:
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
@@ -128,121 +100,6 @@ class GeneralListHandler(BaseHandler):
             self.task['url'] = rule['jsonUrl']
 
         return rule
-
-    def run_parse(self, rule):
-        """
-        根据解析规则解析源码，获取相应数据
-        根据爬取结果：self.response 爬虫结果 {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
-        解析输出： self.response {"parsed": 解析结果}
-        :param rule: 解析规则
-        """
-        parser = ListParser(source=self.response['content'], ruleset=copy.deepcopy(rule), log_level=self.log_level, url=self.response['final_url'])
-        self.response['parsed'] = parser.parse()
-
-    def _build_crawl_info(self, final_url):
-        """
-        构造文章数据的爬虫信息
-        :param final_url: 请求的url
-        """
-        return {
-                'listMode': self.mode,
-                'mode': HANDLER_MODE_DEFAULT_ITEM,
-                "stid": self.task.get("uuid", 0),   # SpiderTask uuid
-                "uid": self.task.get("uid", 0),     # url id
-                "pid": self.task.get('pid', 0),     # project id
-                "sid": self.task.get('sid', 0),     # site id
-                "tid": self.task.get('tid', 0),     # task id
-                "kid": self.task.get('kid', 0),     # keyword id
-                "listRule": self.process.get('uuid', 0),   # 规则ID
-                "list_url": final_url,              # 列表url
-                "list_crawl_id": self.crawl_id,     # 列表抓取时间
-        }
-
-    def _build_result_info(self, **kwargs):
-        """
-        构造文章数据
-        :param result: 解析到的文章信息 {"title": 标题, "author": 作者, "pubtime": 发布时间, "content": 内容}
-        :param final_url: 请求的url
-        :param typeinfo: 域名信息 {'domain': 一级域名, 'subdomain': 子域名}
-        :param crawlinfo: 爬虫信息
-        :param unid: 文章唯一索引
-        :param ctime: 抓取时间
-        :param status: 状态
-        """
-        now = int(time.time())
-        result = kwargs.get('result', {})
-        pubtime = TimeParser.timeformat(str(result.pop('pubtime', '')))
-        if pubtime and pubtime > now:
-            pubtime = now
-        r = {
-            "status": kwargs.get('status', ArticlesDB.STATUS_INIT),
-            'url': kwargs['final_url'],
-            'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
-            'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
-            'title': result.pop('title', None),                                # 标题
-            'author': result.pop('author', None),                              # 作者
-            'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER)),
-            'pubtime': pubtime,                                                # 发布时间
-            'channel': result.pop('channel', None),                            # 频道信息
-            'result': result,
-            'crawlinfo': kwargs.get('crawlinfo'),
-            'acid': kwargs['unid'],                                            # unique str
-            'ctime': kwargs.get('ctime', self.crawl_id),
-            }
-        return r
-
-    def run_result(self, save):
-        """
-        爬虫结果处理
-        获取的结果: self.response {"parsed": 解析结果, "final_url": 请求的url}
-        :param save: 保存的上下文信息
-        """
-        self.crawl_info['crawl_urls'][str(self.page)] = self.response['url']
-        self.crawl_info['crawl_count']['page'] += 1
-        ctime = self.crawl_id
-        new_count = self.crawl_info['crawl_count']['new_count']
-        # 格式化url
-        formated = self.build_url_by_rule(self.response['parsed'], self.response['final_url'])
-        for item in formated:
-            self.crawl_info['crawl_count']['total'] += 1
-            if self.testing_mode:
-                '''
-                testing_mode打开时，数据不入库
-                '''
-                inserted, unid = (True, {"acid": "test_mode", "ctime": ctime})
-                self.debug("%s test mode: %s" % (self.__class__.__name__, unid))
-            else:
-                # 生成文章唯一索引并判断文章是否已经存在
-                inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
-                self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
-            if inserted:
-                crawlinfo =  self._build_crawl_info(self.response['final_url'])
-                typeinfo = utils.typeinfo(item['url'])
-                result = self._build_result_info(
-                    final_url=item['url'], typeinfo=typeinfo, crawlinfo=crawlinfo, result=item, **unid)
-                if self.testing_mode:
-                    '''
-                    testing_mode打开时，数据不入库
-                    '''
-                    self.debug("%s result: %s" % (self.__class__.__name__, result))
-                else:
-                    result_id = self.db['ArticlesDB'].insert(result)
-                    if not result_id:
-                        raise CDSpiderDBError("Result insert failed")
-
-                    mode_list = self.extension("mode_handle", {"save": save, "url": result['url']})
-                    if mode_list is None:
-                        self.build_item_task(result_id, HANDLER_MODE_DEFAULT_ITEM)
-                    else:
-                        for mode in mode_list:
-                            if mode is not None:
-                                self.build_item_task(result_id, mode)
-                self.crawl_info['crawl_count']['new_count'] += 1
-            else:
-                self.crawl_info['crawl_count']['repeat_count'] += 1
-        if self.crawl_info['crawl_count']['new_count'] - new_count == 0:
-            self.crawl_info['crawl_count']['repeat_page'] += 1
-            self.on_repetition(save)
 
     def url_prepare(self, url):
         return url
