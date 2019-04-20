@@ -335,6 +335,13 @@ def rpc_test(ctx, rpc, method, params, output):
         print(ret)
 
 @cli.command()
+@click.option('-q', '--queue', help='queue name')
+@click.option('-m', '--message', help='message')
+@click.pass_context
+def send_queue(ctx, queue, message):
+    ctx.obj['queue'][queue].put_nowait(json.loads(message))
+
+@cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
 @click.option('--plantask-schedule-num', default=1, help='plantask schedule实例个数')
 @click.option('--run-in', default='subprocess', type=click.Choice(['subprocess', 'thread']),
