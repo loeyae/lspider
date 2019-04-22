@@ -23,11 +23,11 @@ class GeneralHandler(BaseHandler):
     general handler
     """
 
-    def route(self, handler_driver_name, rate, save):
+    def route(self, handler_driver_name, frequency, save):
         """
         route
         :param handler_driver_name:
-        :param rate:
+        :param frequency:
         :param save:
         :return:
         """

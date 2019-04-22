@@ -6,7 +6,7 @@
         "user": "hongmai",
         "password": "soften.cn",
         "type": "socks",
-        "proxy_rate": "every"
+        "proxy_frequency": "every"
     },
     "message_queue": {
         "protocol": "amqp",

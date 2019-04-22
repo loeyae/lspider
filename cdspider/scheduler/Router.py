@@ -20,13 +20,13 @@ class Router(BaseScheduler):
     路由--初级任务分发
     """
 
-    def __init__(self, context, mode = None, rate=None, outqueue = None):
+    def __init__(self, context, mode = None, frequency=None, outqueue = None):
         super(Router, self).__init__(context)
         if not outqueue:
             outqueue = QUEUE_NAME_SCHEDULER_TO_TASK
         self.outqueue = self.queue[outqueue]
         self.mode = mode
-        self.rate = rate
+        self.frequency = frequency
         self.interval = 5
         self._check_time = None
 
@@ -37,26 +37,26 @@ class Router(BaseScheduler):
             return False
         if not self.testing_mode and int(s) > 3:
             self._check_time = None
-            # self.debug("scheduler2task is running @%s" % s)
+            self.debug("scheduler2task is running @%s" % s)
             return False
         elif not self.testing_mode and not self._check_time is None:
-            # self.debug("scheduler2task is running @%s" % s)
+            self.debug("scheduler2task is running @%s" % s)
             return False
         self._check_time = s
         return True
 
     def schedule(self, message = None):
         self.info("%s route starting..." % self.__class__.__name__)
-        def handler_schedule(handler, mode, rate):
-            self.info("%s loaded handler: %s by %s" % (self.__class__.__name__, handler, rate))
+        def handler_schedule(handler, mode, frequency):
+            self.info("%s loaded handler: %s by %s" % (self.__class__.__name__, handler, frequency))
             save = {}
             while True:
                 has_item = False
-                for item in handler.route(mode, rate, save):
+                for item in handler.route(mode, frequency, save):
                     if item:
                         has_item = True
                         message = {
-                            "rate": rate,
+                            "frequency": frequency,
                             "mode": mode,
                             **item
                         }
@@ -67,19 +67,19 @@ class Router(BaseScheduler):
                     break
                 time.sleep(0.1)
         threads = []
-        ratemap = self.rate if self.rate else self.ctx.obj.get('app_config', {}).get('ratemap', {}).keys()
+        frequencymap = self.frequency if self.frequency else self.ctx.obj.get('app_config', {}).get('frequencymap', {}).keys()
 
         if self.mode:
             for key in self.mode:
                 handler = load_handler(key, context=self.ctx, task=None)
-                for rate in ratemap:
-                    threads.append(run_in_thread(handler_schedule, handler, key, rate))
+                for frequency in frequencymap:
+                    threads.append(run_in_thread(handler_schedule, handler, key, frequency))
         else:
             def execut(ext, data):
-                for rate in data["ratemap"]:
-                    threads.append(run_in_thread(handler_schedule, ext.obj, ext.name, rate))
+                for frequency in data["frequencymap"]:
+                    threads.append(run_in_thread(handler_schedule, ext.obj, ext.name, frequency))
 
-            call_extension("handler", execut, {"ctx": self.ctx, "ratemap": ratemap}, context=self.ctx, task=None)
+            call_extension("handler", execut, {"ctx": self.ctx, "frequencymap": frequencymap}, context=self.ctx, task=None)
 
         for each in threads:
             if not each.is_alive():

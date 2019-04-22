@@ -12,22 +12,22 @@ from cdspider.libs.constants import *
 from cdspider.libs.utils import load_handler
 
 
-class PlantaskScheduler(BaseScheduler):
+class Scheduler(BaseScheduler):
     """
     任务调度
     """
-    DEFAULT_RATE = [7200, "每2小时一次"]
+    DEFAULT_FREQUENCY = [7200, "每2小时一次"]
 
     def __init__(self, context, inqueue = None, outqueue = None):
-        super(PlantaskScheduler, self).__init__(context)
+        super(Scheduler, self).__init__(context)
         if not inqueue:
             inqueue = QUEUE_NAME_SCHEDULER_TO_TASK
         self.inqueue = self.queue[inqueue]
         if not outqueue:
             outqueue = QUEUE_NAME_SCHEDULER_TO_SPIDER
         self.outqueue = self.queue[outqueue]
-        rate_map = context.obj.get('rate_map')
-        self.rate_map = rate_map
+        frequency_map = context.obj.get('frequency_map')
+        self.frequency_map = frequency_map
 
     def valid(self):
         if self.outqueue.qsize() > 500000:
@@ -61,7 +61,6 @@ class PlantaskScheduler(BaseScheduler):
 
     def send_task(self, task):
         if self.outqueue:
-            self.debug("push %s into queue: scheduler2spider" % task)
             self.outqueue.put_nowait(task)
         else:
             raise CDSpiderError("%s outqueue is missing" % self.__class__.__name__)

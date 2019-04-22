@@ -14,7 +14,7 @@ from . import Base
         'kwid': int,        # keywords id
         'word': str,        # keyword
         'status': int,      # status
-        'rate': str,        # 关键词来源
+        'frequency': str,        # 关键词来源
         'src': str,         # 来源
         'ctime': int,       # 创建时间
         'utime': int,       # 最后一次更新时间

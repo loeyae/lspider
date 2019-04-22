@@ -54,7 +54,7 @@ class BaseCrawler(Component):
 
     # proxy setting
     proxies_setting = {
-        'proxy_rate': None,
+        'proxy_frequency': None,
         'proxies': None,
         'proxy_file': None,
         'proxy_url': None,
@@ -308,7 +308,7 @@ class BaseCrawler(Component):
         """
         代理设置解析
         :param init: 初始化代理，default: True
-        :param proxy_rate: 代理使用频率, default: always
+        :param proxy_frequency: 代理使用频率, default: always
         :param addr: proxy addr
         :param type: proxy type
         :param user: proxy user
@@ -318,8 +318,8 @@ class BaseCrawler(Component):
         :param proxy_url: proxy url
         """
         init = kwargs.get('init', True)
-        proxy_rate = kwargs.get('proxy_rate', 'always')
-        if not init and proxy_rate == 'always':
+        proxy_frequency = kwargs.get('proxy_frequency', 'always')
+        if not init and proxy_frequency == 'always':
             return
         proxies = utils.dictunion(kwargs, {'addr': None, 'type': None, 'user': None, 'password': None})
         if 'proxies' in kwargs and kwargs['proxies']:

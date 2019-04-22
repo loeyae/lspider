@@ -58,7 +58,7 @@ class GeneralListHandler(GeneralHandler):
                 'tid': urls.get('tid', 0),   # task uuid
                 'uid': each,                 # url uuid
                 'kid': 0,                    # keyword id
-                'frequency': str(rule.get('rate', self.DEFAULT_RATE)),
+                'frequency': str(rule.get('frequency', self.DEFAULT_FREQUENCY)),
                 'url': urls['url'],          # url
             }
             self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))

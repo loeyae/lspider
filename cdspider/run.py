@@ -73,7 +73,7 @@ def cli(ctx, **kwargs):
     ctx.obj.update(kwargs)
     ctx.obj['app_config'] = app_config
     ctx.obj['app_path'] = cpath
-    ctx.obj.setdefault('rate_map', ctx.obj['app_config'].get('ratemap', {}))
+    ctx.obj.setdefault('frequency_map', ctx.obj['app_config'].get('frequencymap', {}))
     ctx.obj['instances'] = []
     if ctx.invoked_subcommand is None:
         ctx.invoke(all)
@@ -82,18 +82,18 @@ def cli(ctx, **kwargs):
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
 @click.option('-m', '--mode', default=None, help="分发模式：handle类型,为空时执行全部handle", multiple=True,  show_default=True)
-@click.option('-r', '--rate', default=None, help="分发模式：更新频率,为空时执行全部rate", multiple=True,  show_default=True)
+@click.option('-r', '--frequency', default=None, help="分发模式：更新频率,为空时执行全部frequency", multiple=True,  show_default=True)
 @click.option('-o', '--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def route(ctx, scheduler_cls, mode, rate, outqueue, no_loop, get_object=False):
+def route(ctx, scheduler_cls, mode, frequency, outqueue, no_loop, get_object=False):
     """
     路由: 按handle和频率分发任务
     """
     mode = list(set(mode))
     g = ctx.obj
     scheduler = load_cls(ctx, None, scheduler_cls)
-    scheduler = scheduler(ctx, mode=mode, rate=rate, outqueue=outqueue)
+    scheduler = scheduler(ctx, mode=mode, frequency=frequency, outqueue=outqueue)
     g['instances'].append(scheduler)
     if get_object:
         return scheduler
@@ -103,12 +103,12 @@ def route(ctx, scheduler_cls, mode, rate, outqueue, no_loop, get_object=False):
         scheduler.run()
 
 @cli.command()
-@click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name')
+@click.option('--scheduler-cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('-i', '--inqueue', default=None, help='监听的queue', show_default=True)
 @click.option('-o', '--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def plantask_schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop,  get_object=False):
+def schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop,  get_object=False):
     """
     根据路由的分发，将爬虫任务入队
     """
@@ -347,7 +347,7 @@ def send_queue(ctx, queue, message):
 @click.option('--run-in', default='subprocess', type=click.Choice(['subprocess', 'thread']),
               help='运行模式:subprocess or thread')
 @click.pass_context
-def all(ctx, fetch_num, plantask_schedule_num, run_in):
+def all(ctx, fetch_num, schedule_num, run_in):
     """
     集成运行整个系统
     """
@@ -366,10 +366,10 @@ def all(ctx, fetch_num, plantask_schedule_num, run_in):
         route_config.setdefault('xmlrpc_host', '127.0.0.1')
         threads.append(run_in(ctx.invoke, route, **route_config))
 
-        # plantask_schedule
-        plantask_schedule_config = g['config'].get('plantask_schedule', {})
-        for i in range(plantask_schedule_num):
-            threads.append(run_in(ctx.invoke, plantask_schedule, **plantask_schedule_config))
+        # schedule
+        schedule_config = g['config'].get('schedule', {})
+        for i in range(schedule_num):
+            threads.append(run_in(ctx.invoke, schedule, **schedule_config))
 
         # schedule_rpc
         schedule_rpc_config = g['config'].get('schedule_rpc', {})
