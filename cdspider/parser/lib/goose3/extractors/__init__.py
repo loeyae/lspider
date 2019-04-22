@@ -53,7 +53,7 @@ class BaseExtractor(object):
         if doc is None:
             return None
 
-        doc = self.parser.fromstring(self.parser.nodeToString(doc))
+        doc = self.parser.fromstring(self.parser.nodeToString(doc), encoding="utf-8")
         leaf = tags.pop('leaf', None)
         content = tags.pop('content', None)
         if 'attribute' in tags:
@@ -85,7 +85,7 @@ class BaseExtractor(object):
         if doc is None:
             return None
 
-        doc = self.parser.fromstring(self.parser.nodeToString(doc))
+        doc = self.parser.fromstring(self.parser.nodeToString(doc), encoding="utf-8")
         if custom_rule.startswith('@css:'):
             custom_rule = custom_rule[5:]
             custom_rule_arr = custom_rule.split(":eq")
@@ -136,7 +136,7 @@ class BaseExtractor(object):
         if doc is None:
             return None
 
-        doc = self.parser.fromstring(self.parser.nodeToString(doc))
+        doc = self.parser.fromstring(self.parser.nodeToString(doc), encoding="utf-8")
         if custom_rule.startswith('@css:'):
             custom_rule = custom_rule[5:]
             ret = self.parser.css_select(doc, custom_rule)
