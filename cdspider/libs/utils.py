@@ -268,12 +268,7 @@ def load_config(f):
     if not f or not os.path.isfile(f):
         return {}
 
-    def underline_dict(d):
-        if not isinstance(d, dict):
-            return d
-        return dict((k.replace('-', '_'), underline_dict(v)) for k, v in six.iteritems(d))
-
-    config = underline_dict(json.load(open(f, encoding='utf-8')))
+    config = json.load(open(f, encoding='utf-8'))
     return config
 
 
