@@ -540,6 +540,8 @@ class BaseHandler(Component):
         :return:
         """
         self.debug("%s on error" % self.__class__.__name__)
+        if isinstance(exc, CDSpiderError):
+            self.error(exc.get_message())
         self.exception(exc)
         elid = 0
         if 'uuid' in self.task and self.task['uuid']:
@@ -571,9 +573,13 @@ class BaseHandler(Component):
             if self.response['broken_exc']:
                 raise self.response['broken_exc']
             if self.page > 1:
-                raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
+                raise CDSpiderCrawlerNoNextPage(
+                    source=self.response['content'], base_url=save.get("base_url", ''),
+                    current_url=save.get('request_url'))
             else:
-                raise CDSpiderParserNoContent(base_url=save.get("base_url", ''), current_url=save.get('request_url'))
+                raise CDSpiderParserNoContent(
+                    source=self.response['content'], base_url=save.get("base_url", ''),
+                    current_url=save.get('request_url'))
         self.run_result(save)
         self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
 
