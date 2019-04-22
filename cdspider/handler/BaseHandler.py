@@ -663,7 +663,7 @@ class BaseHandler(Component):
 
         if name == '-general':
             return HANDLER_MODE_DEFAULT
-        return name.replace("-general-", "")
+        return name.replace("-general-", "").strip('-')
 
     @property
     def ns(self):
