@@ -498,7 +498,7 @@ class BaseHandler(Component):
             self.handler_run(HANDLER_FUN_PARSE, {"rule": rule, "save": save})
         else:
             self.run_parse(rule, save=save)
-        self.handler_run(HANDLER_FUN_POSTPARSE, {"save": {}})
+        self.handler_run(HANDLER_FUN_POSTPARSE, {"save": save})
         self.debug("%s parse end" % self.__class__.__name__)
 
     @abc.abstractmethod
