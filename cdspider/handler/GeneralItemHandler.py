@@ -298,14 +298,19 @@ class GeneralItemHandler(BaseHandler):
                     '''
                     self.debug("%s on_result: %s" % (self.__class__.__name__, self.response['parsed']))
                 else:
-                    result = self.db['ArticlesDB'].get_detail(result_id)
-                    content = result['content']
-                    if 'content' in self.response['parsed'] and self.response['parsed']['content']:
-                        content = '%s\r\n\r\n%s' % (content, self.response['parsed']['content'])
+                    result = self.response['parsed']
+                    article = self.db['ArticlesDB'].get_detail(result_id)
+                    content = article['content']
+                    if 'content' in result and result['content']:
+                        content = '%s\r\n\r\n%s' % (content, result['content'])
                         self.debug("%s on_result content: %s" % (self.__class__.__name__, content))
-                        self.db['ArticlesDB'].update(result_id, {"content": content})
-                        HandlerUtils.send_result_into_queue(
-                            self.queue, self.ctx.obj.get('app_config'), self.mode, result_id)
+                    update_data = dict({"content": content})
+                    for k, v in result.items():
+                        if k not in article or not article[k]:
+                            update_data[k] = v
+                    self.db['ArticlesDB'].update(result_id, update_data)
+                    HandlerUtils.send_result_into_queue(
+                        self.queue, self.ctx.obj.get('app_config'), self.mode, result_id)
         if not result_id:
             raise CDSpiderDBError("Result insert failed")
 
