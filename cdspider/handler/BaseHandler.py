@@ -478,7 +478,7 @@ class BaseHandler(Component):
         :param rule: 解析规则
         :return:
         """
-        self.handler_run(HANDLER_FUN_PREPARSE, {"rule": rule, save: save})
+        self.handler_run(HANDLER_FUN_PREPARSE, {"rule": rule, "save": save})
         return rule
 
     def parse(self, rule=None, save={}):
