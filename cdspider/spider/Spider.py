@@ -105,7 +105,7 @@ class Spider(Component):
                 else:
                     self.info("Spider crawl end")
                 self.info("Spider parse start")
-                handler.parse()
+                handler.parse(save=save)
                 self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
                 if return_result:
                     return_data.append((handler.response['parsed'], None, handler.response['content'],

@@ -472,16 +472,16 @@ class BaseHandler(Component):
             request['data'] = {}
         return request
 
-    def preparse(self, rule):
+    def preparse(self, rule, save={}):
         """
         解析预处理
         :param rule: 解析规则
         :return:
         """
-        self.handler_run(HANDLER_FUN_PREPARSE, {"rule": rule})
+        self.handler_run(HANDLER_FUN_PREPARSE, {"rule": rule, save: save})
         return rule
 
-    def parse(self, rule=None):
+    def parse(self, rule=None, save={}):
         """
         页面解析
         :param rule: 解析规则
@@ -491,18 +491,18 @@ class BaseHandler(Component):
         if not rule:
             rule = self.process.get("parse")
         self.debug("%s parse rule: %s" % (self.__class__.__name__, rule))
-        rule = self.preparse(rule)
+        rule = self.preparse(rule, save=save)
         self.debug("%s preparsed rule: %s" % (self.__class__.__name__, rule))
 
         if HANDLER_FUN_CRAWL in self.handle:
-            self.handler_run(HANDLER_FUN_PARSE, {"rule": rule})
+            self.handler_run(HANDLER_FUN_PARSE, {"rule": rule, save: save})
         else:
-            self.run_parse(rule)
-        self.handler_run(HANDLER_FUN_POSTPARSE, {})
+            self.run_parse(rule, save=save)
+        self.handler_run(HANDLER_FUN_POSTPARSE, {"save": {}})
         self.debug("%s parse end" % self.__class__.__name__)
 
     @abc.abstractmethod
-    def run_parse(self, rule):
+    def run_parse(self, rule, save={}):
         """
         执行解析规则
         :param rule:
