@@ -30,39 +30,5 @@
         "9": "删除"
     },
     "attach_storage": "data/attach",
-    "bloomfilter_redis_url": "redis://:08BcCWLe5Lmc7Rqp@117.79.146.156:6379",
-    "sync_kafka": {
-        "article_topic": "article_spider2",
-        "comment_topic": "comment_spider2",
-        "attach_topic": "attach_spider2",
-        "spider": "spider",
-        "host": "192.168.10.131:9092,192.168.10.132:9092,192.168.10.133:9092"
-    },
-    "mail": {
-        "mailer": "smtp",
-        "sender": {
-            "host": "ismtp.beyondsoft.com",
-            "port": 25,
-            "user": "bdopener",
-            "pass": "bdopener20170510",
-            "from": "bdopener@beyondsoft.com",
-            "from_name": "bdopener service"
-        }
-    },
-    "exc_work_receiver":  [
-        {
-            "name": "Zhang Yi",
-            "mail": "zhangyi07@beyondsoft.com"
-        }
-    ],
-    "statistics_receiver":  [
-        {
-            "name": "Zhang Yi",
-            "mail": "zhangyi07@beyondsoft.com"
-        },
-        {
-            "name": "Zhu Hong",
-            "mail": "zhuhong@beyondsoft.com"
-        }
-    ]
+    "bloomfilter_redis_url": "redis://:0f87990482b26838c1c2702cb1145007@127.0.0.1:6379"
 }

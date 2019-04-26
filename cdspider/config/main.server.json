@@ -3,27 +3,26 @@
     "runtime_dir": "/var/run/cdspider",
     "proxy": {
         "proxy_file": "/home/www/ip.txt",
-        "user": "hongmai",
-        "password": "soften.cn",
+        "user": "proxy",
+        "password": "proxy",
         "type": "socks",
         "proxy_frequency": "every"
     },
-    "message_queue": {
-        "protocol": "amqp",
-        "host": "117.79.146.156",
-        "port": 5672,
-        "user": "cdspider",
-        "password": "cdspider",
-        "exchange": "cdspider",
-        "maxsize": 1000000,
-        "queue_prefix": ""
-    },
     "database": {
         "protocol": "mongo",
-        "host": "117.79.146.156",
-        "port": 3717,
-        "db": "cdspider",
-        "user": "root",
-        "password": "8ZfFlwwxK8K5juxr"
+        "host": "localhost",
+        "port": 27017,
+        "db": "cdspider_sample",
+        "user": "admin",
+        "password": "admin"
+    },
+    "message_queue": {
+        "protocol": "redis",
+        "host": "localhost",
+        "port": 6379,
+        "user": "",
+        "password": "0f87990482b26838c1c2702cb1145007",
+        "maxsize": 1000000,
+        "queue_prefix": "local"
     }
 }
