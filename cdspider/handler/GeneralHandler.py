@@ -71,7 +71,7 @@ class GeneralHandler(BaseHandler):
         }
 
 
-    def run_parse(self, rule):
+    def run_parse(self, rule, save={}):
         """
         根据解析规则解析源码，获取相应数据
         爬虫结果 self.response {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}

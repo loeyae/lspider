@@ -138,7 +138,7 @@ class GeneralItemHandler(BaseHandler):
                             return item
         return parse_rule
 
-    def run_parse(self, rule):
+    def run_parse(self, rule, save={}):
         """
         解析
         根据 self.response {"last_source": 最后一次抓取到的源码, "final_url": 最后一次请求的url}
