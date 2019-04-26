@@ -494,7 +494,7 @@ class BaseHandler(Component):
         rule = self.preparse(rule, save=save)
         self.debug("%s preparsed rule: %s" % (self.__class__.__name__, rule))
 
-        if HANDLER_FUN_CRAWL in self.handle:
+        if HANDLER_FUN_PARSE in self.handle:
             self.handler_run(HANDLER_FUN_PARSE, {"rule": rule, "save": save})
         else:
             self.run_parse(rule, save=save)
