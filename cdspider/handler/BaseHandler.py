@@ -495,7 +495,7 @@ class BaseHandler(Component):
         self.debug("%s preparsed rule: %s" % (self.__class__.__name__, rule))
 
         if HANDLER_FUN_CRAWL in self.handle:
-            self.handler_run(HANDLER_FUN_PARSE, {"rule": rule, save: save})
+            self.handler_run(HANDLER_FUN_PARSE, {"rule": rule, "save": save})
         else:
             self.run_parse(rule, save=save)
         self.handler_run(HANDLER_FUN_POSTPARSE, {"save": {}})
