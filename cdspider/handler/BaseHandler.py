@@ -296,7 +296,7 @@ class BaseHandler(Component):
             return fn
         return _handler_register
 
-    def handler_run(self, handle_type, save):
+    def handler_run(self, handle_type, kwargs):
         """
         运行注册的方法
         :param handle_type: 方法类型
@@ -310,7 +310,7 @@ class BaseHandler(Component):
             if func_list:
                 for _,fn in sorted(func_list, reverse=True):
                     if callable(fn):
-                        fn(save)
+                        fn(self, kwargs)
 
     @property
     def current_page(self):
@@ -346,7 +346,7 @@ class BaseHandler(Component):
         if not save['base_url'] or save['base_url'] == 'base_url':
             save['base_url'] = self.task['url']
         save['page'] = self.page
-        self.handler_run(HANDLER_FUN_PROCESS, {"process": self.process, "save": save})
+        self.handler_run(HANDLER_FUN_PROCESS, {"save": save})
         self.request = self._get_request(save)
         self.proxy_mode = self.request.pop('proxy', 'never')
         if not self.crawler:
@@ -367,7 +367,7 @@ class BaseHandler(Component):
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['content'] or DEFAULT_SOURCE,
                                             self.response.get('cookies', {}), save)
-        self.handler_run(HANDLER_FUN_INIT, {"request_params": self.request_params, "save": save})
+        self.handler_run(HANDLER_FUN_INIT, {"save": save})
 
     @abc.abstractmethod
     def init_process(self, save):
@@ -383,8 +383,7 @@ class BaseHandler(Component):
         预处理
         :param save: 传递的上下文
         """
-        self.handler_run(HANDLER_FUN_PREPARE, {"request": self.request, "request_params": self.request_params,
-                                               "save": save})
+        self.handler_run(HANDLER_FUN_PREPARE, {"save": save})
 
     def precrawl(self, save):
         """
@@ -397,7 +396,7 @@ class BaseHandler(Component):
             self.request_params['proxy'] = copy.deepcopy(self.proxy)
         else:
             self.request_params['proxy'] = None
-        self.handler_run(HANDLER_FUN_PRECRAWL, {"request_params": self.request_params, "save": save})
+        self.handler_run(HANDLER_FUN_PRECRAWL, {"save": save})
 
     def crawl(self, save):
         """
@@ -409,8 +408,7 @@ class BaseHandler(Component):
             self.precrawl(save)
             params = copy.deepcopy(self.request_params)
             if HANDLER_FUN_CRAWL in self.handle:
-                self.handler_run(HANDLER_FUN_CRAWL, {"request": self.request, "requst_params": params, "response":
-                    self.response, "save": save})
+                self.handler_run(HANDLER_FUN_CRAWL, {"requst_params": params, "save": save})
             else:
                 response = self.crawler.crawl(**params)
                 if response is None:
@@ -423,7 +421,7 @@ class BaseHandler(Component):
         except Exception as exc:
             self.response['broken_exc'] = exc
         finally:
-            self.handler_run(HANDLER_FUN_POSTCRAWL, {"response": self.response, "save": save})
+            self.handler_run(HANDLER_FUN_POSTCRAWL, {"save": save})
 
     def _get_request(self, save):
         """
@@ -480,7 +478,7 @@ class BaseHandler(Component):
         :param rule: 解析规则
         :return:
         """
-        self.handler_run(HANDLER_FUN_PREPARSE, {"rule": rule, "response": self.response})
+        self.handler_run(HANDLER_FUN_PREPARSE, {"rule": rule})
         return rule
 
     def parse(self, rule=None):
@@ -497,10 +495,10 @@ class BaseHandler(Component):
         self.debug("%s preparsed rule: %s" % (self.__class__.__name__, rule))
 
         if HANDLER_FUN_CRAWL in self.handle:
-            self.handler_run(HANDLER_FUN_PARSE, {"rule": rule, "response": self.response, "handler": self})
+            self.handler_run(HANDLER_FUN_PARSE, {"rule": rule})
         else:
             self.run_parse(rule)
-        self.handler_run(HANDLER_FUN_POSTPARSE, {"response": self.response})
+        self.handler_run(HANDLER_FUN_POSTPARSE, {})
         self.debug("%s parse end" % self.__class__.__name__)
 
     @abc.abstractmethod
@@ -527,7 +525,7 @@ class BaseHandler(Component):
         if self.crawl_info['crawl_count']['repeat_page'] < self.ALLOWED_REPEAT:
             return
         if HANDLER_FUN_REPETITION in self.handle:
-            self.handler_run(HANDLER_FUN_REPETITION, {"crawl_info": self.crawl_info, "task": self.task, "save": save})
+            self.handler_run(HANDLER_FUN_REPETITION, {"save": save})
         else:
             raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", self.task['url']), current_url=save.get(
                 "request_url", self.task['url']))
@@ -559,7 +557,7 @@ class BaseHandler(Component):
             self.crawl_info['traceback'] = traceback.format_exc()
         else:
             self.crawl_info['errid'] = elid
-        self.handler_run(HANDLER_FUN_ERROR, {"response": self.response, "crawl_info": self.crawl_info, "save": save})
+        self.handler_run(HANDLER_FUN_ERROR, {"save": save})
 
     def on_result(self, save):
         """
@@ -581,7 +579,7 @@ class BaseHandler(Component):
                     source=self.response['content'], base_url=save.get("base_url", ''),
                     current_url=save.get('request_url'))
         self.run_result(save)
-        self.handler_run(HANDLER_FUN_RESULT, {"response": self.response, "save": save})
+        self.handler_run(HANDLER_FUN_RESULT, {"save": save})
 
     def run_result(self, save):
         """
@@ -610,8 +608,7 @@ class BaseHandler(Component):
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['content'], self.response.get('cookies', {}),
                                             save)
-        self.handler_run(HANDLER_FUN_NEXT, {"response": self.response, "request_params": self.request_params,
-                                            "save": save})
+        self.handler_run(HANDLER_FUN_NEXT, {"save": save})
         save['next_url'] = self.request_params['url']
 
     def on_continue(self, broken_exc, save):
@@ -655,7 +652,7 @@ class BaseHandler(Component):
         if self.log_id:
             log = HandlerUtils.build_update_log(self.crawl_info)
             self.log_id = self.db['CrawlLogDB'].update(self.log_id, log)
-        self.handler_run(HANDLER_FUN_FINISH, {"crawl_info": self.crawl_info, "response": self.response, "save": save})
+        self.handler_run(HANDLER_FUN_FINISH, {"save": save})
 
     @property
     def mode(self):
