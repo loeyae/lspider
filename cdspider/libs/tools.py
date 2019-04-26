@@ -3,7 +3,7 @@
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import sys
 import copy
-import importlib.util
+import imp
 import linecache
 import six
 import click
@@ -217,7 +217,7 @@ class ModulerLoader(object):
 
     def load_module(self, handler, handler_params):
         if self.mod is None:
-            self.mod = mod = importlib.util.module_from_spec(self.name)
+            self.mod = mod = imp.new_module(self.name)
         else:
             mod = self.mod
         mod.__file__ = '<%s>' % self.name
