@@ -243,7 +243,7 @@ class BaseCrawler(Component):
             rest={'HttpOnly': None},
             rfc2109=False,)
         result = utils.dictunion(kwargs, allowed)
-        if not result['domain'] and self._base_url:
+        if ('domain' not in result or not result['domain']) and self._base_url:
             result['domain'] = utils.typeinfo(self._base_url)["domain"]
 
         return self._cookies.set(name, str(value), **result)
