@@ -191,34 +191,6 @@ class GeneralHandler(BaseHandler):
         }
         return r
 
-    def build_url_by_rule(self, data, base_url = None):
-        """
-        根据url规则格式化url
-        :param data 解析到的数据
-        :param base_url 基本url
-        """
-        if not base_url:
-            base_url = self.task.get('url')
-        urlrule = self.process.get("url")
-        formated = []
-        for item in data:
-            if 'url' not in item or not item['url']:
-                continue
-            if item['url'].startswith('javascript') or item['url'] == '/':
-                continue
-            try:
-                item['url'] = self.url_prepare(item['url'])
-            except:
-                self.error(traceback.format_exc())
-                continue
-            if urlrule and 'name' in urlrule and urlrule['name']:
-                parsed = {urlrule['name']: item['url']}
-                item['url'] = utils.build_url_by_rule(urlrule, parsed)
-            else:
-                item['url'] = urljoin(base_url, item['url'])
-            formated.append(item)
-        return formated
-
     def build_item_task(self, rid, mode):
         """
         生成详情抓取任务并入队

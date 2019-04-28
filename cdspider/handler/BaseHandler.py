@@ -11,9 +11,10 @@ import os
 import time
 import traceback
 import re
+from urllib.parse import urljoin
 from cdspider.scheduler import CounterMananger
 from cdspider.crawler import BaseCrawler
-from cdspider.crawler import RequestsCrawler, SeleniumCrawler
+from cdspider.crawler import RequestsCrawler
 from cdspider.database.base import Base as BaseDB
 from cdspider.libs.tools import *
 from cdspider.parser import *
@@ -514,6 +515,54 @@ class BaseHandler(Component):
         # parsed = parser.parse()
         # self.response['parsed'] = parsed
         pass
+
+    def url_prepare(self, url):
+        return url
+
+    def build_url_by_rule(self, data, base_url = None):
+        """
+        根据url规则格式化url
+        :param data 解析到的数据
+        :param base_url 基本url
+        """
+        if not base_url:
+            base_url = self.task.get('url')
+        urlrule = self.process.get("url")
+        self.debug("%s URL RULE: %s", self.__class__.__name__, urlrule)
+        if "parse" in urlrule:
+            parser = CustomParser(source=self.response['content'], ruleset=urlrule['parse'])
+            parsed = parser.parse()
+            if not parsed:
+                raise CDSpiderParserError(source=self.response['content'], rule=urlrule['parse'])
+            if not isinstance(parsed, (list, tuple)):
+                parsed = [parsed]
+            parsed.extend(parsed[-1] for i in range(len(data) - len(parsed)))
+        else:
+            parsed = None
+        formated = []
+        i = 0
+        for item in data:
+            if 'url' not in item or not item['url']:
+                continue
+            if item['url'].startswith('javascript') or item['url'] == '/':
+                continue
+            try:
+                item['url'] = self.url_prepare(item['url'])
+            except:
+                self.error(traceback.format_exc())
+                continue
+            if urlrule and 'name' in urlrule and urlrule['name']:
+                if parsed:
+                    params = parsed[i]
+                else:
+                    params = {}
+                params.update({urlrule['name']: item['url']})
+                item['url'] = utils.build_url_by_rule(urlrule, params)
+            else:
+                item['url'] = urljoin(base_url, item['url'])
+            formated.append(item)
+            i += 1
+        return formated
 
     def on_repetition(self, save):
         """
