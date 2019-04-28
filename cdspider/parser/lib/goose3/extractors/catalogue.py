@@ -56,7 +56,7 @@ class CatalogueExtractor(BaseExtractor):
                     val = self.custom_match(rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'),
                                             target=rule.get('target', None))
                     data[k] = self.correction_result(val, rule)
-                return utils.table2kvlist(data)
+                return utils.table2kvlist(data, extend=True)
             if 'filter' in urls_pattern and urls_pattern['filter']:
                 if not urls_pattern['filter'].startswith('@'):
                     rule, key = utils.rule2pattern(urls_pattern['filter'])
@@ -82,7 +82,7 @@ class CatalogueExtractor(BaseExtractor):
                                 rule['filter'], onlyOne=False, dtype=rule.get('type', 'text'),
                                 target=rule.get('target', None))
                             data[k] = self.correction_result(val, rule)
-                    return utils.table2kvlist(data)
+                    return utils.table2kvlist(data, extend=True)
                 return []
 
         known_context_patterns = []
