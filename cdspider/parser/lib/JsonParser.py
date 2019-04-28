@@ -75,7 +75,7 @@ class JsonParser(BaseParser):
 
     def _filter(self, data, rule):
         if isinstance(rule, dict):
-            if 'filter' in rule:
+            if 'filter' in rule and rule['filter']:
                 if not rule['filter']:
                     return None
                 if rule['filter'].startswith("@json:"):
@@ -91,7 +91,13 @@ class JsonParser(BaseParser):
                     return self.patch_result(utils.extract_result(data, rule, None), rule, callback)
             elif 'item' in rule:
                 onlyOne = bool(int(rule.get('onlyOne', 0)))
-                return self._item_filter(data, rule, onlyOne, noLeaf = True)
+                rest = {}
+                for item in rule['item']:
+                    rest[item] = self._filter(copy.deepcopy(data), rule['item'][item])
+                rst = utils.table2kvlist(rest)
+                if onlyOne:
+                    return rst[0]
+                return rst
             else:
                 rst = {}
                 for key, val in rule.items():
@@ -107,25 +113,26 @@ class JsonParser(BaseParser):
         else:
             return self._filter(data, {"filter": rule})
 
-    def _item_filter(self, data, rule, onlyOne, noLeaf = False):
-        if isinstance(data, list):
-            rst = []
-            for d in data:
-                rest = self._item_filter(d, rule, onlyOne, noLeaf = True)
-                if rest:
-                    rst.extend(rest)
-                    if onlyOne:
-                        return rst
-            return rst
-        elif not noLeaf and isinstance(data, dict):
-            rst = []
-            for idx in data:
-                rest = self._item_filter(data[idx], rule, onlyOne, noLeaf = True)
-                if rest:
-                    rst.extend(rest)
-                    if onlyOne:
-                        return rst
-            return rst
+    def _item_filter(self, data, rule, onlyOne, noLeaf=False):
+        if noLeaf is False:
+            if isinstance(data, list):
+                rst = []
+                for d in data:
+                    rest = self._item_filter(d, rule, onlyOne, noLeaf=True)
+                    if rest:
+                        rst.extend(rest)
+                        if onlyOne:
+                            return rst
+                return rst
+            elif isinstance(data, dict):
+                rst = []
+                for idx in data:
+                    rest = self._item_filter(data[idx], rule, onlyOne, noLeaf=True)
+                    if rest:
+                        rst.extend(rest)
+                        if onlyOne:
+                            return rst
+                return rst
         else:
             ruleset = rule['item']['url'] if 'url' in rule['item'] else list(rule['item'].values())[0]
             if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@css:'):

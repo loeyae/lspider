@@ -713,7 +713,14 @@ def table2kvlist(data):
             item = []
             for i in range(l):
                 v = None
-                if values[i] and isinstance(values[i], (list, tuple)) and len(values[i]) > j:
+                if values[i]:
+                    if not isinstance(values[i], (list, tuple)):
+                        values[i] = [values[i]]
+                    if len(values[i]) <= j:
+                        if j == 0:
+                            values[i][j] = None,
+                        else:
+                            values[i].extend([values[i][j-1]])
                     v = values[i][j]
                 item.append(v)
             d.append(dict(zip(keys,item)))
