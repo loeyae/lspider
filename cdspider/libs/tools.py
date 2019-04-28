@@ -249,3 +249,6 @@ def load_cls(ctx, param, value):
     if isinstance(value, six.string_types):
         return utils.get_object(value)
     return value
+
+def load_param(ctx, param, value):
+    return json.loads(value)
