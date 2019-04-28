@@ -94,7 +94,7 @@ class JsonParser(BaseParser):
                 rest = {}
                 for item in rule['item']:
                     rest[item] = self._filter(copy.deepcopy(data), rule['item'][item])
-                rst = utils.table2kvlist(rest)
+                rst = utils.table2kvlist(rest, extend=True)
                 if onlyOne:
                     return rst[0]
                 return rst

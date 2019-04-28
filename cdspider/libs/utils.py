@@ -680,7 +680,7 @@ def dictunion(dict1, dict2):
     return dict((x, y) for x, y in dict1.items() if x in dict2)
 
 
-def table2kvlist(data):
+def table2kvlist(data, extend=False):
     """
     将table形式数据转换为键值对列表
     :params
@@ -714,14 +714,18 @@ def table2kvlist(data):
             for i in range(l):
                 v = None
                 if values[i]:
-                    if not isinstance(values[i], (list, tuple)):
-                        values[i] = [values[i]]
-                    if len(values[i]) <= j:
-                        if j == 0:
-                            values[i][j] = None,
-                        else:
-                            values[i].extend([values[i][j-1]])
-                    v = values[i][j]
+                    if extend is True:
+                        if not isinstance(values[i], (list, tuple)):
+                            values[i] = [values[i]]
+                        if len(values[i]) <= j:
+                            if j == 0:
+                                values[i][j] = None,
+                            else:
+                                values[i].extend([values[i][j-1]])
+                        v = values[i][j]
+                    else:
+                        if isinstance(values[i], (list, tuple)) and len(values[i]) > j:
+                            v = values[i][j]
                 item.append(v)
             d.append(dict(zip(keys,item)))
     return d
