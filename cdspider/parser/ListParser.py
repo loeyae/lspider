@@ -25,7 +25,7 @@ class ListParser(BaseParser):
         if not ruleset:
             ruleset = {}
         if ('filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@json:'))\
-                or ((ruleset.get('item') or {}).get("url") or '').startswith('@json'):
+                or (((ruleset.get('item') or {}).get("url") or {}).get("filter") or '').startswith('@json'):
             parser = JsonParser(source=source, ruleset=ruleset, logger=self.logger, domain=self.domain, subdomain=self.subdomain)
             return parser.parse()
         g = Goose({"target_language": "zh", 'stopwords_class': StopWordsChinese, "enable_fewwords_paragraphs": True, "logger": self.logger, "domain": self.domain, "subdomain": self.subdomain, "custom_rule": ruleset if ruleset else {}})
