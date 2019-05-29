@@ -529,7 +529,7 @@ class BaseHandler(Component):
             base_url = self.task.get('url')
         urlrule = self.process.get("url")
         self.debug("%s URL RULE: %s", self.__class__.__name__, urlrule)
-        if "parse" in urlrule:
+        if urlrule and "parse" in urlrule:
             parser = CustomParser(source=self.response['content'], ruleset=urlrule['parse'])
             parsed = parser.parse()
             if not parsed:
