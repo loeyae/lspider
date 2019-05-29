@@ -106,6 +106,9 @@ class RequestsCrawler(BaseCrawler):
         fetch_ = copy.deepcopy(self.fetch)
         fetch_['method'] = kwargs['method'].upper()
         fetch_['url'] = utils.quote_chinese(kwargs['url'])
+        fetch_['data'] = kwargs.get('data')
+        fetch_['json'] = kwargs.get('json')
+        fetch_['params'] = kwargs.get('params')
         return fetch_
 
     @gen.coroutine
