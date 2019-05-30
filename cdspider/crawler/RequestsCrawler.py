@@ -33,7 +33,7 @@ class RequestsCrawler(BaseCrawler):
         'headers': {
         },
         'auth': None,
-        'timeout': (30, 60),
+        'timeout': (90, 120),
         'allow_redirects': True,
         'proxies': None,
         'hooks': None,
