@@ -101,7 +101,7 @@ class JsonParser(BaseParser):
             else:
                 rst = {}
                 for key, val in rule.items():
-                    rst[key] = self._filter(data, val)
+                    rst[key] = self._filter(data, {"filter": val})
                 return rst
         elif isinstance(rule, list):
             rst = []
