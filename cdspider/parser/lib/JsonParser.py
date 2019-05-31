@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
@@ -6,16 +6,17 @@
 """
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-24 21:39:45
+:version: SVN: $Id: JsonParser.py 2096 2018-07-03 14:03:03Z zhangyi $
 """
 import six
 import re
 import json
 import copy
-import jsonpath
-from cdspider.parser.lib import BaseParser
-from cdspider.parser.lib.PyqueryParser import PyqueryParser
-from cdspider.parser.lib.RegularParser import RegularParser
-from cdspider.parser.lib.XpathParser import XpathParser
+import traceback
+from cdspider.parser import BaseParser
+from .PyqueryParser import PyqueryParser
+from .RegularParser import RegularParser
+from .XpathParser import XpathParser
 from cdspider.exceptions import *
 from cdspider.libs import utils
 
@@ -24,7 +25,7 @@ class JsonParser(BaseParser):
     JSON Parser
     """
     def __init__(self, *args, **kwargs):
-       super(JsonParser, self).__init__(*args, **kwargs)
+        super(JsonParser, self).__init__(*args, **kwargs)
 
     def parse(self, source = None, ruleset = None):
         """
@@ -39,8 +40,8 @@ class JsonParser(BaseParser):
                 source = utils.decode(source)
             except:
                 source = str(source)
-        # self.info("Json source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(source)))
-        # self.info("Json ruleset: %s" % str(ruleset))
+        #        self.logger.info("Json source: %s" % re.sub(r"(\r|\n|\s{2,})", "", str(source)))
+        #        self.logger.info("Json ruleset: %s" % str(ruleset))
         if source and ruleset:
             source = source.strip()
             ll = source[0:1]
@@ -75,7 +76,7 @@ class JsonParser(BaseParser):
 
     def _filter(self, data, rule):
         if isinstance(rule, dict):
-            if 'filter' in rule and rule['filter']:
+            if 'filter' in rule:
                 if not rule['filter']:
                     return None
                 if rule['filter'].startswith("@json:"):
@@ -88,68 +89,53 @@ class JsonParser(BaseParser):
                     return self._item_filter(data, rule, onlyOne)
                 else:
                     callback = rule.get('callback', None)
-                    return self.patch_result(utils.extract_result(data, rule, None), rule, callback)
+                    return self.patch_result(data, rule, callback)
             elif 'item' in rule:
                 onlyOne = bool(int(rule.get('onlyOne', 0)))
-                rest = {}
-                for item in rule['item']:
-                    rest[item] = self._filter(copy.deepcopy(data), rule['item'][item])
-                rst = utils.table2kvlist(rest, extend=True)
-                if onlyOne:
-                    return rst[0]
-                return rst
+                return self._item_filter(data, rule, onlyOne, noLeaf = True)
             else:
-                rst = {}
-                for key, val in rule.items():
-                    rst[key] = self._filter(data, {"filter": val})
-                return rst
+                return data
         elif isinstance(rule, list):
             rst = []
             for item in rule:
                 rest = self._filter(copy.deepcopy(data), item)
-                if rest:
-                    rst.append(rest)
+                rst.append(rest)
             return rst
         else:
             return self._filter(data, {"filter": rule})
 
-    def _item_filter(self, data, rule, onlyOne, noLeaf=False):
-        if noLeaf is False:
-            if isinstance(data, list):
-                rst = []
-                for d in data:
-                    rest = self._item_filter(d, rule, onlyOne, noLeaf=True)
-                    if rest:
-                        rst.extend(rest)
-                        if onlyOne:
-                            return rst
-                return rst
-            elif isinstance(data, dict):
-                rst = []
-                for idx in data:
-                    rest = self._item_filter(data[idx], rule, onlyOne, noLeaf=True)
-                    if rest:
-                        rst.extend(rest)
-                        if onlyOne:
-                            return rst
-                return rst
+    def _item_filter(self, data, rule, onlyOne, noLeaf = False):
+        if isinstance(data, list):
+            rst = []
+            for d in data:
+                rest = self._item_filter(d, rule, onlyOne, noLeaf = True)
+                rst.extend(rest)
+                if onlyOne:
+                    return rst
+            return rst
+        elif not noLeaf and isinstance(data, dict):
+            rst = []
+            for idx in data:
+                rest = self._item_filter(data[idx], rule, onlyOne, noLeaf = True)
+                rst.extend(rest)
+                if onlyOne:
+                    return rst
+            return rst
         else:
             ruleset = rule['item']['url'] if 'url' in rule['item'] else list(rule['item'].values())[0]
-            if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@css:'):
+            if 'filter' in ruleset and ruleset['filter'].startswith('@pq:'):
                 for k, v in rule['item'].items():
-                    if v['filter']:
-                        v['filter'] = v['filter'][5:]
+                    v['filter'] = v['filter'][4:]
                 parser = PyqueryParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
                 parsed = parser.parse()
                 return parsed.get('json', []) if parsed else None
-            elif 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@xpath:'):
+            elif 'filter' in ruleset and ruleset['filter'].startswith('@xpath:'):
                 for k, v in rule['item'].items():
-                    if v['filter']:
-                        v['filter'] = v['filter'][7:]
+                    v['filter'] = v['filter'][7:]
                 parser = XpathParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
                 parsed = parser.parse()
                 return parsed.get('json', []) if parsed else None
-            elif 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@reg:'):
+            elif 'filter' in ruleset and ruleset['filter'].startswith('@reg:'):
                 for k, v in rule['item'].items():
                     v['filter'] = v['filter'][5:]
                 parser = RegularParser(ruleset={"json": {"onlyOne": onlyOne, 'item': rule['item']}}, source=copy.deepcopy(data))
@@ -162,83 +148,12 @@ class JsonParser(BaseParser):
                 return [rest]
 
     def _json_parse(self, data, kstring):
-        if not kstring.startswith("$"):
-            kstring = "$.%s" % kstring
-        kstring = kstring.replace("[-1]", "[(@.length-1)]").replace(".-1", "[(@.length-1)]")
-        rst = jsonpath.jsonpath(data, kstring)
-        if isinstance(rst, list) and len(rst) == 1 and not isinstance(rst[0], (tuple, list, dict)):
-            return rst[0]
-        return rst
-
-if __name__ == "__main__":
-    """
-    规则测试
-    """
-    _json = {
-        "key1": [
-            "value11",
-            "value12",
-            "value13",
-        ],
-        "key2": [
-            {
-                "key21": "value211",
-                "key22": "value212",
-            },
-            {
-                "key21": "value221",
-                "key22": "value222"
-            },
-            {
-                "key21": "value231",
-                "key22": "value232"
-            }
-        ],
-        "key3": [
-            {
-                "key30": {
-                    "key301": "value301",
-                }
-            },
-            {
-                "key31": [
-                    {
-                        "key311": "value311",
-                        "key312": "value312",
-                    },
-                    {
-                        "key311": "value321",
-                        "key312": "value322",
-                    }
-                ]
-            }
-        ]
-    }
-    parser = JsonParser()
-    ruleset = {
-        "filter": "$.key2",
-        "item": {
-            "key1": {
-                "filter": "$.key21",
-            },
-            "key2": {
-                "filter": "$.key22",
-            }
-        }
-    }
-    parsed = parser.parse(source=json.dumps(_json),ruleset=ruleset)
-    print(parsed)
-    ruleset = {
-        "filter": "key3.*.key31",
-        "item": {
-            "key1": "key311",
-            "key2": "key312"
-        }
-    }
-    parsed = parser.parse(source=json.dumps(_json),ruleset=ruleset)
-    print(parsed)
-    ruleset = {
-        "filter": "key1.-1",
-    }
-    parsed = parser.parse(source=json.dumps(_json),ruleset=ruleset)
-    print(parsed)
+        kstring = "[\"%s\"]" % kstring.replace(".", "\"][\"")
+        result = None
+        code = "data%s" % re.sub(r"\[\"(\d+)\"\]", r"[\1]", kstring)
+        try:
+            result = eval(code, None, locals())
+        except:
+            self.logger.error(traceback.format_exc())
+            pass
+        return result
