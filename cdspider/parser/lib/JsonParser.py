@@ -166,7 +166,7 @@ class JsonParser(BaseParser):
             kstring = "$.%s" % kstring
         kstring = kstring.replace("[-1]", "[(@.length-1)]").replace(".-1", "[(@.length-1)]")
         rst = jsonpath.jsonpath(data, kstring)
-        if isinstance(rst, list):
+        if isinstance(rst, list) and len(rst) == 1:
             return rst[0]
         return rst
 
