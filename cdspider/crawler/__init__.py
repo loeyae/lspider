@@ -77,6 +77,7 @@ class BaseCrawler(Component):
         log_level = kwargs.pop('log_level', logging.WARN)
         super(BaseCrawler, self).__init__(self.logger, log_level)
         self.fetch = copy.deepcopy(self.default_options)
+        self.proxy_lock = None
         if kwargs:
             self._prepare_setting(**kwargs)
         self.ioloop = kwargs.get('ioloop', tornado.ioloop.IOLoop())
@@ -319,7 +320,7 @@ class BaseCrawler(Component):
         """
         init = kwargs.get('init', True)
         proxy_frequency = kwargs.get('proxy_frequency', 'always')
-        if not init and proxy_frequency == 'always':
+        if (not init and proxy_frequency == 'always') or self.proxy_lock is not None:
             return
         proxies = utils.dictunion(kwargs, {'addr': None, 'type': None, 'user': None, 'password': None})
         if 'proxies' in kwargs and kwargs['proxies']:
@@ -344,11 +345,12 @@ class BaseCrawler(Component):
                     proxies['proxies'] = c.split('|')
             except urllib.error.URLError:
                 self.logger.error(traceback.format_exc())
-
+        self.proxy_lock = True
         if 'proxies' in proxies:
             proxies['proxies'].append("127.0.0.1")
             proxy = random.choice(proxies['proxies'])
             if proxy == "127.0.0.1":
+                self.set_proxy(None)
                 return
             if isinstance(proxy, dict):
                 proxies.update(proxy)
