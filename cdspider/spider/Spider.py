@@ -90,11 +90,6 @@ class Spider(Component):
                 self.info('Spider crawl start')
                 handler.crawl(save)
                 handler.validate(save=save)
-                if isinstance(handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
-                    handler.on_continue(handler.response['broken_exc'], save)
-                    continue
-                elif handler.response['broken_exc']:
-                    raise handler.response['broken_exc']
                 if not handler.response['content']:
                     raise CDSpiderCrawlerError('Spider crawl failed')
                 unid = utils.md5(handler.response['content'])
@@ -109,6 +104,13 @@ class Spider(Component):
                 self.info("Spider parse start")
                 handler.parse(save=save)
                 self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
+
+                if isinstance(handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
+                    handler.on_continue(handler.response['broken_exc'], save)
+                    continue
+                elif handler.response['broken_exc']:
+                    raise handler.response['broken_exc']
+
                 if return_result:
                     return_data.append((handler.response['parsed'], None, handler.response['content'],
                                         handler.response['url'], save))
