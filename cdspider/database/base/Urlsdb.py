@@ -67,6 +67,9 @@ class UrlsDB(Base):
     def delete_by_project(self, pid, where):
         raise NotImplementedError
 
+    def active_rule(self, id, where):
+        raise NotImplementedError
+
     def active(self, id, where):
         raise NotImplementedError
 
