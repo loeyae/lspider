@@ -484,6 +484,8 @@ class BaseHandler(Component):
         else:
             self.run_parse(rule, save=save)
         self.handler_run(HANDLER_FUN_POSTPARSE, {"save": save})
+        if not self.response['parsed']:
+            self.response['broken_exc'] = CDSpiderCrawlerNoResponse()
         self.debug("%s parse end" % self.__class__.__name__)
 
     @abc.abstractmethod
