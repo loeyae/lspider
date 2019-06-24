@@ -81,6 +81,15 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where.update({'pid': int(pid)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
 
+    def active_rule(self, id, where):
+        obj = {"ruleStatus": self.STATUS_ACTIVE}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {'uuid': int(id)}
+        else:
+            where.update({'uuid': int(id)})
+        return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
+
     def active(self, id, where = {}):
         obj = {"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
