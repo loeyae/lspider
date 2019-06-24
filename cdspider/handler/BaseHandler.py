@@ -443,7 +443,7 @@ class BaseHandler(Component):
         self.debug("%s validate start" % self.__class__.__name__)
         if not rule:
             rule = self.process.get("validate")
-        self.debug("%s parse rule: %s" % (self.__class__.__name__, rule))
+        self.debug("%s validate rule: %s" % (self.__class__.__name__, rule))
         if rule:
             url_rule = rule.get('url', '')
             if url_rule and utils.preg(self.response['final_url'], url_rule):
@@ -455,6 +455,7 @@ class BaseHandler(Component):
                 parsed = parser.parse()
                 if parsed and "ele" in parsed and parsed["ele"]:
                     raise CDSpiderCrawlerForbidden
+        self.debug("%s validate pass" % self.__class__.__name__)
 
     def preparse(self, rule, save={}):
         """
