@@ -89,6 +89,7 @@ class Spider(Component):
             while True:
                 self.info('Spider crawl start')
                 handler.crawl(save)
+                handler.validate(save=save)
                 if isinstance(handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
                     handler.on_continue(handler.response['broken_exc'], save)
                     continue
