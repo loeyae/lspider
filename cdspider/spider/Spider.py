@@ -89,21 +89,23 @@ class Spider(Component):
             while True:
                 self.info('Spider crawl start')
                 handler.crawl(save)
-                handler.validate(save=save)
                 if not handler.response['content']:
                     raise CDSpiderCrawlerError('Spider crawl failed')
-                unid = utils.md5(handler.response['content'])
-                if last_source_unid == unid or last_url == handler.response['url']:
-                    raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['url'])
-                last_source_unid = unid
-                last_url = handler.response['url']
-                if self.sdebug:
-                    self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["last_source"]))
-                else:
-                    self.info("Spider crawl end")
-                self.info("Spider parse start")
-                handler.parse(save=save)
-                self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
+                if not handler.response['broken_exc']:
+                    unid = utils.md5(handler.response['content'])
+                    if last_source_unid == unid or last_url == handler.response['url']:
+                        raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['url'])
+                    validated = handler.validate(save=save)
+                    if validated:
+                        last_source_unid = unid
+                        last_url = handler.response['url']
+                        if self.sdebug:
+                            self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["last_source"]))
+                        else:
+                            self.info("Spider crawl end")
+                        self.info("Spider parse start")
+                        handler.parse(save=save)
+                        self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
 
                 if isinstance(handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
                     handler.on_continue(handler.response['broken_exc'], save)
