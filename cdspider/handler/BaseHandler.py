@@ -388,6 +388,7 @@ class BaseHandler(Component):
         except Exception as exc:
             self.response['broken_exc'] = exc
         finally:
+            self.crawler.proxy_lock = None
             self.handler_run(HANDLER_FUN_POSTCRAWL, {"save": save})
 
     def _get_request(self, save):
