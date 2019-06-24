@@ -35,7 +35,7 @@ class GeneralHandler(BaseHandler):
                     raise CDSpiderDBDataNotFound("SpiderTask: %s not exists" % self.task['uuid'])
                 self.task.update(task)
             rule = self.match_rule({})
-            return rule.get("scripts", None)
+            return rule.get("script", None)
         except CDSpiderError:
             return None
 
