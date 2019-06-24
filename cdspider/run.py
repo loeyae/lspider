@@ -52,7 +52,6 @@ def cli(ctx, **kwargs):
         os.makedirs(kwargs['runtime_dir'])
     if not os.path.isfile(kwargs['app_config']):
         kwargs['app_config'] = os.path.join(sys_path, kwargs['app_config'])
-    print(os.path.abspath(kwargs['runtime_dir']))
     if os.path.isfile(kwargs['app_config']):
         app_config = utils.load_config(kwargs['app_config'])
     else:
