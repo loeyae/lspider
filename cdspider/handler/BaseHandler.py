@@ -659,7 +659,7 @@ class BaseHandler(Component):
         # if isinstance(broken_exc, (CDSpiderCrawlerForbidden,)):
         if isinstance(self.crawler, RequestsCrawler):
             self.info('Change crawler to Tornado')
-            self.crawler.close()
+            self.crawler  = None
             self.crawler = utils.load_crawler('tornado', log_level=self.log_level)
         else:
             self.force_proxy = True
