@@ -68,6 +68,7 @@ class GeneralItemHandler(BaseHandler):
                 if not u:
                     raise CDSpiderNotUrlMatched()
         self.process = self.match_rule()
+        self.debug("%s matched detail rule: %s" % (self.__class__.__name__, self.process.get("uuid", 0)))
         if 'paging' in self.process and self.process['paging']:
             self.process['paging']['url'] = 'base_url'
 
