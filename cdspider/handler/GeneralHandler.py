@@ -23,17 +23,6 @@ class GeneralHandler(BaseHandler):
     general handler
     """
 
-    def route(self, handler_driver_name, frequency, save):
-        """
-        route
-        :param handler_driver_name:
-        :param frequency:
-        :param save:
-        :return:
-        """
-        yield None
-
-
     def get_scripts(self):
         """
         获取列表规则中的自定义脚本
@@ -109,7 +98,7 @@ class GeneralHandler(BaseHandler):
                 inserted, unid = self.db['UniqueDB'].insert(self.get_unique_setting(item['url'], {}), ctime)
                 self.debug("%s on_result unique: %s @ %s" % (self.__class__.__name__, str(inserted), str(unid)))
             if inserted:
-                mode_list = self.extension("mode_handle", {"save": save, "url": result['url']})
+                mode_list = self.extension("mode_handle", {"save": save, "url": item['url']})
                 mode = HANDLER_MODE_DEFAULT_ITEM
                 if mode_list:
                     for i in mode_list:

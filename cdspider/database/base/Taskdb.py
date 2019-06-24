@@ -12,22 +12,14 @@ from . import Base
 {
     'task': {
         'uuid' : int,                         # '自增id',
+        'pid' : int,                          # '项目ID',
         'sid'  : int,                         # '站点ID',
-        'type' : int,                         # '任务类别 int',
-        'name' : int,                         # '任务名称 | 唯一,MAX50',
-        'rule' : {
-                # 列表类
-                'filtration' : int,           # '是否过滤(1:过滤,0:不过滤)',
-                'url' : list,                 # url
-                #接口类
-                'url' : str,                  # 基础url
-                'word' : str,                 # '搜索词',
-                #发表人类
-                'authorId' : str,             # '作者ID',
-                'account' :  str,             # '账号',
-        },
-        'addAuthor' : int,                    # '添加人ID',
-        'updated_at' : int,                   # '更新时间',
+        'type' : str,                         # '任务类别 int',
+        'frequency' : str,                    # '更新频率'
+        'name' : str,                         # '任务名称 | 唯一,MAX50',
+        'desc' : str,                         # '任务描述'
+        'ctime' : int,                        # '添加时间',
+        'utime' : int,                        # '更新时间',
         'status' : int,                       # '状态(1:正常,0:冻结,-1:删除)',
     }
 }

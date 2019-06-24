@@ -139,8 +139,8 @@ class BaseHandler(Component):
         offset = cm.get('offset')
         count = cm.get('count')
         total = cm.get('total')
-        # self.error("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, frequency, now, total,
-        # offset, count))
+        self.error("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, frequency, now, total,
+        offset, count))
         cm.value(count)
         while count > 0 and offset < total:
             yield {"offset": offset, "count": self.ROUTE_LIMIT if count > self.ROUTE_LIMIT else count}
@@ -233,41 +233,7 @@ class BaseHandler(Component):
         :param message: 消息
         :return:
         """
-        mode = message['mode']
-        status = message['status']
-        if status == BaseDB.STATUS_DELETED:
-            if "uid" in message and message['uid']:
-                self.db['SpiderTaskDB'].delete_by_url(message['uid'], mode)
-            elif "tid" in message and message['tid']:
-                self.db['SpiderTaskDB'].delete_by_tid(message['tid'], mode)
-            elif "sid" in message and message['sid']:
-                self.db['SpiderTaskDB'].delete_by_sid(message['sid'], mode)
-            elif "pid" in message and message['pid']:
-                self.db['SpiderTaskDB'].delete_by_pid(message['pid'], mode)
-            elif "kid" in message and message['kid']:
-                self.db['SpiderTaskDB'].delete_by_kid(message['kid'], mode)
-        elif status == BaseDB.STATUS_ACTIVE:
-            if "uid" in message and message['uid']:
-                self.db['SpiderTaskDB'].active_by_url(message['uid'], mode)
-            elif "tid" in message and message['tid']:
-                self.db['SpiderTaskDB'].active_by_tid(message['tid'], mode)
-            elif "sid" in message and message['sid']:
-                self.db['SpiderTaskDB'].active_by_sid(message['sid'], mode)
-            elif "pid" in message and message['pid']:
-                self.db['SpiderTaskDB'].active_by_pid(message['pid'], mode)
-            elif "kid" in message and message['kid']:
-                self.db['SpiderTaskDB'].active_by_kid(message['kid'], mode)
-        elif status == BaseDB.STATUS_INIT:
-            if "uid" in message and message['uid']:
-                self.db['SpiderTaskDB'].disable_by_url(message['uid'], mode)
-            elif "tid" in message and message['tid']:
-                self.db['SpiderTaskDB'].disable_by_tid(message['tid'], mode)
-            elif "sid" in message and message['sid']:
-                self.db['SpiderTaskDB'].disable_by_sid(message['sid'], mode)
-            elif "pid" in message and message['pid']:
-                self.db['SpiderTaskDB'].disable_by_pid(message['pid'], mode)
-            elif "kid" in message and message['kid']:
-                self.db['SpiderTaskDB'].disable_by_kid(message['kid'], mode)
+        self.queue[QUEUE_NAME_STATUS].put_nowait(message);
 
     def get_scripts(self):
         """
@@ -358,13 +324,13 @@ class BaseHandler(Component):
             self.debug("%s other request parameters: %s" % (self.__class__.__name__, save['request']))
             if save['request']:
                 request = HandlerUtils.update_request(request, save['request'])
-        if 'paging' in save and save['paging']:
-            rule = self.process.get("paging")
-            self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
-            rule = HandlerUtils.format_paging(copy.deepcopy(rule))
-            self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
-            if rule:
-                request = HandlerUtils.update_request(request, rule)
+
+        rule = self.process.get("paging")
+        self.debug("%s paging rule: %s" % (self.__class__.__name__, rule))
+        rule = HandlerUtils.format_paging(copy.deepcopy(rule))
+        self.debug("%s formated paging rule: %s" % (self.__class__.__name__, rule))
+        if rule:
+            request = HandlerUtils.update_request(request, rule)
         builder = UrlBuilder(CustomParser, self.logger, self.log_level)
         self.request_params = builder.build(request, self.response['content'] or DEFAULT_SOURCE,
                                             self.response.get('cookies', {}), save)

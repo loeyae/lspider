@@ -23,6 +23,7 @@ class BaseScheduler(Component):
         self.testing_mode = g.get('testing_mode', False)
         self.db = g.get('db')
         self.queue = g.get('queue')
+        self.pcker = g.get('pcker', True)
         self.ioloop = tornado.ioloop.IOLoop()
         log_level = logging.WARN
         if g.get("debug", False):
@@ -83,8 +84,11 @@ class BaseScheduler(Component):
                 self.flush()
                 gc.collect()
                 if self.t > 50:
-                    self.info("%s broken" % self.__class__.__name__)
-                    raise SystemExit
+                    if self.pcker:
+                        self.info("%s broken" % self.__class__.__name__)
+                        raise SystemExit
+                    else:
+                        self.t = 0
 
         tornado.ioloop.PeriodicCallback(queue_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True

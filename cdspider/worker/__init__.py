@@ -23,6 +23,7 @@ class BaseWorker(Component):
         self.ctx = context
         self.g = context.obj
         self.db = self.g['db']
+        self.pcker = self.g.get('pcker', True)
         self.queue = self.g['queue']
         self._quit = False
         self.t = 0
@@ -96,8 +97,11 @@ class BaseWorker(Component):
                 self.flush()
                 gc.collect()
                 if self.t > 20:
-                    self.info("%s broken" % self.__class__.__name__)
-                    raise SystemExit
+                    if self.pcker:
+                        self.info("%s broken" % self.__class__.__name__)
+                        raise SystemExit
+                    else:
+                        self.t = 0
 
         tornado.ioloop.PeriodicCallback(queue_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True

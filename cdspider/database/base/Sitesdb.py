@@ -41,8 +41,8 @@ from . import Base
                         'Host' : str,       # 'Host',
                     },
         },
-        'addAuthor' : int,     # '添加人ID',
-        'updated_at' : int,    # '更新时间',
+        'ctime' : int,         # '创建时间',
+        'utime' : int,         # '更新时间',
         'status' : int,        # '状态(1:正常,0:冻结,-1:删除)',
     }
 }

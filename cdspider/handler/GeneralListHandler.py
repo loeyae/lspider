@@ -31,7 +31,7 @@ class GeneralListHandler(GeneralHandler):
         uid = message['uid']
         if not isinstance(uid, (list, tuple)):
             uid = [uid]
-        rules = []
+        rules = {}
         for each in uid:
             tasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
             if len(list(tasks)) > 0:

@@ -42,6 +42,7 @@ class Spider(Component):
         self.queue = queue
         self.no_sync = no_sync
         self.sdebug = g.get('sdebug', False)
+        self.pcker = g.get('pcker', True)
         self.ioloop = tornado.ioloop.IOLoop()
         self.set_handler(handler)
 
@@ -196,8 +197,11 @@ class Spider(Component):
                 self.flush()
                 gc.collect()
                 if self.t > 10:
-                    self.info("%s broken" % self.__class__.__name__)
-                    raise SystemExit
+                    if self.pcker:
+                        self.info("%s broken" % self.__class__.__name__)
+                        raise SystemExit
+                    else:
+                        self.t = 0
 
         tornado.ioloop.PeriodicCallback(queue_loop, self.interval, io_loop=self.ioloop).start()
         self._running = True

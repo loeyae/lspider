@@ -36,10 +36,12 @@ cpath = os.path.dirname(os.path.abspath(__file__))
 @click.option('--add-sys-path/--not-add-sys-path', default=False, is_flag=True,
               help='增加当前文件夹路径到系统路径', show_default=True)
 @click.option('--testing-mode', default=False, is_flag=True, help='debug mode', show_default=True)
+@click.option('--pcker', default=True, is_flag=True, help='debug mode', show_default=True)
 @click.pass_context
 def cli(ctx, **kwargs):
+    sys_path = os.path.abspath(os.path.join(os.getcwd(), '..'))
     if kwargs['add_sys_path']:
-        sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
+        sys.path.append(sys_path)
     logging.config.fileConfig(kwargs['logging_config'])
     kwargs['logger'] = logging.getLogger("root")
     if kwargs['debug']:
@@ -48,8 +50,13 @@ def cli(ctx, **kwargs):
         kwargs['runtime_dir'] = os.path.join(cpath, 'runtime')
     if not os.path.exists(kwargs['runtime_dir']):
         os.makedirs(kwargs['runtime_dir'])
-
-    app_config = utils.load_config(kwargs['app_config'])
+    if not os.path.isfile(kwargs['app_config']):
+        kwargs['app_config'] = os.path.join(sys_path, kwargs['app_config'])
+    print(os.path.abspath(kwargs['runtime_dir']))
+    if os.path.isfile(kwargs['app_config']):
+        app_config = utils.load_config(kwargs['app_config'])
+    else:
+        app_config = {}
 
     db_setting = kwargs.get('database')
     db_object = {}

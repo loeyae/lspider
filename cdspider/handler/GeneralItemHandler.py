@@ -118,7 +118,7 @@ class GeneralItemHandler(BaseHandler):
                         u = utils.preg(url, item['urlPattern'])
                         if u:
                             return item
-            else:
+            if not parse_rule:
                 '''
                 获取域名对应的规则
                 '''
@@ -186,7 +186,6 @@ class GeneralItemHandler(BaseHandler):
             pubtime = now
         r = {
             "status": kwargs.get('status', ArticlesDB.STATUS_ACTIVE),
-            'url': kwargs['final_url'],
             'mediaType': self.process.get('mediaType', self.task.get('mediaType', MEDIA_TYPE_OTHER)),
             'title': item.get('title', None) or result.pop('title', None),              # 标题
             'author': result.pop('author', None) or item.get('author', None),      # 作者
@@ -195,6 +194,9 @@ class GeneralItemHandler(BaseHandler):
             'channel': result.pop('channel', None)  or item.get('channel', None),       # 频道信息
             'crawlinfo': kwargs.get('crawlinfo')
         }
+
+        if result:
+            r['detail'] = result
 
         if all((r['title'], r['author'], r['content'], r['pubtime'])):
             '''

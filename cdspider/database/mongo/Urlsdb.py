@@ -31,28 +31,10 @@ class UrlsDB(Mongo, BaseUrlsDB):
             collection.create_index('sid', name='sid')
         if 'tid' not in indexes:
             collection.create_index('tid', name='tid')
-        if 'typeChannel' not in indexes:
-            collection.create_index('typeChannel', name='typeChannel')
-        if 'typeList' not in indexes:
-            collection.create_index('typeList', name='typeList')
-        if 'typeDetail' not in indexes:
-            collection.create_index('typeDetail', name='typeDetail')
-        if 'typeOther' not in indexes:
-            collection.create_index('typeOther', name='typeOther')
-        if 'linkText' not in indexes:
-            collection.create_index('linkText', name='linkText')
         if 'url' not in indexes:
             collection.create_index([('url', pymongo.TEXT)], name='url')
-        if 'cluster' not in indexes:
-            collection.create_index('cluster', name='cluster')
-        if 'dataNum' not in indexes:
-            collection.create_index('dataNum', name='dataNum')
-        if 'addAuthor' not in indexes:
-            collection.create_index('addAuthor', name='addAuthor')
         if 'status' not in indexes:
             collection.create_index('status', name='status')
-        if 'ruleStatus' not in indexes:
-            collection.create_index('ruleStatus', name='ruleStatus')
 
     def insert(self, obj = {}):
         obj['uuid'] = self._get_increment(self.incr_key)
@@ -147,7 +129,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
         if not where:
             where = {}
         where = self._build_where(where)
-        _where = {'$and':[{"$or": [{"typeChannelList": UrlsDB.IS_TYPE_CHANNEL_LIST}, {"typeChannel": UrlsDB.IS_TYPE_CHANNEL}, {"typeList": UrlsDB.IS_TYPE_LIST}]}, {"uuid": {"$gt": id}}]}
+        _where = {'$and':[{"uuid": {"$gt": id}}]}
         for k, v in where.items():
             _where['$and'].extend([{k: v}])
         return self.find(where = _where, select=select, **kwargs)
@@ -157,7 +139,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
         if not where:
             where = {}
         where = self._build_where(where)
-        _where = {'$and':[{"$or": [{"typeChannelList": UrlsDB.IS_TYPE_CHANNEL_LIST}, {"typeChannel": UrlsDB.IS_TYPE_CHANNEL}, {"typeList": UrlsDB.IS_TYPE_LIST}]}, {"uuid": {"$gt": id}}, {"pid": pid}]}
+        _where = {'$and':[{"uuid": {"$gt": id}}, {"pid": pid}]}
         for k, v in where.items():
             _where['$and'].extend([{k: v}])
         return self.find(where = _where, select=select, **kwargs)

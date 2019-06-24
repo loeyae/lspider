@@ -42,18 +42,43 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)
         _id = super(ParseRuleDB, self).insert(setting=obj)
-        return obj['kwid']
+        return obj['uuid']
 
     def update(self, id, obj={}):
         obj['utime'] = int(time.time())
         return super(ParseRuleDB, self).update(setting=obj, where={"uuid": int(id)}, multi=False)
 
-    def delete(self, id, where={}):
+    def active(self, id, where = {}):
+        obj = {"utime": int(time.time()), "status": self.STATUS_ACTIVE}
         if not where:
             where = {'uuid': int(id)}
         else:
             where.update({'uuid': int(id)})
-        return super(ParseRuleDB, self).update(setting={"status": self.STATUS_DELETED}, where=where, multi=False)
+        return super(ParseRuleDB, self).update(setting=obj, where=where, multi=False)
+
+    def enable(self, id, where = {}):
+        obj = {"utime": int(time.time()), "status": self.STATUS_INIT}
+        if not where:
+            where = {'uuid': int(id)}
+        else:
+            where.update({'uuid': int(id)})
+        return super(ParseRuleDB, self).update(setting=obj, where=where, multi=False)
+
+    def disable(self, id, where = {}):
+        obj = {"utime": int(time.time()), "status": self.STATUS_DISABLE}
+        if not where:
+            where = {'uuid': int(id)}
+        else:
+            where.update({'uuid': int(id)})
+        return super(ParseRuleDB, self).update(setting=obj, where=where, multi=False)
+
+    def delete(self, id, where={}):
+        obj = {"utime": int(time.time()), "status": self.STATUS_DELETED}
+        if not where:
+            where = {'uuid': int(id)}
+        else:
+            where.update({'uuid': int(id)})
+        return super(ParseRuleDB, self).update(setting=obj, where=where, multi=False)
 
     def get_detail(self, id):
         return self.get(where={"uuid": int(id)})
@@ -66,17 +91,19 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
         where = {'subdomain': subdomain}
         return self.get(where=where)
 
-    def get_list(self, where={}, select=None):
-        return self.find(where=where, select=select)
+    def get_list(self, where={}, select=None, **kwargs):
+        return self.find(where=where, select=select, **kwargs)
 
-    def get_list_by_domain(self, domain, where={}, select = None):
+    def get_list_by_domain(self, domain, where={}, select=None, **kwargs):
         if not where:
             where={}
         where.update({'domain': domain, 'subdomain': {"$in": ["", None]}})
-        return self.find(where=where, select=select)
+        where.update({'status': self.STATUS_ACTIVE})
+        return self.find(where=where, select=select, **kwargs)
 
-    def get_list_by_subdomain(self, subdomain, where={}, select=None):
+    def get_list_by_subdomain(self, subdomain, where={}, select=None, **kwargs):
         if not where:
             where={}
         where.update({'subdomain': subdomain})
-        return self.find(where=where, select=select)
+        where.update({'status': self.STATUS_ACTIVE})
+        return self.find(where=where, select=select, **kwargs)

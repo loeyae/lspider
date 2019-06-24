@@ -14,8 +14,8 @@ from . import Base
         'uuid' : int,         # '自增id',
         'name' : str,         # '项目名称 | 唯一',
         'baseUrl' : str,      # '根域名 | 唯一',
-        'addAuthor' : int,    # '添加人ID',
-        'updated_at' : str,   # '更新时间',
+        'ctime' : int,        # '创建时间',
+        'utime' : str,        # '更新时间',
         'status' : int,       # '状态(1:正常,0:冻结,-1:删除)',
     }
 }

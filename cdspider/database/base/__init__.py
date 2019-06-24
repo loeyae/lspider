@@ -6,6 +6,7 @@ class Base(object):
 
     STATUS_INIT = 0
     STATUS_ACTIVE = 1
+    STATUS_DISABLE = 2
     STATUS_DELETED = -1
 
 from .Articlesdb import ArticlesDB

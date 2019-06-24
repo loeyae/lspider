@@ -85,6 +85,15 @@ class ParseRuleDB(Base):
     def update(self, id, obj = {}):
         raise NotImplementedError
 
+    def active(self, id, where = {}):
+        raise NotImplementedError
+
+    def enable(self, id, where = {}):
+        raise NotImplementedError
+
+    def disable(self, id, where = {}):
+        raise NotImplementedError
+
     def delete(self, id, where = {}):
         raise NotImplementedError
 

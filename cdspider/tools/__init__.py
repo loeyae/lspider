@@ -20,6 +20,7 @@ class Base(Component):
         self.g = self.ctx.obj
         super(Base, self).__init__(self.g['logger'], logging.DEBUG if self.g['debug'] else logging.WARN)
         self.daemon = daemon
+        self.pcker = self.g.get('pcker', True)
         self.ioloop = None
         self._quit = False
         self._running = False
@@ -47,8 +48,11 @@ class Base(Component):
                 self.process(*args, **kwargs)
                 self.t += 1
                 if self.t > 20:
-                    self.info("%s broken" % self.__class__.__name__)
-                    raise SystemExit
+                    if self.pcker:
+                        self.info("%s broken" % self.__class__.__name__)
+                        raise SystemExit
+                    else:
+                        self.t = 0
                 time.sleep(0.1)
             except KeyboardInterrupt:
                 pass

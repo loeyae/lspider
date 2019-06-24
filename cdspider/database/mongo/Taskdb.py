@@ -17,6 +17,8 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
 
     __tablename__ = 'task'
 
+    incr_key = 'task'
+
     def __init__(self, connector, table=None, **kwargs):
         super(TaskDB, self).__init__(connector, table = table, **kwargs)
         collection = self._db.get_collection(self.table)
@@ -31,8 +33,7 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             collection.create_index('status', name='status')
 
     def insert(self, obj):
-        table = self._table_name(obj['pid'])
-        obj['uuid'] = self._get_increment(table)
+        obj['uuid'] = self._get_increment(self.incr_key)
         obj.setdefault('status', self.STATUS_INIT)
         obj.setdefault('ctime', int(time.time()))
         obj.setdefault('utime', 0)

@@ -25,6 +25,7 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
 
     def insert(self, obj={}):
         obj.setdefault("ctime", int(time.time()))
+        obj.setdefault("status", self.STATUS_INIT)
         obj['uuid'] = self._get_increment(self.incr_key)
         super(ListRuleDB, self).insert(setting=obj)
         return obj['uuid']
@@ -32,6 +33,38 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
         return super(ListRuleDB, self).update(setting=obj, where={"uuid": id})
+
+    def active(self, id, where = {}):
+        obj = {"utime": int(time.time()), "status": self.STATUS_ACTIVE}
+        if not where:
+            where = {'uuid': int(id)}
+        else:
+            where.update({'uuid': int(id)})
+        return super(ListRuleDB, self).update(setting=obj, where=where, multi=False)
+
+    def enable(self, id, where = {}):
+        obj = {"utime": int(time.time()), "status": self.STATUS_INIT}
+        if not where:
+            where = {'uuid': int(id)}
+        else:
+            where.update({'uuid': int(id)})
+        return super(ListRuleDB, self).update(setting=obj, where=where, multi=False)
+
+    def disable(self, id, where = {}):
+        obj = {"utime": int(time.time()), "status": self.STATUS_DISABLE}
+        if not where:
+            where = {'uuid': int(id)}
+        else:
+            where.update({'uuid': int(id)})
+        return super(ListRuleDB, self).update(setting=obj, where=where, multi=False)
+
+    def delete(self, id, where={}):
+        obj = {"utime": int(time.time()), "status": self.STATUS_DELETED}
+        if not where:
+            where = {'uuid': int(id)}
+        else:
+            where.update({'uuid': int(id)})
+        return super(ListRuleDB, self).update(setting=obj, where=where, multi=False)
 
     def get_detail(self, id, select=None):
         return self.get(where={"uuid": id}, select=select)
