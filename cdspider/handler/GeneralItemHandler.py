@@ -44,6 +44,7 @@ class GeneralItemHandler(BaseHandler):
         """
         try:
             rule = self.match_rule()
+            self.debug("%s matched detail rule: %s" % (self.__class__.__name__, self.process.get("uuid", 0)))
             return rule.get("script", None)
         except CDSpiderError:
             return None
