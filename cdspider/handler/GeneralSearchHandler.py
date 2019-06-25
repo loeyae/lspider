@@ -29,43 +29,60 @@ class GeneralSearchHandler(GeneralHandler):
             data参数为 {"save": save,"url": url}
     """
 
+    def new_search_task(self, urls, keyword):
+        t = {
+            'mode': self.mode,     # handler mode
+            'pid': urls['pid'],          # project uuid
+            'sid': urls['sid'],          # site uuid
+            'tid': urls['tid'],          # task uuid
+            'uid': urls['uuid'],         # url uuid
+            'kid': keyword['uuid'],      # keyword id
+            'url': 'base_url',           # url
+            'frequency': str(urls.get('frequency', self.DEFAULT_FREQUENCY)),
+            'status': SpiderTaskDB.STATUS_ACTIVE
+        }
+        self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
+        if not self.testing_mode:
+            '''
+            testing_mode打开时，数据不入库
+            '''
+            self.db['SpiderTaskDB'].insert(t)
+
+    def new_search_task_by_tid(self, tid, keyword):
+        uuid = 0
+        while True:
+            has_item = False
+            for urls in self.db['UrlsDB'].get_new_list(uuid, where={"tid": tid}):
+                tasks = self.db['SpiderTaskDB'].get_list(self.mode, {"tid": tid, "kid": keyword['uuid']})
+                has_item = True
+                uuid = urls['uuid']
+                if len(list(tasks)) > 0:
+                    continue
+                self.new_search_task(urls, keyword)
+            if has_item is False:
+                return
+
     def newtask(self, message):
         """
         新建爬虫任务
         :param message: [{"tid": task id, "kid": keyword uuid, "mode": handler mode}]
         """
-        if 'tid' in message and message['tid']:
-            tid = message['tid']
-            if not isinstance(tid, (list, tuple)):
-                tid = [tid]
-            for each in tid:
-                tasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"tid": each})
+        if 'uid' in message and message['uid']:
+            uid = message['uid']
+            if not isinstance(uid, (list, tuple)):
+                uid = [uid]
+            for each in uid:
+                tasks = self.db['SpiderTaskDB'].get_list(message['mode'], {"uid": each})
                 if len(list(tasks)) > 0:
                     continue
-                task = self.db['TaskDB'].get_detail(each)
-                if not task:
+                urls = self.db['UrlsDB'].get_detail(each)
+                if not urls:
                     raise CDSpiderDBDataNotFound("task: %s not found" % each)
                 uuid = 0
                 while True:
                     has_word = False
                     for item in self.db['KeywordsDB'].get_new_list(uuid, select=['uuid']):
-                        t = {
-                            'mode': message['mode'],     # handler mode
-                            'pid': task['pid'],          # project uuid
-                            'sid': task['sid'],          # site uuid
-                            'tid': each,                 # task uuid
-                            'uid': 0,                    # url uuid
-                            'kid': item['uuid'],         # keyword id
-                            'url': 'base_url',           # url
-                            'frequency': str(task.get('frequency', self.DEFAULT_FREQUENCY)),
-                            'status': SpiderTaskDB.STATUS_ACTIVE
-                        }
-                        self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
-                        if not self.testing_mode:
-                            '''
-                            testing_mode打开时，数据不入库
-                            '''
-                            self.db['SpiderTaskDB'].insert(t)
+                        self.new_search_task_by_tid(urls, item)
                         uuid = item['uuid']
                         has_word = True
                     if not has_word:
@@ -80,34 +97,13 @@ class GeneralSearchHandler(GeneralHandler):
                     raise CDSpiderDBDataNotFound("word: %s not found" % each)
                 uuid = 0
                 while True:
-                    has_word = False
+                    has_task = False
                     for item in self.db['TaskDB'].get_new_list(
-                            uuid, where={"type": TASK_TYPE_SEARCH},
-                            select=['uuid', 'pid', 'sid', 'mediaType', 'searchType']):
-                        mode = HANDLER_MODE_DEFAULT_SEARCH
-                        tasks = self.db['SpiderTaskDB'].get_list(mode, {"tid": item['uuid'], "kid": each})
-                        if len(list(tasks)) > 0:
-                            continue
-                        t = {
-                            'mode': mode,     # handler mode
-                            'pid': item['pid'],          # project uuid
-                            'sid': item['sid'],          # site uuid
-                            'tid': item['uuid'],         # task uuid
-                            'uid': 0,                    # url uuid
-                            'kid': each,                 # keyword id
-                            'frequency': str(item.get('frequency', self.DEFAULT_FREQUENCY)),
-                            'url': 'base_url',           # url
-                            'status': SpiderTaskDB.STATUS_ACTIVE
-                        }
-                        self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
-                        if not self.testing_mode:
-                            '''
-                            testing_mode打开时，数据不入库
-                            '''
-                            self.db['SpiderTaskDB'].insert(t)
+                            uuid, where={"type": self.mode}, select=['uuid', 'pid', 'sid']):
+                        has_task = True
+                        self.new_search_task_by_tid(item['uuid'], word)
                         uuid = item['uuid']
-                        has_word = True
-                    if not has_word:
+                    if not has_task:
                         break
 
     def match_rule(self, save):
@@ -123,6 +119,9 @@ class GeneralSearchHandler(GeneralHandler):
             keyword = copy.deepcopy(self.task['keyword'])
             if not keyword:
                 raise CDSpiderError("keyword not exists")
+            urls = copy.deepcopy(self.task['urls'])
+            if not urls:
+                raise CDSpiderError("urls not exists")
         else:
             keyword = self.db['KeywordsDB'].get_detail(self.task['kid'])
             if not keyword:
@@ -131,7 +130,8 @@ class GeneralSearchHandler(GeneralHandler):
             if keyword['status'] != KeywordsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderHandlerError("keyword: %s not active" % self.task['kid'])
-            rule = self.db['ListRuleDB'].get_detail_by_tid(self.task['tid'])
+            urls = self.db['UrlsDB'].get_detail(self.task['uid'])
+            rule = self.db['ListRuleDB'].get_detail_by_tid(urls['ruleId'])
             if not rule:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderDBDataNotFound("task rule by tid: %s not exists" % self.task['tid'])
@@ -151,7 +151,7 @@ class GeneralSearchHandler(GeneralHandler):
         now = int(time.time())
         params = {"lastmonth": now - 30 * 86400, "lastweek": now - 7 * 86400,
                   "yesterday": now - 86400, "lasthour": now - 36000, "now": now}
-        self.task['url'] = utils.build_url_by_rule({"base": rule['baseUrl'], "mode": "format"}, params)
+        self.task['url'] = utils.build_url_by_rule({"base": urls['url'], "mode": "format"}, params)
         save['base_url'] = self.task['url']
         save['paging'] = True
         return rule
