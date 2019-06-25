@@ -90,7 +90,7 @@
 
 > ;work
 > [program:cdspider_work_test]
-> command=/usr/local/bin/cdspider -c config/main.server.json work --work-cls cdspider.worker.TestWorker
+> command=/usr/local/bin/cdspider -c config/main.server.json work --worker-cls cdspider.worker.TestWorker
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
 > directory=${rootpath}
