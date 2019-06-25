@@ -35,6 +35,12 @@ class TaskDB(Base):
     def disable(self, id, where):
         raise NotImplementedError
 
+    def disable_by_site(self, sid, where = {}):
+        raise NotImplementedError
+
+    def disable_by_project(self, pid, where = {}):
+        raise NotImplementedError
+
     def active(self, id, where):
         raise NotImplementedError
 
@@ -45,6 +51,12 @@ class TaskDB(Base):
         raise NotImplementedError
 
     def delete(self, id, where):
+        raise NotImplementedError
+
+    def delete_by_site(self, sid, where = {}):
+        raise NotImplementedError
+
+    def delete_by_project(self, pid, where = {}):
         raise NotImplementedError
 
     def get_detail(self, id, select=None):

@@ -63,6 +63,15 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where.update({'uuid': int(id)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
+    def delete_by_task(self, tid, where = {}):
+        obj = {"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {"tid": int(tid)}
+        else:
+            where.update({"tid": int(tid)})
+        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
+
     def delete_by_site(self, sid, where = {}):
         obj = {"status": self.STATUS_DELETED}
         obj['utime'] = int(time.time())
@@ -100,7 +109,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
     def disable(self, id, where = {}):
-        obj = {"status": self.STATUS_INIT}
+        obj = {"status": self.STATUS_DISABLE}
         obj['utime'] = int(time.time())
         if not where:
             where = {'uuid': int(id)}
@@ -108,8 +117,17 @@ class UrlsDB(Mongo, BaseUrlsDB):
             where.update({'uuid': int(id)})
         return super(UrlsDB, self).update(setting=obj, where=where, multi=False)
 
+    def disable_by_task(self, tid, where = {}):
+        obj = {"status": self.STATUS_DISABLE}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {"tid": int(tid)}
+        else:
+            where.update({"sid": int(tid)})
+        return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
+
     def disable_by_site(self, sid, where = {}):
-        obj = {"status": self.STATUS_INIT}
+        obj = {"status": self.STATUS_DISABLE}
         obj['utime'] = int(time.time())
         if not where:
             where = {"sid": int(sid)}
@@ -118,7 +136,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
         return super(UrlsDB, self).update(setting=obj, where=where, multi=True)
 
     def disable_by_project(self, pid, where = {}):
-        obj = {"status": self.STATUS_INIT}
+        obj = {"status": self.STATUS_DISABLE}
         obj['utime'] = int(time.time())
         if not where:
             where = {'pid': int(pid)}

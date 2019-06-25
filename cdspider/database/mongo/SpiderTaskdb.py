@@ -113,7 +113,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({"kid": int(kid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
-    def disable_by_url(self, uid, mode, where={}):
+    def disable_by_uid(self, uid, mode, where={}):
         table = self._table_name(mode)
         obj = dict({"status": self.STATUS_INIT})
         obj['utime'] = int(time.time())
@@ -189,7 +189,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({"kid": int(kid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
-    def active_by_url(self, uid, mode, where={}):
+    def active_by_uid(self, uid, mode, where={}):
         table = self._table_name(mode)
         obj = dict({"status": self.STATUS_ACTIVE})
         obj['utime'] = int(time.time())
@@ -274,7 +274,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({"kid": int(kid)})
         return super(SpiderTaskDB, self).update(setting=obj, where=where, table=table, multi=True)
 
-    def delete_by_url(self, uid, mode, where={}):
+    def delete_by_uid(self, uid, mode, where={}):
         table = self._table_name(mode)
         obj = dict({"status": self.STATUS_DELETED})
         obj['utime'] = int(time.time())

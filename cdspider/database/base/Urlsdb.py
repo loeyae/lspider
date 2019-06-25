@@ -61,6 +61,9 @@ class UrlsDB(Base):
     def delete(self, id, where):
         raise NotImplementedError
 
+    def delete_by_task(self, tid, where = {}):
+        raise NotImplementedError
+
     def delete_by_site(self, sid, where):
         raise NotImplementedError
 
@@ -74,6 +77,9 @@ class UrlsDB(Base):
         raise NotImplementedError
 
     def disable(self, id, where):
+        raise NotImplementedError
+
+    def disable_by_task(self, tid, where = {}):
         raise NotImplementedError
 
     def disable_by_site(self, sid, where):

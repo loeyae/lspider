@@ -54,7 +54,7 @@ class SpiderTaskDB(Base):
     def disable_by_kid(self, kid, mode, where):
         raise NotImplementedError
 
-    def disable_by_url(self, uid, mode, where):
+    def disable_by_uid(self, uid, mode, where):
         raise NotImplementedError
 
     def active(self, id, mode, where):
@@ -72,7 +72,7 @@ class SpiderTaskDB(Base):
     def active_by_kid(self, kid, mode, where):
         raise NotImplementedError
 
-    def active_by_url(self, uid, mode, where):
+    def active_by_uid(self, uid, mode, where):
         raise NotImplementedError
 
     def update(self, id, mode, obj={}):
@@ -99,7 +99,7 @@ class SpiderTaskDB(Base):
     def delete_by_kid(self, kid, mode, where):
         raise NotImplementedError
 
-    def delete_by_url(self, uid, mode, where):
+    def delete_by_uid(self, uid, mode, where):
         raise NotImplementedError
 
     def get_detail(self, id, mode, select=None):

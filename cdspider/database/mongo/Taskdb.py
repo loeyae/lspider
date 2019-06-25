@@ -60,6 +60,24 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
             where.update({'uuid':int(id)})
         return super(TaskDB, self).update(setting=obj, where=where, multi=False)
 
+    def disable_by_site(self, sid, where = {}):
+        obj = {"status": self.STATUS_DISABLE}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {"sid": int(sid)}
+        else:
+            where.update({"sid": int(sid)})
+        return super(TaskDB, self).update(setting=obj, where=where, multi=True)
+
+    def disable_by_project(self, pid, where = {}):
+        obj = {"status": self.STATUS_DISABLE}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {'pid': int(pid)}
+        else:
+            where.update({'pid': int(pid)})
+        return super(TaskDB, self).update(setting=obj, where=where, multi=True)
+
     def active(self, id, where={}):
         obj={"status": self.STATUS_ACTIVE}
         obj['utime'] = int(time.time())
@@ -78,6 +96,24 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         else:
             where.update({'uuid':int(id)})
         return super(TaskDB, self).update(setting=obj, where=where, multi=False)
+
+    def delete_by_site(self, sid, where = {}):
+        obj = {"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {"sid": int(sid)}
+        else:
+            where.update({"sid": int(sid)})
+        return super(TaskDB, self).update(setting=obj, where=where, multi=True)
+
+    def delete_by_project(self, pid, where = {}):
+        obj = {"status": self.STATUS_DELETED}
+        obj['utime'] = int(time.time())
+        if not where:
+            where = {'pid': int(pid)}
+        else:
+            where.update({'pid': int(pid)})
+        return super(TaskDB, self).update(setting=obj, where=where, multi=True)
 
     def get_detail(self, id, select=None):
         return self.get(where={'uuid': int(id)}, select=select)
