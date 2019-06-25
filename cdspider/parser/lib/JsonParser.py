@@ -133,6 +133,9 @@ class JsonParser(BaseParser):
                         if onlyOne:
                             return rst
                 return rst
+            else:
+                rest = self._item_filter(data, rule, onlyOne, noLeaf=True)
+                return rest
         else:
             ruleset = rule['item']['url'] if 'url' in rule['item'] else list(rule['item'].values())[0]
             if 'filter' in ruleset and ruleset['filter'] and ruleset['filter'].startswith('@css:'):
