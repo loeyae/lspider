@@ -186,7 +186,7 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
 @cli.command()
-@click.option('--worker-cls', default='cdspider.worker.TestWorker', callback=load_cls, help='worker name')
+@click.option('--worker-cls', default='cdspider.worker.TestWorker', callback=load_cls, help='worker class name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def work(ctx, worker_cls, no_loop,  get_object=False):
@@ -205,16 +205,15 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
         worker.run()
 
 @cli.command()
-@click.option('-n', '--name', default="test_tool", help='tool名')
+@click.option('--tool-cls', default="cdspider.tools.test_tool.test_tool", callback=load_cls, help='tool class name')
 @click.option('-a', '--arg', multiple=True, help='tool参数')
 @click.option('--daemon', default=False, is_flag=True, help='是否作为守护进程', show_default=True)
 @click.pass_context
-def tool(ctx, name, arg, daemon):
+def tool(ctx, tool_cls, arg, daemon):
     """
     工具
     """
-    cls_name = 'cdspider.tools.%s.%s' % (name, name)
-    cls = load_cls(ctx, None, cls_name)
+    cls = load_cls(ctx, None, tool_cls)
     c = cls(ctx, daemon)
     if daemon:
         c.run(*arg)
