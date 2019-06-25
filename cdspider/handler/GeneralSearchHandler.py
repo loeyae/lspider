@@ -131,7 +131,7 @@ class GeneralSearchHandler(GeneralHandler):
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderHandlerError("keyword: %s not active" % self.task['kid'])
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
-            rule = self.db['ListRuleDB'].get_detail_by_tid(urls['ruleId'])
+            rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
             if not rule:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderDBDataNotFound("task rule by tid: %s not exists" % self.task['tid'])
