@@ -34,61 +34,78 @@
 >
 > ;route
 > [program:cdspider_route]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json route
+> command=/usr/local/bin/cdspider -c config/main.server.json route
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
+> directory=${rootpath}
+> umask=022
+> priority=999
+> autostart=true
+> autorestart=true
 
-> ;newtask_schedule
-> [program:cdspider_newtask_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json newtask-schedule
+> ;schedule_rpc
+> [program:cdspider_schedule]
+> command=/usr/local/bin/cdspider -c config/main.server.json schedule-rpc
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
+> directory=${rootpath}
+> umask=022
+> priority=999
+> autostart=true
+> autorestart=true
 
-> ;plantask_schedule
-> [program:cdspider_plantask_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json plantask-schedule
-> process_name=%(program_name)s_%(process_num)02d
-> numprocs=1
 
-> ;synctask_schedule
-> [program:cdspider_synctask_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json synctask-schedule
+> ;schedule
+> [program:cdspider_schedule]
+> command=/usr/local/bin/cdspider -c config/main.server.json schedule
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
-
-> ;status_schedule
-> [program:cdspider_status_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json status-schedule
-> process_name=%(program_name)s_%(process_num)02d
-> numprocs=1
-
-> ;search_work
-> [program:cdspider_search_schedule]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json search-schedule
-> process_name=%(program_name)s_%(process_num)02d
-> numprocs=1
+> directory=${rootpath}
+> umask=022
+> priority=999
+> autostart=true
+> autorestart=true
 
 > ;fetch
 > [program:cdspider_fetch]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json fetch
+> command=/usr/local/bin/cdspider -c config/main.server.json fetch
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
+> directory=${rootpath}
+> umask=022
+> priority=999
+> autostart=true
+> autorestart=true
 
 > ;spider_rpc
 > [program:cdspider_spider_rpc]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json spider-rpc
+> command=/usr/local/bin/cdspider -c config/main.server.json spider-rpc
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
+> directory=${rootpath}
+> umask=022
+> priority=999
+> autostart=true
+> autorestart=true
 
-> ;exc_work
-> [program:cdspider_exc_work]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json exc-work
+> ;work
+> [program:cdspider_work_test]
+> command=/usr/local/bin/cdspider -c config/main.server.json work --work-cls cdspider.worker.TestWorker
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
+> directory=${rootpath}
+> umask=022
+> priority=999
+> autostart=true
+> autorestart=true
 
-> ;sync_kafka_work
-> ;同步数据到kafka，此为与大数据平台对接的出口，如不需要，可不开启
-> [program:cdspider_sync_kafka_work]
-> command=/usr/local/bin/cdspider -c ${rootpath}/config/main.server.json sync-kafka-work
+> ;tool
+> [program:cdspider_work_test]
+> command=/usr/local/bin/cdspider -c config/main.server.json tool --tool-cls cdspider.tool.test_tool.test_tool
 > process_name=%(program_name)s_%(process_num)02d
 > numprocs=1
+> directory=${rootpath}
+> umask=022
+> priority=999
+> autostart=true
+> autorestart=true
