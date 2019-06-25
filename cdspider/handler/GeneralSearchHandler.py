@@ -145,7 +145,7 @@ class GeneralSearchHandler(GeneralHandler):
             "hard_code": [{
                 "mode": mode,
                 "name": kset.pop('key', 'keyword'),
-                "value": quote_plus(keyword['name']) if mode != 'post' else keyword['name'],
+                "value": quote_plus(keyword['word']) if mode != 'post' else keyword['word'],
             }],
         }
         now = int(time.time())
