@@ -100,7 +100,7 @@ class Spider(Component):
                         last_source_unid = unid
                         last_url = handler.response['url']
                         if self.sdebug:
-                            self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["last_source"]))
+                            self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["source"]))
                         else:
                             self.info("Spider crawl end")
                         self.info("Spider parse start")
