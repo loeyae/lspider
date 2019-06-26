@@ -41,7 +41,7 @@ class GeneralSearchHandler(GeneralHandler):
             'frequency': str(urls.get('frequency', self.DEFAULT_FREQUENCY)),
             'status': SpiderTaskDB.STATUS_ACTIVE
         }
-        self.debug("%s newtask: %s" % (self.__class__.__name__, str(t)))
+        self.debug("%s newtask new task: %s" % (self.__class__.__name__, str(t)))
         if not self.testing_mode:
             '''
             testing_mode打开时，数据不入库
@@ -67,6 +67,7 @@ class GeneralSearchHandler(GeneralHandler):
         新建爬虫任务
         :param message: [{"tid": task id, "kid": keyword uuid, "mode": handler mode}]
         """
+        self.debug("%s newtask got message: %s" % (self.__class__.__name__, str(message)))
         if 'uid' in message and message['uid']:
             uid = message['uid']
             if not isinstance(uid, (list, tuple)):
@@ -77,12 +78,12 @@ class GeneralSearchHandler(GeneralHandler):
                     continue
                 urls = self.db['UrlsDB'].get_detail(each)
                 if not urls:
-                    raise CDSpiderDBDataNotFound("task: %s not found" % each)
+                    raise CDSpiderDBDataNotFound("urls: %s not found" % each)
                 uuid = 0
                 while True:
                     has_word = False
                     for item in self.db['KeywordsDB'].get_new_list(uuid, select=['uuid']):
-                        self.new_search_task_by_tid(urls, item)
+                        self.new_search_task(urls, item)
                         uuid = item['uuid']
                         has_word = True
                     if not has_word:
