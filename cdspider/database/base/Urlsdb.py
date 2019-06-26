@@ -49,15 +49,6 @@ class UrlsDB(Base):
     def update_many(self, id, obj={}):
         raise NotImplementedError
 
-    def enable(self, id, where):
-        raise NotImplementedError
-
-    def enable_by_site(self, sid, where):
-        raise NotImplementedError
-
-    def enable_by_project(self, pid, where):
-        raise NotImplementedError
-
     def delete(self, id, where):
         raise NotImplementedError
 
