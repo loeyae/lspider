@@ -61,7 +61,7 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         return super(TaskDB, self).update(setting=obj, where=where, multi=False)
 
     def disable_by_site(self, sid, where = {}):
-        obj = {"status": self.STATUS_DISABLE}
+        obj = {"status": self.STATUS_INIT}
         obj['utime'] = int(time.time())
         if not where:
             where = {"sid": int(sid)}
@@ -70,7 +70,7 @@ class TaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         return super(TaskDB, self).update(setting=obj, where=where, multi=True)
 
     def disable_by_project(self, pid, where = {}):
-        obj = {"status": self.STATUS_DISABLE}
+        obj = {"status": self.STATUS_INIT}
         obj['utime'] = int(time.time())
         if not where:
             where = {'pid': int(pid)}
