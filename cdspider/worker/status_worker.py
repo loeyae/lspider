@@ -28,7 +28,8 @@ class StatusWorker(BaseWorker):
     def on_result(self, message):
         self.debug("got message: %s" % message)
         mode = message.get('mode', None)
-        message.pop("mode")
+        if mode:
+            message.pop("mode")
         status = message.pop("status")
         s = [item for item in message.items()]
         key, value = s[0]
