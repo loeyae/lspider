@@ -74,7 +74,9 @@ class GeneralListHandler(GeneralHandler):
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
             '''
-            rule = copy.deepcopy(self.task['rule'])
+            rule = self.db['ListRuleDB'].get_detail(int(self.task['rule']))
+            if not rule:
+                raise CDSpiderDBDataNotFound("rule: %s not exists" % self.task['rule'])
         else:
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
             if not urls:
