@@ -79,7 +79,10 @@ class GeneralItemHandler(BaseHandler):
         :return:
         """
         # 优先获取task中详情规则
-        parse_rule = self.task.get("rule", {})
+        if "rule" in self.task and self.task['rule']:
+            parse_rule = self.db['ParseRuleDB'].get_detail(int(self.task['rule']))
+            if not parse_rule:
+                raise CDSpiderDBDataNotFound("rule: %s not exists" % self.task['rule'])
         # 根据task中的rid获取文章信息
         rid = self.task.get('rid', None)
         if rid:
