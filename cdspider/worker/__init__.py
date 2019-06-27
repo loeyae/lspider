@@ -121,3 +121,4 @@ from .result_worker import ResultWorker
 from .exc_worker import ExcWorker
 from .test_worker import TestWorker
 from .status_worker import StatusWorker
+from .newtask_worker import NewtaskWorker
