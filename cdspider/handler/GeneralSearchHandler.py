@@ -112,11 +112,13 @@ class GeneralSearchHandler(GeneralHandler):
         获取匹配的规则
         :param save: 传递的上下文
         """
-        if "listRule" in self.task:
+        if "rule" in self.task and self.task['rule']:
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
             '''
-            rule = copy.deepcopy(self.task['rule'])
+            rule = self.db['ListRuleDB'].get_detail(int(self.task['rule']))
+            if not rule:
+                raise CDSpiderDBDataNotFound("rule: %s not exists" % self.task['rule'])
             keyword = copy.deepcopy(self.task['keyword'])
             if not keyword:
                 raise CDSpiderError("keyword not exists")
