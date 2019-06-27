@@ -91,12 +91,7 @@ class Router(BaseScheduler):
         self.info("%s route end, %s threads was run" % (self.__class__.__name__, len(threads)))
 
     def newtask(self, message):
-        name = message.get('mode', HANDLER_MODE_DEFAULT)
-
-        handler = load_handler(name, self.ctx, None)
-        self.info("Spider loaded handler: %s" % handler)
-        handler.newtask(message)
-        del handler
+        self.queue[QUEUE_NAME_NEWTASK].put_nowait(message)
 
     def status(self, message):
         name = message.get('mode', HANDLER_MODE_DEFAULT)
