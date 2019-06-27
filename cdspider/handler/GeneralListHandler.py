@@ -70,11 +70,11 @@ class GeneralListHandler(GeneralHandler):
         获取匹配的规则
         :param save: 传递的上下文
         """
-        if "listRule" in self.task and self.task['listRule']:
+        if "rule" in self.task and self.task['rule']:
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
             '''
-            rule = copy.deepcopy(self.task['listRule'])
+            rule = copy.deepcopy(self.task['rule'])
         else:
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
             if not urls:
@@ -83,6 +83,8 @@ class GeneralListHandler(GeneralHandler):
             if urls['status'] != UrlsDB.STATUS_ACTIVE or urls['ruleStatus'] != UrlsDB.STATUS_ACTIVE:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderHandlerError("url not active")
+            if 'jsonUrl' in urls and urls['jsonUrl']:
+                self.task['url'] = urls['jsonUrl']
             save['base_url'] = urls['url']
             self.task['urls'] = urls
             if 'ruleId' not in urls or not urls['ruleId']:
@@ -93,8 +95,6 @@ class GeneralListHandler(GeneralHandler):
                 raise CDSpiderDBDataNotFound("rule: %s not exists" % urls['ruleId'])
             if rule and rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("list rule not active")
-        if rule and 'jsonUrl' in rule and rule['jsonUrl']:
-            self.task['url'] = rule['jsonUrl']
 
         return rule
 
