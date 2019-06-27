@@ -79,7 +79,7 @@ class GeneralItemHandler(BaseHandler):
         :return:
         """
         # 优先获取task中详情规则
-        parse_rule = self.task.get("detailRule", {})
+        parse_rule = self.task.get("rule", {})
         # 根据task中的rid获取文章信息
         rid = self.task.get('rid', None)
         if rid:

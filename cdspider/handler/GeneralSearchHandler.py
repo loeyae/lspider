@@ -116,7 +116,7 @@ class GeneralSearchHandler(GeneralHandler):
             '''
             如果task中包含列表规则，则读取相应的规则，否则在数据库中查询
             '''
-            rule = copy.deepcopy(self.task['listRule'])
+            rule = copy.deepcopy(self.task['rule'])
             keyword = copy.deepcopy(self.task['keyword'])
             if not keyword:
                 raise CDSpiderError("keyword not exists")
