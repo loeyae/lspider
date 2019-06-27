@@ -78,6 +78,7 @@ class GeneralItemHandler(BaseHandler):
         匹配详情页规则
         :return:
         """
+        parse_rule = None
         # 优先获取task中详情规则
         if "rule" in self.task and self.task['rule']:
             parse_rule = self.db['ParseRuleDB'].get_detail(int(self.task['rule']))
