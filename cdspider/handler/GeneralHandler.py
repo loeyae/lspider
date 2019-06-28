@@ -7,9 +7,7 @@
 :date:    2018-11-17 19:56:32
 """
 import copy
-import traceback
 import time
-from urllib.parse import urljoin
 from cdspider.handler import BaseHandler
 from cdspider.parser import ListParser
 from cdspider.parser.lib import TimeParser
@@ -184,12 +182,17 @@ class GeneralHandler(BaseHandler):
         """
         生成详情抓取任务并入队
         """
+        handle_mode = self.process.get("url_handle", URL_HANDLE_MODE_ITEM)
+        if handle_mode == URL_HANDLE_MODE_NONE:
+            return
         message = {
             'mode': mode,
             'rid': rid,
             'mediaType': self.process.get('mediaType', self.task['task'].get('mediaType', MEDIA_TYPE_OTHER))
         }
-        self.queue[QUEUE_NAME_SCHEDULER_TO_SPIDER].put_nowait(message)
+        if handle_mode == URL_HANDLE_MODE_RESULT:
+            return self.queue[QUEUE_NAME_SPIDER_TO_RESULT].put_nowati(message)
+        return self.queue[QUEUE_NAME_SCHEDULER_TO_SPIDER].put_nowait(message)
 
     def finish(self, save):
         """
@@ -206,7 +209,11 @@ class GeneralHandler(BaseHandler):
         if not s:
             s = {}
         s.update(save)
+        frequency = self.task.get("frequency", None)
+        status = self.task.get("status", SpiderTaskDB.STATUS_ACTIVE)
+        if frequency == "0":
+            status = SpiderTaskDB.STATUS_INIT
         self.db['SpiderTaskDB'].update(
             self.task['uuid'], self.mode,
-            {"crawltime": self.crawl_id, "crawlinfo": dict(crawlinfo_sorted), "save": s})
+            {"crawltime": self.crawl_id, "status": status, "crawlinfo": dict(crawlinfo_sorted), "save": s})
 

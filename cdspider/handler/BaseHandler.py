@@ -224,7 +224,7 @@ class BaseHandler(Component):
         mode = message['mode']
         expire = message['expire']
         where = HandlerUtils.build_spider_task_where(message)
-        expire = int(time.time()) + int(expire)
+        expire = int(time.time()) + int(expire) if int(expire) > 0 else 0
         self.db['SpiderTaskDB'].update_many(mode, {"expire": expire}, where=where)
 
     def status(self, message):

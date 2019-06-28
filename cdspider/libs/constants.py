@@ -113,3 +113,9 @@ MEDIA_TYPE_PAPER = 13   # '平媒',
 MEDIA_TYPE_OTHER = 99   # '其他',
 
 RESULT_SYNC_QUEUE_NAME = 'result_sync_queue'  # app.json中结果同步队列名设置的key
+
+FREQUENCY_ONCE = "0"
+EXPIRE_NEVER = 0
+URL_HANDLE_MODE_ITEM = "item"
+URL_HANDLE_MODE_RESULT = "result"
+URL_HANDLE_MODE_NONE = "none"
