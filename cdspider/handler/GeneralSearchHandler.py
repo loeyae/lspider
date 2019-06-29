@@ -22,7 +22,7 @@ class GeneralSearchHandler(GeneralHandler):
     general search handler
     task 爬虫任务信息 {"mode": "search", "uuid": SpiderTask.list uuid}
                    当测试该handler，数据应为 {"mode": "search", "keyword": 关键词规则,
-                   "authorListRule": 列表规则，参考列表规则}
+                   "rule": 列表规则，参考列表规则}
 
     支持注册的插件:
         search_handler.mode_handle
@@ -30,6 +30,16 @@ class GeneralSearchHandler(GeneralHandler):
     """
 
     def new_search_task(self, urls, keyword):
+        kfrequency = keyword.get("frequency")
+        frequency = urls.get("frequency", self.DEFAULT_FREQUENCY)
+        if kfrequency and kfrequency < frequency:
+            frequency = kfrequency
+        kexpire = keyword.get("expire", 0)
+        expire = urls.get("expire", 0)
+        if kexpire != 0 and expire != 0 and kexpire < expire:
+            expire = kexpire
+        elif expire == 0:
+            expire = kexpire or 0
         t = {
             'mode': self.mode,     # handler mode
             'pid': urls['pid'],          # project uuid
@@ -38,8 +48,9 @@ class GeneralSearchHandler(GeneralHandler):
             'uid': urls['uuid'],         # url uuid
             'kid': keyword['uuid'],      # keyword id
             'url': 'base_url',           # url
-            'frequency': str(urls.get('frequency', self.DEFAULT_FREQUENCY)),
-            'status': SpiderTaskDB.STATUS_ACTIVE
+            'frequency': str(frequency),
+            'status': SpiderTaskDB.STATUS_ACTIVE,
+            'expire': int(time.time()) + int(expire) if int(expire) > 0 else 0
         }
         self.debug("%s newtask new task: %s" % (self.__class__.__name__, str(t)))
         if not self.testing_mode:
@@ -82,7 +93,7 @@ class GeneralSearchHandler(GeneralHandler):
                 uuid = 0
                 while True:
                     has_word = False
-                    for item in self.db['KeywordsDB'].get_new_list(uuid, select=['uuid']):
+                    for item in self.db['KeywordsDB'].get_new_list(uuid, urls['tid'], select=['uuid']):
                         self.new_search_task(urls, item)
                         uuid = item['uuid']
                         has_word = True
@@ -96,16 +107,22 @@ class GeneralSearchHandler(GeneralHandler):
                 word = self.db['KeywordsDB'].get_detail(each)
                 if not word:
                     raise CDSpiderDBDataNotFound("word: %s not found" % each)
-                uuid = 0
-                while True:
-                    has_task = False
-                    for item in self.db['TaskDB'].get_new_list(
-                            uuid, where={"type": self.mode}, select=['uuid', 'pid', 'sid']):
-                        has_task = True
-                        self.new_search_task_by_tid(item['uuid'], word)
-                        uuid = item['uuid']
-                    if not has_task:
-                        break
+                if "tid" in word and word['tid'] != 0:
+                    task = self.db['TaskDB'].get_detail(word['tid'])
+                    if not task:
+                        raise CDSpiderDBDataNotFound("task: %s not found" % word['tid'])
+                    self.new_search_task_by_tid(task['uuid'], word)
+                else:
+                    uuid = 0
+                    while True:
+                        has_task = False
+                        for item in self.db['TaskDB'].get_new_list(
+                                uuid, where={"type": self.mode}, select=['uuid', 'pid', 'sid']):
+                            has_task = True
+                            self.new_search_task_by_tid(item['uuid'], word)
+                            uuid = item['uuid']
+                        if not has_task:
+                            break
 
     def match_rule(self, save):
         """

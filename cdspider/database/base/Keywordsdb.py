@@ -11,15 +11,15 @@ from . import Base
 
 {
     'keywords': {
-        'kwid': int,        # keywords id
+        'uuid': int,        # keywords id
         'word': str,        # keyword
+        'tid': int,         # 所属任务ID, 默认为0，全局所有
         'status': int,      # status
-        'frequency': str,        # 关键词来源
+        'frequency': str,   # 关键词频率
+        'expire': int,      # 过期时间
         'src': str,         # 来源
         'ctime': int,       # 创建时间
         'utime': int,       # 最后一次更新时间
-        'creator': int,     # 创建人
-        'updator': int,     # 最后一次更新的人
     }
 }
 
@@ -52,8 +52,11 @@ class KeywordsDB(Base):
     def get_detail(self, id):
         raise NotImplementedError
 
-    def get_new_list(self, id, select=None, **kwargs):
+    def get_new_list(self, id, tid, select=None, **kwargs):
         raise NotImplementedError
 
     def get_list(self, where = {}, select=None, **kwargs):
+        raise NotImplementedError
+
+    def get_list_by_tid(self, tid, where = {}, select=None, **kwargs):
         raise NotImplementedError
