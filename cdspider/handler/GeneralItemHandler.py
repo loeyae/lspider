@@ -69,9 +69,9 @@ class GeneralItemHandler(BaseHandler):
             self.task['article'] = article
         self.task.setdefault('article', {})
         self.task.setdefault('crawlinfo', {})
-        url = self.task.get("url")
-        if not url:
+        if not self.task.get("url"):
             raise CDSpiderHandlerError("url not exists")
+        save['base_url'] = self.task.get("url")
         self.process = self.match_rule()
         self.debug("%s matched detail rule: %s" % (self.__class__.__name__, self.process.get("uuid", 0)))
         if 'paging' in self.process and self.process['paging']:
@@ -104,7 +104,7 @@ class GeneralItemHandler(BaseHandler):
             '''
             task中不存在详情规则，根据域名匹配规则库中的规则
             '''
-            subdomain, domain = utils.domain_info(url)
+            subdomain, domain = utils.domain_info(self.task['url'])
             if subdomain:
                 '''
                 优先获取子域名对应的规则
@@ -120,7 +120,7 @@ class GeneralItemHandler(BaseHandler):
                         '''
                         如果规则中存在url匹配规则，则进行url匹配规则验证
                         '''
-                        u = utils.preg(url, item['urlPattern'])
+                        u = utils.preg(self.task['url'], item['urlPattern'])
                         if u:
                             return item
             if not parse_rule:
@@ -138,7 +138,7 @@ class GeneralItemHandler(BaseHandler):
                         '''
                         如果规则中存在url匹配规则，则进行url匹配规则验证
                         '''
-                        u = utils.preg(url, item['urlPattern'])
+                        u = utils.preg(self.task['url'], item['urlPattern'])
                         if u:
                             return item
         return parse_rule
