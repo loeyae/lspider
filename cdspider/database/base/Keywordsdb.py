@@ -57,6 +57,3 @@ class KeywordsDB(Base):
 
     def get_list(self, where = {}, select=None, **kwargs):
         raise NotImplementedError
-
-    def get_list_by_tid(self, tid, where = {}, select=None, **kwargs):
-        raise NotImplementedError

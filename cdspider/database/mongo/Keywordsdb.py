@@ -79,17 +79,10 @@ class KeywordsDB(Mongo, BaseKeywordsDB):
 
     def get_new_list(self, id, tid, select=None, **kwargs):
         kwargs.setdefault('sort', [('uuid', 1)])
-        return self.find(where={"uuid": {"$gt": int(id)}, "$or": [{"tid": 0}, {"tid": None}, {"tid": tid}]},
+        where = {"$and": [{"uuid": {"$gt": int(id)}}, {"$or": [{"tid": 0}, {"tid": None}, {"tid": tid}]}]}
+        return self.find(where=where,
             select=select, **kwargs)
 
     def get_list(self, where={}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uuid', 1)])
-        return self.find(where=where, select=select, **kwargs)
-
-    def get_list_by_tid(self, tid, where = {}, select=None, **kwargs):
-        kwargs.setdefault('sort', [('uuid', 1)])
-        if not where:
-            where = {'tid': int(tid)}
-        else:
-            where.update({'tid': int(tid)})
         return self.find(where=where, select=select, **kwargs)
