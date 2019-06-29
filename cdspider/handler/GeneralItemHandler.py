@@ -55,19 +55,6 @@ class GeneralItemHandler(BaseHandler):
         :param save: 传递的上下文
         :return:
         """
-        if "detailRule" in self.task:
-            typeinfo = utils.typeinfo(self.task['url'])
-            if typeinfo['domain'] != self.task['detailRule']['domain']\
-                    or (self.task['detailRule']['subdomain']
-                        and typeinfo['subdomain'] != self.task['detailRule']['subdomain']):
-                raise CDSpiderNotUrlMatched()
-            if 'urlPattern' in self.task['detailRule'] and self.task['detailRule']['urlPattern']:
-                '''
-                如果规则中存在url匹配规则，则进行url匹配规则验证
-                '''
-                u = utils.preg(self.task['url'], self.task['detailRule']['urlPattern'])
-                if not u:
-                    raise CDSpiderNotUrlMatched()
         self.process = self.match_rule()
         self.debug("%s matched detail rule: %s" % (self.__class__.__name__, self.process.get("uuid", 0)))
         if 'paging' in self.process and self.process['paging']:
@@ -84,6 +71,18 @@ class GeneralItemHandler(BaseHandler):
             parse_rule = self.db['ParseRuleDB'].get_detail(int(self.task['rule']))
             if not parse_rule:
                 raise CDSpiderDBDataNotFound("rule: %s not exists" % self.task['rule'])
+
+            typeinfo = utils.typeinfo(self.task['url'])
+            if typeinfo['domain'] != parse_rule['domain'] or \
+                    (parse_rule['subdomain'] and typeinfo['subdomain'] != parse_rule['subdomain']):
+                raise CDSpiderNotUrlMatched()
+            if 'urlPattern' in parse_rule and parse_rule['urlPattern']:
+                '''
+                如果规则中存在url匹配规则，则进行url匹配规则验证
+                '''
+                u = utils.preg(self.task['url'], parse_rule['urlPattern'])
+                if not u:
+                    raise CDSpiderNotUrlMatched()
         # 根据task中的rid获取文章信息
         rid = self.task.get('rid', None)
         if rid:
