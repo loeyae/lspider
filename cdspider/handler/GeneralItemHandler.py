@@ -55,6 +55,23 @@ class GeneralItemHandler(BaseHandler):
         :param save: 传递的上下文
         :return:
         """
+        # 根据task中的rid获取文章信息
+        rid = self.task.get('rid', None)
+        if rid:
+            article = self.db['ArticlesDB'].get_detail(rid, select=['mediaType', 'url', 'crawlinfo', 'title',
+                                                                    'author', 'channel', 'pubtime'])
+            if not article:
+                raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
+            self.task.setdefault('mediaType', article.get('mediaType', MEDIA_TYPE_OTHER))
+            if 'ulr' not in self.task or not self.task['url']:
+                self.task["url"] = article['url']
+            self.task['crawlinfo'] = article.get('crawlinfo', {})
+            self.task['article'] = article
+        self.task.setdefault('article', {})
+        self.task.setdefault('crawlinfo', {})
+        url = self.task.get("url")
+        if not url:
+            raise CDSpiderHandlerError("url not exists")
         self.process = self.match_rule()
         self.debug("%s matched detail rule: %s" % (self.__class__.__name__, self.process.get("uuid", 0)))
         if 'paging' in self.process and self.process['paging']:
@@ -83,23 +100,6 @@ class GeneralItemHandler(BaseHandler):
                 u = utils.preg(self.task['url'], parse_rule['urlPattern'])
                 if not u:
                     raise CDSpiderNotUrlMatched()
-        # 根据task中的rid获取文章信息
-        rid = self.task.get('rid', None)
-        if rid:
-            article = self.db['ArticlesDB'].get_detail(rid, select=['mediaType', 'url', 'crawlinfo', 'title',
-                                                                    'author', 'channel', 'pubtime'])
-            if not article:
-                raise CDSpiderHandlerError("aritcle: %s not exists" % rid)
-            self.task.setdefault('mediaType', article.get('mediaType', MEDIA_TYPE_OTHER))
-            if 'ulr' not in self.task or not self.task['url']:
-                self.task["url"] = article['url']
-            self.task.setdefault('crawlinfo', article.get('crawlinfo', {}))
-            self.task['article'] = article
-        else:
-            self.task.setdefault('crawlinfo', {})
-        url = self.task.get("url")
-        if not url:
-            raise CDSpiderHandlerError("url not exists")
         if not parse_rule:
             '''
             task中不存在详情规则，根据域名匹配规则库中的规则
