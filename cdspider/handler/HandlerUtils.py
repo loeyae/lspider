@@ -218,3 +218,45 @@ class HandlerUtils(object):
                 queue_name = [queue_name]
             for q in queue_name:
                 queue[q].put_nowait({"mode": mode, "rid": rid})
+
+    @classmethod
+    def match_detail_rule(cls, db, url):
+        parse_rule = None
+        subdomain, domain = utils.parse_domain(url)
+        if subdomain:
+            '''
+            优先获取子域名对应的规则
+            '''
+            parserule_list = db['ParseRuleDB'].get_list_by_subdomain(subdomain)
+            for item in parserule_list:
+                if not parse_rule:
+                    '''
+                    将第一条规则选择为返回的默认值
+                    '''
+                    parse_rule = item
+                if  'urlPattern' in item and item['urlPattern']:
+                    '''
+                    如果规则中存在url匹配规则，则进行url匹配规则验证
+                    '''
+                    u = utils.preg(url, item['urlPattern'])
+                    if u:
+                        return item
+        else:
+            '''
+            获取域名对应的规则
+            '''
+            parserule_list = db['ParseRuleDB'].get_list_by_domain(domain)
+            for item in parserule_list:
+                if not parse_rule:
+                    '''
+                    将第一条规则选择为返回的默认值
+                    '''
+                    parse_rule = item
+                if  'urlPattern' in item and item['urlPattern']:
+                    '''
+                    如果规则中存在url匹配规则，则进行url匹配规则验证
+                    '''
+                    u = utils.preg(url, item['urlPattern'])
+                    if u:
+                        return item
+        return parse_rule
