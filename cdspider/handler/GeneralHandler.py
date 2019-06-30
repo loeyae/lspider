@@ -117,7 +117,7 @@ class GeneralHandler(BaseHandler):
                     result_id = self.db['ArticlesDB'].insert(result)
                     if not result_id:
                         raise CDSpiderDBError("Result insert failed")
-                    self.build_item_task(result_id, mode)
+                    self.build_item_task(result_id, mode, save)
                 self.crawl_info['crawl_count']['new_count'] += 1
             else:
                 self.crawl_info['crawl_count']['repeat_count'] += 1
@@ -178,7 +178,7 @@ class GeneralHandler(BaseHandler):
         }
         return r
 
-    def build_item_task(self, rid, mode):
+    def build_item_task(self, rid, mode, save=None):
         """
         生成详情抓取任务并入队
         """

@@ -101,7 +101,7 @@ class GeneralListHandler(GeneralHandler):
 
         return rule
 
-    def build_item_task(self, rid, mode):
+    def build_item_task(self, rid, mode, save):
         """
         生成详情抓取任务并入队
         """
