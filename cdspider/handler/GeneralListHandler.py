@@ -56,6 +56,7 @@ class GeneralListHandler(GeneralHandler):
                 'uid': each,                 # url uuid
                 'kid': 0,                    # keyword id
                 'frequency': str(rule.get('frequency', self.DEFAULT_FREQUENCY)),
+                'expire': int(time.time()) + int(rule.get('frequency', 0)) if int(rule.get('frequency', 0)) > 0 else 0,
                 'url': urls['url'],          # url
             }
             self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
