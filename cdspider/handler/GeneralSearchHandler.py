@@ -151,6 +151,12 @@ class GeneralSearchHandler(GeneralHandler):
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
                 raise CDSpiderHandlerError("keyword: %s not active" % self.task['kid'])
             urls = self.db['UrlsDB'].get_detail(self.task['uid'])
+            if not urls:
+                self.db['SpiderTaskDB'].delete(self.task['uuid'], self.mode)
+                raise CDSpiderDBDataNotFound("urls: %s not exists" % self.task['uid'])
+            if urls['status'] != UrlsDB.STATUS_ACTIVE or urls['ruleStatus'] != UrlsDB.STATUS_ACTIVE:
+                self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
+                raise CDSpiderHandlerError("url not active")
             rule = self.db['ListRuleDB'].get_detail(urls['ruleId'])
             if not rule:
                 self.db['SpiderTaskDB'].disable(self.task['uuid'], self.mode)
