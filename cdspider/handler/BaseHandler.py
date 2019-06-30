@@ -705,8 +705,10 @@ class BaseHandler(Component):
     def ns(self):
         return "%s_handler" % self.mode
 
-    def extension(self, name, params):
-        return utils.run_extension(extension_ns="{0}.{1}".format(self.ns, name), data=params, handler=self)
+    def extension(self, name, params, ns=None):
+        if not ns:
+            ns = self.ns
+        return utils.run_extension(extension_ns="{0}.{1}".format(ns, name), data=params, handler=self)
 
     def close(self):
         """
