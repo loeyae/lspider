@@ -76,7 +76,7 @@ class GeneralSearchHandler(GeneralHandler):
     def newtask(self, message):
         """
         新建爬虫任务
-        :param message: [{"tid": task id, "kid": keyword uuid, "mode": handler mode}]
+        :param message: [{"uid": url id, "kid": keyword uuid, "mode": handler mode}]
         """
         self.debug("%s newtask got message: %s" % (self.__class__.__name__, str(message)))
         if 'uid' in message and message['uid']:
