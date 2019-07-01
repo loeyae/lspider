@@ -111,6 +111,8 @@ class GeneralSearchHandler(GeneralHandler):
                     task = self.db['TaskDB'].get_detail(word['tid'])
                     if not task:
                         raise CDSpiderDBDataNotFound("task: %s not found" % word['tid'])
+                    if task['type'] != self.mode:
+                        continue
                     self.new_search_task_by_tid(task['uuid'], word)
                 else:
                     uuid = 0
