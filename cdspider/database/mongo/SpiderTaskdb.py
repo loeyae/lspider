@@ -308,7 +308,7 @@ class SpiderTaskDB(Mongo, BaseTaskDB, SplitTableMixin):
         _where = {'$and': [{'status': self.STATUS_ACTIVE}, {'$or': [{'expire': 0},{'expire': {'$gt': now}}]}]}
         for k, v in where.items():
             _where['$and'].extend([{k: v}])
-        return self.count(where=where, table=table)
+        return self.count(where=_where, table=table)
 
     def get_active_list(self, mode, where={}, select=None, **kwargs):
         table = self._table_name(mode)
