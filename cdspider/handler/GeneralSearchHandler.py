@@ -64,7 +64,7 @@ class GeneralSearchHandler(GeneralHandler):
         while True:
             has_item = False
             for urls in self.db['UrlsDB'].get_new_list(uuid, where={"tid": tid}):
-                tasks = self.db['SpiderTaskDB'].get_list(self.mode, {"tid": tid, "kid": keyword['uuid']})
+                tasks = self.db['SpiderTaskDB'].get_list(self.mode, {"uid": urls['uuid'], "kid": keyword['uuid']})
                 has_item = True
                 uuid = urls['uuid']
                 if len(list(tasks)) > 0:
