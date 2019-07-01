@@ -222,7 +222,7 @@ class HandlerUtils(object):
     @classmethod
     def match_detail_rule(cls, db, url):
         parse_rule = None
-        subdomain, domain = utils.parse_domain(url)
+        subdomain, domain = utils.domain_info(url)
         if subdomain:
             '''
             优先获取子域名对应的规则
@@ -241,7 +241,7 @@ class HandlerUtils(object):
                     u = utils.preg(url, item['urlPattern'])
                     if u:
                         return item
-        else:
+        if not parse_rule:
             '''
             获取域名对应的规则
             '''

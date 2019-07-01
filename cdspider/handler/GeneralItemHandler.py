@@ -43,7 +43,7 @@ class GeneralItemHandler(BaseHandler):
         :return:
         """
         try:
-            rule = self.match_rule()
+            rule = self.match_rule(save={})
             self.debug("%s matched detail rule: %s" % (self.__class__.__name__, rule.get("uuid", 0)))
             return rule.get("script", None)
         except CDSpiderError:
@@ -53,6 +53,16 @@ class GeneralItemHandler(BaseHandler):
         """
         初始化爬虫流程 初始化后的数据self.process {"request": 请求设置, "parse": 解析规则, "paging": 分页规则}
         :param save: 传递的上下文
+        :return:
+        """
+        self.process = self.match_rule(save)
+        self.debug("%s matched detail rule: %s" % (self.__class__.__name__, self.process.get("uuid", 0)))
+        if 'paging' in self.process and self.process['paging']:
+            self.process['paging']['url'] = 'base_url'
+
+    def match_rule(self, save):
+        """
+        匹配详情页规则
         :return:
         """
         # 根据task中的rid获取文章信息
@@ -72,16 +82,6 @@ class GeneralItemHandler(BaseHandler):
         if not self.task.get("url"):
             raise CDSpiderHandlerError("url not exists")
         save['base_url'] = self.task.get("url")
-        self.process = self.match_rule()
-        self.debug("%s matched detail rule: %s" % (self.__class__.__name__, self.process.get("uuid", 0)))
-        if 'paging' in self.process and self.process['paging']:
-            self.process['paging']['url'] = 'base_url'
-
-    def match_rule(self):
-        """
-        匹配详情页规则
-        :return:
-        """
         parse_rule = None
         # 优先获取task中详情规则
         if "rule" in self.task and self.task['rule']:
