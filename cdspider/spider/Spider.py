@@ -73,6 +73,7 @@ class Spider(Component):
             self.info("Spider loaded handler: %s" % handler)
             last_source_unid = None
             last_url = None
+            last_parsed_unid = None
             self.info("Spider process start")
             handler.init(save)
             self.info("Spider fetch prepare start")
@@ -95,9 +96,9 @@ class Spider(Component):
                     unid = utils.md5(handler.response['content'])
                     if last_source_unid == unid or last_url == handler.response['url']:
                         raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['url'])
+                    last_source_unid = unid
                     validated = handler.validate(save=save)
                     if validated:
-                        last_source_unid = unid
                         last_url = handler.response['url']
                         if self.sdebug:
                             self.info("Spider crawl end, source: %s" % utils.remove_whitespace(handler.response["source"]))
@@ -106,6 +107,10 @@ class Spider(Component):
                         self.info("Spider parse start")
                         handler.parse(save=save)
                         self.info("Spider parse end, result: %s" % str(handler.response["parsed"]))
+                        parsed_unid = utils.md5(handler.response['parsed'])
+                        if last_parsed_unid == parsed_unid:
+                            raise CDSpiderCrawlerNoNextPage(base_url=save.get("base_url", ''), current_url=handler.response['url'])
+                        last_parsed_unid = parsed_unid
 
                 if isinstance(handler.response['broken_exc'], CONTINUE_EXCEPTIONS):
                     handler.on_continue(handler.response['broken_exc'], save)
