@@ -66,5 +66,5 @@ class ProjectsDB(Mongo, BaseProjectsDB):
         kwargs.setdefault('sort', [('uuid', 1)])
         if not where:
             where == {}
-        where['uuid'] = {"$gt": id}
+        where['uuid'] = {"$gt": int(id)}
         return self.find(where=where, select=select, **kwargs)

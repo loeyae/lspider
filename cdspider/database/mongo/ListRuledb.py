@@ -32,7 +32,7 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
 
     def update(self, id, obj = {}):
         obj['utime'] = int(time.time())
-        return super(ListRuleDB, self).update(setting=obj, where={"uuid": id})
+        return super(ListRuleDB, self).update(setting=obj, where={"uuid": int(id)})
 
     def active(self, id, where = {}):
         obj = {"utime": int(time.time()), "status": self.STATUS_ACTIVE}
@@ -67,7 +67,7 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
         return super(ListRuleDB, self).update(setting=obj, where=where, multi=False)
 
     def get_detail(self, id, select=None):
-        return self.get(where={"uuid": id}, select=select)
+        return self.get(where={"uuid": int(id)}, select=select)
 
     def get_list(self, where={}, select=None, **kwargs):
         kwargs.setdefault('sort', [('uuid', 1)])

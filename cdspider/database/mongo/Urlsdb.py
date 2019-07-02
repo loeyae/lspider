@@ -156,7 +156,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
         if not where:
             where = {}
         where = self._build_where(where)
-        _where = {'$and':[{"uuid": {"$gt": id}}]}
+        _where = {'$and':[{"uuid": {"$gt": int(id)}}]}
         for k, v in where.items():
             _where['$and'].extend([{k: v}])
         return self.find(where = _where, select=select, **kwargs)
@@ -166,7 +166,7 @@ class UrlsDB(Mongo, BaseUrlsDB):
         if not where:
             where = {}
         where = self._build_where(where)
-        _where = {'$and':[{"uuid": {"$gt": id}}, {"pid": pid}]}
+        _where = {'$and':[{"uuid": {"$gt": int(id)}}, {"pid": int(pid)}]}
         for k, v in where.items():
             _where['$and'].extend([{k: v}])
         return self.find(where = _where, select=select, **kwargs)
