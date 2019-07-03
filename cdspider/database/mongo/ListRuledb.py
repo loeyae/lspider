@@ -15,9 +15,9 @@ from .Mongo import Mongo, SplitTableMixin
 
 class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
 
-    __tablename__ = 'listRule'
+    __tablename__ = 'list_rule'
 
-    incr_key = 'listRule'
+    incr_key = 'list_rule'
 
     def __init__(self, connector, table=None, **kwargs):
         super(ListRuleDB, self).__init__(connector, table = table, **kwargs)
