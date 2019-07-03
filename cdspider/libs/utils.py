@@ -980,27 +980,20 @@ class xml_tool(object):
 def array2rule(rule, final_url):
 
     def build_rule(item, final_url):
-        key = item.pop('key')
-        if key and item['filter']:
+        if item['filter']:
             if item['filter'] == '@value:parent_url':
                 '''
                 规则为获取父级url时，将详情页url赋给规则
                 '''
                 item['filter'] = '@value:%s' % final_url
-            return {key: item}
+            return item
         return None
     # 格式化解析规则
     parse = {}
-    if isinstance(rule, (list, tuple)):
-        for item in rule:
-            ret = build_rule(item, final_url)
-            if ret:
-                parse.update(ret)
-    elif isinstance(rule, dict):
-        for item in rule.values():
-            ret = build_rule(item, final_url)
-            if ret:
-                parse.update(ret)
+    for key, item in rule.items():
+        ret = build_rule(item, final_url)
+        if ret:
+            parse.update(ret)
     return parse
 
 
@@ -1030,7 +1023,7 @@ def attach_preparse(parser_cls, source, final_url, rule, log_level):
 
 def get_attach_data(parser_cls, source, final_url, rule, log_level):
     if 'preparse' in rule and rule['preparse']:
-        parse = rule['preparse'].get('parse', None)
+        parse = rule['preparse']
         parsed = {}
         if parse:
             _rule = array2rule(copy.deepcopy(parse), final_url)
