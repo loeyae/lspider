@@ -31,6 +31,8 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
             collection.create_index('domain', name='domain')
         if 'subdomain' not in indexes:
             collection.create_index('subdomain', name='subdomain')
+        if 'type' not in indexes:
+            collection.create_index('type', name='type')
         if 'status' not in indexes:
             collection.create_index('status', name='status')
         if 'ctime' not in indexes:
@@ -83,12 +85,12 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
     def get_detail(self, id):
         return self.get(where={"uuid": int(id)})
 
-    def get_detail_by_domain(self, domain):
-        where = {'domain': domain, 'subdomain': {"$in": ["", None]}}
+    def get_detail_by_domain(self, domain, type):
+        where = {'domain': domain, 'subdomain': {"$in": ["", None]}, 'type': type}
         return self.get(where=where)
 
-    def get_detail_by_subdomain(self, subdomain):
-        where = {'subdomain': subdomain}
+    def get_detail_by_subdomain(self, subdomain, type):
+        where = {'subdomain': subdomain, "type": type}
         return self.get(where=where)
 
     def get_list(self, where={}, select=None, **kwargs):

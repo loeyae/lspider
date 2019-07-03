@@ -13,6 +13,8 @@ from . import Base
 {
     'listRule': {
         'uuid' : int,                   # '主键ID | 唯一',
+        'preid': int,                   # 前置处理规则，默认为0
+        'type': int,                    # 0默认列表处理规则，1前置处理规则
         'name' : str,                   # '规则名称',
         'domain' : str,                 # '域名',
         'subdomain' : str,              # '子域名',
@@ -74,6 +76,9 @@ from . import Base
 }
 
 class ListRuleDB(Base):
+
+    RULE_TYPE_DEFAULT = 0
+    RULE_TYPE_PREPARE = 1
 
     def insert(self, obj={}):
         raise NotImplementedError

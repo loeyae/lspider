@@ -24,6 +24,8 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
         self._create_collection(self.table)
 
     def insert(self, obj={}):
+        obj.setdefault("type", self.RULE_TYPE_DEFAULT)
+        obj.setdefault("preid", 0)
         obj.setdefault("ctime", int(time.time()))
         obj.setdefault("status", self.STATUS_INIT)
         obj['uuid'] = self._get_increment(self.incr_key)
@@ -81,6 +83,8 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
         indexes = collection.index_information()
         if 'uuid' not in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
+        if 'type' not in indexes:
+            collection.create_index('type', name='type')
         if 'status' not in indexes:
             collection.create_index('status', name='status')
         if 'ctime' not in indexes:

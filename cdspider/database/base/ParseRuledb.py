@@ -13,6 +13,7 @@ from . import Base
 {
     "detailRule": {
         'uuid' : int,               # '主键ID | 唯一',
+        'type' : str,               # 规则类型
         'name' : str,               # '规则名称',
         'domain' : str,             # '基础URL',
         'subdomain' : str,          # '子域名',
@@ -100,10 +101,10 @@ class ParseRuleDB(Base):
     def get_detail(self, id):
         raise NotImplementedError
 
-    def get_detail_by_domain(self, domain):
+    def get_detail_by_domain(self, domain, type):
         raise NotImplementedError
 
-    def get_detail_by_subdomain(self, subdomain):
+    def get_detail_by_subdomain(self, subdomain, type):
         raise NotImplementedError
 
     def get_list(self, where = {}, select = None):
