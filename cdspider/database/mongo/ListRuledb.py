@@ -83,6 +83,8 @@ class ListRuleDB(Mongo, BaseListRuleDB, SplitTableMixin):
         indexes = collection.index_information()
         if 'uuid' not in indexes:
             collection.create_index('uuid', unique=True, name='uuid')
+        if 'tid' not in indexes:
+            collection.create_index('tid', name='tid')
         if 'type' not in indexes:
             collection.create_index('type', name='type')
         if 'status' not in indexes:
