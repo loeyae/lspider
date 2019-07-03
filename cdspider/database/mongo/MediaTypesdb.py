@@ -19,7 +19,7 @@ class MediaTypesDB(Mongo, BaseMediaTypesDB):
 
     __tablename__ = 'media_types'
 
-    incr_key = 'mediaTypes'
+    incr_key = 'media_types'
 
     def __init__(self, connector, table=None, **kwargs):
         super(MediaTypesDB, self).__init__(connector, table = table, **kwargs)
