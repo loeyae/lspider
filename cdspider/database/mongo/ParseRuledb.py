@@ -31,8 +31,6 @@ class ParseRuleDB(Mongo, BaseParseRuleDB):
             collection.create_index('domain', name='domain')
         if 'subdomain' not in indexes:
             collection.create_index('subdomain', name='subdomain')
-        if 'type' not in indexes:
-            collection.create_index('type', name='type')
         if 'status' not in indexes:
             collection.create_index('status', name='status')
         if 'ctime' not in indexes:

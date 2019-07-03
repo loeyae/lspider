@@ -13,7 +13,6 @@ from . import Base
 {
     "detailRule": {
         'uuid' : int,               # '主键ID | 唯一',
-        'type' : str,               # 规则类型
         'name' : str,               # '规则名称',
         'domain' : str,             # '基础URL',
         'subdomain' : str,          # '子域名',
