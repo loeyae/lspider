@@ -11,11 +11,11 @@ import os
 import time
 import traceback
 import re
+import random
 from urllib.parse import urljoin
 from cdspider.scheduler import CounterMananger
 from cdspider.crawler import BaseCrawler
 from cdspider.crawler import RequestsCrawler
-from cdspider.database.base import Base as BaseDB
 from cdspider.libs.tools import *
 from cdspider.parser import *
 from cdspider.libs.url_builder import UrlBuilder
@@ -399,36 +399,20 @@ class BaseHandler(Component):
         """
 
         request = utils.dictjoin(self.process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
-        if 'cookie' in request and request['cookie']:
-            self.debug("%s parse cookie start: %s" % (self.__class__.__name__, request['cookie']))
-            cookie_list = re.split('(?:(?:\r\n)|\r|\n)', request['cookie'])
-            if len(cookie_list) > 1:
-                for item in cookie_list:
-                    request['cookies_list'].append(utils.quertstr2dict(item))
-            else:
-                request['cookies'] = utils.quertstr2dict(cookie_list[0])
+        if 'cookies_list' in request and request['cookies_list']:
+            request['cookies'] = random.choice(request['cookies_list'])
             self.debug("%s parsed cookie: %s" % (self.__class__.__name__, request['cookies']))
-            del request['cookie']
-        if 'header' in request and request['header']:
-            self.debug("%s parse header start: %s" % (self.__class__.__name__, request['header']))
-            header_list = re.split('(?:(?:\r\n)|\r|\n)', request['header'])
-            if len(header_list) > 1:
-                for item in header_list:
-                    request['headers_list'].append(utils.quertstr2dict(item))
-            else:
-                request['headers'] = utils.quertstr2dict(header_list[0])
+            del request['cookies_list']
+        if 'headers_list' in request and request['headers_list']:
+            request['headers'] = random.choice(request['headers_list'])
             self.debug("%s parsed header: %s" % (self.__class__.__name__, request['headers']))
-            del request['header']
+            del request['headers_list']
         if 'data' in request and request['data']:
-            self.debug("%s parse data start: %s" % (self.__class__.__name__, request['data']))
-            if isinstance(request['data'], six.text_type):
-                request['data'] = utils.quertstr2dict(request['data'])
-                self.debug("%s parsed data: %s" % (self.__class__.__name__, request['data']))
-            elif 'hard_code' not in save or not save['hard_code']:
+            if 'hard_code' not in save or not save['hard_code']:
                 rule = utils.array2rule(request.pop('data'), save['base_url'])
                 parsed = utils.rule2parse(CustomParser, DEFAULT_SOURCE, save['base_url'], rule, self.log_level)
                 self.debug("%s parsed data: %s" % (self.__class__.__name__, parsed))
-                hard_code = []
+                hard_code = request.get('request') or []
                 for k, r in parsed.items():
                     hard_code.append({"mode": rule[k]['mode'], "name": k, "value": r})
                 self.debug("%s parsed hard code: %s" % (self.__class__.__name__, hard_code))
