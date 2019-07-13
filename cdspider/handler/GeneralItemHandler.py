@@ -159,7 +159,7 @@ class GeneralItemHandler(BaseHandler):
             'title': item.get('title', None) or result.pop('title', None),              # 标题
             'author': result.pop('author', None) or item.get('author', None),      # 作者
             'content': result.pop('content', None),
-            'pubtime': pubtime or item.get('pubtime', None),          # 发布时间
+            'pubtime': pubtime or item.get('pubtime', None) or now,          # 发布时间
             'channel': result.pop('channel', None)  or item.get('channel', None),       # 频道信息
             'crawlinfo': kwargs.get('crawlinfo')
         }

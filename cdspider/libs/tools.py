@@ -73,7 +73,7 @@ class db_wrapper(collections.UserDict):
             cls = utils.load_dao(self.protocol, key, connector=self.connector, log_level=self.log_level)
             self.data[key] = cls
             return cls
-        except (ImportError, AttributeError):
+        except (ImportError, AttributeError) as e:
             cls = utils.load_dao(self.protocol, 'Base', connector=self.connector, log_level=self.log_level)
             self.data[key] = cls
             return cls

@@ -51,10 +51,10 @@ class ArticlesDB(Base):
     def get_detail_by_unid(self, unid, createtime):
         raise NotImplementedError
 
-    def get_count(self, createtime, where={}, select = None, **kwargs):
+    def get_count(self, ctime, where={}, select = None, **kwargs):
         raise NotImplementedError
 
-    def get_list(self, createtime, where={}, select = None, sort=[("pid", 1)], **kwargs):
+    def get_list(self, ctime, where={}, select = None, sort=[("pid", 1)], **kwargs):
         raise NotImplementedError
 
     @staticmethod
