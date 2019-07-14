@@ -97,7 +97,7 @@ class Counter(object):
             return self.data['avg']
         else:
             if self.ctime == 0:
-                self.ctime = 86400
+                self.ctime = self.itime * math.ceil(self.total/120)
             if not self.total is None and self.ctime and self.itime:
                 self.data['avg'] = math.ceil(self.total / (self.ctime / self.itime))
                 return self.data['avg']
