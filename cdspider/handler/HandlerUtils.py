@@ -133,12 +133,12 @@ class HandlerUtils(object):
             'hard_code': [],
             'match_data': {}
         }
-        if isinstance(paging['rule'], (list, tuple)):
+        if "rule" in paging and isinstance(paging['rule'], (list, tuple)):
             for item in paging['rule']:
                 if 'name' not in item or not item['name']:
                     continue
                 build_rule(rule, copy.deepcopy(item))
-        elif isinstance(paging['rule'], dict):
+        elif "rule" in paging and isinstance(paging['rule'], dict):
             for item in paging['rule'].values():
                 if 'name' not in item or not item['name']:
                     continue
