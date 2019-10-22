@@ -35,7 +35,7 @@ require_packages = [
         'tld>=0.7.9',
         'pykafka>=2.7.0',
         'pycurl>=7.43.0.0',
-        'jsonpath>=0.81'
+        'jsonpath>=0.81',
     ]
 if sys.platform != 'win32':
     require_packages.append('gssapi>=1.5.0')
@@ -117,7 +117,7 @@ setup(
             'ErrorLogDB=cdspider.database.mongo:ErrorLogDB',
         ],
         'cdspider.mailer': [
-            'smtp=cdspider.mailer:SmtpSender'
+            'smtp=cdspider.mailer:SmtpSender',
         ]
     }
 )
