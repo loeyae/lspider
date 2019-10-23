@@ -58,6 +58,7 @@ QUEUE_NAME_SCHEDULER_TO_TASK = "scheduler2task"
 QUEUE_NAME_SCHEDULER_TO_SPIDER = "scheduler2spider"
 QUEUE_NAME_SPIDER_TO_RESULT = "spider2result"
 QUEUE_NAME_EXCINFO = "excinfo_queue"
+QUEUE_NAME_SPIDER_TO_DOWNLOAD = "spider2download"
 
 #handler redister fn type
 HANDLER_FUN_INIT = '0'                   # 初始化自定义方法类型

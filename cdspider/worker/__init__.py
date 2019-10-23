@@ -91,7 +91,7 @@ class BaseWorker(Component):
             except KeyboardInterrupt:
                 pass
             except Exception as e:
-                self.on_error(e, message)
+                self.on_error(e)
                 time.sleep(0.05)
             finally:
                 self.flush()
@@ -122,3 +122,4 @@ from .exc_worker import ExcWorker
 from .test_worker import TestWorker
 from .status_worker import StatusWorker
 from .newtask_worker import NewtaskWorker
+from .download_worker import DownloadWorker

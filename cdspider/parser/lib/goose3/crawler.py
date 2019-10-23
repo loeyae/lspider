@@ -514,22 +514,22 @@ class CustomCrawler(object):
         custom_rule = self.config.custom_rule
         if custom_rule:
             data = {}
+            onlyOne = custom_rule.pop('onlyOne', 1)
             if 'item' in custom_rule and custom_rule['item']:
                 if 'filter' in custom_rule and custom_rule['filter']:
                     doc = self.extractor.custom_match_elements(custom_rule['filter'], doc=doc)
-                onlyOne = custom_rule.get('onlyOne', 1)
                 self.catalogue._doc = doc
                 for key, rule in custom_rule['item'].items():
                     parsed = self.extractor.extract(key, rule, onlyOne)
                     parsed = utils.patch_result(parsed, rule)
                     parsed = utils.extract_result(parsed, rule)
-                    data[key] = parsed
+                    data[key] = [parsed] if not isinstance(parsed, list) else parsed
                 self.catalogue.data = utils.table2kvlist(data)
             else:
                 for key, rule in custom_rule.items():
                     parsed = self.extractor.extract(key, rule)
                     parsed = utils.patch_result(parsed, rule)
                     parsed = utils.extract_result(parsed, rule)
-                    data[key] = [parsed] if not isinstance(parsed, list) else parsed
-                self.catalogue.data = utils.table2kvlist(data)
+                    data[key] = parsed
+                self.catalogue.data = [data]
         return self.catalogue

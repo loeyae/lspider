@@ -213,7 +213,8 @@ class GeneralHandler(BaseHandler):
         status = self.task.get("status", SpiderTaskDB.STATUS_ACTIVE)
         if frequency == "0":
             status = SpiderTaskDB.STATUS_INIT
-        self.db['SpiderTaskDB'].update(
-            self.task['uuid'], self.mode,
-            {"crawltime": self.crawl_id, "status": status, "crawlinfo": dict(crawlinfo_sorted), "save": s})
+        if "uuid" in self.task and self.task['uuid']:
+            self.db['SpiderTaskDB'].update(
+                self.task['uuid'], self.mode,
+                {"crawltime": self.crawl_id, "status": status, "crawlinfo": dict(crawlinfo_sorted), "save": s})
 

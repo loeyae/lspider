@@ -274,6 +274,7 @@ class BaseHandler(Component):
             handle_type = [handle_type]
         for _type in handle_type:
             func_list = self.handle.get(_type, None)
+            print(_type, func_list)
             if func_list:
                 for _,fn in sorted(func_list, reverse=True):
                     if callable(fn):

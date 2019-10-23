@@ -409,6 +409,28 @@ def newtask_work(ctx, worker_cls, no_loop,  get_object=False):
 
 
 @cli.command()
+@click.option('--worker-cls', default='cdspider.worker.DownloadWorker', callback=load_cls,
+              help='worker '
+                                                                                         'class name')
+@click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
+@click.pass_context
+def download_work(ctx, worker_cls, no_loop,  get_object=False):
+    """
+    worker
+    """
+    g = ctx.obj
+    worker = load_cls(ctx, None, worker_cls)
+    worker = worker(ctx)
+    g['instances'].append(worker)
+    if get_object:
+        return worker
+    if no_loop:
+        worker.run_once()
+    else:
+        worker.run()
+
+
+@cli.command()
 @click.option('--fetch-num', default=1, help='fetch实例个数')
 @click.option('--plantask-schedule-num', default=1, help='plantask schedule实例个数')
 @click.option('--run-in', default='subprocess', type=click.Choice(['subprocess', 'thread']),
