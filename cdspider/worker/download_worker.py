@@ -49,13 +49,14 @@ class DownloadWorker(BaseWorker):
         self.db['ArticlesDB'].update(rid, {"downloadInfo": download_info})
 
     def download(self, d, sd, file_urls):
+        self.debug("download urls: %s" % file_urls)
         if isinstance(file_urls, (list, tuple)):
             return [self.download(d, sd, item) for item in file_urls]
         elif isinstance(file_urls, dict):
             return [self.download(d, sd, item) for _,item in file_urls.items()]
         else:
             headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36"}
-            res = requests.get(file_urls, headers=headers)
+            res = requests.get(file_urls, headers=headers, timeout=(30,30))
             if res.status_code == BaseCrawler.STATUS_CODE_OK:
                 ext = mimetypes.guess_extension(res.headers["Content-Type"])
                 if ext is None:
@@ -66,5 +67,7 @@ class DownloadWorker(BaseWorker):
                 with open(full_file_name, "wb") as fp:
                     fp.write(res.content)
                     fp.close()
+                res.close()
                 return {"src": file_urls, "file": short_file_name}
+            res.close()
             return {"src": file_urls, "file": ""}
