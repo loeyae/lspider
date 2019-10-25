@@ -56,7 +56,19 @@ class DownloadWorker(BaseWorker):
             return [self.download(d, sd, item) for _,item in file_urls.items()]
         else:
             headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36"}
-            res = requests.get(file_urls, headers=headers, timeout=(30,30))
+            end = False
+            retry = 0
+            while end is False:
+                try:
+                    res = requests.get(file_urls, headers=headers, timeout=(30,30))
+                    end = True
+                except requests.exceptions.ConnectionError:
+                    retry += 1
+                    if retry > 5:
+                        end = True
+                except Exception:
+                    end = True
+
             if res.status_code == BaseCrawler.STATUS_CODE_OK:
                 ext = mimetypes.guess_extension(res.headers["Content-Type"])
                 if ext is None:
