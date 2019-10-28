@@ -164,6 +164,7 @@ class GeneralHandler(BaseHandler):
         r = {
             "status": kwargs.get('status', ArticlesDB.STATUS_INIT),
             'url': kwargs['final_url'],
+            'keyword': self.task.get("keyword", None),
             'domain': kwargs.get("typeinfo", {}).get('domain', None),          # 站点域名
             'subdomain': kwargs.get("typeinfo", {}).get('subdomain', None),    # 站点域名
             'title': result.pop('title', None),                                # 标题
