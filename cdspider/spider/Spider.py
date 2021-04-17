@@ -9,7 +9,6 @@
 :version: SVN: $Id: Spider.py 2266 2018-07-06 06:50:15Z zhangyi $
 """
 import gc
-import json
 import time
 import traceback
 
@@ -242,10 +241,11 @@ class Spider(Component):
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
             try:
-                task_map = json.loads(task)
-                self.debug("%s rpc format message %s, is %s" % (self.__class__.__name__, task_map, type(task_map)))
-                return_result = task_map.pop('return_result', False)
-                ret = self.fetch(task_map, return_result)
+                while isinstance(task, str):
+                    task = json.loads(task)
+                self.debug("%s rpc format message %s, is %s" % (self.__class__.__name__, task, type(task)))
+                return_result = task.pop('return_result', False)
+                ret = self.fetch(task, return_result)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
                     parsed, broken_exc, last_source, final_url, save = ret[0]
                 else:
