@@ -11,13 +11,13 @@
 import gc
 import time
 import traceback
-import tornado.ioloop
-from six.moves import queue
 
+import tornado.ioloop
 from cdspider import Component
 from cdspider.handler import BaseHandler, Loader
-from cdspider.libs.tools import *
 from cdspider.libs.constants import *
+from cdspider.libs.tools import *
+from six.moves import queue
 
 
 class Spider(Component):
@@ -241,9 +241,9 @@ class Spider(Component):
             sys.stdout = r_obj
             parsed = broken_exc = last_source = final_url = save = errmsg = None
             try:
-                task = json.loads(task)
-                return_result = task.pop('return_result', False)
-                ret = self.fetch(task, return_result)
+                task_map = json.loads(task)
+                return_result = task_map.pop('return_result', False)
+                ret = self.fetch(task_map, return_result)
                 if ret and isinstance(ret, (list, tuple)) and isinstance(ret[0], (list, tuple)):
                     parsed, broken_exc, last_source, final_url, save = ret[0]
                 else:
@@ -276,9 +276,9 @@ class Spider(Component):
             return json.dumps(result)
         application.register_function(get_task, 'task')
 
-        import tornado.wsgi
-        import tornado.ioloop
         import tornado.httpserver
+        import tornado.ioloop
+        import tornado.wsgi
 
         container = tornado.wsgi.WSGIContainer(application)
         self.xmlrpc_ioloop = tornado.ioloop.IOLoop()

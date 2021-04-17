@@ -2,9 +2,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 import abc
-import six
 import logging
 
+import six
 from cdspider.libs.utils import md5
 
 

@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-import sys
+import collections
 import copy
 import imp
-import linecache
-import six
-import click
 import json
+import linecache
 import logging
-import redis
-import collections
+import sys
 
+import click
+import redis
+import six
 from cdspider.exceptions import *
 from cdspider.libs import utils
 

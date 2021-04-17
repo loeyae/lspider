@@ -8,11 +8,10 @@
 :date:    2018-8-4 21:00:32
 """
 
-from pymongo import MongoClient
-from pymongo import errors
 from cdspider.exceptions import *
-from . import Base
+from pymongo import MongoClient, errors
 
+from . import Base
 
 # 链接池
 connection_pool = {}

@@ -1,27 +1,28 @@
 # -*- coding: utf-8 -*-
 # Licensed under the Apache License, Version 2.0 (the "License"),
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
-import sys
-import os
-import re
-import logging
-import traceback
-import copy
 import base64
-import json
+import copy
+import datetime
 import hashlib
-import tldextract
-import subprocess
+import json
+import logging
+import os
 import random
-import types
+import re
 import string
+import subprocess
+import sys
+import traceback
+import types
+from multiprocessing import Process
+from threading import Thread
+from urllib import parse
+
 import six
 import stevedore
-import datetime
-from threading import Thread
-from multiprocessing import Process
+import tldextract
 from chardet.universaldetector import UniversalDetector
-from urllib import parse
 from lxml import etree as le
 
 

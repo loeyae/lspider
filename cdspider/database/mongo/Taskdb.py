@@ -9,7 +9,9 @@
 :version: SVN: $Id: Taskdb.py 2141 2018-07-04 06:43:11Z zhangyi $
 """
 import time
+
 from cdspider.database.base import TaskDB as BaseTaskDB
+
 from .Mongo import Mongo, SplitTableMixin
 
 

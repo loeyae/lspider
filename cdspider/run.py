@@ -6,9 +6,10 @@
 __author__ = "Zhang Yi <loeyae@gmail.com>"
 __date__ = "$2018-1-9 18:04:41$"
 
+import logging.config
 import os
 import traceback
-import logging.config
+
 from cdspider.libs.tools import *
 
 cpath = os.path.dirname(os.path.abspath(__file__))
