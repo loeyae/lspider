@@ -57,7 +57,7 @@ class GeneralListHandler(GeneralHandler):
                 'kid': 0,                    # keyword id
                 'frequency': str(rule.get('frequency', self.DEFAULT_FREQUENCY)),
                 'status': urls.get("status", SpiderTaskDB.STATUS_INIT),
-                'expire': int(time.time()) + int(rule.get('frequency', 0)) if int(rule.get('frequency', 0)) > 0 else 0,
+                'expire': int(time.time()) + int(urls.get('expire', 0)) if int(urls.get('expire', 0)) > 0 else 0,
                 'url': urls['url'],          # url
             }
             self.debug("%s newtask: %s" % (self.__class__.__name__, str(task)))
