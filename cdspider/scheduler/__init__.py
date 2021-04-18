@@ -73,7 +73,7 @@ class BaseScheduler(Component):
                 self.schedule(message)
                 time.sleep(0.05)
             except queue.Empty:
-                self.debug("empty queue")
+                # self.debug("empty queue")
                 time.sleep(2)
             except KeyboardInterrupt:
                 pass
