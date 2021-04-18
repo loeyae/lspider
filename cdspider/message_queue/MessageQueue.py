@@ -21,9 +21,11 @@ import amqp
 from six.moves.urllib.parse import unquote
 from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
+
 connection_pool = {}
 channel_pool = {}
 logger = logging.getLogger('queue')
+
 
 def catch_error(func):
     """Catch errors of rabbitmq then reconnect"""
@@ -51,7 +53,9 @@ def catch_error(func):
             logger.error('RabbitMQ error: %r, reconnect.', e)
             self.connect()
             return func(self, *args, **kwargs)
+
     return wrap
+
 
 class PikaQueue(CDBaseQueue):
     """
@@ -62,8 +66,8 @@ class PikaQueue(CDBaseQueue):
     Full = BaseQueue.Full
     max_timeout = 0.3
 
-    def __init__(self, name, user="guest",exchange='', password="guest", host="localhost", port=5672, path='%2F',
-                 maxsize=0, lazy_limit=True, log_level = logging.WARN):
+    def __init__(self, name, user="guest", exchange='', password="guest", host="localhost", port=5672, path='%2F',
+                 maxsize=0, lazy_limit=True, log_level=logging.WARN):
         """
         init
         """
@@ -97,7 +101,6 @@ class PikaQueue(CDBaseQueue):
             self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
             connection_pool[k] = self.connection
-
 
         try:
             self.channel.queue_declare(self.queuename)
@@ -146,7 +149,7 @@ class PikaQueue(CDBaseQueue):
                     time.sleep(self.max_timeout)
 
     @catch_error
-    def put_nowait(self, obj, pack = True):
+    def put_nowait(self, obj, pack=True):
         if self.lazy_limit and self.qsize_diff < self.qsize_diff_limit:
             pass
         elif self.full():
@@ -187,9 +190,9 @@ class PikaQueue(CDBaseQueue):
             if ack:
                 self.channel.basic_ack(method_frame.delivery_tag)
         try:
-            s=umsgpack.unpackb(body)
+            s = umsgpack.unpackb(body)
         except:
-            s=json.loads(body.decode())
+            s = json.loads(body.decode())
         return s
 
     @catch_error
@@ -203,15 +206,17 @@ class PikaQueue(CDBaseQueue):
         except:
             pass
 
+
 class AmqpQueue(PikaQueue):
 
-    def __init__(self, name, user="guest",exchange='', password="guest", host="localhost", port=5672, path='%2F',
+    def __init__(self, name, user="guest", exchange='', password="guest", host="localhost", port=5672, path='%2F',
                  maxsize=0, lazy_limit=True, log_level=logging.WARN):
         """
         init
         """
-        super(AmqpQueue, self).__init__(name=name, exchange=exchange,user=user, password=password, host=host, port=port, path=path,
-                 maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
+        super(AmqpQueue, self).__init__(name=name, exchange=exchange, user=user, password=password, host=host,
+                                        port=port, path=path,
+                                        maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
 
     def connect(self):
         """
@@ -250,7 +255,7 @@ class AmqpQueue(PikaQueue):
         return message_count
 
     @catch_error
-    def put_nowait(self, obj, pack = True):
+    def put_nowait(self, obj, pack=True):
         if self.lazy_limit and self.qsize_diff < self.qsize_diff_limit:
             pass
         elif self.full():
@@ -259,10 +264,7 @@ class AmqpQueue(PikaQueue):
             self.qsize_diff = 0
         with self.lock:
             self.qsize_diff += 1
-            if pack:
-                msg = amqp.Message(umsgpack.packb(obj))
-            else:
-                msg = amqp.Message(json.dumps(obj))
+            msg = amqp.Message(json.dumps(obj))
             return self.channel.basic_publish(msg, exchange=self.exchange, routing_key=self.queuename)
 
     @catch_error
@@ -273,8 +275,6 @@ class AmqpQueue(PikaQueue):
                 raise BaseQueue.Empty
             if ack:
                 self.channel.basic_ack(message.delivery_tag)
-        try:
-            s=umsgpack.unpackb(message.body)
-        except:
-            s=json.loads(message.body.decode())
+
+        s = json.loads(message.body.decode())
         return s

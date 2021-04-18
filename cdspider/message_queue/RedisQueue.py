@@ -18,6 +18,7 @@ from cdspider.message_queue import BaseQueue as CDBaseQueue
 
 connection_pool = {}
 
+
 def catch_error(func):
     """
     Catch errors of redis then reconnect
@@ -45,17 +46,19 @@ def catch_error(func):
                 del connection_pool[k]
             self.connect()
             return func(self, *args, **kwargs)
+
     return wrap
+
 
 class RedisQueue(CDBaseQueue):
 
     def __init__(self, name, user=None, password=None, host="localhost", port=6379, path='0',
-                 maxsize=0, lazy_limit=True, log_level = logging.WARN):
+                 maxsize=0, lazy_limit=True, log_level=logging.WARN):
         """
         init
         """
         super(RedisQueue, self).__init__(name=name, user=user, password=password, host=host, port=port, path=path,
-                 maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
+                                         maxsize=maxsize, lazy_limit=lazy_limit, log_level=log_level)
         if self.lazy_limit and self.maxsize:
             self.qsize_diff_limit = int(self.maxsize * 0.1)
         else:
@@ -133,14 +136,11 @@ class RedisQueue(CDBaseQueue):
         body = self.connect.lpop(self.queuename)
         if body is None:
             raise BaseQueue.Empty
-        try:
-            s=umsgpack.unpackb(body)
-        except:
-            s=json.loads(body.decode())
+        s = json.loads(body.decode())
         return s
 
     @catch_error
-    def put_nowait(self, obj, pack = True):
+    def put_nowait(self, obj, pack=True):
         """
         直接发送
         """
@@ -151,8 +151,6 @@ class RedisQueue(CDBaseQueue):
         else:
             self.qsize_diff = 0
         self.qsize_diff += 1
-        if pack:
-            return self.connect.rpush(self.queuename, umsgpack.packb(obj))
         return self.connect.rpush(self.queuename, json.dumps(obj))
 
     @catch_error
@@ -161,7 +159,6 @@ class RedisQueue(CDBaseQueue):
         queue的条数
         """
         return self.connect.llen(self.queuename)
-
 
     def close(self):
         pass
