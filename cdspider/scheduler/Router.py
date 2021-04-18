@@ -53,6 +53,7 @@ class Router(BaseScheduler):
             while True:
                 has_item = False
                 for item in handler.route(mode, frequency, save):
+                    self.info("%s got route parameter: %s", self.__class__.__name__, json.dumps(item))
                     if item:
                         has_item = True
                         message = {

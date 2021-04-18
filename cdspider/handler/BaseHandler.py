@@ -139,7 +139,7 @@ class BaseHandler(Component):
         offset = cm.get('offset')
         count = cm.get('count')
         total = cm.get('total')
-        self.error("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, frequency, now, total,
+        self.info("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, frequency, now, total,
         offset, count))
         cm.value(count)
         while count > 0 and offset < total:
