@@ -85,8 +85,7 @@ class KafkaQueue(CDBaseQueue):
         # sum=self.connect.latest_available_offsets()[0][0][0]
         c=consumer.consume()
         # self.qsize=sum-c.offset
-        msg=c.value.decode('utf-8')
-        msg=json.loads(msg)
+        msg=json.loads(c.value)
         if msg is None:
             raise BaseQueue.Empty
         return msg

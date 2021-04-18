@@ -276,5 +276,5 @@ class AmqpQueue(PikaQueue):
             if ack:
                 self.channel.basic_ack(message.delivery_tag)
 
-        s = json.loads(message.body.decode())
+        s = json.loads(message.body)
         return s

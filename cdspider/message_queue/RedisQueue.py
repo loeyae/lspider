@@ -136,7 +136,7 @@ class RedisQueue(CDBaseQueue):
         body = self.connect.lpop(self.queuename)
         if body is None:
             raise BaseQueue.Empty
-        s = json.loads(body.decode())
+        s = json.loads(body)
         return s
 
     @catch_error
