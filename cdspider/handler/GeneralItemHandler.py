@@ -105,7 +105,7 @@ class GeneralItemHandler(BaseHandler):
             task中不存在详情规则，根据域名匹配规则库中的规则
             '''
             parse_rule = HandlerUtils.match_detail_rule(self.db, self.task['url'])
-        return parse_rule
+        return parse_rule if parse_rule else {}
 
     def run_parse(self, rule, save={}):
         """
