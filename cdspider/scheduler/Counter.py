@@ -101,7 +101,8 @@ class Counter(object):
             if not self.total is None and self.ctime and self.itime:
                 self.data['avg'] = math.ceil(self.total / (self.ctime / self.itime))
                 return self.data['avg']
-            raise Exception('total not exists or ctime not exists or itime not exists')
+            logging.error('total not exists or ctime not exists or itime not exists')
+            return 0
 
     @property
     def count(self):
