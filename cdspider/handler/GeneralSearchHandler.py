@@ -138,7 +138,7 @@ class GeneralSearchHandler(GeneralHandler):
             rule = self.db['ListRuleDB'].get_detail(int(self.task['rule']))
             if not rule:
                 raise CDSpiderDBDataNotFound("rule: %s not exists" % self.task['rule'])
-            keyword = {'word': self.task['keyword']}
+            keyword = copy.deepcopy(self.task['keyword'])
             if not keyword:
                 raise CDSpiderError("keyword not exists")
             urls = {'url': self.task['url']}
