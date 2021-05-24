@@ -141,7 +141,7 @@ class GeneralSearchHandler(GeneralHandler):
             keyword = copy.deepcopy(self.task['keyword'])
             if not keyword:
                 raise CDSpiderError("keyword not exists")
-            urls = {"url": self.task['url']}
+            urls = {'url': self.task['url']}
         else:
             keyword = self.db['KeywordsDB'].get_detail(self.task['kid'])
             if not keyword:
