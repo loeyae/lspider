@@ -166,10 +166,10 @@ class GeneralSearchHandler(GeneralHandler):
         klist = rule['request'].pop('hard_code', [])
         self.debug("Keyword setting: %s" % (str(klist)))
         kset = {}
-        if klist and len(klist) > 1:
+        if klist and len(klist) > 0:
             for item in klist:
-                if item['attr'] == "keyword":
-                    kset = item;
+                if item['attr'] == 'keyword':
+                    kset = item
                     break
 
         self.debug("Keyword setting: %s" % (str(kset)))
