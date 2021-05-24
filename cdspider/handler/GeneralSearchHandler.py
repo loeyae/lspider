@@ -174,6 +174,7 @@ class GeneralSearchHandler(GeneralHandler):
                 "value": quote_plus(keyword['word'].encode()) if mode != 'post' else keyword['word'],
             }],
         }
+        self.debug("Got keyword: %s" % str(keyword))
         now = int(time.time())
         params = {"lastmonth": now - 30 * 86400, "lastweek": now - 7 * 86400,
                   "yesterday": now - 86400, "lasthour": now - 36000, "now": now}
