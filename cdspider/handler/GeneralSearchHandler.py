@@ -163,7 +163,13 @@ class GeneralSearchHandler(GeneralHandler):
                 raise CDSpiderDBDataNotFound("task rule by tid: %s not exists" % self.task['tid'])
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("rule: %s not active" % rule['uuid'])
-        kset = rule['request'].pop('hard_code', {})
+        klist = rule['request'].pop('hard_code', [])
+        kset = {}
+        if klist and len(klist) > 1:
+            for item in klist:
+                if item['attr'] == "keyword":
+                    kset = item;
+                    break
         if 'hard_code' in save:
             del save['hard_code']
         mode = kset.pop('mode', 'format')
