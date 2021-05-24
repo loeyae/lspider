@@ -69,7 +69,7 @@ def build_url_by_rule(rule, params):
         for key, value in params.items():
             replace, subject = rule2subitem(str(key), str(value))
             url = re.sub(replace, subject, url)
-    elif mode == 'get' || mode == 'url':
+    elif mode == 'get' or mode == 'url':
         return build_query(url, params)
     return url
 
