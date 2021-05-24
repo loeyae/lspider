@@ -164,6 +164,7 @@ class GeneralSearchHandler(GeneralHandler):
             if rule['status'] != ListRuleDB.STATUS_ACTIVE:
                 raise CDSpiderHandlerError("rule: %s not active" % rule['uuid'])
         klist = rule['request'].pop('hard_code', [])
+        self.debug("Keyword setting: %s" % (str(klist)))
         kset = {}
         if klist and len(klist) > 1:
             for item in klist:
