@@ -171,6 +171,8 @@ class GeneralSearchHandler(GeneralHandler):
                 if item['attr'] == "keyword":
                     kset = item;
                     break
+
+        self.debug("Keyword setting: %s" % (str(kset)))
         if 'hard_code' in save:
             del save['hard_code']
         mode = kset.pop('mode', 'format')
@@ -185,7 +187,7 @@ class GeneralSearchHandler(GeneralHandler):
         now = int(time.time())
         params = {"lastmonth": now - 30 * 86400, "lastweek": now - 7 * 86400,
                   "yesterday": now - 86400, "lasthour": now - 36000, "now": now}
-        self.task['url'] = utils.build_url_by_rule({"base": urls['url'], "mode": "format"}, params)
+        self.task['url'] = utils.build_url_by_rule({"base": urls['url'], "mode": mode}, params)
         self.task['keyword'] = keyword
         save['base_url'] = self.task['url']
         save['paging'] = True
