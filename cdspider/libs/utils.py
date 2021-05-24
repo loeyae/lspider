@@ -498,7 +498,7 @@ def url_encode(params):
     t = sorted(g_encode_params.items(), key=lambda item: item[0])
     query_str = []
     for item in t:
-        query_str.append("%s=%s" % (item[0], parse.quote_plus(item[1])))
+        query_str.append("%s=%s" % (item[0], parse.quote_plus(item[1].encode())))
     return "&". join(query_str)
 
 
