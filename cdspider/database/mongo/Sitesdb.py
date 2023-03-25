@@ -64,7 +64,7 @@ class SitesDB(Mongo, BaseSitesDB):
 
     def update(self, id, obj={}):
         obj['utime'] = int(time.time())
-        return super(SitesDB, self).update(setting=obj, where={'sid': int(id)}, multi=False)
+        return super(SitesDB, self).update(setting=obj, where={'uuid': int(id)}, multi=False)
 
     def update_many(self, obj={},where=None):
         if where == {} or (where is None):

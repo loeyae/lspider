@@ -59,6 +59,8 @@ def cli(ctx, **kwargs):
         app_config = {}
 
     db_setting = kwargs.get('database')
+    if isinstance(db_setting, six.string_types):
+        db_setting = json.loads(db_setting)
     db_object = {}
     if db_setting:
         connector = connect_db(ctx, None, db_setting)
@@ -69,6 +71,8 @@ def cli(ctx, **kwargs):
 
     queue_object = {}
     queue_setting = kwargs.get("message_queue")
+    if isinstance(queue_setting, six.string_types):
+        queue_setting = json.loads(queue_setting)
     if queue_setting:
         queue_setting.setdefault('maxsize', kwargs.get('queue_maxsize'))
         queue_setting.setdefault('queue_prefix', kwargs.get('queue_prefix', ''))
@@ -411,8 +415,7 @@ def newtask_work(ctx, worker_cls, no_loop,  get_object=False):
 
 @cli.command()
 @click.option('--worker-cls', default='cdspider.worker.DownloadWorker', callback=load_cls,
-              help='worker '
-                                                                                         'class name')
+              help='worker class name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
 def download_work(ctx, worker_cls, no_loop,  get_object=False):
@@ -437,7 +440,7 @@ def download_work(ctx, worker_cls, no_loop,  get_object=False):
 @click.option('--run-in', default='subprocess', type=click.Choice(['subprocess', 'thread']),
               help='运行模式:subprocess or thread')
 @click.pass_context
-def all(ctx, fetch_num, schedule_num, run_in):
+def all(ctx, fetch_num, plantask_schedule_num, run_in):
     """
     集成运行整个系统
     """
@@ -453,12 +456,11 @@ def all(ctx, fetch_num, schedule_num, run_in):
     try:
         # route
         route_config = g['config'].get('route', {})
-        route_config.setdefault('xmlrpc_host', '127.0.0.1')
         threads.append(run_in(ctx.invoke, route, **route_config))
 
         # schedule
         schedule_config = g['config'].get('schedule', {})
-        for i in range(schedule_num):
+        for i in range(plantask_schedule_num):
             threads.append(run_in(ctx.invoke, schedule, **schedule_config))
 
         # schedule_rpc
