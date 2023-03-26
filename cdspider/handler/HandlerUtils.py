@@ -6,11 +6,12 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2019/4/14 21:27
 """
-import time
 import copy
 import re
+import time
 import traceback
 from urllib.parse import urlparse, urlunparse
+
 from cdspider.libs import utils
 from cdspider.libs.constants import *
 
@@ -80,17 +81,17 @@ class HandlerUtils(object):
     @classmethod
     def build_log(cls, mode, task, crawl_id):
         return {
-            'stid': task['uuid'],          # task id
-            'pid': task['pid'],            # project id
-            'sid': task['sid'],            # site id
-            'tid': task['tid'],            # task id
-            'uid': task.get('uid', 0),     # url id
-            'kid': task.get('kid', 0),     # keyword id
-            'rid': task.get('rid', 0),     # rule id
-            'mode': mode,                  # handler mode
+            'stid': task['uuid'],  # task id
+            'pid': task['pid'],  # project id
+            'sid': task['sid'],  # site id
+            'tid': task['tid'],  # task id
+            'uid': task.get('uid', 0),  # url id
+            'kid': task.get('kid', 0),  # keyword id
+            'rid': task.get('rid', 0),  # rule id
+            'mode': mode,  # handler mode
             'frequency': task.get('frequency', None),
-            'crawl_start': crawl_id,       # crawl start time
-            'ctime': crawl_id              # create time
+            'crawl_start': crawl_id,  # crawl start time
+            'ctime': crawl_id  # create time
         }
 
     @classmethod
@@ -187,27 +188,27 @@ class HandlerUtils(object):
     @classmethod
     def build_update_log(cls, crawl_info):
         return {
-            'crawl_urls': crawl_info['crawl_urls'],                    # {page: request url, ...}
-            'crawl_end': int(time.time()),                             # crawl end time
-            'total': crawl_info['crawl_count']['total'],               # 抓取到的数据总数
-            'new_count': crawl_info['crawl_count']['new_count'],       # 抓取到的数据入库数'
-            'repeat_count': crawl_info['crawl_count']['repeat_count'], # 抓取到的数据重复数
-            'page': crawl_info['crawl_count']['page'],                 # 抓取的页数
-            'repeat_page': crawl_info['crawl_count']['repeat_page'],   # 重复的页数
-            'errid': crawl_info.get('errid', 0),                       # 如果有错误，关联的错误日志ID
+            'crawl_urls': crawl_info['crawl_urls'],  # {page: request url, ...}
+            'crawl_end': int(time.time()),  # crawl end time
+            'total': crawl_info['crawl_count']['total'],  # 抓取到的数据总数
+            'new_count': crawl_info['crawl_count']['new_count'],  # 抓取到的数据入库数'
+            'repeat_count': crawl_info['crawl_count']['repeat_count'],  # 抓取到的数据重复数
+            'page': crawl_info['crawl_count']['page'],  # 抓取的页数
+            'repeat_page': crawl_info['crawl_count']['repeat_page'],  # 重复的页数
+            'errid': crawl_info.get('errid', 0),  # 如果有错误，关联的错误日志ID
         }
-    
+
     @classmethod
     def build_error_log(cls, tid, mode, crawl_id, frequency, url, exc):
         return {
-            'tid': tid,                                 # spider task id
+            'tid': tid,  # spider task id
             'mode': mode,
             'create_at': crawl_id,
-            'frequency': frequency,                     # process info
-            'url': url,                                 # error message
-            'error': str(exc),                          # create time
-            'msg': str(traceback.format_exc()),         # trace log
-            'class': exc.__class__.__name__,            # error class
+            'frequency': frequency,  # process info
+            'url': url,  # error message
+            'error': str(exc),  # create time
+            'msg': str(traceback.format_exc()),  # trace log
+            'class': exc.__class__.__name__,  # error class
         }
 
     @classmethod
@@ -234,7 +235,7 @@ class HandlerUtils(object):
                     将第一条规则选择为返回的默认值
                     '''
                     parse_rule = item
-                if  'urlPattern' in item and item['urlPattern']:
+                if 'urlPattern' in item and item['urlPattern']:
                     '''
                     如果规则中存在url匹配规则，则进行url匹配规则验证
                     '''
@@ -252,7 +253,7 @@ class HandlerUtils(object):
                     将第一条规则选择为返回的默认值
                     '''
                     parse_rule = item
-                if  'urlPattern' in item and item['urlPattern']:
+                if 'urlPattern' in item and item['urlPattern']:
                     '''
                     如果规则中存在url匹配规则，则进行url匹配规则验证
                     '''
