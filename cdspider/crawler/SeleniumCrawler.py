@@ -16,6 +16,8 @@ from http.client import BadStatusLine
 from urllib.error import URLError
 from selenium import webdriver
 from selenium.common.exceptions import *
+from selenium.webdriver.chrome.options import Options as ChromeOpts
+from selenium.webdriver.firefox.options import Options as FirefoxOpts
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -24,7 +26,7 @@ from cdspider.exceptions import *
 from cdspider.libs import utils
 from cdspider.libs.constants import BROKEN_EXCEPTIONS
 
-IGNORED_EXCEPTIONS = (NoSuchElementException, BadStatusLine, URLError, )
+IGNORED_EXCEPTIONS = (NoSuchElementException, BadStatusLine, URLError,)
 
 
 class SeleniumCrawler(BaseCrawler):
@@ -47,15 +49,13 @@ class SeleniumCrawler(BaseCrawler):
         :param kwargs:
         """
         self._driver = None
-        self._cap = self._init_cap()
+        config = kwargs.pop('crawler_config', {})
+        self.engine = config.get('engine', 'remote')
+        self.exec_path = config.get('exec_path', None)
+        self._cap = self._init_cap(self.engine)
         # path = os.path.join(os.path.dirname(__file__), os.pardir)
         self.service_args = {"--webdriver-loglevel": "WARN", "--web-security": "false", "--ignore-ssl-errors": "true"}
-        if os.path.exists('/usr/bin/phantomjs'):
-            self.execut = '/usr/bin/phantomjs'
-        elif os.path.exists('/usr/local/bin/phantomjs'):
-            self.execut = '/usr/local/bin/phantomjs'
-        else:
-            self.execut = 'phantomjs'
+        self._init_exec_path()
         self._encoding = "UTF-8"
         super(SeleniumCrawler, self).__init__(*args, **kwargs)
 
@@ -84,26 +84,55 @@ class SeleniumCrawler(BaseCrawler):
             self._driver.quit()
 
     @staticmethod
-    def _init_cap():
+    def _init_cap(engine):
         """
         初始化DesiredCapabilities
         :return:
         """
-        cap = webdriver.DesiredCapabilities.PHANTOMJS.copy()
-        # cap["phantomjs.page.settings.resourceTimeout"] = 1000
-        # cap["phantomjs.page.customHeaders.Accept"] = '*/*'
-        # cap["phantomjs.page.customHeaders.accept"] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-        # cap["phantomjs.page.customHeaders.Accept-Encoding"] = 'gzip, deflate, sdch, br'
-        # cap["phantomjs.page.customHeaders.accept-language"] = 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3'
-        # cap["phantomjs.page.customHeaders.x-insight"] = '1'
-        # cap["phantomjs.page.customHeaders.upgrade-insecure-requests"] = '1'
-        # cap["phantomjs.page.customHeaders.Connection"] = 'Keep-Alive'
-        cap["browserName"] = "chrome"
-        cap["browserVersion"] = "54.0.2840.71"
-        cap["platformName"] = "Windows"
-        cap["phantomjs.page.settings.loadImages"] = False
-        # cap["phantomjs.page.settings.localToRemoteUrlAccessEnabled"] = True
-        return cap
+        if engine == 'remote':
+            cap = webdriver.DesiredCapabilities.CHROME.copy()
+            # cap["phantomjs.page.settings.resourceTimeout"] = 1000
+            # cap["phantomjs.page.customHeaders.Accept"] = '*/*'
+            # cap["phantomjs.page.customHeaders.accept"] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            # cap["phantomjs.page.customHeaders.Accept-Encoding"] = 'gzip, deflate, sdch, br'
+            # cap["phantomjs.page.customHeaders.accept-language"] = 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3'
+            # cap["phantomjs.page.customHeaders.x-insight"] = '1'
+            # cap["phantomjs.page.customHeaders.upgrade-insecure-requests"] = '1'
+            # cap["phantomjs.page.customHeaders.Connection"] = 'Keep-Alive'
+            cap["browserName"] = "chrome"
+            cap["platform"] = "Windows"
+            cap["version"] = "10"
+            # cap["phantomjs.page.settings.localToRemoteUrlAccessEnabled"] = True
+            return cap
+        else:
+            cap = webdriver.DesiredCapabilities.PHANTOMJS.copy()
+            # cap["phantomjs.page.settings.resourceTimeout"] = 1000
+            # cap["phantomjs.page.customHeaders.Accept"] = '*/*'
+            # cap["phantomjs.page.customHeaders.accept"] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            # cap["phantomjs.page.customHeaders.Accept-Encoding"] = 'gzip, deflate, sdch, br'
+            # cap["phantomjs.page.customHeaders.accept-language"] = 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3'
+            # cap["phantomjs.page.customHeaders.x-insight"] = '1'
+            # cap["phantomjs.page.customHeaders.upgrade-insecure-requests"] = '1'
+            # cap["phantomjs.page.customHeaders.Connection"] = 'Keep-Alive'
+            cap["browserName"] = "chrome"
+            cap["version"] = "10"
+            cap["platform"] = "Windows"
+            cap["phantomjs.page.settings.loadImages"] = False
+            # cap["phantomjs.page.settings.localToRemoteUrlAccessEnabled"] = True
+            return cap
+
+    def _init_exec_path(self):
+        if self.exec_path is None:
+            if self.engine == 'phantomjs':
+                if os.path.exists('/usr/bin/phantomjs'):
+                    self.exec_path = '/usr/bin/phantomjs'
+                elif os.path.exists('/usr/local/bin/phantomjs'):
+                    self.exec_path = '/usr/local/bin/phantomjs'
+                else:
+                    self.exec_path = 'phantomjs'
+            elif self.engine == 'remote':
+                if self.exec_path is None:
+                    self.exec_path = 'http://192.168.163.94:4444/wd/hub'
 
     def _init_driver(self):
         """
@@ -115,18 +144,40 @@ class SeleniumCrawler(BaseCrawler):
             self.parse_proxy(**self._proxy)
             self._proxy['init'] = False
         service_args = None
+        options = None
+        if self.engine == 'remote':
+            options = ChromeOpts()
+            # options.add_argument('--no-sandbox')
+            if '--proxy-server' in self.service_args and self.service_args['--proxy-server']:
+                options.add_argument('--proxy-server=' + self.service_args['--proxy-server'])
+
         if self.service_args:
             service_args = [k + "=" + v for k, v in self.service_args.items()]
             self.info("Selenium set service_args: %s" % (str(service_args)))
-        self._driver = webdriver.PhantomJS(executable_path=self.execut, service_args=service_args)
+        if self.engine == 'remote':
+            self._driver = webdriver.Remote(command_executor=self.exec_path, desired_capabilities=options.to_capabilities())
+        else:
+            self._driver = webdriver.PhantomJS(executable_path=self.exec_path, service_args=service_args)
 
     def start(self):
         headers = self.fetch.get('headers')
         if headers:
             for k, v in headers.items():
-                self._cap["phantomjs.page.customHeaders."+ k] = utils.quote_chinese(v)
+                if self.engine == 'chrome':
+                    # self._cap["chrome.page.customHeaders." + k] = utils.quote_chinese(v)
+                    pass
+                else:
+                    self._cap["phantomjs.page.customHeaders." + k] = utils.quote_chinese(v)
 
-        self._driver.start_session(self._cap)
+        if self.engine == 'chrome':
+            self.close()
+            self._driver.start_session(capabilities=self._cap)
+        elif self.engine == 'firefox':
+            self.close()
+            self._driver.start_session(capabilities=self._cap)
+        else:
+            self.close()
+            self._driver.start_session(capabilities=self._cap)
 
         for cookie in self._cookies:
             self._driver.add_cookie(dict(cookie))
@@ -183,7 +234,7 @@ class SeleniumCrawler(BaseCrawler):
         self._prepare_setting(**kwargs)
         curl = self._join_url(kwargs['url'])
         self._prepare_request(curl)
-        self.start()
+        # self.start()
         self.info("Selenium request url: %s" % curl)
         try:
             self._driver.get(curl)
@@ -322,7 +373,7 @@ class SeleniumCrawler(BaseCrawler):
             elements.double_click()
         if 'wait' in kwargs:
             if not isinstance(kwargs['wait'], dict):
-                    raise CDSpiderSettingError('Invalid wait setting')
+                raise CDSpiderSettingError('Invalid wait setting')
             self.wait_element(**kwargs['wait'])
         self.switch_window()
         return self
@@ -346,7 +397,7 @@ class SeleniumCrawler(BaseCrawler):
             self.chains().key_down(value)
         if 'wait' in kwargs:
             if not isinstance(kwargs['wait'], dict):
-                    raise CDSpiderSettingError('Invalid wait setting')
+                raise CDSpiderSettingError('Invalid wait setting')
             self.wait_element(**kwargs['wait'])
         self.switch_window()
         return self
@@ -370,7 +421,7 @@ class SeleniumCrawler(BaseCrawler):
             self.chains().key_up(value)
         if 'wait' in kwargs:
             if not isinstance(kwargs['wait'], dict):
-                    raise CDSpiderSettingError('Invalid wait setting')
+                raise CDSpiderSettingError('Invalid wait setting')
             self.wait_element(**kwargs['wait'])
         self.switch_window()
         return self
@@ -398,7 +449,7 @@ class SeleniumCrawler(BaseCrawler):
         item.send_keys(value)
         if 'wait' in kwargs:
             if not isinstance(kwargs['wait'], dict):
-                    raise CDSpiderSettingError('Invalid wait setting')
+                raise CDSpiderSettingError('Invalid wait setting')
             self.wait_element(**kwargs['wait'])
         self.switch_window()
         return self
@@ -478,12 +529,14 @@ class SeleniumCrawler(BaseCrawler):
                 del self.service_args['--proxy']
             if "--proxy-auth" in self.service_args:
                 del self.service_args['--proxy-auth']
+            if "--proxy-sever" in self.service_args:
+                del self.service_args['--proxy-sever']
             # if "phantomjs.page.settings.proxyType" in self._cap:
-                # del self._cap['phantomjs.page.settings.proxyType']
+            # del self._cap['phantomjs.page.settings.proxyType']
             # if "phantomjs.page.settings.proxy" in self._cap:
-                # del self._cap['phantomjs.page.settings.proxy']
+            # del self._cap['phantomjs.page.settings.proxy']
             # if "phantomjs.page.settings.proxyAuth" in self._cap:
-                # del self._cap['phantomjs.page.settings.proxyAuth']
+            # del self._cap['phantomjs.page.settings.proxyAuth']
         else:
             setting = {}
             if type == 'socks':
@@ -509,9 +562,12 @@ class SeleniumCrawler(BaseCrawler):
             if user:
                 auths = user
                 if password:
-                    auths += ':'+ password
+                    auths += ':' + password
                 setting["--proxy-auth"] = auths
+                setting["--proxy-server"] = setting['--proxy-type'] + '://' + setting['--proxy-auth'] + '@' + setting['--proxy']
                 # setting["phantomjs.page.settings.proxyAuth"] = auths
+            else:
+                setting["--proxy-server"] = setting['--proxy-type'] + '://' + setting['--proxy']
             self.service_args.update(setting)
             # self._cap.update(setting)
 
@@ -533,7 +589,7 @@ class SeleniumCrawler(BaseCrawler):
         except Exception as e:
             raise CDSpiderCrawlerNotFoundEelement(e, self._base_url, self.final_url, rule=selector)
 
-    def find_by_eq(self, selector, index = 0):
+    def find_by_eq(self, selector, index=0):
         """
         获取给定index的符合css选择器内容
         """
@@ -688,12 +744,23 @@ class SeleniumCrawler(BaseCrawler):
 
 
 if __name__ == "__main__":
-    crawler = SeleniumCrawler()
+    settings = {
+        "engine": "remote",
+        # "exec_path": "E:/Application/phantomjs/bin/phantomjs"
+        # "exec_path": "E:/Application/chromedriver_win32/chromedriver"
+    }
+    crawler = SeleniumCrawler(**settings)
+    crawler.set_proxy(addr="192.168.163.90:8888", type="http")
+
+
     def f(result):
         print(result)
+
+
     fetch = {
         "method": "GET",
-        "url": "http://www.ip138.com/",
+        "url": "https://www.amazon.cn/dp/B09YL4ZMDT",
         "callback": f
     }
     crawler.crawl(**fetch)
+    crawler.quit()

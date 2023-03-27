@@ -17,5 +17,11 @@
         "password": "0f87990482b26838c1c2702cb1145007",
         "maxsize": 1000000,
         "queue_prefix": "local"
+    },
+    "crawler": {
+        "selenium": {
+            "engine": "phantomjs",
+            "exec_path": "/usr/bin/phantomjs"
+        }
     }
 }

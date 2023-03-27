@@ -76,7 +76,7 @@ class HandlerUtils(object):
         :param rule: 爬虫规则
         """
         crawler = rule.get('crawler', '') or 'requests'
-        return utils.load_crawler(crawler, proxy=rule.get('proxy'), log_level=log_level)
+        return utils.load_crawler(crawler, config=rule.get("crawler_config"), proxy=rule.get('proxy'), log_level=log_level)
 
     @classmethod
     def build_log(cls, mode, task, crawl_id):

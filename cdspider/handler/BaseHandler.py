@@ -58,6 +58,7 @@ class BaseHandler(Component):
         self.task = task or {}
         g = context.obj
         self.proxy = g.get("proxy", None)
+        self.crawler_setting = g.get("crawler", {})
         self.logger = kwargs.pop('logger', logging.getLogger('handler'))
         self.log_level = logging.WARN
         if g.get('debug', False):
