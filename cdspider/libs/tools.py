@@ -20,6 +20,7 @@ class Redis():
     """
     redis连接库
     """
+
     def __init__(self, *args, **kwargs):
         if len(args) == 1:
             kwargs['url'] = args[0]
@@ -43,7 +44,8 @@ class Redis():
             if 'url' in self.setting:
                 self.setting['pool'] = redis.ConnectionPool.from_url(url=self.setting['url'], db=self.setting['db'])
             else:
-                self.setting['pool'] = redis.ConnectionPool(host=self.setting['host'], port=self.setting['port'], db=self.setting['db'], password=self.setting['pass'])
+                self.setting['pool'] = redis.ConnectionPool(host=self.setting['host'], port=self.setting['port'],
+                                                            db=self.setting['db'], password=self.setting['pass'])
         self._conn = redis.Redis(connection_pool=self.setting['pool'])
 
     def __getattr__(self, name):
@@ -60,7 +62,7 @@ class db_wrapper(collections.UserDict):
     connector = None
     protocol = None
 
-    def __init__(self, connector, protocol, log_level = logging.WARN):
+    def __init__(self, connector, protocol, log_level=logging.WARN):
         self.connector = connector
         self.protocol = protocol
         self.log_level = log_level
@@ -99,10 +101,12 @@ class queue_wrapper(collections.UserDict):
         self.data[key] = cls
         return cls
 
+
 def underline_dict(d):
     if not isinstance(d, dict):
         return d
     return dict((k.replace('-', '_'), underline_dict(v)) for k, v in six.iteritems(d))
+
 
 def read_config(ctx, param, value):
     """
@@ -115,12 +119,14 @@ def read_config(ctx, param, value):
     ctx.default_map = config
     return config
 
+
 def load_config(ctx, param, value):
     if value is None:
         return None
     if not value:
         return {}
     return underline_dict(json.load(value))
+
 
 def load_crawler(ctx, param, value):
     """
@@ -130,8 +136,9 @@ def load_crawler(ctx, param, value):
         log_level = logging.WARN
         if ctx.obj.get("debug", False):
             log_level = logging.DEBUG
-        return utils.load_crawler(value, log_level = log_level)
+        return utils.load_crawler(value, config=ctx.obj.get('crawler_setting'), log_level=log_level)
     return value
+
 
 def load_parser(ctx, param, value):
     """
@@ -141,8 +148,9 @@ def load_parser(ctx, param, value):
         log_level = logging.WARN
         if ctx.obj.get("debug", False):
             log_level = logging.DEBUG
-        return utils.load_parser(value, log_level = log_level)
+        return utils.load_parser(value, log_level=log_level)
     return value
+
 
 def connect_message_queue(ctx, param, value):
     """
@@ -155,7 +163,7 @@ def connect_message_queue(ctx, param, value):
     if isinstance(param, click.core.Option):
         name = value.get('name', param.name)
     else:
-        name =  value.get('name', param)
+        name = value.get('name', param)
     if prefix:
         name = "%s_%s" % (prefix, name)
     host = value.get('host', 'localhost')
@@ -167,10 +175,11 @@ def connect_message_queue(ctx, param, value):
     log_level = logging.WARN
     if ctx.params.get("debug", ctx.obj.get('debug') if ctx.obj else False):
         log_level = logging.DEBUG
-    qo = utils.load_queue(protocol, name = name, host = host, port = port,
-        user = user, password = password, maxsize = maxsize,
-        lazy_limit = lazy_limit, log_level = log_level)
+    qo = utils.load_queue(protocol, name=name, host=host, port=port,
+                          user=user, password=password, maxsize=maxsize,
+                          lazy_limit=lazy_limit, log_level=log_level)
     return qo
+
 
 def connect_db(ctx, param, value):
     """
@@ -193,8 +202,8 @@ def connect_db(ctx, param, value):
     if protocol == 'hive':
         config = ctx.params.get('config').get('redis')
         kwargs['redis'] = Redis(**config)
-    connector =  utils.load_db(protocol, host = host, port = port, db = db, user = user,
-        password = password, logger=logger, log_level = log_level, **kwargs)
+    connector = utils.load_db(protocol, host=host, port=port, db=db, user=user,
+                              password=password, logger=logger, log_level=log_level, **kwargs)
     return connector
 
 
@@ -245,10 +254,12 @@ class ModulerLoader(object):
             return script.encode('utf8')
         return script
 
+
 def load_cls(ctx, param, value):
     if isinstance(value, six.string_types):
         return utils.get_object(value)
     return value
+
 
 def load_param(ctx, param, value):
     return json.loads(value)

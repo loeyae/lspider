@@ -8,19 +8,21 @@
 """
 
 import os
+import random
+import re
 import time
 import traceback
-import re
-import random
 from urllib.parse import urljoin
-from cdspider.scheduler import CounterMananger
+
 from cdspider.crawler import BaseCrawler
 from cdspider.crawler import RequestsCrawler
-from cdspider.libs.tools import *
-from cdspider.parser import *
-from cdspider.libs.url_builder import UrlBuilder
 from cdspider.libs.constants import *
+from cdspider.libs.tools import *
+from cdspider.libs.url_builder import UrlBuilder
+from cdspider.parser import *
 from cdspider.parser import CustomParser
+from cdspider.scheduler import CounterMananger
+
 from .HandlerUtils import HandlerUtils
 
 
@@ -58,7 +60,7 @@ class BaseHandler(Component):
         self.task = task or {}
         g = context.obj
         self.proxy = g.get("proxy", None)
-        self.crawler_setting = g.get("crawler", {})
+        self.crawler_setting = g.get("crawler_setting", {})
         self.logger = kwargs.pop('logger', logging.getLogger('handler'))
         self.log_level = logging.WARN
         if g.get('debug', False):
@@ -141,7 +143,7 @@ class BaseHandler(Component):
         count = cm.get('count')
         total = cm.get('total')
         self.info("%s route %s @ %s, total: %s offset: %s count: %s" % (self.__class__.__name__, frequency, now, total,
-        offset, count))
+                                                                        offset, count))
         cm.value(count)
         while count > 0 and offset < total:
             yield {"offset": offset, "count": self.ROUTE_LIMIT if count > self.ROUTE_LIMIT else count}
@@ -243,7 +245,7 @@ class BaseHandler(Component):
         """
         return None
 
-    def handler_register(self, handle_type, priority = 1000):
+    def handler_register(self, handle_type, priority=1000):
         """
         handler register
         :param handle_type: any of cdspider.libs.constants.(HANDLER_FUN_INIT, HANDLER_FUN_PROCESS,
@@ -262,6 +264,7 @@ class BaseHandler(Component):
                     self.handle[_type] = []
                 self.handle[_type].append((priority, fn))
             return fn
+
         return _handler_register
 
     def handler_run(self, handle_type, kwargs):
@@ -276,7 +279,7 @@ class BaseHandler(Component):
         for _type in handle_type:
             func_list = self.handle.get(_type, None)
             if func_list:
-                for _,fn in sorted(func_list, reverse=True):
+                for _, fn in sorted(func_list, reverse=True):
                     if callable(fn):
                         fn(self, kwargs)
 
@@ -400,6 +403,7 @@ class BaseHandler(Component):
         """
 
         request = utils.dictjoin(self.process.get('request', {}), copy.deepcopy(self.DEFAULT_PROCESS['request']))
+        request['crawler_setting'] = self.crawler_setting
         if 'cookies_list' in request and request['cookies_list']:
             request['cookies'] = random.choice(request['cookies_list'])
             self.debug("%s parsed cookie: %s" % (self.__class__.__name__, request['cookies']))
@@ -441,7 +445,7 @@ class BaseHandler(Component):
                                       log_level=self.log_level, url=self.response['final_url']);
                 parsed = parser.parse()
                 if parsed and "ele" in parsed and parsed["ele"]:
-                    self.response['broken_exc'] =  CDSpiderCrawlerForbidden()
+                    self.response['broken_exc'] = CDSpiderCrawlerForbidden()
                 return False
         self.debug("%s validate pass" % self.__class__.__name__)
         return True
@@ -494,7 +498,7 @@ class BaseHandler(Component):
     def url_prepare(self, url):
         return url
 
-    def build_url_by_rule(self, data, base_url = None):
+    def build_url_by_rule(self, data, base_url=None):
         """
         根据url规则格式化url
         :param data 解析到的数据
@@ -645,8 +649,8 @@ class BaseHandler(Component):
         # if isinstance(broken_exc, (CDSpiderCrawlerForbidden,)):
         if isinstance(self.crawler, RequestsCrawler):
             self.info('Change crawler to Tornado')
-            self.crawler  = None
-            self.crawler = utils.load_crawler('tornado', log_level=self.log_level)
+            self.crawler = None
+            self.crawler = utils.load_crawler('tornado', config=self.crawler_setting, log_level=self.log_level)
         else:
             self.force_proxy = True
         if isinstance(broken_exc, (CDSpiderCrawlerProxyError, CDSpiderCrawlerProxyExpired)):

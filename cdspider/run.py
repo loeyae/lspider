@@ -26,14 +26,16 @@ cpath = os.path.dirname(os.path.abspath(__file__))
 @click.option('--debug', default=False, is_flag=True, help='debug模式', show_default=True)
 @click.option('--db-debug', default=False, is_flag=True, help='database debug模式', show_default=True)
 @click.option('--sdebug', default=False, is_flag=True, help='source debug模式', show_default=True)
-@click.option('--runtime-dir', default=None, help ='runtime文件夹', show_default=True)
-@click.option('--database', help='数据库设置, default: '
-              '{protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: cdspider}')
+@click.option('--runtime-dir', default=None, help='runtime文件夹', show_default=True)
+@click.option('--database',
+              help='数据库设置, default: {protocol: mongo, host: host, port: 27017, user: guest, password: guest, db: cdspider}')
 @click.option('--proxy', default=None, help='代理设置', show_default=True)
 @click.option('--queue-maxsize', default=1000, help='queue最大阈值', show_default=True)
 @click.option('--queue-prefix', default=None, help='queue的前缀', show_default=True)
-@click.option('--message-queue', help='queue设置, default: '
-              'message_queue: {protocol: amqp, host: host, port: 5672, user: guest, password: guest}')
+@click.option('--message-queue',
+              help='queue设置, default: message_queue: {protocol: amqp, host: host, port: 5672, user: guest, password: guest}')
+@click.option('--crawler-setting',
+              help='采集其设置, default: crawler_setting: {selenium: {engine: remote, exec_path: http://127.0.0.1:4444/wd/hub}}')
 @click.option('--add-sys-path/--not-add-sys-path', default=False, is_flag=True,
               help='增加当前文件夹路径到系统路径', show_default=True)
 @click.option('--testing-mode', default=False, is_flag=True, help='debug mode', show_default=True)
@@ -60,11 +62,12 @@ def cli(ctx, **kwargs):
 
     db_setting = kwargs.get('database')
     if isinstance(db_setting, six.string_types):
-        db_setting = json.loads(db_setting)
+        db_setting = json.loads(json.dumps(eval(db_setting)))
     db_object = {}
     if db_setting:
         connector = connect_db(ctx, None, db_setting)
-        db_object = db_wrapper(connector, db_setting.get('protocol'), log_level=logging.DEBUG if kwargs['db_debug'] else logging.WARN)
+        db_object = db_wrapper(connector, db_setting.get('protocol'),
+                               log_level=logging.DEBUG if kwargs['db_debug'] else logging.WARN)
     else:
         kwargs['testing_mode'] = True
     kwargs['db'] = db_object
@@ -72,7 +75,7 @@ def cli(ctx, **kwargs):
     queue_object = {}
     queue_setting = kwargs.get("message_queue")
     if isinstance(queue_setting, six.string_types):
-        queue_setting = json.loads(queue_setting)
+        queue_setting = json.loads(json.dumps(eval(queue_setting)))
     if queue_setting:
         queue_setting.setdefault('maxsize', kwargs.get('queue_maxsize'))
         queue_setting.setdefault('queue_prefix', kwargs.get('queue_prefix', ''))
@@ -90,10 +93,11 @@ def cli(ctx, **kwargs):
         ctx.invoke(all)
     return ctx
 
+
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Router', callback=load_cls, help='schedule name')
-@click.option('-m', '--mode', default=None, help="分发模式：handle类型,为空时执行全部handle", multiple=True,  show_default=True)
-@click.option('-r', '--frequency', default=None, help="分发模式：更新频率,为空时执行全部frequency", multiple=True,  show_default=True)
+@click.option('-m', '--mode', default=None, help="分发模式：handle类型,为空时执行全部handle", multiple=True, show_default=True)
+@click.option('-r', '--frequency', default=None, help="分发模式：更新频率,为空时执行全部frequency", multiple=True, show_default=True)
 @click.option('-o', '--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
@@ -113,17 +117,18 @@ def route(ctx, scheduler_cls, mode, frequency, outqueue, no_loop, get_object=Fal
     else:
         scheduler.run()
 
+
 @cli.command()
 @click.option('--scheduler-cls', default='cdspider.scheduler.Scheduler', callback=load_cls, help='schedule name')
 @click.option('-i', '--inqueue', default=None, help='监听的queue', show_default=True)
 @click.option('-o', '--outqueue', default=None, help='输出的queue', show_default=True)
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop,  get_object=False):
+def schedule(ctx, scheduler_cls, inqueue, outqueue, no_loop, get_object=False):
     """
     根据路由的分发，将爬虫任务入队
     """
-    g=ctx.obj
+    g = ctx.obj
     scheduler = load_cls(ctx, None, scheduler_cls)
     scheduler = scheduler(ctx, inqueue=inqueue, outqueue=outqueue)
     g['instances'].append(scheduler)
@@ -151,6 +156,7 @@ def schedule_rpc(ctx, scheduler_cls, xmlrpc_host, xmlrpc_port):
     g['instances'].append(scheduler)
     scheduler.xmlrpc_run(xmlrpc_port, xmlrpc_host)
 
+
 @cli.command()
 @click.option('--fetch-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
 @click.option('-i', '--inqueue', default=None, help='监听的queue', show_default=True)
@@ -165,7 +171,7 @@ def fetch(ctx, fetch_cls, inqueue, no_loop, no_sync, get_object=False, no_input=
     spider = load_cls(ctx, None, fetch_cls)
     if no_input:
         inqueue = False
-    spider = spider(ctx, no_sync=no_sync, inqueue = inqueue)
+    spider = spider(ctx, no_sync=no_sync, inqueue=inqueue)
     g['instances'].append(spider)
     if get_object:
         return spider
@@ -173,6 +179,7 @@ def fetch(ctx, fetch_cls, inqueue, no_loop, no_sync, get_object=False, no_input=
         spider.run_once()
     else:
         spider.run()
+
 
 @cli.command()
 @click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name')
@@ -186,15 +193,16 @@ def spider_rpc(ctx, spider_cls, xmlrpc_host, xmlrpc_port):
     g = ctx.obj
     spider = load_cls(ctx, None, spider_cls)
 
-    spider = spider(ctx, inqueue = False)
+    spider = spider(ctx, inqueue=False)
     g['instances'].append(spider)
     spider.xmlrpc_run(xmlrpc_port, xmlrpc_host)
+
 
 @cli.command()
 @click.option('--worker-cls', default='cdspider.worker.TestWorker', callback=load_cls, help='worker class name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def work(ctx, worker_cls, no_loop,  get_object=False):
+def work(ctx, worker_cls, no_loop, get_object=False):
     """
     worker
     """
@@ -208,6 +216,7 @@ def work(ctx, worker_cls, no_loop,  get_object=False):
         worker.run_once()
     else:
         worker.run()
+
 
 @cli.command()
 @click.option('--tool-cls', default="cdspider.tools.test_tool.test_tool", callback=load_cls, help='tool class name')
@@ -225,8 +234,10 @@ def tool(ctx, tool_cls, arg, daemon):
     else:
         c.run_once(*arg)
 
+
 @cli.command()
-@click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls, help='schedule name', show_default=True)
+@click.option('--scheduler-cls', default='cdspider.scheduler.PlantaskScheduler', callback=load_cls,
+              help='schedule name', show_default=True)
 @click.option('-m', '--message', help="测试消息,JSON格式", show_default=True)
 @click.option('--outqueue', default=None, help='输出的queue', show_default=True)
 @click.pass_context
@@ -240,12 +251,14 @@ def schedule_test(ctx, scheduler_cls, message, outqueue):
     task = json.loads(message)
     scheduler.schedule(task)
 
+
 @cli.command()
-@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name', show_default=True)
+@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name',
+              show_default=True)
 @click.option('-s', '--setting', callback=load_config, type=click.File(mode='r', encoding='utf-8'),
               help='任务配置json文件', show_default=True)
 @click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
-@click.option( '--no-input/--has-input', default=True, is_flag=True, help='no/has input', show_default=True)
+@click.option('--no-input/--has-input', default=True, is_flag=True, help='no/has input', show_default=True)
 @click.pass_context
 def spider_test(ctx, spider_cls, setting, output, no_input):
     """
@@ -255,17 +268,47 @@ def spider_test(ctx, spider_cls, setting, output, no_input):
     inqueue = None
     if no_input:
         inqueue = False
-    spider = spider(ctx, no_sync = True, handler=None, inqueue=inqueue)
-    task = spider.get_task(message = setting, no_check_status = True)
-    return_result = spider.fetch(task=task, return_result = setting.get("return_result", False))
+    spider = spider(ctx, no_sync=True, handler=None, inqueue=inqueue)
+    task = spider.get_task(message=setting, no_check_status=True)
+    return_result = spider.fetch(task=task, return_result=setting.get("return_result", False))
     print(return_result)
     if output:
         f = open(output, 'w')
         f.write(json.dumps(return_result))
         f.close()
 
+
 @cli.command()
-@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name', show_default=True)
+@click.option('--crawler', default='tornado', help='crawler name', show_default=True)
+@click.option('-u', '--url', help='抓取URL')
+@click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
+@click.pass_context
+def crawl_test(ctx, crawler, url, output):
+    """
+    抓取测试
+    """
+
+    def f(result):
+        print(result)
+
+    fetch = {
+        "method": "GET",
+        "url": url,
+        "callback": f
+    }
+
+    spider = load_crawler(ctx, None, crawler)
+    return_result = spider.crawl(**fetch)
+    print(return_result)
+    if output:
+        f = open(output, 'w')
+        f.write(json.dumps(return_result))
+        f.close()
+
+
+@cli.command()
+@click.option('--spider-cls', default='cdspider.spider.Spider', callback=load_cls, help='spider name',
+              show_default=True)
 @click.option('-t', '--tid', help="task id")
 @click.option('-m', '--mode', default='list', help="mode id", show_default=True)
 @click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
@@ -275,7 +318,7 @@ def fetch_task(ctx, spider_cls, tid, mode, output):
     按任务ID抓取数据,测试时使用
     """
     spider = load_cls(ctx, None, spider_cls)
-    spider = spider(ctx, no_sync = True, handler=None, inqueue=False)
+    spider = spider(ctx, no_sync=True, handler=None, inqueue=False)
     task = {
         "uuid": int(tid),
         "mode": mode,
@@ -292,8 +335,10 @@ def fetch_task(ctx, spider_cls, tid, mode, output):
             f.write(json.dumps(ret))
             f.close()
 
+
 @cli.command()
-@click.option('--worker-cls', default='cdspider.worker.ResultWorker', callback=load_cls, help='spider name', show_default=True)
+@click.option('--worker-cls', default='cdspider.worker.ResultWorker', callback=load_cls, help='spider name',
+              show_default=True)
 @click.option('-r', '--rid', help="result id")
 @click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
 @click.pass_context
@@ -317,6 +362,7 @@ def fetch_result(ctx, worker_cls, rid, output):
             f = open(output, 'w')
             f.write(json.dumps(ret))
             f.close()
+
 
 @cli.command()
 @click.option('-r', '--rpc', default='http://127.0.0.1:23333', callback=connect_rpc, help='rpc host', show_default=True)
@@ -344,6 +390,7 @@ def rpc_test(ctx, rpc, method, params, output):
     else:
         print(ret)
 
+
 @cli.command()
 @click.option('-q', '--queue', help='queue name')
 @click.option('-m', '--message', help='message')
@@ -353,11 +400,12 @@ def send_queue(ctx, queue, message):
         message = utils.load_config(message) or json.loads(message)
     ctx.obj['queue'][queue].put_nowait(message)
 
+
 @cli.command()
 @click.option('--worker-cls', default='cdspider.worker.ResultWorker', callback=load_cls, help='worker class name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def result_work(ctx, worker_cls, no_loop,  get_object=False):
+def result_work(ctx, worker_cls, no_loop, get_object=False):
     """
     worker
     """
@@ -377,7 +425,7 @@ def result_work(ctx, worker_cls, no_loop,  get_object=False):
 @click.option('--worker-cls', default='cdspider.worker.StatusWorker', callback=load_cls, help='worker class name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def status_work(ctx, worker_cls, no_loop,  get_object=False):
+def status_work(ctx, worker_cls, no_loop, get_object=False):
     """
     worker
     """
@@ -397,7 +445,7 @@ def status_work(ctx, worker_cls, no_loop,  get_object=False):
 @click.option('--worker-cls', default='cdspider.worker.NewtaskWorker', callback=load_cls, help='worker class name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def newtask_work(ctx, worker_cls, no_loop,  get_object=False):
+def newtask_work(ctx, worker_cls, no_loop, get_object=False):
     """
     worker
     """
@@ -418,7 +466,7 @@ def newtask_work(ctx, worker_cls, no_loop,  get_object=False):
               help='worker class name')
 @click.option('--no-loop', default=False, is_flag=True, help='不循环', show_default=True)
 @click.pass_context
-def download_work(ctx, worker_cls, no_loop,  get_object=False):
+def download_work(ctx, worker_cls, no_loop, get_object=False):
     """
     worker
     """
@@ -507,8 +555,10 @@ def all(ctx, fetch_num, plantask_schedule_num, run_in):
                 each.terminate()
             each.join()
 
+
 def main():
     cli()
+
 
 if __name__ == "__main__":
     main()

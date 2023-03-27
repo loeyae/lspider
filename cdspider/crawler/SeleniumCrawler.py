@@ -8,23 +8,23 @@
 :date:    2018-1-19 9:13:51
 """
 import os
-import six
 import time
 import traceback
-from tornado import gen
 from http.client import BadStatusLine
 from urllib.error import URLError
-from selenium import webdriver
-from selenium.common.exceptions import *
-from selenium.webdriver.chrome.options import Options as ChromeOpts
-from selenium.webdriver.firefox.options import Options as FirefoxOpts
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+
+import six
 from cdspider.crawler import BaseCrawler
 from cdspider.exceptions import *
 from cdspider.libs import utils
 from cdspider.libs.constants import BROKEN_EXCEPTIONS
+from selenium import webdriver
+from selenium.common.exceptions import *
+from selenium.webdriver.chrome.options import Options as ChromeOpts
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+from tornado import gen
 
 IGNORED_EXCEPTIONS = (NoSuchElementException, BadStatusLine, URLError,)
 
@@ -49,7 +49,7 @@ class SeleniumCrawler(BaseCrawler):
         :param kwargs:
         """
         self._driver = None
-        config = kwargs.pop('crawler_config', {})
+        config = kwargs.pop('config', {})
         self.engine = config.get('engine', 'remote')
         self.exec_path = config.get('exec_path', None)
         self._cap = self._init_cap(self.engine)
@@ -132,7 +132,7 @@ class SeleniumCrawler(BaseCrawler):
                     self.exec_path = 'phantomjs'
             elif self.engine == 'remote':
                 if self.exec_path is None:
-                    self.exec_path = 'http://192.168.163.94:4444/wd/hub'
+                    self.exec_path = 'http://127.0.0.1:4444/wd/hub/'
 
     def _init_driver(self):
         """
@@ -155,7 +155,8 @@ class SeleniumCrawler(BaseCrawler):
             service_args = [k + "=" + v for k, v in self.service_args.items()]
             self.info("Selenium set service_args: %s" % (str(service_args)))
         if self.engine == 'remote':
-            self._driver = webdriver.Remote(command_executor=self.exec_path, desired_capabilities=options.to_capabilities())
+            self._driver = webdriver.Remote(command_executor=self.exec_path,
+                                            desired_capabilities=options.to_capabilities())
         else:
             self._driver = webdriver.PhantomJS(executable_path=self.exec_path, service_args=service_args)
 
@@ -564,7 +565,8 @@ class SeleniumCrawler(BaseCrawler):
                 if password:
                     auths += ':' + password
                 setting["--proxy-auth"] = auths
-                setting["--proxy-server"] = setting['--proxy-type'] + '://' + setting['--proxy-auth'] + '@' + setting['--proxy']
+                setting["--proxy-server"] = setting['--proxy-type'] + '://' + setting['--proxy-auth'] + '@' + setting[
+                    '--proxy']
                 # setting["phantomjs.page.settings.proxyAuth"] = auths
             else:
                 setting["--proxy-server"] = setting['--proxy-type'] + '://' + setting['--proxy']
@@ -747,11 +749,12 @@ if __name__ == "__main__":
     settings = {
         "engine": "remote",
         # "exec_path": "E:/Application/phantomjs/bin/phantomjs"
-        # "exec_path": "E:/Application/chromedriver_win32/chromedriver"
+        "exec_path": "http://127.0.0.1:27099"
     }
     crawler = SeleniumCrawler(**settings)
-    crawler.set_proxy(addr="192.168.163.90:8888", type="http")
 
+
+    # crawler.set_proxy(addr="192.168.163.90:8888", type="http")
 
     def f(result):
         print(result)
