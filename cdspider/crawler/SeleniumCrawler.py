@@ -7,6 +7,7 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-19 9:13:51
 """
+import json
 import os
 import time
 import traceback
@@ -50,8 +51,10 @@ class SeleniumCrawler(BaseCrawler):
         """
         self._driver = None
         config = kwargs.pop('config', {})
-        self.engine = config.get('engine', 'remote')
-        self.exec_path = config.get('exec_path', None)
+        if isinstance(config, six.string_types):
+            config = json.loads(json.dumps(eval(config)))
+        self.engine = config.get('selenium', {}).get('engine', 'remote')
+        self.exec_path = config.get('selenium', {}).get('exec_path', None)
         self._cap = self._init_cap(self.engine)
         # path = os.path.join(os.path.dirname(__file__), os.pardir)
         self.service_args = {"--webdriver-loglevel": "WARN", "--web-security": "false", "--ignore-ssl-errors": "true"}
@@ -223,6 +226,7 @@ class SeleniumCrawler(BaseCrawler):
                 headers=self.fetch.get("headers", {}),
                 cookies=response["cookies"],
                 content=response["content"],
+                iframe=response["iframe"],
                 start_time=start_time)
 
     def open(self, **kwargs):
@@ -239,19 +243,35 @@ class SeleniumCrawler(BaseCrawler):
         self.info("Selenium request url: %s" % curl)
         try:
             self._driver.get(curl)
+            if 'wait' in kwargs and kwargs['wait']:
+                wait = kwargs['wait']
+                if isinstance(wait, six.string_types):
+                    wait = json.loads(json.dumps(eval(wait)))
+                self.wait(**wait)
+
+            result = {
+                "url": self._driver.current_url,
+                "cookies": self._cookies.get_dict()
+            }
+
+            iframes = self._driver.find_elements(By.TAG_NAME, 'iframe')
+            if iframes is not None and len(iframes) > 0:
+                iframe_result = []
+                for iframe in iframes:
+                    self._driver.switch_to_frame(iframe)
+                    iframe_result.append(self._driver.page_source)
+                result['iframe'] = iframe_result
 
             cookies_ = self._driver.get_cookies()
             if cookies_:
                 for cookie in cookies_:
                     self.set_cookie(**cookie)
-            return {
-                "url": self._driver.current_url,
-                "content": self._driver.page_source,
-                "cookies": self._cookies.get_dict()
-            }
+            self._driver.switch_to_default_content()
+            result['content'] = self._driver.page_source,
+            return result
         except TimeoutException as e:
             raise CDSpiderCrawlerConnectTimeout(e, self._base_url, curl)
-        except Exception:
+        except Exception as e:
             raise CDSpiderCrawlerError(traceback.format_exc(), self._base_url, curl)
 
     def chains(self):
@@ -747,14 +767,18 @@ class SeleniumCrawler(BaseCrawler):
 
 if __name__ == "__main__":
     settings = {
-        "engine": "remote",
-        # "exec_path": "E:/Application/phantomjs/bin/phantomjs"
-        "exec_path": "http://127.0.0.1:27099"
+        "config": {
+            "selenium": {
+                "engine": "remote",
+                # "exec_path": "E:/Application/phantomjs/bin/phantomjs"
+                "exec_path": "http://ssa.dev.loeyae.com/wd/hub"
+            }
+        }
     }
     crawler = SeleniumCrawler(**settings)
 
 
-    # crawler.set_proxy(addr="192.168.163.90:8888", type="http")
+    crawler.set_proxy(addr="192.168.163.90:8888", type="http")
 
     def f(result):
         print(result)
@@ -762,7 +786,7 @@ if __name__ == "__main__":
 
     fetch = {
         "method": "GET",
-        "url": "https://www.amazon.cn/dp/B09YL4ZMDT",
+        "url": "http://www.ip138.com",
         "callback": f
     }
     crawler.crawl(**fetch)

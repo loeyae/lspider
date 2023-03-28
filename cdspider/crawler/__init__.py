@@ -122,6 +122,8 @@ class BaseCrawler(Component):
         kwargs.setdefault('encoding', 'utf-8')
         self._encoding = kwargs['encoding']
         self._proxy = kwargs.get('proxy', None)
+        if isinstance(self._proxy, six.string_types):
+            self._proxy = json.loads(json.dumps(eval(self._proxy)))
 
     def _join_url(self, url):
         """
@@ -381,10 +383,11 @@ class BaseCrawler(Component):
             raise BROKEN_EXCEPTIONS[type_](message)
         raise CDSpiderCrawlerError("Invalid broken setting")
 
-    def gen_result(self, url, code, headers, cookies, content, start_time, error=None):
+    def gen_result(self, url, code, headers, cookies, content, iframe, start_time, error=None):
         result = dict()
         result['orig_url'] = self._base_url
         result['content'] = utils.decode(content) if content else ''
+        result['iframe'] = [utils.decode(item) for item in iframe] if iframe is not None and len(iframe) > 0 else None
         result['headers'] = headers
         result['status_code'] = code
         result['url'] = url

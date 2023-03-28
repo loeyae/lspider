@@ -281,9 +281,11 @@ def spider_test(ctx, spider_cls, setting, output, no_input):
 @cli.command()
 @click.option('--crawler', default='tornado', help='crawler name', show_default=True)
 @click.option('-u', '--url', help='抓取URL')
+@click.option('--enable-proxy', default=False, is_flag=True, help='是否使用代理', show_default=True)
+@click.option('--wait', default=None, help="使用selenium采集器时等待的页面元素:{'item':'.content','mode':'css selector','wait_time':10,'intval':1}", show_default=True)
 @click.option('-o', '--output', default=None, help='数据保存的文件', show_default=True)
 @click.pass_context
-def crawl_test(ctx, crawler, url, output):
+def crawl_test(ctx, crawler, url, enable_proxy, wait, output):
     """
     抓取测试
     """
@@ -294,12 +296,12 @@ def crawl_test(ctx, crawler, url, output):
     fetch = {
         "method": "GET",
         "url": url,
-        "callback": f
+        "callback": f,
+        "proxy": ctx.obj.get("proxy") if enable_proxy else None
     }
 
     spider = load_crawler(ctx, None, crawler)
     return_result = spider.crawl(**fetch)
-    print(return_result)
     if output:
         f = open(output, 'w')
         f.write(json.dumps(return_result))
