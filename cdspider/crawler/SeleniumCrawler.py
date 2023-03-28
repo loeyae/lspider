@@ -256,12 +256,17 @@ class SeleniumCrawler(BaseCrawler):
                 "cookies": self._cookies.get_dict()
             }
 
-            iframes = self._driver.find_elements(By.TAG_NAME, 'iframe')
+            iframes = self._driver.find_elements(By.XPATH, '//iframe')
             if iframes is not None and len(iframes) > 0:
                 iframe_result = []
                 for iframe in iframes:
-                    self._driver.switch_to_frame(iframe)
-                    iframe_result.append(self._driver.page_source)
+                    if iframe.is_enabled:
+                        try:
+                            self._driver.switch_to_frame(iframe)
+                            iframe_result.append(self._driver.page_source)
+                        except Exception as ignore:
+                            pass
+                        time.sleep(0.1)
                 result['iframe'] = iframe_result
 
             cookies_ = self._driver.get_cookies()
@@ -273,7 +278,7 @@ class SeleniumCrawler(BaseCrawler):
             return result
         except TimeoutException as e:
             raise CDSpiderCrawlerConnectTimeout(e, self._base_url, curl)
-        except Exception as e:
+        except Exception as exc:
             raise CDSpiderCrawlerError(traceback.format_exc(), self._base_url, curl)
 
     def chains(self):
@@ -773,7 +778,7 @@ if __name__ == "__main__":
             "selenium": {
                 "engine": "remote",
                 # "exec_path": "E:/Application/phantomjs/bin/phantomjs"
-                "exec_path": "http://ssa.dev.loeyae.com:80/wd/hub"
+                "exec_path": "http://127.0.0.1:4444/wd/hub"
             }
         }
     }
@@ -787,7 +792,7 @@ if __name__ == "__main__":
 
     fetch = {
         "method": "GET",
-        "url": "http://www.ip138.com",
+        "url": "https://www.amazon.cn/dp/B09TR9CX4M/ref=sr_1_1?keywords=%E9%92%88%E7%BB%87%E4%B8%8A%E8%A1%A3&qid=1679497347&sr=8-1&th=1&psc=1",
         "callback": f
     }
     crawler.crawl(**fetch)
