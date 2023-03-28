@@ -15,10 +15,6 @@ from http.client import BadStatusLine
 from urllib.error import URLError
 
 import six
-from cdspider.crawler import BaseCrawler
-from cdspider.exceptions import *
-from cdspider.libs import utils
-from cdspider.libs.constants import BROKEN_EXCEPTIONS
 from selenium import webdriver
 from selenium.common.exceptions import *
 from selenium.webdriver.chrome.options import Options as ChromeOpts
@@ -26,6 +22,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from tornado import gen
+
+from cdspider.crawler import BaseCrawler
+from cdspider.exceptions import *
+from cdspider.libs import utils
+from cdspider.libs.constants import BROKEN_EXCEPTIONS
 
 IGNORED_EXCEPTIONS = (NoSuchElementException, BadStatusLine, URLError,)
 
@@ -103,8 +104,8 @@ class SeleniumCrawler(BaseCrawler):
             # cap["phantomjs.page.customHeaders.upgrade-insecure-requests"] = '1'
             # cap["phantomjs.page.customHeaders.Connection"] = 'Keep-Alive'
             cap["browserName"] = "chrome"
-            cap["platform"] = "Windows"
-            cap["version"] = "10"
+            cap["platform"] = "WIN10"
+            cap["version"] = "108"
             # cap["phantomjs.page.settings.localToRemoteUrlAccessEnabled"] = True
             return cap
         else:
@@ -777,7 +778,6 @@ if __name__ == "__main__":
         }
     }
     crawler = SeleniumCrawler(**settings)
-
 
     # crawler.set_proxy(addr="192.168.163.90:8888", type="http")
 

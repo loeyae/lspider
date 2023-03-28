@@ -383,7 +383,7 @@ class BaseCrawler(Component):
             raise BROKEN_EXCEPTIONS[type_](message)
         raise CDSpiderCrawlerError("Invalid broken setting")
 
-    def gen_result(self, url, code, headers, cookies, content, iframe, start_time, error=None):
+    def gen_result(self, url, code, headers, cookies, content, start_time, error=None, iframe=None):
         result = dict()
         result['orig_url'] = self._base_url
         result['content'] = utils.decode(content) if content else ''
