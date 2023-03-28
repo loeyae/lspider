@@ -44,7 +44,7 @@ if sys.platform != 'win32':
 
 setup(
     name="cdspider",
-    version="0.1.6",
+    version="0.1.7",
     description="数据采集框架",
     author="Zhang Yi",
     author_email="loeyae@gmail.com",
