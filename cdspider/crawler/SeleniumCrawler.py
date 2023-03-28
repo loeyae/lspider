@@ -157,6 +157,7 @@ class SeleniumCrawler(BaseCrawler):
         if self.service_args:
             service_args = [k + "=" + v for k, v in self.service_args.items()]
             self.info("Selenium set service_args: %s" % (str(service_args)))
+        self.info("Selenium load driver: %s => %s" % (self.engine, self.exec_path))
         if self.engine == 'remote':
             self._driver = webdriver.Remote(command_executor=self.exec_path,
                                             desired_capabilities=options.to_capabilities())
@@ -226,7 +227,7 @@ class SeleniumCrawler(BaseCrawler):
                 headers=self.fetch.get("headers", {}),
                 cookies=response["cookies"],
                 content=response["content"],
-                iframe=response["iframe"],
+                iframe=response.get("iframe", []),
                 start_time=start_time)
 
     def open(self, **kwargs):
@@ -771,14 +772,14 @@ if __name__ == "__main__":
             "selenium": {
                 "engine": "remote",
                 # "exec_path": "E:/Application/phantomjs/bin/phantomjs"
-                "exec_path": "http://ssa.dev.loeyae.com/wd/hub"
+                "exec_path": "http://ssa.dev.loeyae.com:80/wd/hub"
             }
         }
     }
     crawler = SeleniumCrawler(**settings)
 
 
-    crawler.set_proxy(addr="192.168.163.90:8888", type="http")
+    # crawler.set_proxy(addr="192.168.163.90:8888", type="http")
 
     def f(result):
         print(result)
