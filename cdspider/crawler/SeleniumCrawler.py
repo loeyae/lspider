@@ -253,7 +253,8 @@ class SeleniumCrawler(BaseCrawler):
 
             result = {
                 "url": self._driver.current_url,
-                "cookies": self._cookies.get_dict()
+                "cookies": self._cookies.get_dict(),
+                "content": self._driver.page_source
             }
 
             iframes = self._driver.find_elements(By.XPATH, '//iframe')
@@ -274,7 +275,6 @@ class SeleniumCrawler(BaseCrawler):
                 for cookie in cookies_:
                     self.set_cookie(**cookie)
             self._driver.switch_to_default_content()
-            result['content'] = self._driver.page_source,
             return result
         except TimeoutException as e:
             raise CDSpiderCrawlerConnectTimeout(e, self._base_url, curl)
