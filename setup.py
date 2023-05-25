@@ -27,7 +27,7 @@ require_packages = [
     'mysql-connector-python>=8.0.5',
     'pymongo>=3.6.0',
     'pika>=0.11.2',
-    'tornado>=3.2,<=4.5.3',
+    'tornado>=3.2,<=6.3.2',
     'Pillow>=5.0.0',
     'cssselect>=1.0.1',
     'jieba3k>=0.35.1',
