@@ -20,6 +20,6 @@ SocksiPy_branch==1.01
 stevedore==3.5.2
 tld==0.12.7
 tldextract==3.1.2
-tornado==4.5.3
+tornado==6.3.2
 umsgpack==0.1.0
 urllib3==1.26.15
