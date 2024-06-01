@@ -9,6 +9,7 @@
 :version: SVN: $Id: Spider.py 2266 2018-07-06 06:50:15Z zhangyi $
 """
 import gc
+import queue
 import time
 import traceback
 
@@ -17,7 +18,6 @@ from cdspider import Component
 from cdspider.handler import BaseHandler, Loader
 from cdspider.libs.constants import *
 from cdspider.libs.tools import *
-from six.moves import queue
 
 
 class Spider(Component):

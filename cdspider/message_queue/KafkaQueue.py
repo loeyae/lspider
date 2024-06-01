@@ -6,12 +6,13 @@ Created on 2018年8月5日
 @author: Wang Fengwei
 '''
 
-from pykafka import KafkaClient
-from six.moves import queue as BaseQueue
-from cdspider.message_queue import BaseQueue as CDBaseQueue
-import time
-import logging
 import json
+import logging
+import queue as BaseQueue
+import time
+
+from cdspider.message_queue import BaseQueue as CDBaseQueue
+from pykafka import KafkaClient
 
 connection_pool = {}
 

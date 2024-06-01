@@ -6,21 +6,23 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-9-21 16:10:41
 """
-import time
-import sys
-import traceback
 import json
-import stevedore
-from . import BaseScheduler
+import sys
+import time
+import traceback
+
 from cdspider.libs.constants import *
 from cdspider.libs.utils import __redirection__, call_extension, load_handler, run_in_thread
+
+from . import BaseScheduler
+
 
 class Router(BaseScheduler):
     """
     路由--初级任务分发
     """
 
-    def __init__(self, context, mode = None, frequency=None, outqueue = None):
+    def __init__(self, context, mode=None, frequency=None, outqueue=None):
         super(Router, self).__init__(context)
         if not outqueue:
             outqueue = QUEUE_NAME_SCHEDULER_TO_TASK
@@ -45,8 +47,9 @@ class Router(BaseScheduler):
         self._check_time = s
         return True
 
-    def schedule(self, message = None):
+    def schedule(self, message=None):
         self.info("%s route starting..." % self.__class__.__name__)
+
         def handler_schedule(handler, mode, frequency):
             self.info("%s loaded handler: %s by %s" % (self.__class__.__name__, handler, frequency))
             save = {}
@@ -67,8 +70,10 @@ class Router(BaseScheduler):
                 if not has_item:
                     break
                 time.sleep(0.1)
+
         threads = []
-        frequencymap = self.frequency if self.frequency else self.ctx.obj.get('app_config', {}).get('frequencymap', {}).keys()
+        frequencymap = self.frequency if self.frequency else self.ctx.obj.get('app_config', {}).get('frequencymap',
+                                                                                                    {}).keys()
 
         if self.mode:
             for key in self.mode:
@@ -80,7 +85,8 @@ class Router(BaseScheduler):
                 for frequency in data["frequencymap"]:
                     threads.append(run_in_thread(handler_schedule, ext.obj, ext.name, frequency))
 
-            call_extension("handler", execut, {"ctx": self.ctx, "frequencymap": frequencymap}, context=self.ctx, task=None)
+            call_extension("handler", execut, {"ctx": self.ctx, "frequencymap": frequencymap}, context=self.ctx,
+                           task=None)
 
         for each in threads:
             if not each.is_alive():
@@ -133,6 +139,7 @@ class Router(BaseScheduler):
         def hello():
             result = {"message": "xmlrpc is running"}
             return json.dumps(result)
+
         application.register_function(hello, 'hello')
 
         def build(task):
@@ -149,9 +156,11 @@ class Router(BaseScheduler):
                 broken_exc = traceback.format_exc()
                 self.error(broken_exc)
             output = sys.stdout.read()
-            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save,
+                      "stdout": output, "errmsg": errmsg}
 
             return json.dumps(result)
+
         application.register_function(build, 'build')
 
         def newtask(task):
@@ -168,9 +177,11 @@ class Router(BaseScheduler):
                 broken_exc = traceback.format_exc()
                 self.error(broken_exc)
             output = sys.stdout.read()
-            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output, "errmsg": errmsg}
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save,
+                      "stdout": output, "errmsg": errmsg}
 
             return json.dumps(result)
+
         application.register_function(newtask, 'newtask')
 
         def status(task):
@@ -182,13 +193,15 @@ class Router(BaseScheduler):
                 task = json.loads(task)
                 self.status(task)
                 parsed = True
-            except :
+            except:
                 broken_exc = traceback.format_exc()
                 self.error(broken_exc)
             output = sys.stdout.read()
-            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save,
+                      "stdout": output}
 
             return json.dumps(result)
+
         application.register_function(status, 'status')
 
         def frequency(task):
@@ -200,13 +213,15 @@ class Router(BaseScheduler):
                 task = json.loads(task)
                 self.frequency(task)
                 parsed = True
-            except :
+            except:
                 broken_exc = traceback.format_exc()
                 self.error(broken_exc)
             output = sys.stdout.read()
-            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save,
+                      "stdout": output}
 
             return json.dumps(result)
+
         application.register_function(frequency, 'frequency')
 
         def expire(task):
@@ -218,13 +233,15 @@ class Router(BaseScheduler):
                 task = json.loads(task)
                 self.expire(task)
                 parsed = True
-            except :
+            except:
                 broken_exc = traceback.format_exc()
                 self.error(broken_exc)
             output = sys.stdout.read()
-            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save, "stdout": output}
+            result = {"parsed": parsed, "broken_exc": broken_exc, "source": last_source, "url": final_url, "save": save,
+                      "stdout": output}
 
             return json.dumps(result)
+
         application.register_function(expire, 'expire')
 
         import tornado.wsgi

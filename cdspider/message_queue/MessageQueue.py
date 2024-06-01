@@ -8,18 +8,19 @@
 :date:    2018-1-9 17:56:34
 """
 
-import time
 import json
-import socket
-import select
 import logging
-import umsgpack
+import queue as BaseQueue
+import select
+import socket
 import threading
+import time
+from urllib.parse import unquote
+
+import amqp
 import pika
 import pika.exceptions
-import amqp
-from six.moves.urllib.parse import unquote
-from six.moves import queue as BaseQueue
+import umsgpack
 from cdspider.message_queue import BaseQueue as CDBaseQueue
 
 connection_pool = {}

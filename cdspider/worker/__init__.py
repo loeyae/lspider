@@ -4,11 +4,12 @@
 
 
 import gc
-import time
 import logging
+import queue
+import time
 import traceback
+
 import tornado.ioloop
-from six.moves import queue
 from cdspider import Component
 
 

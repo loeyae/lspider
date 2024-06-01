@@ -7,13 +7,13 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-1-29 11:23:19
 """
-import time
-import logging
-import socket
-import umsgpack
 import json
+import logging
+import queue as BaseQueue
+import socket
+import time
+
 import redis
-from six.moves import queue as BaseQueue
 from cdspider.message_queue import BaseQueue as CDBaseQueue
 
 connection_pool = {}

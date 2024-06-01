@@ -3,10 +3,11 @@
 # see LICENSE for more details: http://www.apache.org/licenses/LICENSE-2.0.
 
 import gc
-import time
 import logging
+import queue
+import time
+
 import tornado.ioloop
-from six.moves import queue
 from cdspider import Component
 
 

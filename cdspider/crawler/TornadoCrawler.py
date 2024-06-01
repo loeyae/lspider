@@ -6,21 +6,22 @@
 :author:  Zhang Yi <loeyae@gmail.com>
 :date:    2018-8-15 0:54:49
 """
-import time
 import copy
+import time
+from urllib.parse import urljoin, urlsplit
+
 import pycurl
 import six
-import tornado.ioloop
-import tornado.httputil
 import tornado.httpclient
-from requests import cookies
-from tornado import gen
-from six.moves.urllib.parse import urljoin, urlsplit
-from tornado.curl_httpclient import CurlAsyncHTTPClient
-from tornado.simple_httpclient import SimpleAsyncHTTPClient
+import tornado.httputil
+import tornado.ioloop
 from cdspider.crawler import BaseCrawler
 from cdspider.exceptions import *
 from cdspider.libs import utils
+from requests import cookies
+from tornado import gen
+from tornado.curl_httpclient import CurlAsyncHTTPClient
+from tornado.simple_httpclient import SimpleAsyncHTTPClient
 
 
 def prepare_curl_socks5(curl):
